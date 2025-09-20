@@ -6,7 +6,6 @@
 #include "C:/PBL2/include/entities/Account.h"
 #include "C:/PBL2/include/entities/Flight.h"
 #include "../entities/Booking.h"
-// Include other entity headers as needed
 
 class DatabaseManager {
 public:

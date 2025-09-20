@@ -1,3 +1,0 @@
-id|username|passwordHash|fullName|email|phone|address|role|registrationDate|lastLogin|isActive
-1|admin|5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8|Pham Minh Hien|admin@airline.com|0886086331|HQ Building|ADMIN|2025-9-20|2025-9-20 14:30:45|1
-2|agent1|5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8|Nguyen Do Khanh Linh|agent1@airline.com|0123456789|123 Main St|AGENT|2025-9-20|2025-9-20 15:20:30|1

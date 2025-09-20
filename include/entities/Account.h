@@ -1,5 +1,5 @@
-#ifndef USER_H
-#define USER_H
+#ifndef ACCOUNT_H
+#define ACCOUNT_H
 
 #include "Person.h"
 #include <string>

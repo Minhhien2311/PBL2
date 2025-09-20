@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include <openssl/sha.h>// Dùng để băm password
 
 class Helpers {
 public:
