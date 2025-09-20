@@ -1,0 +1,3 @@
+instanceId|flightId|flightDate|scheduledDeparture|scheduledArrival|actualDeparture|actualArrival|availableSeats|status|aircraftRegistration|currentGate
+1001|1|2023-11-01|14:30:00|16:45:00|||120|SCHEDULED|VN-A123|Gate A5
+1002|1|2023-11-02|14:30:00|16:45:00|||180|SCHEDULED|VN-A124|Gate A6
