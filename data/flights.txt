@@ -1,3 +1,6 @@
 flightId|flightNumber|airline|aircraftType|departureAirport|arrivalAirport|basePrice|totalSeats|businessSeats|economySeats
 1|VN123|Vietnam Airlines|A321|HAN|SGN|1500000|180|20|160
-2|VJ456|Vietjet Air|A320|SGN|DAD|1200000|150|0|150
+2|VN456|Vietnam Airlines|A321|SGN|HAN|1500000|180|20|160
+3|VJ789|Vietjet Air|A320|HAN|DAD|1200000|180|0|180
+4|BL101|Bamboo Airways|A320|SGN|CXR|1800000|180|12|168
+5|VN202|Vietnam Airlines|B787|HAN|SYD|12000000|240|30|210
