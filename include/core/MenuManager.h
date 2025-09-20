@@ -2,7 +2,7 @@
 #define MENUMANAGER_H
 
 #include <string>
-#include "../entities/User.h"
+#include "../entities/Account.h"
 
 class MenuManager {
 public:
