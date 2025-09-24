@@ -3,7 +3,7 @@
 
 #include "Account.h"
 
-class Admin : public User {
+class Admin : public Account {
 public:
     Admin(const std::string& id, const std::string& name, const std::string& dob, 
           const std::string& email, const std::string& phone, const std::string& addr,
