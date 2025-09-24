@@ -9,7 +9,7 @@
 class SystemManager {
 private:
     static SystemManager* instance;
-    User* currentUser;
+    Account* currentUser;
     
     SystemManager(); // Private constructor for singleton
 
@@ -23,9 +23,9 @@ public:
     bool restoreSystem(const std::string& backupPath);
     
     // Session management
-    bool startSession(User* user);
+    bool startSession(Account* user);
     bool endSession();
-    User* getCurrentSessionUser();
+    Account* getCurrentSessionUser();
     
     // System status
     std::string getSystemStatus() const;
