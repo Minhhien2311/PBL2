@@ -23,7 +23,7 @@ public:
     bool restoreSystem(const std::string& backupPath);
     
     // Session management
-    bool startSession(Account* account);
+    bool startSession(Account* user);
     bool endSession();
     Account* getCurrentSessionUser();
     
