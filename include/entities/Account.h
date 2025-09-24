@@ -4,7 +4,7 @@
 #include "Person.h"
 #include <string>
 
-class User : public Person {
+class Account : public Person {
 protected:
     std::string username;
     std::string passwordHash;
@@ -13,7 +13,7 @@ protected:
     std::string role; // "ADMIN" or "AGENT"
 
 public:
-    User(const std::string& id, const std::string& name, const std::string& dob, 
+    Account(const std::string& id, const std::string& name, const std::string& dob, 
          const std::string& email, const std::string& phone, const std::string& addr,
          const std::string& user, const std::string& pwdHash, 
          const std::string& regDate, const std::string& role);
@@ -36,4 +36,4 @@ public:
     virtual void displayInfo() const override;
 };
 
-#endif // USER_H
+#endif // ACCOUNT_H
