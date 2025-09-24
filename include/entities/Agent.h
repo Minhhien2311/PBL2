@@ -3,7 +3,7 @@
 
 #include "Account.h"
 
-class Agent : public User {
+class Agent : public Account {
 private:
     // double commissionRate;
     double totalSales;

@@ -15,7 +15,7 @@ protected:
 public:
     Account(const std::string& id, const std::string& name, const std::string& dob, 
          const std::string& email, const std::string& phone, const std::string& addr,
-         const std::string& user, const std::string& pwdHash, 
+         const std::string& account, const std::string& pwdHash, 
          const std::string& regDate, const std::string& role);
     
     // Gette 
