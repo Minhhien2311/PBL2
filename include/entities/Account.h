@@ -18,7 +18,7 @@ public:
          const std::string& account, const std::string& pwdHash, 
          const std::string& regDate, const std::string& role);
     
-    // Gette 
+    // Getter
     std::string getUsername() const;
     std::string getPasswordHash() const;
     std::string getRegistrationDate() const;
