@@ -1,29 +1,42 @@
 #include <iostream>
 #include "C:/PBL2/include/entities/Person.h"
 
-Person::Person(const std::string& id, const std::string& name, const std::string& dob, 
-               const std::string& email, const std::string& phone, const std::string& addr)
-    : id(id), fullName(name), dateOfBirth(dob), email(email), phoneNumber(phone), address(addr) {}
+// Constructor
+Person::Person(const std::string& id,
+               const std::string& name,
+               const std::string& dob,
+               Gender gender,
+               const std::string& phone)
+    : id(id), fullName(name), dateOfBirth(dob), gender(gender), phoneNumber(phone) {
+    // Nếu muốn validate thì gọi hàm từ Validation.cpp ở đây
+}
 
 // Getter methods
-std::string Person::getId() const { return id; }
-std::string Person::getFullName() const { return fullName; }
-std::string Person::getDateOfBirth() const { return dateOfBirth; }
-std::string Person::getEmail() const { return email; }
-std::string Person::getPhoneNumber() const { return phoneNumber; }
-std::string Person::getAddress() const { return address; }
+const std::string& Person::getId() const { return id; }
 
-// Setter methods
-void Person::setFullName(const std::string& name) { fullName = name; }
-void Person::setEmail(const std::string& email) { this->email = email; }
-void Person::setPhoneNumber(const std::string& phone) { phoneNumber = phone; }
-void Person::setAddress(const std::string& addr) { address = addr; }
+const std::string& Person::getFullName() const { return fullName; }
 
+const std::string& Person::getDateOfBirth() const { return dateOfBirth; }
+
+Gender Person::getGender() const { return gender; }
+
+const std::string& Person::getPhoneNumber() const { return phoneNumber; }
+
+// Hàm tiện ích nội bộ: chuyển enum Gender sang string để hiển thị
+static std::string genderToString(Gender g) {
+    switch (g) {
+        case Gender::Male:   return "Male";
+        case Gender::Female: return "Female";
+        case Gender::Other:  return "Other";
+    }
+    return "Unknown";
+}
+
+// Hiển thị thông tin (có thể override ở lớp con)
 void Person::displayInfo() const {
-    std::cout << "ID: " << id << std::endl;
-    std::cout << "Name: " << fullName << std::endl;
-    std::cout << "Date of Birth: " << dateOfBirth << std::endl;
-    std::cout << "Email: " << email << std::endl;
-    std::cout << "Phone: " << phoneNumber << std::endl;
-    std::cout << "Address: " << address << std::endl;
+    std::cout << "ID: " << id << "\n"
+              << "Name: " << fullName << "\n"
+              << "DOB: " << dateOfBirth << "\n"
+              << "Gender: " << genderToString(gender) << "\n"
+              << "Phone: " << phoneNumber << "\n";
 }

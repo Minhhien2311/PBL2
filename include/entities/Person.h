@@ -3,35 +3,40 @@
 
 #include <string>
 
+// Định nghĩa enum class Gender ngay trong header này
+enum class Gender {
+    Male,
+    Female,
+    Other
+};
+
 class Person {
-protected:
+private:
     std::string id;
     std::string fullName;
-    std::string dateOfBirth;
-    std::string email;
+    std::string dateOfBirth;  // Định dạng khuyến nghị: yyyy-mm-dd
+    Gender gender;            // dùng enum class thay vì string
     std::string phoneNumber;
-    std::string address;
 
 public:
-    Person(const std::string& id, const std::string& name, const std::string& dob, 
-           const std::string& email, const std::string& phone, const std::string& addr);
-    
+    // Constructor: chỉ khai báo, validate sẽ được triển khai ở .cpp
+    Person(const std::string& id,
+           const std::string& name,
+           const std::string& dob,
+           Gender gender,
+           const std::string& phone);
+
+    // Đảm bảo hủy đúng khi kế thừa
     virtual ~Person() = default;
-    
-    // Getter methods
-    std::string getId() const;
-    std::string getFullName() const;
-    std::string getDateOfBirth() const;
-    std::string getEmail() const;
-    std::string getPhoneNumber() const;
-    std::string getAddress() const;
-    
-    // Setter methods
-    void setFullName(const std::string& name);
-    void setEmail(const std::string& email);
-    void setPhoneNumber(const std::string& phone);
-    void setAddress(const std::string& addr);
-    
+
+    // Getter methods (trả const ref để tránh copy)
+    const std::string& getId()          const;
+    const std::string& getFullName()    const;
+    const std::string& getDateOfBirth() const;
+    Gender             getGender()      const;   // trả trực tiếp enum
+    const std::string& getPhoneNumber() const;
+
+    // Cho phép override ở lớp con
     virtual void displayInfo() const;
 };
 
