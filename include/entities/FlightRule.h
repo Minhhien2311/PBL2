@@ -19,6 +19,7 @@ private:
     int  minChangeHoursBeforeDeparture;
     int  minCancelHoursBeforeDeparture;
 
+    // Phí thực hiện
     double changeFee;
     double cancellationFee;
     double upgradeFee; // áp trên chênh lệch giá
