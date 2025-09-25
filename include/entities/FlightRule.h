@@ -6,44 +6,65 @@
 
 class FlightRule {
 private:
+    // Định danh & mô tả
     std::string ruleId;
-    int minDaysBeforeChange;
-    int minDaysBeforeCancel;
+    std::string description;
+
+    // Cờ cho phép
+    bool changeAllowed;
+    bool cancelAllowed;
+    bool upgradeAllowed;
+
+    // Cửa sổ thời gian (tính theo GIỜ trước giờ bay)
+    int  minChangeHoursBeforeDeparture;
+    int  minCancelHoursBeforeDeparture;
+
     double changeFee;
     double cancellationFee;
-    double upgradeFee;
-    std::string applicableClasses;
+    double upgradeFee; // áp trên chênh lệch giá
 
 public:
-    FlightRule(const std::string& id, int minChangeDays, int minCancelDays,
-               double chgFee, double cancelFee, double upgFee,
-               const std::string& classes);
-    
-    // Getter methods
+    // Ctor đầy đủ
+    FlightRule(const std::string& id,
+               const std::string& description,
+               bool changeAllowed,  int minChangeHours,  double changeFee,
+               bool cancelAllowed,  int minCancelHours,  double cancelFee,
+               bool upgradeAllowed, double upgFee);
+
+    // Getters
     std::string getRuleId() const;
-    int getMinDaysBeforeChange() const;
-    int getMinDaysBeforeCancel() const;
+    std::string getDescription() const;
+
+    bool  isChangeEnabled() const;     // trả về changeAllowed
+    bool  isCancelEnabled() const;     // trả về cancelAllowed
+    bool  isUpgradeEnabled() const;    // trả về upgradeAllowed
+
+    int   getMinChangeHoursBeforeDeparture() const;
     double getChangeFee() const;
+
+    int   getMinCancelHoursBeforeDeparture() const;
     double getCancellationFee() const;
+
     double getUpgradeFee() const;
-    std::string getApplicableClasses() const;
-    
-    // Setter methods
+
+    // Setters cơ bản
     void setChangeFee(double fee);
     void setCancellationFee(double fee);
     void setUpgradeFee(double fee);
-    void setApplicableClasses(const std::string& classes);
-    
-    // Business methods
-    bool isChangeAllowed(int daysBeforeFlight) const;
-    bool isCancellationAllowed(int daysBeforeFlight) const;
+    void setMinChangeHoursBeforeDeparture(int hours);
+    void setMinCancelHoursBeforeDeparture(int hours);
+
+    // Business (đơn vị GIỜ)
+    bool   isChangeAllowed(int hoursBeforeDeparture) const;
+    bool   isCancellationAllowed(int hoursBeforeDeparture) const;
     double calculateChangePenalty(double ticketPrice) const;
-    double calculateCancellationRefund(double ticketPrice) const;
-    bool isApplicableForClass(const std::string& seatClass) const;
-    
-    static FlightRule getDefaultRule();
-    static FlightRule findRuleById(const std::string& ruleId);
-    static FlightRule findRuleForFlight(const std::string& flightId);
+    double calculateCancellationPenalty(double ticketPrice) const;
+
+    // Rule mặc định (fallback)
+    static FlightRule defaultRule();
+
+    // GỢI Ý: loại bỏ hàm này khỏi entity, chuyển sang RuleRepository trong infrastructure
+    // static FlightRule findRuleById(const std::string& ruleId);
 };
 
 #endif // FLIGHTRULE_H
