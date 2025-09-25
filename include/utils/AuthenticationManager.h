@@ -7,17 +7,17 @@
 
 class AuthenticationManager {
 private:
-    static User* currentUser;
+    static Account* currentUser;
 
 public:
     static bool login(const std::string& username, const std::string& password);
     static bool logout();
     static bool isLoggedIn();
-    static User* getCurrentUser();
+    static Account* getCurrentUser();
     static bool hasPermission(const std::string& permission);
     static bool changePassword(const std::string& oldPassword, const std::string& newPassword);
     static bool resetPassword(const std::string& username, const std::string& newPassword);
-    static bool registerNewUser(const User& newUser);
+    static bool registerNewUser(const Account& newUser);
 };
 
 #endif // AUTHENTICATIONMANAGER_H

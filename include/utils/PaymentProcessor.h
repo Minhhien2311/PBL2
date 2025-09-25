@@ -1,1 +1,0 @@
-//Xử lý thanh toán (dù không thanh toán thật)
