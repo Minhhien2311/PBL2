@@ -1,46 +1,69 @@
-// Thông tin vé đã xuất
 #ifndef TICKET_H
 #define TICKET_H
 
 #include <string>
-#include "Booking.h"
+
+// Vé phát sinh khi Booking chuyển sang Issued.
+// Là "snapshot" bất biến của dữ liệu tại thời điểm xuất.
+enum class TicketStatus {
+    Active,     // vé đang có hiệu lực
+    Exchanged,  // đã đổi sang vé mới
+    Cancelled
+};
 
 class Ticket {
 private:
-    std::string ticketId;
-    std::string bookingId;
-    std::string ticketNumber;
-    std::string issueDate;
-    std::string status;
-    std::string originalTicketId;
+    std::string ticketNumber;     // số vé (khác PNR); ví dụ: 123-4567890123
+    std::string bookingId;        // tham chiếu về booking gốc
+    std::string pnr;              // lưu lại PNR lúc xuất
+
+    // Ảnh chụp hành trình/khách/ghế/giá tại thời điểm xuất
+    std::string passengerId;
+    std::string flightInstanceId;
+    std::string seatId;
+    std::string bookingClass;     // "Economy" / "Business" (hoặc enum -> serialize ra chữ)
+    std::string issueDateTime;    // "YYYY-MM-DDTHH:MM:SS" (quy ước timezone)
+
+    double baseFare;
+    double discount;
+    double totalAmount;
+
+    TicketStatus status;
 
 public:
-    Ticket(const std::string& id, const std::string& bookingId, const std::string& number,
-           const std::string& issueDate, const std::string& status, 
-           const std::string& originalTicketId = "");
-    
-    // Getter methods
-    std::string getTicketId() const;
-    std::string getBookingId() const;
-    std::string getTicketNumber() const;
-    std::string getIssueDate() const;
-    std::string getStatus() const;
-    std::string getOriginalTicketId() const;
-    
-    // Setter methods
-    void setStatus(const std::string& newStatus);
-    
-    // Business methods
-    bool isActive() const;
-    bool isChanged() const;
-    bool isCancelled() const;
-    bool canBeRefunded() const;
-    
-    static std::vector<Ticket> loadAllTickets();
-    static Ticket findTicketByNumber(const std::string& ticketNumber);
-    static std::vector<Ticket> findTicketsByBooking(const std::string& bookingId);
-    static bool issueTicketsForBooking(const std::string& bookingId);
-    static bool cancelTicket(const std::string& ticketId);
+    Ticket(const std::string& ticketNumber,
+           const std::string& bookingId,
+           const std::string& pnr,
+           const std::string& passengerId,
+           const std::string& flightInstanceId,
+           const std::string& seatId,
+           const std::string& bookingClass,
+           const std::string& issueDateTime,
+           double baseFare,
+           double discount,
+           double totalAmount,
+           TicketStatus status = TicketStatus::Active);
+
+    // Getters (rút gọn)
+    const std::string& getTicketNumber() const;
+    const std::string& getBookingId() const;
+    const std::string& getPNR() const;
+    const std::string& getPassengerId() const;
+    const std::string& getFlightInstanceId() const;
+    const std::string& getSeatId() const;
+    const std::string& getBookingClass() const;
+    const std::string& getIssueDateTime() const;
+    double getBaseFare() const;
+    double getDiscount() const;
+    double getTotalAmount() const;
+    TicketStatus getStatus() const;
+
+    void setStatus(TicketStatus s);  // dùng khi exchange/cancel
+
+    // I/O 1 dòng record (tuỳ format nhóm: CSV/TSV/pipe)
+    std::string toRecordLine() const;                       // ghi object vào file
+    static Ticket fromRecordLine(const std::string& line);  // đọc từ file
+    void printTicket();
 };
 
 #endif // TICKET_H

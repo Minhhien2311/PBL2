@@ -1,31 +1,39 @@
-#include <iostream>
 #include "C:/PBL2/include/entities/Ticket.h"
 
-Ticket::Ticket(const std::string& id, const std::string& bookingId, const std::string& number,
-           const std::string& issueDate, const std::string& status,
-           const std::string& originalTicketId)
-    : ticketId(id), bookingId(bookingId), ticketNumber(number),
-      issueDate(issueDate), status(status), originalTicketId(originalTicketId) {}
+Ticket::Ticket(const std::string& ticketNumber,
+           const std::string& bookingId,
+           const std::string& pnr,
+           const std::string& passengerId,
+           const std::string& flightInstanceId,
+           const std::string& seatId,
+           const std::string& bookingClass,
+           const std::string& issueDateTime,
+           double baseFare,
+           double discount,
+           double totalAmount,
+           TicketStatus status = TicketStatus::Active)
+        : ticketNumber(ticketNumber), bookingId(bookingId), pnr(pnr),
+          passengerId(passengerId), flightInstanceId(flightInstanceId), seatId(seatId),
+          bookingClass(bookingClass), issueDateTime(issueDateTime),
+          baseFare(baseFare), discount(discount), totalAmount(totalAmount), status(status) {}
 
-// Getter methods
-std::string Ticket::getTicketId() const { return ticketId; }
-std::string Ticket::getBookingId() const { return bookingId; }
-std::string Ticket::getTicketNumber() const { return ticketNumber; }
-std::string Ticket::getIssueDate() const { return issueDate; }
-std::string Ticket::getStatus() const { return status; }
-std::string Ticket::getOriginalTicketId() const { return originalTicketId; }
+    // Getters
+    const std::string& Ticket::getTicketNumber() const { return ticketNumber; }
+    const std::string& Ticket::getBookingId() const { return bookingId; }
+    const std::string& Ticket::getPNR() const { return pnr; }
+    const std::string& Ticket::getPassengerId() const { return passengerId; }
+    const std::string& Ticket::getFlightInstanceId() const { return flightInstanceId; }
+    const std::string& Ticket::getSeatId() const { return seatId; }
+    const std::string& Ticket::getBookingClass() const { return bookingClass; }
+    const std::string& Ticket::getIssueDateTime() const { return issueDateTime; }
+    double Ticket::getBaseFare() const { return baseFare; }
+    double Ticket::getDiscount() const { return discount; }
+    double Ticket::getTotalAmount() const { return totalAmount; }
+    TicketStatus Ticket::getStatus() const { return status; }
 
-// Setter methods
-void Ticket::setStatus(const std::string& newStatus) { status = newStatus; }
+    void Ticket::setStatus(TicketStatus newStatus) { status = newStatus; } // dùng khi exchange/cancel
 
-// Business methods
-bool Ticket::isActive() const { return status == "Active"; }
-bool Ticket::isChanged() const { return !originalTicketId.empty(); }
-bool Ticket::isCancelled() const { return status == "Cancelled"; }
-bool Ticket::canBeRefunded() const { return status == "Active" || status == "Changed"; } // Example logic
-
-std::vector<Ticket> Ticket::loadAllTickets() { return {}; } // Placeholder
-Ticket Ticket::findTicketByNumber(const std::string& ticketNumber) { return Ticket("", "", "", "", "", ""); } // Placeholder
-std::vector<Ticket> Ticket::findTicketsByBooking(const std::string& bookingId) { return {}; } // Placeholder
-bool Ticket::issueTicketsForBooking(const std::string& bookingId) { return false; } // Placeholder
-bool Ticket::cancelTicket(const std::string& ticketId) { return false; } // Placeholder
+    // I/O 1 dòng record (tuỳ format nhóm: CSV/TSV/pipe)
+    std::string Ticket::toRecordLine() const { }                       // ghi object vào file
+    Ticket Ticket::fromRecordLine(const std::string& line) {  }  // đọc từ file
+    void Ticket::printTicket() { /* TODO: Implement */ }
