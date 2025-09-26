@@ -1,36 +1,42 @@
 #ifndef AGENT_H
 #define AGENT_H
 
+#include <string>
+#include "Person.h"
 #include "Account.h"
 
-class Agent : public Account {
+// Agent: đại lý bán vé, là một người (Person) có một tài khoản đăng nhập (Account).
+// Ngoài thông tin cá nhân, Agent còn có các chỉ số kinh doanh như doanh số và trạng thái hoạt động (active/inactive).
+class Agent : public Person {
 private:
-    // double commissionRate;
-    double totalSales;
-    bool isActive;
+    Account account;       // thông tin đăng nhập (Role::Agent)
+    double totalSales;     // tổng số tiền bán vé (để tính hoa hồng)
+    bool isActive;         // đại lý còn hoạt động hay đã bị khóa
 
 public:
-    Agent(const std::string& id, const std::string& name, const std::string& dob, 
-          const std::string& email, const std::string& phone, const std::string& addr,
-          const std::string& user, const std::string& pwdHash, 
-          const std::string& regDate, double commission, double sales, bool active);
-    
-    // Getter methods
-    double getCommissionRate() const;
+    // Khởi tạo Agent: gồm thông tin Person + Account + thông tin kinh doanh
+    Agent(const std::string& id,
+          const std::string& name,
+          const std::string& dob,
+          Gender gender,
+          const std::string& phone,
+          const Account& acc,
+          double totalSales = 0,
+          bool active);
+
+    // Truy cập account
+    const Account& getAccount() const;  // chỉ đọc
+    Account&       getAccount();        // cho phép chỉnh sửa khi là chính Agent
+
+    // Thông tin kinh doanh
     double getTotalSales() const;
-    bool getIsActive() const;
-    
-    // Setter methods
-    void setCommissionRate(double rate);
-    void updateTotalSales(double amount);
-    void setActiveStatus(bool status);
-    
-    // Agent-specific methods
-    void createBooking();
-    void issueTicket();
-    void cancelBooking();
-    double calculateCommission() const;
-    
+    bool   getIsActive() const;
+
+    // Các hàm set
+    void updateTotalSales(double amount); // Cộng thêm vào doanh số. Cái này không phải Agent tự nhập tay mà được cập nhật từ Booking/Ticket Service.
+    void setActive(bool status);
+
+    // Hiển thị thông tin (Person + Account + số liệu kinh doanh)
     void displayInfo() const override;
 };
 

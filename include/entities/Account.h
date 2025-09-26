@@ -21,10 +21,6 @@ public:
     // Tránh tạo đối tượng rỗng
     Account() = delete; 
 
-    // Tránh sao chép Account
-    Account(const Account&) = delete;
-    Account& operator=(const Account&) = delete;
-
     explicit Account(const std::string& id,
                      const std::string& username,
                      const std::string& passwordPlain, // sẽ hash nội bộ ở .cpp
