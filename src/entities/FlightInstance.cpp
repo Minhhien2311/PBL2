@@ -7,13 +7,17 @@ FlightInstance::FlightInstance(const std::string& instanceId,
                                const std::string& departureIso,
                                const std::string& arrivalIso,
                                int capacity,
-                               int seatsAvailable)
+                               int seatsAvailable,
+                               double fareEconomy, 
+                               double fareBusiness)
     : instanceId(instanceId),
       flightId(flightId),
       departureIso(departureIso),
       arrivalIso(arrivalIso),
       capacity(capacity),
-      seatsAvailable(seatsAvailable) {}
+      seatsAvailable(seatsAvailable),
+      fareEconomy(fareEconomy), 
+      fareBusiness(fareBusiness) {}
 
 // Getters
 const std::string& FlightInstance::getInstanceId() const    { return instanceId; }
@@ -22,6 +26,8 @@ const std::string& FlightInstance::getDepartureIso() const  { return departureIs
 const std::string& FlightInstance::getArrivalIso() const    { return arrivalIso; }
 int  FlightInstance::getCapacity() const                    { return capacity; }
 int  FlightInstance::getSeatsAvailable() const              { return seatsAvailable; }
+double FlightInstance::getFareEconomy() const { return fareEconomy; }
+double FlightInstance::getFareBusiness() const { return fareBusiness; }
 
 // Updater
 void FlightInstance::setSeatsAvailable(int remaining) {
@@ -29,6 +35,14 @@ void FlightInstance::setSeatsAvailable(int remaining) {
     // if (remaining < 0) seatsAvailable = 0;
     // else if (remaining > capacity) seatsAvailable = capacity;
     // else seatsAvailable = remaining;
+}
+void FlightInstance::setFareEconomy(double fare)
+{
+    fareEconomy = fare;
+}
+void FlightInstance::setFareBusiness(double fare)
+{
+    fareBusiness = fare;
 }
 
 // Helpers

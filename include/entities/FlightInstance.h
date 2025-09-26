@@ -15,24 +15,33 @@ private:
     int capacity;             // tổng số ghế cấu hình cho lần bay
     int seatsAvailable;       // số ghế còn trống (update khi đặt/hủy)
 
+    double fareEconomy;
+    double fareBusiness;
+
 public:
     FlightInstance(const std::string& instanceId,
                    const std::string& flightId,
                    const std::string& departureIso,
                    const std::string& arrivalIso,
                    int capacity,
-                   int seatsAvailable);
+                   int seatsAvailable,
+                   double fareEconomy,
+                   double fareBusiness);
 
     // Getter
-    const std::string& getInstanceId()       const;
-    const std::string& getFlightId()         const;
-    const std::string& getDepartureIso()     const;
-    const std::string& getArrivalIso()       const;
-    int                getCapacity()         const;
-    int                getSeatsAvailable()   const;
+    const std::string& getInstanceId()      const;
+    const std::string& getFlightId()        const;
+    const std::string& getDepartureIso()    const;
+    const std::string& getArrivalIso()      const;
+    int                getCapacity()        const;
+    int                getSeatsAvailable()  const;
+    double getFareEconomy()                 const;
+    double getFareBusiness()                const;
 
     // Setter/Updater tối thiểu (nghiệp vụ đặt vé/đổi vé để ở service)
     void setSeatsAvailable(int remaining);
+    void setFareEconomy(double fare);
+    void setFareBusiness(double fare);
 
     // Tiện ích nhẹ
     bool hasAvailableSeats() const;     // seatsAvailable > 0 ?

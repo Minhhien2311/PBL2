@@ -1,59 +1,92 @@
-// Thông tin đặt chỗ (PNR)
-#ifndef BOOKING_H
-#define BOOKING_H
+#ifndef BOOKINGH
+#define BOOKINGH
 
 #include <string>
-#include <vector>
-#include "Passenger.h"
+
+// Trạng thái đặt chỗ
+enum class BookingStatus {
+    Confirmed,  // Đã chốt, sẵn sàng xuất vé
+    Issued,     // Đã xuất vé
+    Cancelled,  // Đã huỷ
+};
+
+// Hạng đặt chỗ
+enum class BookingClass {
+    Economy,
+    Business,
+};
 
 class Booking {
 private:
-    std::string bookingId;
-    std::string pnr;
-    std::string agentId;
-    std::string instanceId;
-    std::string bookingDate;
-    double totalAmount;
-    std::string status;
-    std::string promotionId;
-    std::vector<Passenger> passengers;
+    // Định danh & Liên kết
+    std::string bookingId;         // Khóa nội bộ duy nhất
+    std::string pnr;               // Mã locator hiển thị/tra cứu (thường 6 ký tự)
+    std::string agentId;           // Đại lý/admin tạo booking
+    std::string flightInstanceId;  // Chuyến bay cụ thể
+    std::string passengerId;       // ID duy nhất của hành khách
+    std::string seatId;            // Ghế đã gán; rỗng nếu chưa gán
+
+    // Trạng thái & Hạng vé
+    std::string bookingDate;       // Định dạng YYYYMMDDhhmm
+    BookingStatus status;
+    BookingClass bookingClass;
+
+    // Chi tiết giá vé  
+    double baseFare;               // Giá vé nền (đã bao gồm phụ phí hạng vé)
+    double discount;               // Khoản giảm giá
+    double totalAmount;            // Tổng tiền cuối cùng
+
+    // Thông tin huỷ vé  
+    std::string cancelReason;      // Lý do huỷ (nếu có)
 
 public:
-    Booking(const std::string& id, const std::string& pnr, const std::string& agentId,
-            const std::string& instanceId, const std::string& date, double amount,
-            const std::string& status, const std::string& promotionId);
-    
-    // Getter methods
-    std::string getBookingId() const;
-    std::string getPNR() const;
-    std::string getAgentId() const;
-    std::string getInstanceId() const;
-    std::string getBookingDate() const;
+    // Constructors  
+    Booking() = default;
+
+    // Constructor chính để tạo một booking mới
+    Booking(const std::string& bookingId,
+            const std::string& pnr,
+            const std::string& agentId,
+            const std::string& flightInstanceId,
+            const std::string& passengerId,
+            const std::string& bookingDate,
+            BookingClass bookingClass,
+            double baseFare); // baseFare nên được tính bên ngoài và truyền vào
+
+    // Getters (Truy xuất thông tin)  
+    const std::string& getBookingId() const;
+    const std::string& getPNR() const;
+    const std::string& getAgentId() const;
+    const std::string& getFlightInstanceId() const;
+    const std::string& getPassengerId() const;
+    const std::string& getSeatId() const;
+
+    const std::string& getBookingDate() const;
+    BookingStatus getStatus() const;
+    BookingClass getClass() const;
+
+    double getBaseFare() const;
     double getTotalAmount() const;
-    std::string getStatus() const;
-    std::string getPromotionId() const;
-    std::vector<Passenger> getPassengers() const;
-    
-    // Setter methods
-    void setStatus(const std::string& newStatus);
-    void setPromotionId(const std::string& promoId);
-    void setTotalAmount(double amount);
-    
-    // Passenger management
-    void addPassenger(const Passenger& passenger);
-    void removePassenger(const std::string& passengerId);
-    int getPassengerCount() const;
-    
-    // Business methods
-    bool canBeCancelled() const;
-    bool canBeChanged() const;
-    double calculateCancellationFee() const;
-    double calculateChangeFee() const;
-    
-    static std::vector<Booking> loadAllBookings();
-    static Booking findBookingByPNR(const std::string& pnr);
-    static std::vector<Booking> findBookingsByAgent(const std::string& agentId);
-    static std::vector<Booking> findBookingsByDate(const std::string& date);
+
+    const std::string& getCancelReason() const;
+
+    // Thay đổi thông tin
+    void setStatus(BookingStatus newStatus);
+    void setCancelReason(const std::string& reason);
+
+    // Các hàm setter cho giá trị nên được dùng cẩn thận,
+    // vì chúng có thể ảnh hưởng đến các quy tắc nghiệp vụ.
+    void setBaseFare(double value);
+
+    // Quy tắc nghiệp vụ dựa theo rule
+    bool canBeCancelled() const; // Logic sẽ ở file .cpp
+    bool canBeChanged() const;   // Logic sẽ ở file .cpp
+
+    // Thao tác Ghế  
+    // Gán ghế. Trả về false nếu thất bại.
+    bool assignSeat(const std::string& seatId);
+    // Bỏ gán ghế hiện tại.
+    void unassignSeat();
 };
 
 #endif // BOOKING_H
