@@ -1,39 +1,43 @@
 #ifndef ACCOUNT_H
 #define ACCOUNT_H
 
-#include "Person.h"
 #include <string>
 
-class Account : public Person {
-protected:
+enum class Role { Admin, Agent };
+
+class Account {
+private:
+    std::string accountId;       // ID tài khoản (khác ID của Person)
     std::string username;
-    std::string passwordHash;
-    std::string registrationDate;
-    std::string lastLogin;
-    std::string role; // "ADMIN" or "AGENT"
+    std::string passwordHash;    // không expose ra ngoài
+    Role        role;
+
+    // Internal helpers (dùng chung cho mọi đối tượng Account)
+    // Đặt private để không ai bên ngoài tự băm/verify trái quy trình.
+    static std::string hashPassword(const std::string& plain);
+    static bool verifyPassword(const std::string& plain, const std::string& hash);
 
 public:
-    Account(const std::string& id, const std::string& name, const std::string& dob, 
-         const std::string& email, const std::string& phone, const std::string& addr,
-         const std::string& account, const std::string& pwdHash, 
-         const std::string& regDate, const std::string& role);
-    
-    // Getter
-    std::string getUsername() const;
-    std::string getPasswordHash() const;
-    std::string getRegistrationDate() const;
-    std::string getLastLogin() const;
-    std::string getRole() const;
-    
-    // Setter methods
-    void setPasswordHash(const std::string& pwdHash);
-    void setLastLogin(const std::string& loginTime);
-    
-    // Authentication methods
-    bool authenticate(const std::string& password) const;
-    void changePassword(const std::string& newPassword);
-    
-    virtual void displayInfo() const override;
+    // Tránh tạo đối tượng rỗng
+    Account() = delete; 
+
+    // Tránh sao chép Account
+    Account(const Account&) = delete;
+    Account& operator=(const Account&) = delete;
+
+    explicit Account(const std::string& id,
+                     const std::string& username,
+                     const std::string& passwordPlain, // sẽ hash nội bộ ở .cpp
+                     Role role);
+
+    // Getter (không có getPassword)
+    const std::string& getId()           const;
+    const std::string& getUsername()     const;
+    Role               getRole()         const;
+
+    // Auth API
+    bool authenticate(const std::string& passwordPlain) const; // so sánh bằng verifyPassword
+    void changePassword(const std::string& newPasswordPlain);  // cập nhật passwordHash = hashPassword(newPassword)
 };
 
 #endif // ACCOUNT_H

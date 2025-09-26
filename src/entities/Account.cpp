@@ -1,41 +1,52 @@
 #include "C:/PBL2/include/entities/Account.h"
-#include "C:/PBL2/include/utils/Helpers.h"
-#include <iostream>
+#include <string>
 
-Account::Account(const std::string& id, const std::string& name, const std::string& dob, 
-           const std::string& email, const std::string& phone, const std::string& addr,
-           const std::string& Account, const std::string& pwdHash, 
-           const std::string& regDate, const std::string& role)
-    : Person(id, name, dob, email, phone, addr), 
-      username(Account), passwordHash(pwdHash), 
-      registrationDate(regDate), role(role) {
-    lastLogin = "";
+// === Constructor ===
+Account::Account(const std::string& id,
+                 const std::string& user,
+                 const std::string& passwordPlain,
+                 Role r)
+    : accountId(id),
+      username(user),
+      // Lưu ý: hiện tại gọi hàm hashPassword (placeholder).
+      // Thay bằng hàm băm an toàn khi triển khai thuật toán.
+      passwordHash(hashPassword(passwordPlain)),
+      role(r)
+{}
+
+// === Internal helpers (placeholder) ===
+/*
+  GHI CHÚ (Thực hiện thuật toán ở đây):
+  - Nên dùng bcrypt / scrypt / Argon2 trong thực tế.
+  - Sử dụng salt (riêng cho mỗi account) và pepper (bí mật ứng dụng).
+  - Lưu salt (nếu dùng) kèm trong DB hoặc mở rộng struct Account để chứa salt.
+  - Khi verify: hash(passwordPlain + salt + pepper) và so sánh với stored hash.
+*/
+std::string Account::hashPassword(const std::string& plain) {
+    // PLACEHOLDER: minh họa, KHÔNG an toàn trong thực tế.
+    // TODO: Thay thế bằng bcrypt/Argon2 + salt + pepper.
 }
 
-// Getter methods
-std::string Account::getUsername() const { return username; }
-std::string Account::getPasswordHash() const { return passwordHash; }
-std::string Account::getRegistrationDate() const { return registrationDate; }
-std::string Account::getLastLogin() const { return lastLogin; }
-std::string Account::getRole() const { return role; }
-
-// Setter methods
-void Account::setPasswordHash(const std::string& pwdHash) { passwordHash = pwdHash; }
-void Account::setLastLogin(const std::string& loginTime) { lastLogin = loginTime; }
-
-// Authentication methods
-bool Account::authenticate(const std::string& password) const {
-    return Helpers::hashPassword(password) == passwordHash;
+bool Account::verifyPassword(const std::string& plain, const std::string& hash) {
+    // PLACEHOLDER: so sánh trực tiếp với hàm hash hiện có.
+    // TODO: Thay bằng verify phù hợp với thuật toán bạn chọn.
+    return hash == hashPassword(plain);
 }
 
-void Account::changePassword(const std::string& newPassword) {
-    passwordHash = Helpers::hashPassword(newPassword);
+// Các hàm getter
+const std::string& Account::getId() const { return accountId; }
+
+const std::string& Account::getUsername() const { return username; }
+
+Role Account::getRole() const { return role; }
+
+// === Auth API ===
+bool Account::authenticate(const std::string& passwordPlain) const {
+    // Không cập nhật lastLogin ở đây (nếu có field đó, chỉ cập nhật khi login thành công)
+    return verifyPassword(passwordPlain, passwordHash);
 }
 
-void Account::displayInfo() const {
-    Person::displayInfo();
-    std::cout << "username: " << username << std::endl;
-    std::cout << "Role: " << role << std::endl;
-    std::cout << "Registration Date: " << registrationDate << std::endl;
-    std::cout << "Last Login: " << lastLogin << std::endl;
+void Account::changePassword(const std::string& newPasswordPlain) {
+    // Gợi ý: Validate password strength trước khi đổi (nếu cần)
+    passwordHash = hashPassword(newPasswordPlain);
 }
