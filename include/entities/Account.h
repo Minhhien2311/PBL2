@@ -6,34 +6,49 @@
 enum class Role { Admin, Agent };
 
 class Account {
-private:
-    std::string accountId;       // ID tài khoản (khác ID của Person)
+protected:
+    // Thông tin đăng nhập 
+    std::string accountId;       // ID tài khoản (unique)
     std::string username;
-    std::string passwordHash;    // không expose ra ngoài
+    std::string passwordHash;    // chỉ lưu hash
     Role        role;
 
-    // Internal helpers (dùng chung cho mọi đối tượng Account)
-    // Đặt private để không ai bên ngoài tự băm/verify trái quy trình.
+    // Thông tin cá nhân cơ bản 
+    std::string fullName;        // Họ tên của admin/agent
+    std::string phoneNumber;     // Số điện thoại
+    std::string email;           // Email liên hệ
+
+    // Helpers
     static std::string hashPassword(const std::string& plain);
     static bool verifyPassword(const std::string& plain, const std::string& hash);
 
 public:
-    // Tránh tạo đối tượng rỗng
-    Account() = delete; 
+    Account() = delete;
 
     explicit Account(const std::string& id,
                      const std::string& username,
-                     const std::string& passwordPlain, // sẽ hash nội bộ ở .cpp
-                     Role role);
+                     const std::string& passwordPlain, // sẽ hash ở .cpp
+                     Role role,
+                     const std::string& name,
+                     const std::string& phone,
+                     const std::string& email);
 
-    // Getter (không có getPassword)
-    const std::string& getId()           const;
-    const std::string& getUsername()     const;
-    Role               getRole()         const;
+    // Getters
+    const std::string& getId()        const;
+    const std::string& getUsername()  const;
+    Role               getRole()      const;
+    const std::string& getFullName()  const;
+    const std::string& getPhone()     const;
+    const std::string& getEmail()     const;
+
+    // Setters cho profile (tùy chọn)
+    void setFullName(const std::string& name);
+    void setPhone(const std::string& phone);
+    void setEmail(const std::string& email);
 
     // Auth API
-    bool authenticate(const std::string& passwordPlain) const; // so sánh bằng verifyPassword
-    void changePassword(const std::string& newPasswordPlain);  // cập nhật passwordHash = hashPassword(newPassword)
+    bool authenticate(const std::string& passwordPlain) const;
+    void changePassword(const std::string& newPasswordPlain);
 };
 
 #endif // ACCOUNT_H

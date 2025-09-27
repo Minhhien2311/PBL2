@@ -1,13 +1,24 @@
 #ifndef PASSENGER_H
 #define PASSENGER_H
 
-#include "Person.h"
 #include <string>
 
-class Passenger : public Person {
+enum class Gender {
+    Male,
+    Female,
+    Other
+};
+
+class Passenger {
 private:
-    std::string passportNumber;
-    std::string nationality;
+    std::string id;            // Mã định danh
+    std::string fullName;      // Họ tên đầy đủ
+    std::string dateOfBirth;   // Khuyến nghị: "yyyy-mm-dd"
+    Gender      gender;        // Giới tính (enum class)
+    std::string phoneNumber;   // Số điện thoại liên hệ
+
+    std::string passportNumber; // Số hộ chiếu (nếu là nội địa có thể để trống/CCCD)
+    std::string nationality;    // Quốc tịch
 
 public:
     Passenger(const std::string& id,
@@ -17,13 +28,18 @@ public:
               const std::string& phone,
               const std::string& passport,
               const std::string& nation);
-    
-    // Getter
-    const std::string& getPassportNumber() const;
-    const std::string& getNationality() const;
-        
-    // Override displayInfo để in thêm field riêng
-    void displayInfo() const override;
+
+    // Destructor mặc định đủ dùng (không sở hữu tài nguyên động)
+    ~Passenger() = default;
+
+    // Getters (trả const ref cho string để tránh copy) 
+    const std::string& getId()            const;
+    const std::string& getFullName()      const;
+    const std::string& getDateOfBirth()   const;
+    Gender             getGender()        const; // enum trả theo giá trị
+    const std::string& getPhoneNumber()   const;
+    const std::string& getPassportNumber()const;
+    const std::string& getNationality()   const;
 };
 
-#endif // PASSENGER_H
+#endif

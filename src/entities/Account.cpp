@@ -1,52 +1,47 @@
 #include "C:/PBL2/include/entities/Account.h"
-#include <string>
 
-// === Constructor ===
-Account::Account(const std::string& id,
-                 const std::string& user,
-                 const std::string& passwordPlain,
-                 Role r)
+// Constructor 
+Account::Account(const std::string& id, const std::string& username,
+                 const std::string& passwordPlain, // sẽ hash ở .cpp
+                 Role role, const std::string& name,
+                 const std::string& phone, const std::string& email)
     : accountId(id),
-      username(user),
-      // Lưu ý: hiện tại gọi hàm hashPassword (placeholder).
-      // Thay bằng hàm băm an toàn khi triển khai thuật toán.
+      username(username),
       passwordHash(hashPassword(passwordPlain)),
-      role(r)
-{}
+      role(role),
+      fullName(name),
+      phoneNumber(phone),
+      email(email) {}
 
-// === Internal helpers (placeholder) ===
-/*
-  GHI CHÚ (Thực hiện thuật toán ở đây):
-  - Nên dùng bcrypt / scrypt / Argon2 trong thực tế.
-  - Sử dụng salt (riêng cho mỗi account) và pepper (bí mật ứng dụng).
-  - Lưu salt (nếu dùng) kèm trong DB hoặc mở rộng struct Account để chứa salt.
-  - Khi verify: hash(passwordPlain + salt + pepper) và so sánh với stored hash.
-*/
+// Destructor 
+// (được = default trong header, nên không cần viết lại ở .cpp)
+
+// Internal helpers 
 std::string Account::hashPassword(const std::string& plain) {
-    // PLACEHOLDER: minh họa, KHÔNG an toàn trong thực tế.
-    // TODO: Thay thế bằng bcrypt/Argon2 + salt + pepper.
+    // TODO: Thay thế bằng thuật toán băm thực sự (bcrypt/Argon2...).
+    return plain; // placeholder: chỉ để biên dịch
 }
 
 bool Account::verifyPassword(const std::string& plain, const std::string& hash) {
-    // PLACEHOLDER: so sánh trực tiếp với hàm hash hiện có.
-    // TODO: Thay bằng verify phù hợp với thuật toán bạn chọn.
     return hash == hashPassword(plain);
 }
 
-// Các hàm getter
+// Getters 
 const std::string& Account::getId() const { return accountId; }
 
 const std::string& Account::getUsername() const { return username; }
 
 Role Account::getRole() const { return role; }
 
-// === Auth API ===
+const std::string& Account::getFullName() const { return fullName; }
+const std::string& Account::getPhone() const { return phoneNumber; }
+const std::string& Account::getEmail() const { return email; }
+
+// Auth API 
 bool Account::authenticate(const std::string& passwordPlain) const {
-    // Không cập nhật lastLogin ở đây (nếu có field đó, chỉ cập nhật khi login thành công)
     return verifyPassword(passwordPlain, passwordHash);
 }
 
 void Account::changePassword(const std::string& newPasswordPlain) {
-    // Gợi ý: Validate password strength trước khi đổi (nếu cần)
     passwordHash = hashPassword(newPasswordPlain);
 }
