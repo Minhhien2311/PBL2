@@ -2,3 +2,5 @@ id|username|passwordHash|fullName|email|phone|address|role|registrationDate|last
 1|admin|5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8|Admin System|admin@airline.com|0123456789|HQ Building|ADMIN|2023-10-25|2023-10-30 09:15:30|1
 2|agent1|5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8|Nguyen Van A|agent1@airline.com|0987654321|123 Main St|AGENT|2023-10-25|2023-10-30 10:20:45|1
 3|agent2|5e884898da28047151d0e56f8dc6292773603d0d6aabbdd62a11ef721d1542d8|Tran Thi B|agent2@airline.com|0912345678|456 Oak St|AGENT|2023-10-26|2023-10-29 14:35:20|1
+
+accountId|username|passwordHash|role|fullName|phoneNumber|email

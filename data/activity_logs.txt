@@ -1,6 +1,0 @@
-logId|userId|activityType|timestamp|description|ipAddress|affectedEntity|entityId
-1|2|LOGIN|2023-10-28 09:15:30|User logged in|192.168.1.100|USER|2
-2|2|SEARCH_FLIGHT|2023-10-28 09:20:15|Searched for flights HAN-SGN on 2023-11-02|192.168.1.100|FLIGHT|
-3|2|CREATE_BOOKING|2023-10-28 09:25:40|Created booking PNR ABC123|192.168.1.100|BOOKING|1
-4|2|ISSUE_TICKET|2023-10-28 09:30:20|Issued 2 tickets for booking 1|192.168.1.100|TICKET|1,2
-5|2|LOGOUT|2023-10-28 10:45:10|User logged out|192.168.1.100|USER|2
