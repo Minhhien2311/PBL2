@@ -6,17 +6,9 @@ AccountAdmin::AccountAdmin(const std::string& id,
                            const std::string& username,
                            const std::string& passwordPlain,
                            const std::string& fullName,
-                           const std::string& phone,
-                           const std::string& email)
-    : accountId(id),
-      username(username),
-      passwordHash(hashPassword(passwordPlain)),
-      role(role),
-      fullName(name),
-      phoneNumber(phone),
-      email(email)
-    // Lưu ý: nếu Account không lưu fullName/phone/email thì các tham số này chỉ để tương thích chữ ký.
-{
+                           const std::string& phone, const std::string& email)
+    : Account(id, username, passwordPlain, Role::Admin, fullName, phone, email) {
+    // Constructor của AccountAdmin, gọi constructor của lớp cơ sở Account
 }
 
 // Thêm agent (không cho sửa agent theo yêu cầu)

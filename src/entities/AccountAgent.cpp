@@ -10,7 +10,7 @@ AccountAgent::AccountAgent(const std::string& id,
                            const std::string& email,
                            double totalSales,
                            bool active)
-    : Account(id, username, passwordPlain, Role::Agent),
+    : Account(id, username, passwordPlain, Role::Agent, fullName, phone, email),
       totalSales(totalSales),
       isActive(active)
 {

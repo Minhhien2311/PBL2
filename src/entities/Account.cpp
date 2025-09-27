@@ -1,10 +1,13 @@
 #include "C:/PBL2/include/entities/Account.h"
 
 // Constructor 
-Account::Account(const std::string& id, const std::string& username,
+Account::Account(const std::string& id,
+                 const std::string& username,
                  const std::string& passwordPlain, // sẽ hash ở .cpp
-                 Role role, const std::string& name,
-                 const std::string& phone, const std::string& email)
+                 Role role,
+                 const std::string& name,
+                 const std::string& phone,
+                 const std::string& email)
     : accountId(id),
       username(username),
       passwordHash(hashPassword(passwordPlain)),
