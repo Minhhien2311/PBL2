@@ -31,11 +31,8 @@ bool Account::verifyPassword(const std::string& plain, const std::string& hash) 
 
 // Getters 
 const std::string& Account::getId() const { return accountId; }
-
 const std::string& Account::getUsername() const { return username; }
-
 Role Account::getRole() const { return role; }
-
 const std::string& Account::getFullName() const { return fullName; }
 const std::string& Account::getPhone() const { return phoneNumber; }
 const std::string& Account::getEmail() const { return email; }
