@@ -8,7 +8,11 @@ FlightInstance::FlightInstance(const std::string& instanceId,
                                const std::string& arrivalIso,
                                int capacity,
                                int seatsAvailable,
-                               double fareEconomy, 
+                               int economyTotal,
+                               int economyAvailable,
+                               int businessTotal,
+                               int businessAvailable,
+                               double fareEconomy,
                                double fareBusiness)
     : instanceId(instanceId),
       flightId(flightId),
@@ -16,40 +20,56 @@ FlightInstance::FlightInstance(const std::string& instanceId,
       arrivalIso(arrivalIso),
       capacity(capacity),
       seatsAvailable(seatsAvailable),
-      fareEconomy(fareEconomy), 
-      fareBusiness(fareBusiness) {}
+      economyTotal(economyTotal),
+      economyAvailable(economyAvailable),
+      businessTotal(businessTotal),
+      businessAvailable(businessAvailable),
+      fareEconomy(fareEconomy),
+      fareBusiness(fareBusiness)
+{}
 
-// Getters
-const std::string& FlightInstance::getInstanceId() const    { return instanceId; }
-const std::string& FlightInstance::getFlightId() const      { return flightId; }
-const std::string& FlightInstance::getDepartureIso() const  { return departureIso; }
-const std::string& FlightInstance::getArrivalIso() const    { return arrivalIso; }
-int  FlightInstance::getCapacity() const                    { return capacity; }
-int  FlightInstance::getSeatsAvailable() const              { return seatsAvailable; }
-double FlightInstance::getFareEconomy() const { return fareEconomy; }
-double FlightInstance::getFareBusiness() const { return fareBusiness; }
+// GETTERS 
+const std::string& FlightInstance::getInstanceId() const      { return instanceId; }
+const std::string& FlightInstance::getFlightId() const        { return flightId; }
+const std::string& FlightInstance::getDepartureIso() const    { return departureIso; }
+const std::string& FlightInstance::getArrivalIso() const      { return arrivalIso; }
 
-// Updater
+int  FlightInstance::getCapacity() const                      { return capacity; }
+int  FlightInstance::getSeatsAvailable() const                { return seatsAvailable; }
+
+int  FlightInstance::getEconomyTotal() const                  { return economyTotal; }
+int  FlightInstance::getEconomyAvail() const                  { return economyAvailable; }
+int  FlightInstance::getBusinessTotal() const                 { return businessTotal; }
+int  FlightInstance::getBusinessAvail() const                 { return businessAvailable; }
+
+double FlightInstance::getFareEconomy() const                 { return fareEconomy; }
+double FlightInstance::getFareBusiness() const                { return fareBusiness; }
+
+// SETTERS 
 void FlightInstance::setSeatsAvailable(int remaining) {
-    seatsAvailable = remaining;            // nếu muốn an toàn hơn có thể clamp [0, capacity]
-    // if (remaining < 0) seatsAvailable = 0;
-    // else if (remaining > capacity) seatsAvailable = capacity;
-    // else seatsAvailable = remaining;
+    seatsAvailable = remaining;
 }
-void FlightInstance::setFareEconomy(double fare)
-{
+
+void FlightInstance::setEconomyTotal(int ecoTotal) {
+    economyTotal = ecoTotal;
+}
+
+void FlightInstance::setEconomyAvail(int ecoAvail) {
+    economyAvailable = ecoAvail;
+}
+
+void FlightInstance::setBusinessTotal(int busTotal) {
+    businessTotal = busTotal;
+}
+
+void FlightInstance::setBusinessAvail(int busAvail) {
+    businessAvailable = busAvail;
+}
+
+void FlightInstance::setFareEconomy(double fare) {
     fareEconomy = fare;
 }
-void FlightInstance::setFareBusiness(double fare)
-{
+
+void FlightInstance::setFareBusiness(double fare) {
     fareBusiness = fare;
-}
-
-// Helpers
-bool FlightInstance::hasAvailableSeats() const {
-    return seatsAvailable > 0;
-}
-
-void FlightInstance::displayInfo() const {
-    // Để triển sau
 }
