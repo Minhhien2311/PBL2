@@ -1,3 +1,4 @@
-24/09/2025 01:50 CH :
-    - Thêm nội dung vào Passenger.cpp; Promotion.cpp; SalesReport.cpp; Seat.cpp.
-    - Có các comment mới.
+Terminal:
+    - cmake -S . -B build (configure 1 lần)
+    - cmake --build build --target utils -j → chỉ build utils
+    - cmake --build build --target pbl2 -j → build app
