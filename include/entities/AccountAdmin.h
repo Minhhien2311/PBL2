@@ -12,23 +12,28 @@
  *  - Có thể mở rộng thêm thuộc tính dành riêng cho admin (nếu cần)
  */
 class AccountAdmin : public Account {
+private:
+    // Thuộc tính riêng: danh sách các agent mà admin này quản lý
+    std::vector<AccountAgent> managedAgents;
 public:
-    // Constructor: khởi tạo account admin
+    // Constructor: khởi tạo account admin, không cần truyền ID, sẽ tự động sinh ra
     AccountAdmin(const std::string& username,
                  const std::string& passwordPlain,
                  const std::string& fullName,
                  const std::string& phone,
                  const std::string& email);
 
-    // Quản lý agent
+    // --- Chức năng quản lý Agent ---
     void addAgent(const AccountAgent& agent);
-    void removeAgent(const std::string& agentId);
+    bool removeAgent(const std::string& agentId);
 
-    // Xem danh sách agent
-    const std::vector<AccountAgent>& getAgents() const;
+    // --- Getter cho danh sách Agent ---
+    // Trả về một tham chiếu hằng, cho phép xem nhưng không cho sửa đổi từ bên ngoài
+    const std::vector<AccountAgent>& getManagedAgents() const;
 
-    // Hiển thị thông tin admin
-    void displayInfo() const;
+    // --- Triển khai hàm ảo từ lớp cha ---
+    // Thêm 'override' để trình biên dịch kiểm tra tính chính xác
+    void displayInfo() const override;
 };
 
-#endif // ACCOUNT_ADMIN_H
+#endif
