@@ -14,8 +14,7 @@
 class AccountAdmin : public Account {
 public:
     // Constructor: khởi tạo account admin
-    AccountAdmin(const std::string& id,
-                 const std::string& username,
+    AccountAdmin(const std::string& username,
                  const std::string& passwordPlain,
                  const std::string& fullName,
                  const std::string& phone,

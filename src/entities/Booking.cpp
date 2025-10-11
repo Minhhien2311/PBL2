@@ -50,7 +50,7 @@ double             Booking::getTotalAmount()    const { return totalAmount; }
 
 const std::string& Booking::getCancelReason()   const { return cancelReason; }
 
-//  Mutators 
+//  Thay đổi thông tin 
 void Booking::setStatus(BookingStatus newStatus) {
     // Không cho đổi từ Cancelled sang trạng thái khác
     if (status == BookingStatus::Cancelled) return;
