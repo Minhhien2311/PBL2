@@ -3,72 +3,81 @@
 
 #include <string>
 
-// FlightInstance: MỘT LẦN BAY CỤ THỂ của một Flight theo ngày/giờ.
+// Dùng enum để định nghĩa rõ các hạng ghế, giúp các hàm nghiệp vụ an toàn hơn.
+enum class SeatClass {
+    Economy,
+    Business
+};
+
+/*
+    FlightInstance: Đại diện cho MỘT LẦN BAY CỤ THỂ của một Flight.
+    - Đối tượng này tự quản lý số ghế trống để đảm bảo dữ liệu luôn nhất quán.
+    - Ví dụ: Chuyến bay VN123 vào lúc 08:00 ngày 12/10/2025.
+ */
 class FlightInstance {
 private:
-    // Định danh & lịch
-    std::string instanceId;     // ví dụ: "VN123-2025-10-10T08:00"
-    std::string flightId;       // tham chiếu sang Flight (id nội bộ ổn định)
-    std::string departureIso;   // "YYYY-MM-DDTHH:MM:SSZ" (UTC khuyến nghị)
-    std::string arrivalIso;     // "YYYY-MM-DDTHH:MM:SSZ" (UTC khuyến nghị)
+    std::string instanceId;     // ID nội bộ duy nhất, được sinh tự động (VD: "FI-12345")
+    std::string flightId;       // Khóa ngoại, tham chiếu tới Flight gốc
+    std::string departureIso;   // Thời gian cất cánh, định dạng "YYYY-MM-DDTHH:MM:SSZ"
+    std::string arrivalIso;     // Thời gian hạ cánh
 
-    // Sức chứa tổng & khả dụng (COUNT mode)
-    int capacity;               // tổng số ghế cấu hình cho lần bay
-    int seatsAvailable;         // số ghế còn trống (update khi đặt/hủy)
+    // --- Quản lý ghế ---
+    // Chỉ lưu trữ các thông tin gốc, các thông tin khác sẽ được tính toán.
+    int economyTotal;           // Tổng số ghế hạng phổ thông
+    int economyAvailable;       // Số ghế phổ thông còn trống
+    int businessTotal;          // Tổng số ghế hạng thương gia
+    int businessAvailable;      // Số ghế thương gia còn trống
 
-    // Quota theo hạng (COUNT mode)
-    int economyTotal;           // số ghế hạng phổ thông
-    int economyAvailable;       // số ghế phổ thông còn trống
-    int businessTotal;          // số ghế hạng thương gia
-    int businessAvailable;      // số ghế thương gia còn trống
-
-    // Giá cơ bản theo hạng
+    // --- Giá vé ---
     double fareEconomy;
     double fareBusiness;
 
 public:
-    FlightInstance(const std::string& instanceId,
-                   const std::string& flightId,
-                   const std::string& departureIso,
-                   const std::string& arrivalIso,
-                   int capacity,
-                   int seatsAvailable,
-                   int economyTotal,
-                   int economyAvailable,
-                   int businessTotal,
-                   int businessAvailable,
-                   double fareEconomy,
-                   double fareBusiness);
+    // Không cho phép tạo đối tượng rỗng
+    FlightInstance() = delete;
 
-    // Getters
-    const std::string& getInstanceId()      const;
-    const std::string& getFlightId()        const;
-    const std::string& getDepartureIso()    const;
-    const std::string& getArrivalIso()      const;
+    // Constructor chính: Tự động sinh ID và tính toán số ghế ban đầu.
+    // Chỉ cần cung cấp thông tin gốc, không cần truyền vào số ghế trống.
+    explicit FlightInstance(const std::string& flightId,
+                            const std::string& departureIso,
+                            const std::string& arrivalIso,
+                            int totalEconomySeats,
+                            int totalBusinessSeats,
+                            double fareEconomy,
+                            double fareBusiness);
 
-    int    getCapacity()        const;
-    int    getSeatsAvailable()  const;
+    // --- Getters ---
+    const std::string& getInstanceId() const;
+    const std::string& getFlightId() const;
+    const std::string& getDepartureIso() const;
+    const std::string& getArrivalIso() const;
 
-    int    getEconomyTotal()    const;
-    int    getEconomyAvail()    const;
-    int    getBusinessTotal()   const;
-    int    getBusinessAvail()   const;
+    // Getters cho ghế: Các giá trị tổng được tính toán tự động, đảm bảo luôn đúng.
+    int getTotalCapacity() const;       // Trả về: economyTotal + businessTotal
+    int getTotalSeatsAvailable() const; // Trả về: economyAvailable + businessAvailable
+    
+    int getEconomyTotal() const;
+    int getEconomyAvailable() const;
+    int getBusinessTotal() const;
+    int getBusinessAvailable() const;
+    
+    double getFareEconomy() const;
+    double getFareBusiness() const;
 
-    double getFareEconomy()     const;
-    double getFareBusiness()    const;
+    // --- Hàm nghiệp vụ ---
+    // Giảm số ghế trống khi có người đặt vé. Trả về true nếu thành công.
+    bool bookSeats(SeatClass seatClass, int count = 1);
 
-    // Setters/Updaters (logic nghiệp vụ nằm ở service; setters chỉ gán/validate nhẹ)
-    void setSeatsAvailable(int remaining);
-    void setEconomyTotal(int ecoTotal);
-    void setEconomyAvail(int ecoAvail);
-    void setBusinessTotal(int busTotal);
-    void setBusinessAvail(int busAvail);
+    // Tăng lại số ghế trống khi có người hủy vé.
+    void releaseSeats(SeatClass seatClass, int count = 1);
+
+    // --- Setters cho các thông tin có thể thay đổi (giá vé) ---
     void setFareEconomy(double fare);
     void setFareBusiness(double fare);
 
-    // Tiện ích nhẹ
-    bool hasAvailableSeats() const;     // seatsAvailable > 0 ?
-    void displayInfo() const;           // chỉ cout; tránh I/O DB ở đây
+    // --- Hàm tiện ích ---
+    bool hasAvailableSeats() const;     // Kiểm tra xem còn ghế trống hay không
+    void displayInfo() const;           // Hiển thị thông tin chi tiết
 };
 
-#endif // FLIGHT_INSTANCE_H
+#endif

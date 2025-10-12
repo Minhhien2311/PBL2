@@ -1,68 +1,107 @@
-#include "C:/PBL2/include/core/FlightRule.h"
-#include <algorithm> // For std::clamp
-#include <sstream> // For std::stringstream
+#include "C:/PBL2/include/entities/FlightRule.h"
+#include <string>
 
-FlightRule::FlightRule() {}
+// --- Constructor ---
 FlightRule::FlightRule(bool allowCancel,
-               bool allowChange,
-               bool allowCancelAfterIssued,
-               bool allowChangeAfterIssued,
-               double cancelFeePercent,
-               double changeFeePercent)
-
+                       bool allowChange,
+                       int cancelHours,
+                       int changeHours,
+                       double cancelFeePercent,
+                       double changeFeePercent)
     : allowCancel(allowCancel),
       allowChange(allowChange),
-      allowCancelAfterIssued(allowCancelAfterIssued),
-      allowChangeAfterIssued(allowChangeAfterIssued),
+      cancelCutoffHours(cancelHours),
+      changeCutoffHours(changeHours),
       cancelFeePercent(cancelFeePercent),
       changeFeePercent(changeFeePercent) {}
 
-// Getters
-bool FlightRule::isCancelAllowed() const { return allowCancel; }
-bool FlightRule::isChangeAllowed() const { return allowChange; }
-
-bool FlightRule::isCancelAfterIssuedAllowed() const { return allowCancelAfterIssued; }
-bool FlightRule::isChangeAfterIssuedAllowed() const { return allowChangeAfterIssued; }
-
+// --- Getters ---
+bool   FlightRule::isCancelAllowed() const { return allowCancel; }
+bool   FlightRule::isChangeAllowed() const { return allowChange; }
+int    FlightRule::getCancelCutoffHours() const { return cancelCutoffHours; }
+int    FlightRule::getChangeCutoffHours() const { return changeCutoffHours; }
 double FlightRule::getCancelFeePercent() const { return cancelFeePercent; }
 double FlightRule::getChangeFeePercent() const { return changeFeePercent; }
 
-// Setters (kẹp biên hợp lệ)
-void FlightRule::setCancelAllowed(bool v) { allowCancel = v; }
-void FlightRule::setChangeAllowed(bool v) { allowChange = v; }
+// --- Setters ---
+void FlightRule::setCancelAllowed(bool allowed) { this->allowCancel = allowed; }
+void FlightRule::setChangeAllowed(bool allowed) { this->allowChange = allowed; }
+void FlightRule::setCancelCutoffHours(int hours) { this->cancelCutoffHours = hours; }
+void FlightRule::setChangeCutoffHours(int hours) { this->changeCutoffHours = hours; }
+void FlightRule::setCancelFeePercent(double percent) { this->cancelFeePercent = percent; }
+void FlightRule::setChangeFeePercent(double percent) { this->changeFeePercent = percent; }
 
-void FlightRule::setCancelAfterIssuedAllowed(bool v) { allowCancelAfterIssued = v; }
-void FlightRule::setChangeAfterIssuedAllowed(bool v) { allowChangeAfterIssued = v; }
-
-void FlightRule::setCancelFeePercent(double pct) { cancelFeePercent = pct; }
-void FlightRule::setChangeFeePercent(double pct) { changeFeePercent = pct; }
-
-// Convenience checks theo ngữ cảnh
-bool FlightRule::canCancel(bool afterIssued) const {
-    if (!allowCancel) return false;
-    if (afterIssued && !allowCancelAfterIssued) return false;
-    return true;
+// --- Logic kiểm tra nghiệp vụ ---
+bool FlightRule::isCancellable(int hoursUntilDeparture) const {
+    if (!this->allowCancel) {
+        return false;
+    }
+    return hoursUntilDeparture >= this->cancelCutoffHours;
 }
 
-bool FlightRule::canChange(bool afterIssued) const {
-    if (!allowChange) return false;
-    if (afterIssued && !allowChangeAfterIssued) return false;
-    return true;
+bool FlightRule::isChangeable(int hoursUntilDeparture) const {
+    if (!this->allowChange) {
+        return false;
+    }
+    return hoursUntilDeparture >= this->changeCutoffHours;
 }
 
-// Helpers tính phí
-// baseAmount là số tiền làm cơ sở tính % (theo quy ước là base fare)
-double FlightRule::calcCancelFee(double baseAmount) const {
-    if (!allowCancel) return 0.0; // No cancellation allowed, no fee
-    return std::max(0.0, baseAmount * cancelFeePercent);
+// --- Helpers tính phí ---
+double FlightRule::calculateCancelFee(double baseAmount, int hoursUntilDeparture) const {
+    return baseAmount * this->cancelFeePercent;
 }
 
-double FlightRule::calcChangeFee(double baseAmount) const {
-    if (!allowChange) return 0.0; // No change allowed, no fee
-    return std::max(0.0, baseAmount * changeFeePercent);
+double FlightRule::calculateChangeFee(double baseAmount, int hoursUntilDeparture) const {
+    return baseAmount * this->changeFeePercent;
 }
 
-// Serialize một dòng cấu hình
-std::string FlightRule::toRecordLine() const { }
+// --- Đọc/Ghi file cấu hình ---
 
-FlightRule FlightRule::fromRecordLine(const std::string& line) { }
+// Ghi đối tượng vào file dữ liệu
+std::string FlightRule::toRecordLine() const {
+    return (this->allowCancel ? "1" : "0") + std::string("|") +
+           (this->allowChange ? "1" : "0") + std::string("|") +
+           std::to_string(this->cancelCutoffHours) + std::string("|") +
+           std::to_string(this->changeCutoffHours) + std::string("|") +
+           std::to_string(this->cancelFeePercent) + std::string("|") +
+           std::to_string(this->changeFeePercent);
+}
+
+// Đọc dữ liệu từ file và tạo đối tượng
+FlightRule FlightRule::fromRecordLine(const std::string& line) {
+    // Giả định rằng dữ liệu đầu vào luôn đúng định dạng.
+    
+    size_t start = 0;
+    size_t end = line.find('|');
+    
+    // Tách phần 1: allowCancel
+    bool bAllowCancel = (line.substr(start, end - start) == "1");
+    start = end + 1;
+    end = line.find('|', start);
+
+    // Tách phần 2: allowChange
+    bool bAllowChange = (line.substr(start, end - start) == "1");
+    start = end + 1;
+    end = line.find('|', start);
+
+    // Tách phần 3: cancelCutoffHours
+    int iCancelCutoff = std::stoi(line.substr(start, end - start));
+    start = end + 1;
+    end = line.find('|', start);
+
+    // Tách phần 4: changeCutoffHours
+    int iChangeCutoff = std::stoi(line.substr(start, end - start));
+    start = end + 1;
+    end = line.find('|', start);
+
+    // Tách phần 5: cancelFeePercent
+    double dCancelFee = std::stod(line.substr(start, end - start));
+    start = end + 1;
+    // Phần cuối cùng không có dấu | ở sau
+    end = line.length();
+
+    // Tách phần 6: changeFeePercent
+    double dChangeFee = std::stod(line.substr(start, end - start));
+
+    return FlightRule(bAllowCancel, bAllowChange, iCancelCutoff, iChangeCutoff, dCancelFee, dChangeFee);
+}

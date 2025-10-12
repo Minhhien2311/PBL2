@@ -1,5 +1,5 @@
 #include "C:/PBL2/include/entities/Booking.h"
-#include <algorithm> // For std::max (if used, otherwise can be removed)
+#include <algorithm>
 
 namespace {
     static double clampNonNegative(double v) {

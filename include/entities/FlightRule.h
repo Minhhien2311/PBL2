@@ -3,63 +3,79 @@
 
 #include <string>
 
+/*
+    Đối tượng chứa bộ luật chung.
+    - Chỉ có một đối tượng này được tạo khi chương trình khởi động, đọc từ file.
+    - Admin có thể thay đổi các quy tắc này trong lúc chạy và lưu lại.
+ */
 class FlightRule {
 private:
-    //  Quyền thao tác 
-    bool allowCancel;               // có cho phép hủy không
-    bool allowChange;               // có cho phép đổi thông tin (ngày/giờ/ghế) không
+    // --- Công tắc tổng quyết định tính năng có được BẬT hay không ---
+    bool allowCancel;               // true: Về nguyên tắc, hệ thống cho phép hủy vé.
+    bool allowChange;               // true: Về nguyên tắc, hệ thống cho phép đổi vé.
 
-    // Cho phép sau khi đã Issued?
-    bool allowCancelAfterIssued;    // mặc định: true (hủy sau xuất vé nhưng có phí)
-    bool allowChangeAfterIssued;    // mặc định: true (đổi sau xuất vé có tính chênh lệch)
+    // --- Điều kiện chi tiết ---
+    int cancelCutoffHours;          // Số giờ tối thiểu phải hủy trước giờ bay (VD: 24).
+    int changeCutoffHours;          // Số giờ tối thiểu phải đổi trước giờ bay (VD: 12).
+    
+    double cancelFeePercent;        // Phí hủy vé, là % tính trên giá gốc.
+    double changeFeePercent;        // Phí đổi vé, là % tính trên giá gốc.
 
-    // Tham số phí 
-    // Phí đổi/hủy là % tính trên base fare (hoặc total quy ước, mặc định base).
-    double cancelFeePercent;
-    double changeFeePercent;
+    /*
+    // --- Quy tắc nâng cao (comment lại để đơn giản hóa cho giai đoạn đầu) ---
+    // Phân biệt quy tắc cho vé chưa xuất (Confirmed) và đã xuất (Issued).
+    bool allowCancelAfterIssued;
+    bool allowChangeAfterIssued;
+    */
 
 public:
-    // Constructors 
-    FlightRule();
-    FlightRule(bool allowCancel,
-               bool allowChange,
-               bool allowCancelAfterIssued,
-               bool allowChangeAfterIssued,
-               double cancelFeePercent,
-               double changeFeePercent);
+    // Không cho phép tạo đối tượng rỗng, phải có đầy đủ quy tắc.
+    FlightRule() = delete;
 
-    // Getters 
+    // Constructor chính: Khởi tạo bộ luật từ dữ liệu (ví dụ: đọc từ file).
+    explicit FlightRule(bool allowCancel,
+                        bool allowChange,
+                        int cancelCutoffHours,
+                        int changeCutoffHours,
+                        double cancelFeePercent,
+                        double changeFeePercent);
+
+    // --- Getters: Dùng để đọc các quy tắc hiện hành ---
     bool   isCancelAllowed() const;
     bool   isChangeAllowed() const;
-
-    bool   isCancelAfterIssuedAllowed() const;
-    bool   isChangeAfterIssuedAllowed() const;
-
+    int    getCancelCutoffHours() const;
+    int    getChangeCutoffHours() const;
     double getCancelFeePercent() const;
     double getChangeFeePercent() const;
 
-    // Setters (kẹp biên hợp lệ) 
-    void setCancelAllowed(bool v);
-    void setChangeAllowed(bool v);
+    // --- Setters: Dùng cho Admin để thay đổi quy tắc và lưu lại ---
+    void setCancelAllowed(bool allowed);
+    void setChangeAllowed(bool allowed);
+    void setCancelCutoffHours(int hours);
+    void setChangeCutoffHours(int hours);
+    void setCancelFeePercent(double percent);
+    void setChangeFeePercent(double percent);
 
-    void setCancelAfterIssuedAllowed(bool v);
-    void setChangeAfterIssuedAllowed(bool v);
+    // --- Logic kiểm tra nghiệp vụ ---
+    // Kiểm tra xem một booking CÓ THỂ HỦY tại một thời điểm cụ thể không.
+    bool isCancellable(int hoursUntilDeparture) const;
+    
+    // Kiểm tra xem một booking CÓ THỂ ĐỔI tại một thời điểm cụ thể không.
+    bool isChangeable(int hoursUntilDeparture) const;
 
-    void setCancelFeePercent(double pct);   // clamp [0..1]
-    void setChangeFeePercent(double pct);   // clamp [0..1]
+    // --- Helpers tính phí ---
+    // Tính phí hủy vé.
+    double calculateCancelFee(double baseAmount, int hoursUntilDeparture) const;
+    
+    // Tính phí đổi vé.
+    double calculateChangeFee(double baseAmount, int hoursUntilDeparture) const;
 
-    // Convenience checks theo ngữ cảnh 
-    bool canCancel(bool afterIssued)  const;  // xét theo cờ allow* và afterIssued
-    bool canChange(bool afterIssued)  const;
-
-    // Helpers tính phí 
-    // baseAmount là số tiền làm cơ sở tính % (theo quy ước là base fare)
-    double calcCancelFee(double baseAmount) const;            // = max(0, baseAmount * cancelFeePercent/100)
-    double calcChangeFee(double baseAmount) const;            // = max(0, baseAmount * changeFeePercent/100)
-
-    //  Serialize một dòng cấu hình — để sau nếu cần 
+    // --- Đọc/Ghi file cấu hình ---
+    // Chuyển đổi đối tượng thành 1 dòng string để lưu vào file.
     std::string toRecordLine() const;
+    
+    // Tạo đối tượng FlightRule từ 1 dòng string đọc từ file.
     static FlightRule fromRecordLine(const std::string& line);
 };
 
-#endif // FLIGHT_RULE_H
+#endif

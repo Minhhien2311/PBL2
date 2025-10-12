@@ -1,5 +1,5 @@
-#ifndef BOOKINGH
-#define BOOKINGH
+#ifndef BOOKING_H
+#define BOOKING_H
 
 #include <string>
 

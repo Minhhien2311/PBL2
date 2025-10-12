@@ -16,7 +16,7 @@ namespace IdGenerator {
 
         // Sử dụng stringstream để định dạng
         std::stringstream ss;
-        ss << "ADM" 
+        ss << "ADM-" 
            << std::setw(3) << std::setfill('0') << adminCounter;
         
         return ss.str();
@@ -30,9 +30,43 @@ namespace IdGenerator {
 
         // Sử dụng stringstream để định dạng
         std::stringstream ss;
-        ss << "AGT" 
+        ss << "AGT-" 
            << std::setw(3) << std::setfill('0') << agentCounter;
            
+        return ss.str();
+    }
+
+    // Biến đếm tĩnh, chỉ tồn tại trong file này và dành riêng cho Flight
+    static int flightCounter = 0;
+    std::string generateFlightId() {
+        ++flightCounter;
+        
+        // Dùng stringstream hoặc std::format để tạo định dạng "FL-001"
+        // (Hoặc cách thủ công bằng std::to_string nếu bạn muốn)
+        std::stringstream ss;
+        ss << "FL-" << std::setw(3) << std::setfill('0') << flightCounter;
+        return ss.str();
+    }
+
+    static int instanceCounter = 0;
+    std::string generateInstanceId() {
+        ++instanceCounter;
+        
+        // Dùng stringstream để tạo định dạng "FI-00001"
+        // Dùng 5 chữ số để có thể lưu được nhiều chuyến bay
+        std::stringstream ss;
+        ss << "FI-" << std::setw(5) << std::setfill('0') << instanceCounter;
+        return ss.str();
+    }
+
+    static int passengerCounter = 0;
+    std::string generatePassengerId() {
+        ++passengerCounter;
+        
+        // Dùng stringstream để tạo định dạng "FI-00001"
+        // Dùng 5 chữ số để có thể lưu được nhiều chuyến bay
+        std::stringstream ss;
+        ss << "PAX-" << std::setw(5) << std::setfill('0') << instanceCounter;
         return ss.str();
     }
 }

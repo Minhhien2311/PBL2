@@ -21,8 +21,7 @@ private:
     std::string nationality;    // Quốc tịch
 
 public:
-    Passenger(const std::string& id,
-              const std::string& name,
+    Passenger(const std::string& name,
               const std::string& dob,
               Gender gender,
               const std::string& phone,
@@ -40,6 +39,10 @@ public:
     const std::string& getPhoneNumber()   const;
     const std::string& getPassportNumber()const;
     const std::string& getNationality()   const;
+
+    // Hàm đọc và ghi dữ liệu vào file
+    std::string toRecordLine() const;
+    static Passenger fromRecordLine(const std::string& line);
 };
 
 #endif

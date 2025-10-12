@@ -1,13 +1,13 @@
 #include "C:/PBL2/include/entities/Passenger.h"
+#include "C:/PBL2/include/utils/GenID.h"
 
-Passenger::Passenger(const std::string& id,
-                     const std::string& name,
+Passenger::Passenger(const std::string& name,
                      const std::string& dob,
                      Gender gender,
                      const std::string& phone,
                      const std::string& passport,
                      const std::string& nation)
-                    : id(id), fullName(name), dateOfBirth(dob), gender(gender), phoneNumber(phone), passportNumber(passport), nationality(nation) {}
+                    : id(IdGenerator::generatePassengerId()), fullName(name), dateOfBirth(dob), gender(gender), phoneNumber(phone), passportNumber(passport), nationality(nation) {}
 
 const std::string& Passenger::getId() const { return id; }
 const std::string& Passenger::getFullName() const { return fullName; }
