@@ -12,15 +12,12 @@ AccountAdmin::AccountAdmin(const std::string& username,
     // Constructor của AccountAdmin, gọi constructor của lớp cơ sở Account
 }
 
-<<<<<<< HEAD
 // Thêm agent (không cho sửa agent theo yêu cầu)
 void AccountAdmin::addAgent(const AccountAgent& agent) 
 {
     //
 }
-=======
 // --- Chức năng quản lý Agent ---
->>>>>>> 41c5dad8d32597afa8192689d6b8ca73dc06cbe9
 
 // Thêm một agent vào danh sách quản lý
 void AccountAdmin::addAgent(const AccountAgent& agent) {
