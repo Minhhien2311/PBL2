@@ -20,6 +20,9 @@ namespace IdGenerator {
     
     // Hàm tạo ID cho Passenger, bắt đầu bằng "PAX-"
     std::string generatePassengerId();
+
+    // Hàm tạo ID cho Ticket, bắt đầu bằng "TKT-"
+    std::string generateTicketNumber();
 }
 
 #endif // GEN_ID_H

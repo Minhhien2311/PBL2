@@ -69,4 +69,15 @@ namespace IdGenerator {
         ss << "PAX-" << std::setw(5) << std::setfill('0') << instanceCounter;
         return ss.str();
     }
+
+    static int ticketCounter = 0;
+    std::string generateTicketId() {
+        ++ticketCounter;
+        
+        // Dùng stringstream để tạo định dạng "TKT-0000001"
+        // Dùng 5 chữ số để có thể lưu được nhiều chuyến bay
+        std::stringstream ss;
+        ss << "TKT-" << std::setw(7) << std::setfill('0') << instanceCounter;
+        return ss.str();
+    }
 }

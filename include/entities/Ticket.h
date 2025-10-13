@@ -31,8 +31,7 @@ private:
     TicketStatus status;
 
 public:
-    Ticket(const std::string& ticketNumber,
-           const std::string& bookingId,
+    Ticket(const std::string& bookingId,
            const std::string& pnr,
            const std::string& passengerId,
            const std::string& flightInstanceId,

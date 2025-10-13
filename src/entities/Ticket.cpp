@@ -1,7 +1,7 @@
 #include "C:/PBL2/include/entities/Ticket.h"
+#include "C:/PBL2/include/utils/GenID.h"
 
-Ticket::Ticket(const std::string& ticketNumber,
-           const std::string& bookingId,
+Ticket::Ticket(const std::string& bookingId,
            const std::string& pnr,
            const std::string& passengerId,
            const std::string& flightInstanceId,
@@ -12,7 +12,7 @@ Ticket::Ticket(const std::string& ticketNumber,
            double discount,
            double totalAmount,
            TicketStatus status = TicketStatus::Active)
-        : ticketNumber(ticketNumber), bookingId(bookingId), pnr(pnr),
+        : ticketNumber(IdGenerator::generateTicketNumber()), bookingId(bookingId), pnr(pnr),
           passengerId(passengerId), flightInstanceId(flightInstanceId), seatId(seatId),
           bookingClass(bookingClass), issueDateTime(issueDateTime),
           baseFare(baseFare), discount(discount), totalAmount(totalAmount), status(status) {}
@@ -33,7 +33,7 @@ Ticket::Ticket(const std::string& ticketNumber,
 
     void Ticket::setStatus(TicketStatus newStatus) { status = newStatus; } // dùng khi exchange/cancel
 
-    // I/O 1 dòng record (tuỳ format nhóm: CSV/TSV/pipe)
+    // I/O 1 dòng record
     std::string Ticket::toRecordLine() const { }                       // ghi object vào file
     Ticket Ticket::fromRecordLine(const std::string& line) {  }  // đọc từ file
     void Ticket::printTicket() { /* TODO: Implement */ }
