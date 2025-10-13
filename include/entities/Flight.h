@@ -3,32 +3,40 @@
 
 #include <string>
 
-// Flight: tuyến bay (route) định danh bởi flightNumber (VD: VN123).
-// Không gắn ngày/giờ cụ thể; ngày/giờ & số ghế & giá sẽ ở FlightInstance.
+/*
+    Flight: Đại diện cho một tuyến bay (route) gốc, không thay đổi.
+    - Ví dụ: Tuyến bay "VN123" từ Hà Nội (HAN) đến TP.HCM (SGN).
+    - Không chứa thông tin về ngày/giờ, giá vé, hay số ghế.
+ */
 class Flight {
 private:
-    std::string flightId;           // id nội bộ duy nhất (nếu cần)
-    std::string flightNumber;       // mã tuyến công bố: VN123
-    std::string airline;            // hãng (VD: Vietnam Airlines)
-    std::string departureAirport;   // điểm đi; IATA code: HAN
-    std::string arrivalAirport;     // điểm đến; IATA code: SGN
+    std::string flightId;           // ID nội bộ duy nhất, được sinh tự động
+    std::string flightNumber;       // Mã tuyến bay công khai (VD: "VN123")
+    std::string airline;            // Tên hãng hàng không (VD: "Vietnam Airlines")
+    std::string departureAirport;   // Sân bay đi (Mã IATA, VD: "HAN")
+    std::string arrivalAirport;     // Sân bay đến (Mã IATA, VD: "SGN")
 
 public:
-    Flight(const std::string& id,
-           const std::string& number,
-           const std::string& airline,
-           const std::string& departureIATA,
-           const std::string& arrivalIATA);
+    // Không cho phép tạo đối tượng rỗng
+    Flight() = delete;
 
-    // Getter (trả const-ref/int để tránh copy)
+    // Constructor chính: Không cần truyền ID, sẽ tự động sinh ra.
+    explicit Flight(const std::string& number,
+                    const std::string& airline,
+                    const std::string& departureIATA,
+                    const std::string& arrivalIATA);
+
+    // --- Getters ---
+    // Trả về tham chiếu hằng để hiệu quả, tránh sao chép không cần thiết.
     const std::string& getFlightId()        const;
     const std::string& getFlightNumber()    const;
     const std::string& getAirline()         const;
     const std::string& getDepartureAirport()const;
     const std::string& getArrivalAirport()  const;
 
-    // Tiện ích nhẹ (không dính I/O hoặc DB)
-    std::string getFlightInfo() const; // gộp info dạng chuỗi để hiển thị nhanh
+    // --- Hàm tiện ích ---
+    // Cung cấp một chuỗi tóm tắt thông tin chuyến bay để hiển thị nhanh.
+    std::string getFlightInfo() const;
 };
 
 #endif // FLIGHT_H

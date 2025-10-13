@@ -4,7 +4,7 @@
 #include <string>
 
 // Vé phát sinh khi Booking chuyển sang Issued.
-// Là "snapshot" bất biến của dữ liệu tại thời điểm xuất.
+// Là "snapshot" bất biến của Booking tại thời điểm xuất.
 enum class TicketStatus {
     Active,     // vé đang có hiệu lực
     Exchanged,  // đã đổi sang vé mới
@@ -31,8 +31,7 @@ private:
     TicketStatus status;
 
 public:
-    Ticket(const std::string& ticketNumber,
-           const std::string& bookingId,
+    Ticket(const std::string& bookingId,
            const std::string& pnr,
            const std::string& passengerId,
            const std::string& flightInstanceId,

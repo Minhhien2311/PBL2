@@ -16,8 +16,7 @@ private:
 
 public:
     // Constructor: khởi tạo account agent
-    AccountAgent(const std::string& id,
-                 const std::string& username,
+    AccountAgent(const std::string& username,
                  const std::string& passwordPlain,
                  const std::string& fullName,
                  const std::string& phone,

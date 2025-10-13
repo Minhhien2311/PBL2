@@ -1,11 +1,11 @@
 #include "C:/PBL2/include/entities/Flight.h"
+#include "C:/PBL2/include/utils/GenID.h"
 
-Flight::Flight(const std::string& id,
-           const std::string& number,
-           const std::string& airline,
-           const std::string& departureIATA,
-           const std::string& arrivalIATA)
-    : flightId(id), flightNumber(number), airline(airline), departureAirport(departureIATA), arrivalAirport(arrivalIATA)
+Flight::Flight( const std::string& number,
+                const std::string& airline,
+                const std::string& departureIATA,
+                const std::string& arrivalIATA)
+    : flightId(IdGenerator::generateFlightId()), flightNumber(number), airline(airline), departureAirport(departureIATA), arrivalAirport(arrivalIATA)
 {}
 
 // Getter (trả const-ref/int để tránh copy)

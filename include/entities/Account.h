@@ -18,11 +18,13 @@ protected:
     std::string phoneNumber;     // Số điện thoại
     std::string email;           // Email liên hệ
 
-    // Helpers
+private:
+    // Helpers nội bộ, chỉ lớp Account mới truy cập được
     static std::string hashPassword(const std::string& plain);
     static bool verifyPassword(const std::string& plain, const std::string& hash);
 
 public:
+    // Không cho phép tạo đối tượng Account rỗng
     Account() = delete;
 
     explicit Account(const std::string& id,
@@ -33,7 +35,7 @@ public:
                      const std::string& phone,
                      const std::string& email);
 
-    // Getters
+    // --- Getters ---
     const std::string& getId()        const;
     const std::string& getUsername()  const;
     Role               getRole()      const;
@@ -41,14 +43,22 @@ public:
     const std::string& getPhone()     const;
     const std::string& getEmail()     const;
 
-    // Setters cho profile (tùy chọn)
+    // Destructor ảo: Bắt buộc phải có cho lớp cơ sở có hàm ảo
+    virtual ~Account() = default;
+
+    // --- Setters ---
     void setFullName(const std::string& name);
     void setPhone(const std::string& phone);
     void setEmail(const std::string& email);
 
-    // Auth API
+    // --- Chức năng chính ---
     bool authenticate(const std::string& passwordPlain) const;
     void changePassword(const std::string& newPasswordPlain);
+
+    // --- Hàm ảo thuần túy ---
+    // Biến lớp Account thành lớp trừu tượng.
+    // Các lớp con (Admin, Agent) BẮT BUỘC phải định nghĩa lại hàm này.
+    virtual void displayInfo() const = 0;
 };
 
 #endif // ACCOUNT_H
