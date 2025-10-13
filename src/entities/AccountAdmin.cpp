@@ -12,7 +12,10 @@ AccountAdmin::AccountAdmin(const std::string& id,
 }
 
 // Thêm agent (không cho sửa agent theo yêu cầu)
-void AccountAdmin::addAgent(const AccountAgent& agent) { }
+void AccountAdmin::addAgent(const AccountAgent& agent) 
+{
+    //
+}
 
 // Xóa agent theo agentId
 void AccountAdmin::removeAgent(const std::string& agentId) { }
