@@ -6,6 +6,11 @@
 // Namespace để gom nhóm các hàm, tránh bị trùng tên
 namespace IdGenerator {
 
+    // Nạp giá trị các biến đếm từ file khi khởi động chương trình
+    void loadCountersFromFile(const std::string& filePath);
+    // Lưu giá trị các biến đếm hiện tại ra file trước khi thoát
+    void saveCountersToFile(const std::string& filePath);
+
     // Hàm tạo ID cho Admin, bắt đầu bằng "ADM-"
     std::string generateAdminId();
 
@@ -23,6 +28,9 @@ namespace IdGenerator {
 
     // Hàm tạo ID cho Ticket, bắt đầu bằng "TKT-"
     std::string generateTicketNumber();
+
+    // Hàm tạo ID cho Ticket, bắt đầu bằng "BKG-"
+    std::string generateBookingId();
 }
 
 #endif // GEN_ID_H

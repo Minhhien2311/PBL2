@@ -33,7 +33,7 @@ public:
     void setActive(bool status);
 
     std::string AccountAgent::toRecordLine() const;
-    AccountAgent AccountAgent::fromRecordLine(const std::string& line);
+    static AccountAgent AccountAgent::fromRecordLine(const std::string& line);
 
     // Hiển thị thông tin agent (có thể override hàm riêng nếu cần)
     void displayInfo() const;

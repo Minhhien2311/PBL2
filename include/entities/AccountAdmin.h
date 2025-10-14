@@ -33,7 +33,7 @@ public:
     const DynamicArray<AccountAgent>& getManagedAgents() const;
 
     // Hàm đọc ghi file để tạo và lưu đối tượng
-    AccountAdmin AccountAdmin::fromRecordLine(const std::string& line);
+    static AccountAdmin AccountAdmin::fromRecordLine(const std::string& line);
     std::string AccountAdmin::toRecordLine() const;
 
     // --- Triển khai hàm ảo từ lớp cha ---

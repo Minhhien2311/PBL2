@@ -44,8 +44,7 @@ public:
     Booking() = default;
 
     // Constructor chính để tạo một booking mới
-    Booking(const std::string& bookingId,
-            const std::string& pnr,
+    explicit Booking(const std::string& pnr,
             const std::string& agentId,
             const std::string& flightInstanceId,
             const std::string& passengerId,
@@ -87,6 +86,16 @@ public:
     bool assignSeat(const std::string& seatId);
     // Bỏ gán ghế hiện tại.
     void unassignSeat();
+
+    // --- Đọc/Ghi file ---
+    // Chuyển đổi đối tượng thành 1 dòng string để lưu vào file.
+    std::string toRecordLine() const;
+    
+    // Tạo đối tượng Booking từ 1 dòng string đọc từ file.
+    static Booking fromRecordLine(const std::string& line);
+
+    // Helper cho việc nạp dữ liệu từ file.
+    void overrideIdForLoad(const std::string& existingId);
 };
 
 #endif // BOOKING_H

@@ -1,4 +1,5 @@
 #include "C:/PBL2/include/entities/Booking.h"
+#include "C:/PBL2/include/utils/GenID.h"
 #include <algorithm>
 
 namespace {
@@ -8,15 +9,14 @@ namespace {
 }
 
 //  Constructor 
-Booking::Booking(const std::string& bookingId,
-                 const std::string& pnr,
+Booking::Booking(const std::string& pnr,
                  const std::string& agentId,
                  const std::string& flightInstanceId,
                  const std::string& passengerId,
                  const std::string& bookingDate,
                  BookingClass bookingClass,
                  double baseFare)
-    : bookingId(bookingId),
+    : bookingId(IdGenerator::generateBookingId()),
       pnr(pnr),
       agentId(agentId),
       flightInstanceId(flightInstanceId),
@@ -99,4 +99,102 @@ void Booking::unassignSeat() {
     // Chỉ cho bỏ ghế khi đang Confirmed
     if (!canBeChanged()) return;
     seatId.clear();
+}
+
+// --- Đọc/Ghi file ---
+
+// Chuyển đổi đối tượng thành một dòng string để lưu vào file.
+std::string Booking::toRecordLine() const {
+    // Chuyển đổi enum thành số nguyên để lưu file
+    std::string statusStr = std::to_string(static_cast<int>(this->status));
+    std::string classStr = std::to_string(static_cast<int>(this->bookingClass));
+
+    return this->bookingId + "|" +
+           this->pnr + "|" +
+           this->agentId + "|" +
+           this->flightInstanceId + "|" +
+           this->passengerId + "|" +
+           this->seatId + "|" +
+           this->bookingDate + "|" +
+           statusStr + "|" +
+           classStr + "|" +
+           std::to_string(this->baseFare) + "|" +
+           std::to_string(this->discount) + "|" +
+           std::to_string(this->totalAmount) + "|" +
+           this->cancelReason;
+}
+
+// Tạo đối tượng Booking từ một dòng string đọc từ file.
+Booking Booking::fromRecordLine(const std::string& line) {
+    size_t start = 0;
+    size_t end = line.find('|');
+    
+    std::string id = line.substr(start, end - start);
+    start = end + 1;
+    end = line.find('|', start);
+
+    std::string pnr = line.substr(start, end - start);
+    start = end + 1;
+    end = line.find('|', start);
+
+    std::string agentId = line.substr(start, end - start);
+    start = end + 1;
+    end = line.find('|', start);
+
+    std::string instanceId = line.substr(start, end - start);
+    start = end + 1;
+    end = line.find('|', start);
+
+    std::string passengerId = line.substr(start, end - start);
+    start = end + 1;
+    end = line.find('|', start);
+    
+    std::string seatId = line.substr(start, end - start);
+    start = end + 1;
+    end = line.find('|', start);
+
+    std::string bookingDate = line.substr(start, end - start);
+    start = end + 1;
+    end = line.find('|', start);
+
+    BookingStatus status = static_cast<BookingStatus>(std::stoi(line.substr(start, end - start)));
+    start = end + 1;
+    end = line.find('|', start);
+
+    BookingClass bClass = static_cast<BookingClass>(std::stoi(line.substr(start, end - start)));
+    start = end + 1;
+    end = line.find('|', start);
+
+    double baseFare = std::stod(line.substr(start, end - start));
+    start = end + 1;
+    end = line.find('|', start);
+
+    double discount = std::stod(line.substr(start, end - start));
+    start = end + 1;
+    end = line.find('|', start);
+
+    double totalAmount = std::stod(line.substr(start, end - start));
+    start = end + 1;
+    end = line.length();
+
+    std::string cancelReason = line.substr(start, end - start);
+
+    // Dùng constructor để tạo đối tượng
+    // Lưu ý: ID và PNR sẽ được sinh tự động, sau đó ta ghi đè lại
+    Booking booking(pnr, agentId, instanceId, passengerId, bookingDate, bClass, baseFare);
+    
+    // Ghi đè các giá trị đã đọc từ file
+    booking.overrideIdForLoad(id);
+    booking.status = status;
+    booking.seatId = seatId;
+    booking.discount = discount;
+    booking.totalAmount = totalAmount;
+    booking.cancelReason = cancelReason;
+
+    return booking;
+}
+
+// Helper cho việc nạp dữ liệu từ file.
+void Booking::overrideIdForLoad(const std::string& existingId) {
+    this->bookingId = existingId;
 }
