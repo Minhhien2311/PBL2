@@ -1,0 +1,129 @@
+#include <fstream>
+#include <string>
+#include "C:/PBL2/include/utils/Time.h" // Sẽ cần để lấy ngày giờ khi xuất vé
+#include "C:/PBL2/include/core/BookingManager.h"
+#include "C:/PBL2/include/core/FlightManager.h"
+
+// --- Constructor ---
+BookingManager::BookingManager(const std::string& bookingsFilePath, const std::string& ticketsFilePath) {
+    this->loadBookingsFromFile(bookingsFilePath);
+    this->loadTicketsFromFile(ticketsFilePath);
+}
+
+// --- Hàm trợ giúp nội bộ ---
+
+void BookingManager::loadBookingsFromFile(const std::string& filePath) {
+    std::ifstream file(filePath);
+    std::string line;
+    if (file.is_open()) {
+        while (std::getline(file, line)) {
+            if (!line.empty()) {
+                this->allBookings.push_back(Booking::fromRecordLine(line));
+            }
+        }
+        file.close();
+    }
+}
+
+void BookingManager::loadTicketsFromFile(const std::string& filePath) {
+    std::ifstream file(filePath);
+    std::string line;
+    if (file.is_open()) {
+        while (std::getline(file, line)) {
+            if (!line.empty()) {
+                this->allTickets.push_back(Ticket::fromRecordLine(line));
+            }
+        }
+        file.close();
+    }
+}
+
+// --- Chức năng Lưu trữ (Persistence) ---
+
+bool BookingManager::saveDataToFiles(const std::string& bookingsFilePath, const std::string& ticketsFilePath) const {
+    // Lưu danh sách Booking
+    std::ofstream bookingsFile(bookingsFilePath);
+    if (!bookingsFile.is_open()) return false;
+    for (size_t i = 0; i < allBookings.size(); ++i) {
+        bookingsFile << allBookings[i].toRecordLine() << "\n";
+    }
+    bookingsFile.close();
+
+    // Lưu danh sách Ticket
+    std::ofstream ticketsFile(ticketsFilePath);
+    if (!ticketsFile.is_open()) return false;
+    for (size_t i = 0; i < allTickets.size(); ++i) {
+        ticketsFile << allTickets[i].toRecordLine() << "\n";
+    }
+    ticketsFile.close();
+
+    return true;
+}
+
+// --- Nghiệp vụ chính ---
+
+Booking* BookingManager::createNewBooking( FlightManager& flightManager,
+                                           const std::string& pnr,
+                                           const std::string& agentId,
+                                           const std::string& flightInstanceId,
+                                           const std::string& passengerId,
+                                           BookingClass bookingClass,
+                                           double baseFare)
+{
+    // 1. Kiểm tra đầu vào ("Guard Clauses")
+    if (pnr.empty() || agentId.empty() || flightInstanceId.empty() || passengerId.empty() || baseFare < 0) {
+        return nullptr; // Dữ liệu không hợp lệ
+    }
+
+    // 2. Tìm chuyến bay tương ứng
+    FlightInstance* instance = flightManager.findInstanceById(flightInstanceId);
+    if (instance == nullptr) {
+        return nullptr; // Chuyến bay không tồn tại
+    }
+
+    // 3. Kiểm tra và đặt chỗ
+    SeatClass seatClassToBook = (bookingClass == BookingClass::Economy) ? SeatClass::Economy : SeatClass::Business;
+    
+    // Gọi hàm bookSeats của FlightInstance. Hàm này sẽ tự động trừ số ghế nếu còn.
+    if (!instance->bookSeats(seatClassToBook, 1)) {
+        return nullptr; // Hết ghế
+    }
+
+    // 4. Nếu đặt chỗ thành công, tạo đối tượng Booking
+    std::string currentDate = utils::Time::formatLocal(utils::Time::nowUtc(), "%Y-%m-%d %H:%M:%S");
+    Booking newBooking(pnr, agentId, flightInstanceId, passengerId, currentDate, bookingClass, baseFare);
+    
+    this->allBookings.push_back(newBooking);
+
+    // 5. Trả về con trỏ tới đối tượng booking vừa được tạo ra
+    return &this->allBookings.back();
+}
+
+// CÁC HÀM TÌM KIẾM (hiện tại dùng duyệt tuần tự, triển khai AVL sau)
+
+Booking* BookingManager::findBookingById(const std::string& bookingId) {
+    for (size_t i = 0; i < allBookings.size(); ++i) {
+        if (allBookings[i].getBookingId() == bookingId) {
+            return &allBookings[i];
+        }
+    }
+    return nullptr; // Không tìm thấy
+}
+
+Booking* BookingManager::findBookingByPNR(const std::string& pnr) {
+    for (size_t i = 0; i < allBookings.size(); ++i) {
+        if (allBookings[i].getPNR() == pnr) {
+            return &allBookings[i];
+        }
+    }
+    return nullptr; // Không tìm thấy
+}
+
+Ticket* BookingManager::findTicketById(const std::string& ticketId) {
+    for (size_t i = 0; i < allTickets.size(); ++i) {
+        if (allTickets[i].getTicketNumber() == ticketId) {
+            return &allTickets[i];
+        }
+    }
+    return nullptr; // Không tìm thấy
+}

@@ -70,4 +70,4 @@ public:
     bool saveDataToFiles(const std::string& adminsFilePath, const std::string& agentsFilePath) const;
 };
 
-#endif // ACCOUNT_MANAGER_H
+#endif

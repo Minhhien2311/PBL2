@@ -128,7 +128,7 @@ namespace IdGenerator {
     }
 
     static int ticketCounter = 0;
-    std::string generateTicketrateTicketNumber() {
+    std::string generateTicketNumber() {
         ++ticketCounter;
         
         // Dùng stringstream để tạo định dạng "TKT-0000001"
