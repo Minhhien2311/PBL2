@@ -79,6 +79,12 @@ Passenger Passenger::fromRecordLine(const std::string& line) {
     // Tạo đối tượng Passenger bằng constructor và sau đó gán lại ID đã đọc
     // Đây là một cách để tái sử dụng constructor chính
     Passenger p(name, dob, gender, phone, passport, nation);
-    p.id = id; // Ghi đè ID tự sinh bằng ID đọc từ file
+    
+    // Ghi đè ID tự sinh bằng ID đọc từ file
+    p.overrideIdForLoad(id);
     return p;
+}
+
+void Passenger::overrideIdForLoad(const std::string& existingId) {
+    this->id = existingId;
 }

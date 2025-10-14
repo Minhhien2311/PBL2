@@ -59,6 +59,8 @@ public:
 
     void setStatus(TicketStatus s);  // dùng khi exchange/cancel
 
+    void overrideTicketNumberForLoad(const std::string& existingNumber);
+
     // I/O 1 dòng record (tuỳ format nhóm: CSV/TSV/pipe)
     std::string toRecordLine() const;                       // ghi object vào file
     static Ticket fromRecordLine(const std::string& line);  // đọc từ file
