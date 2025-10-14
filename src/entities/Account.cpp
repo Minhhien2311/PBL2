@@ -96,3 +96,10 @@ void Account::changePassword(const std::string& newPasswordPlain) {
         this->passwordHash = hashPassword(newPasswordPlain);
     }
 }
+
+void Account::overrideIdForLoad(const std::string& existingId) {
+    this->accountId = existingId;
+}
+void Account::overridePasswordHashForLoad(const std::string& existingHash) {
+    this->passwordHash = existingHash;
+}

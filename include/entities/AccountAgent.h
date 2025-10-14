@@ -32,6 +32,9 @@ public:
     void updateTotalSales(double amount); // cộng thêm vào doanh số
     void setActive(bool status);
 
+    std::string AccountAgent::toRecordLine() const;
+    AccountAgent AccountAgent::fromRecordLine(const std::string& line);
+
     // Hiển thị thông tin agent (có thể override hàm riêng nếu cần)
     void displayInfo() const;
 };

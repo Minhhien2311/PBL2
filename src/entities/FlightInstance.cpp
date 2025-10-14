@@ -108,3 +108,82 @@ void FlightInstance::displayInfo() const {
     // Deploy sau nha
     return;
 }
+
+// --- Đọc/Ghi file cấu hình ---
+
+// Chuyển đổi đối tượng thành một dòng string, ngăn cách bởi dấu '|'.
+std::string FlightInstance::toRecordLine() const {
+    return this->instanceId + "|" +
+           this->flightId + "|" +
+           this->departureIso + "|" +
+           this->arrivalIso + "|" +
+           std::to_string(this->economyTotal) + "|" +
+           std::to_string(this->economyAvailable) + "|" +
+           std::to_string(this->businessTotal) + "|" +
+           std::to_string(this->businessAvailable) + "|" +
+           std::to_string(this->fareEconomy) + "|" +
+           std::to_string(this->fareBusiness);
+}
+
+// Tạo đối tượng FlightInstance từ một dòng string.
+FlightInstance FlightInstance::fromRecordLine(const std::string& line) {
+    size_t start = 0;
+    size_t end = line.find('|');
+    
+    // Tách các thành phần từ chuỗi
+    std::string id = line.substr(start, end - start);
+    start = end + 1;
+    end = line.find('|', start);
+
+    std::string fId = line.substr(start, end - start);
+    start = end + 1;
+    end = line.find('|', start);
+
+    std::string depIso = line.substr(start, end - start);
+    start = end + 1;
+    end = line.find('|', start);
+
+    std::string arrIso = line.substr(start, end - start);
+    start = end + 1;
+    end = line.find('|', start);
+
+    int ecoTotal = std::stoi(line.substr(start, end - start));
+    start = end + 1;
+    end = line.find('|', start);
+
+    int ecoAvail = std::stoi(line.substr(start, end - start));
+    start = end + 1;
+    end = line.find('|', start);
+
+    int busTotal = std::stoi(line.substr(start, end - start));
+    start = end + 1;
+    end = line.find('|', start);
+
+    int busAvail = std::stoi(line.substr(start, end - start));
+    start = end + 1;
+    end = line.find('|', start);
+
+    double fareEco = std::stod(line.substr(start, end - start));
+    start = end + 1;
+    end = line.length();
+
+    double fareBus = std::stod(line.substr(start, end - start));
+
+    // Kỹ thuật "Tạo tạm rồi sửa lỗi":
+    // 1. Dùng constructor public để tạo đối tượng. Nó sẽ có ID tạm thời.
+    FlightInstance instance(fId, depIso, arrIso, ecoTotal, busTotal, fareEco, fareBus);
+
+    // 2. Ghi đè lại các giá trị có thể bị tính toán sai bởi constructor.
+    //    Trong trường hợp này, ID và số ghế trống cần được cập nhật.
+    instance.overrideIdForLoad(id);
+    instance.economyAvailable = ecoAvail;   // Ghi đè trực tiếp vì không có setter
+    instance.businessAvailable = busAvail; // Ghi đè trực tiếp vì không có setter
+
+    return instance;
+}
+
+// --- Helper cho việc nạp dữ liệu ---
+
+void FlightInstance::overrideIdForLoad(const std::string& existingId) {
+    this->instanceId = existingId;
+}

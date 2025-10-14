@@ -5,6 +5,7 @@
 #include <vector>
 #include "Account.h"
 #include "AccountAgent.h"
+#include "C:/PBL2/include/DSA/DynamicArray.h"
 
 /*
  * AccountAdmin: tài khoản dành riêng cho Admin
@@ -14,7 +15,7 @@
 class AccountAdmin : public Account {
 private:
     // Thuộc tính riêng: danh sách các agent mà admin này quản lý
-    std::vector<AccountAgent> managedAgents;
+    DynamicArray<AccountAgent> managedAgents;
 public:
     // Constructor: khởi tạo account admin, không cần truyền ID, sẽ tự động sinh ra
     AccountAdmin(const std::string& username,
@@ -29,7 +30,11 @@ public:
 
     // --- Getter cho danh sách Agent ---
     // Trả về một tham chiếu hằng, cho phép xem nhưng không cho sửa đổi từ bên ngoài
-    const std::vector<AccountAgent>& getManagedAgents() const;
+    const DynamicArray<AccountAgent>& getManagedAgents() const;
+
+    // Hàm đọc ghi file để tạo và lưu đối tượng
+    AccountAdmin AccountAdmin::fromRecordLine(const std::string& line);
+    std::string AccountAdmin::toRecordLine() const;
 
     // --- Triển khai hàm ảo từ lớp cha ---
     // Thêm 'override' để trình biên dịch kiểm tra tính chính xác

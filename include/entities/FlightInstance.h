@@ -78,6 +78,17 @@ public:
     // --- Hàm tiện ích ---
     bool hasAvailableSeats() const;     // Kiểm tra xem còn ghế trống hay không
     void displayInfo() const;           // Hiển thị thông tin chi tiết
+
+    // --- Đọc/Ghi file cấu hình ---
+    // Chuyển đổi đối tượng thành 1 dòng string để lưu vào file.
+    std::string toRecordLine() const;
+    
+    // Tạo đối tượng FlightInstance từ 1 dòng string đọc từ file.
+    static FlightInstance fromRecordLine(const std::string& line);
+
+    // --- Helper cho việc nạp dữ liệu ---
+    // Chỉ dùng cho hàm fromRecordLine để ghi đè ID tự sinh bằng ID đã lưu.
+    void overrideIdForLoad(const std::string& existingId);
 };
 
 #endif

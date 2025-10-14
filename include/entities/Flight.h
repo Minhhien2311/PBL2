@@ -34,6 +34,17 @@ public:
     const std::string& getDepartureAirport()const;
     const std::string& getArrivalAirport()  const;
 
+    // --- Đọc/Ghi file cấu hình ---
+    // Chuyển đổi đối tượng thành 1 dòng string để lưu vào file.
+    std::string toRecordLine() const;
+    
+    // Tạo đối tượng Flight từ 1 dòng string đọc từ file.
+    static Flight fromRecordLine(const std::string& line);
+
+    // --- Helper cho việc nạp dữ liệu ---
+    // Chỉ dùng cho hàm fromRecordLine để ghi đè ID tự sinh bằng ID đã lưu.
+    void overrideIdForLoad(const std::string& existingId);
+
     // --- Hàm tiện ích ---
     // Cung cấp một chuỗi tóm tắt thông tin chuyến bay để hiển thị nhanh.
     std::string getFlightInfo() const;

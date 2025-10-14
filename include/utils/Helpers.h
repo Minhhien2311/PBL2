@@ -6,7 +6,6 @@
 
 class Helpers {
 public:
-    static std::string hashPassword(const std::string& password);
     static std::vector<std::string> splitString(const std::string& str, char delimiter);
     static std::string generatePNR();
     // static std::string getCurrentDateTime();

@@ -55,6 +55,10 @@ public:
     bool authenticate(const std::string& passwordPlain) const;
     void changePassword(const std::string& newPasswordPlain);
 
+    // Chỉ dùng cho việc nạp dữ liệu từ file.
+    void overrideIdForLoad(const std::string& existingId);
+    void overridePasswordHashForLoad(const std::string& existingHash);
+
     // --- Hàm ảo thuần túy ---
     // Biến lớp Account thành lớp trừu tượng.
     // Các lớp con (Admin, Agent) BẮT BUỘC phải định nghĩa lại hàm này.
