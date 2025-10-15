@@ -26,7 +26,9 @@ add_library(core STATIC)
 # Liệt kê TƯỜNG MINH các file .cpp thuộc module core (điền đúng tên file của bạn)
 target_sources(core PRIVATE
   src/core/MenuManager.cpp
-  src/core/SystemManager.cpp
+  src/core/AccountManager.cpp
+  src/core/BookingManager.cpp
+  src/core/FlightManager.cpp
 )
 
 # Khai báo đường dẫn header CHO TARGET (ai link core sẽ kế thừa include/)
@@ -91,6 +93,14 @@ target_compile_definitions(PBL2 PRIVATE DATA_DIR="${DATA_DIR}")
 
 
 # ==================   HẬU BIÊN DỊCH (SAU BUILD)   ====================
+
+# Thêm thư mục con ftxui vào quá trình build
+add_subdirectory(ftxui)
+
+# ...
+
+# Liên kết thư viện ftxui với chương trình của bạn
+target_link_libraries(program.exe PRIVATE ftxui::component ftxui::screen)
 
 
 # Sau khi build, copy toàn bộ thư mục data/ ở source sang thư mục build (đặt cạnh file chạy)

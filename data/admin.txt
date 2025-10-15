@@ -1,0 +1,1 @@
+accountId|username|passwordHash|role|fullName|phoneNumber|email
