@@ -16,6 +16,8 @@ endif()
 # Biến macro trỏ tới thư mục data trong thư mục build (để code mở file dữ liệu runtime)
 set(DATA_DIR "${CMAKE_BINARY_DIR}/data")
 
+# Thêm thư mục con ftxui vào quá trình build
+add_subdirectory(ftxui)
 
 # ===============   KHAI BÁO CÁC MODULE DƯỚI DẠNG LIB   ==============
 
@@ -42,7 +44,6 @@ add_library(utils STATIC)
 
 # Liệt kê TƯỜNG MINH các file .cpp thuộc module utils
 target_sources(utils PRIVATE
-  src/utils/AuthenticationManager.cpp
   src/utils/Helpers.cpp
   src/utils/Time.cpp
 )
@@ -85,8 +86,15 @@ target_sources(PBL2 PRIVATE
 )
 
 # App link các module
+# App link các module và thư viện FTXUI
 target_include_directories(PBL2 PRIVATE ${CMAKE_SOURCE_DIR}/include)
-target_link_libraries(PBL2 PRIVATE core entities utils)
+target_link_libraries(PBL2 PRIVATE 
+    core 
+    entities 
+    utils
+    ftxui::component
+    ftxui::screen
+)
 
 # Định nghĩa macro DATA_DIR cho app
 target_compile_definitions(PBL2 PRIVATE DATA_DIR="${DATA_DIR}")
@@ -94,13 +102,10 @@ target_compile_definitions(PBL2 PRIVATE DATA_DIR="${DATA_DIR}")
 
 # ==================   HẬU BIÊN DỊCH (SAU BUILD)   ====================
 
-# Thêm thư mục con ftxui vào quá trình build
-add_subdirectory(ftxui)
-
 # ...
 
 # Liên kết thư viện ftxui với chương trình của bạn
-target_link_libraries(program.exe PRIVATE ftxui::component ftxui::screen)
+# target_link_libraries(program.exe PRIVATE ftxui::component ftxui::screen)
 
 
 # Sau khi build, copy toàn bộ thư mục data/ ở source sang thư mục build (đặt cạnh file chạy)
@@ -109,3 +114,4 @@ add_custom_command(TARGET PBL2 POST_BUILD
           "${CMAKE_SOURCE_DIR}/data"
           "${CMAKE_BINARY_DIR}/data"
 )
+

@@ -1,0 +1,2 @@
+C:\msys64\ucrt64\bin\ar.exe qc libcore.a CMakeFiles/core.dir/src/core/MenuManager.cpp.obj CMakeFiles/core.dir/src/core/AccountManager.cpp.obj CMakeFiles/core.dir/src/core/BookingManager.cpp.obj CMakeFiles/core.dir/src/core/FlightManager.cpp.obj
+C:\msys64\ucrt64\bin\ranlib.exe libcore.a

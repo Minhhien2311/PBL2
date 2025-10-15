@@ -1,0 +1,10 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/PBL2/build/cmake_install.cmake",
+		"C:/PBL2/build/ftxui/cmake_install.cmake",
+		"C:/PBL2/build/ftxui/examples/cmake_install.cmake",
+		"C:/PBL2/build/ftxui/doc/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
