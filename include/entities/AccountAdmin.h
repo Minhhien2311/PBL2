@@ -13,9 +13,6 @@
  *  - Có thể mở rộng thêm thuộc tính dành riêng cho admin (nếu cần)
  */
 class AccountAdmin : public Account {
-private:
-    // Thuộc tính riêng: danh sách các agent mà admin này quản lý
-    DynamicArray<AccountAgent> managedAgents;
 public:
     // Constructor: khởi tạo account admin, không cần truyền ID, sẽ tự động sinh ra
     AccountAdmin(const std::string& username,
@@ -24,13 +21,6 @@ public:
                  const std::string& phone,
                  const std::string& email);
 
-    // --- Chức năng quản lý Agent ---
-    void addAgent(const AccountAgent& agent);
-    bool removeAgent(const std::string& agentId);
-
-    // --- Getter cho danh sách Agent ---
-    // Trả về một tham chiếu hằng, cho phép xem nhưng không cho sửa đổi từ bên ngoài
-    const DynamicArray<AccountAgent>& getManagedAgents() const;
 
     // Hàm đọc ghi file để tạo và lưu đối tượng
     static AccountAdmin AccountAdmin::fromRecordLine(const std::string& line);

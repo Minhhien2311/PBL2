@@ -13,40 +13,6 @@ AccountAdmin::AccountAdmin(const std::string& username,
     // Constructor của AccountAdmin, gọi constructor của lớp cơ sở Account
 }
 
-// Thêm một agent vào danh sách quản lý
-void AccountAdmin::addAgent(const AccountAgent& agent) {
-    // Để tránh trùng lặp, có thể thêm kiểm tra xem agentId đã tồn tại chưa
-    // (Ở đây làm đơn giản là chỉ thêm vào)
-    managedAgents.push_back(agent);
-}
-
-
-// Xóa đúng 1 agent có ID khớp (dừng ngay khi tìm thấy), dùng vòng lặp for với chỉ số (index)
-bool AccountAdmin::removeAgent(const std::string& agentId) {
-    // Duyệt qua vector bằng chỉ số i
-    for (size_t i = 0; i < managedAgents.size(); ++i) {
-        // Nếu tìm thấy agent có ID khớp
-        if (managedAgents[i].getId() == agentId) {
-            // Áp dụng quy tắc nghiệp vụ
-            if (managedAgents[i].getIsActive()) {
-                return false;
-            }
-
-            // CHÚ Ý: Gọi hàm erase(index) mới
-            managedAgents.erase(i);
-            
-            // Thoát khỏi hàm ngay sau khi xóa
-            return true;
-        }
-    }
-    // Nếu duyệt hết vòng lặp mà không tìm thấy, trả về false
-    return false;
-}
-
-// --- Getter cho danh sách Agent ---
-const DynamicArray<AccountAgent>& AccountAdmin::getManagedAgents() const {
-    return managedAgents;
-}
 
 // Chuyển đổi đối tượng AccountAdmin thành một dòng string để lưu vào file.
 std::string AccountAdmin::toRecordLine() const {

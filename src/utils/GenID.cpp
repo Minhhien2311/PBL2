@@ -9,7 +9,16 @@
 
 namespace IdGenerator {
 
+    static int adminCounter = 0;
+    static int agentCounter = 0;
+    static int flightCounter = 0;
+    static int instanceCounter = 0;
+    static int passengerCounter = 0;
+    static int ticketCounter = 0;
+    static int bookingCounter = 0;
+
     // 2 hàm này cần thiết để tránh bug sinh ID khi tạo đối tượng từ file
+    // Hàm này kiểm tra và đọc biến đếm từ file.
     void loadCountersFromFile(const std::string& filePath) {
         std::ifstream file(filePath);
         if (!file.is_open()) {
@@ -47,6 +56,8 @@ namespace IdGenerator {
         }
         file.close();
     }
+
+    // Hàm này dùng để ghi lại biến đếm
     void saveCountersToFile(const std::string& filePath) {
         std::ofstream file(filePath);
         if (!file.is_open()) {
@@ -66,7 +77,6 @@ namespace IdGenerator {
     }
 
     // Biến đếm tĩnh, chỉ tồn tại trong file này và dành riêng cho Admin
-    static int adminCounter = 0;
     std::string generateAdminId() {
         // Tăng biến đếm
         ++adminCounter;
@@ -80,7 +90,6 @@ namespace IdGenerator {
     }
 
     // Biến đếm tĩnh, chỉ tồn tại trong file này và dành riêng cho Agent
-    static int agentCounter = 0;
     std::string generateAgentId() {
         // Tăng biến đếm
         ++agentCounter;
@@ -94,7 +103,6 @@ namespace IdGenerator {
     }
 
     // Biến đếm tĩnh, chỉ tồn tại trong file này và dành riêng cho Flight
-    static int flightCounter = 0;
     std::string generateFlightId() {
         ++flightCounter;
         
@@ -105,7 +113,6 @@ namespace IdGenerator {
         return ss.str();
     }
 
-    static int instanceCounter = 0;
     std::string generateInstanceId() {
         ++instanceCounter;
         
@@ -116,36 +123,33 @@ namespace IdGenerator {
         return ss.str();
     }
 
-    static int passengerCounter = 0;
     std::string generatePassengerId() {
         ++passengerCounter;
         
         // Dùng stringstream để tạo định dạng "FI-00001"
         // Dùng 5 chữ số để có thể lưu được nhiều chuyến bay
         std::stringstream ss;
-        ss << "PAX-" << std::setw(5) << std::setfill('0') << instanceCounter;
+        ss << "PAX-" << std::setw(5) << std::setfill('0') << passengerCounter;
         return ss.str();
     }
 
-    static int ticketCounter = 0;
     std::string generateTicketNumber() {
         ++ticketCounter;
         
         // Dùng stringstream để tạo định dạng "TKT-0000001"
         // Dùng 5 chữ số để có thể lưu được nhiều chuyến bay
         std::stringstream ss;
-        ss << "TKT-" << std::setw(7) << std::setfill('0') << instanceCounter;
+        ss << "TKT-" << std::setw(7) << std::setfill('0') << ticketCounter;
         return ss.str();
     }
 
-    static int bookingCounter = 0;
     std::string generateBookingId() {
         ++bookingCounter;
         
         // Dùng stringstream để tạo định dạng "BKG-0000001"
         // Dùng 5 chữ số để có thể lưu được nhiều chuyến bay
         std::stringstream ss;
-        ss << "BKG-" << std::setw(7) << std::setfill('0') << instanceCounter;
+        ss << "BKG-" << std::setw(7) << std::setfill('0') << bookingCounter;
         return ss.str();
     }
 }
