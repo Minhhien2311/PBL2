@@ -1,6 +1,1 @@
-instanceId|flightId|flightDate|scheduledDeparture|scheduledArrival|actualDeparture|actualArrival|availableSeats|status|aircraftRegistration|currentGate
-1001|1|2023-11-01|14:30:00|16:45:00|14:35:00|16:50:00|120|COMPLETED|VN-A123|Gate A5
-1002|1|2023-11-02|14:30:00|16:45:00|||150|SCHEDULED|VN-A124|Gate A6
-1003|2|2023-11-01|18:00:00|20:15:00|18:05:00|20:10:00|170|COMPLETED|VN-A125|Gate B2
-1004|3|2023-11-03|08:45:00|10:00:00|||180|SCHEDULED|VJ-A201|Gate C1
-1005|4|2023-11-04|12:30:00|13:45:00|||168|SCHEDULED|BL-B301|Gate D3
+instanceId|flightId|departureIso|arrivalIso|economyTotal|economyAvailable|businessTotal|businessAvailable|fareEconomy|fareBusiness
