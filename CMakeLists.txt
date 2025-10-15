@@ -26,7 +26,9 @@ add_library(core STATIC)
 # Liệt kê TƯỜNG MINH các file .cpp thuộc module core (điền đúng tên file của bạn)
 target_sources(core PRIVATE
   src/core/MenuManager.cpp
-  src/core/SystemManager.cpp
+  src/core/AccountManager.cpp
+  src/core/BookingManager.cpp
+  src/core/FlightManager.cpp
 )
 
 # Khai báo đường dẫn header CHO TARGET (ai link core sẽ kế thừa include/)
