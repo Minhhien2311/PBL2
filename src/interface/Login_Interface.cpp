@@ -11,7 +11,7 @@ using namespace ftxui;
 
 void ShowLoginScreen() {
     auto screen = ScreenInteractive::TerminalOutput();
-    AccountManager account_manager("C:/PBL2/data/admins.txt","C:/PBL2:/data/agents.txt");
+    AccountManager account_manager("C:/PBL2/data/admins.txt","C:/PBL2/data/agents.txt");
 
     // --- Biến trạng thái cho giao diện ---
     std::string user_name;
