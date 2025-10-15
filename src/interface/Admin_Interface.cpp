@@ -14,7 +14,7 @@ using namespace ftxui;
 
 FlightManager flight_manager("C:/PBL2/data/flights.txt","C:/PBL2/data/flight_instances.txt");
 
-// --- Giao diện cho màn hình "Thêm chuyến bay" ---
+// --- Giao diện cho màn hình "Thêm tuyến bay" ---
 class AddFlightScreen {
 public:
     // Trạng thái (dữ liệu) của màn hình này
@@ -36,14 +36,19 @@ public:
 
         auto them_button = Button("Thêm", [&] {
             // Logic khi nhấn nút "Thêm"
+            bool new_flight = flight_manager.createNewFlight(flight_number,airline,departure_airport,arrival_airport);
+
+            if (new_flight){
+                thong_bao = "Thêm thành công tuyến bay " + flight_number + "|" + departure_airport + " - " + arrival_airport +"!";
+                // Xóa dữ liệu cũ
+                flight_number = "";
+                airline = "";
+                departure_airport = "";
+                arrival_airport = "";
+            }
+            else
+                thong_bao = "Không thể thêm tuyến bay trống hoặc đã tồn tại!";
             
-            if ()
-            thong_bao = "Thêm thành công chuyến bay " + flight_number + "!";
-            // Xóa dữ liệu cũ
-            flight_number = "";
-            airline = "";
-            departure_airport = "";
-            arrival_airport = "";
         });
 
         container = Container::Vertical({
@@ -60,7 +65,80 @@ public:
         return vbox({
             // Bảng nhập liệu
             gridbox({
-                {text(" Mã chuyến bay ") | bold,separator(), text(" Hãng ") | bold,separator(), text(" Sân bay đi ") | bold,separator(), text(" Sân bay đến ") | bold},
+                {text(" Mã chuyến bay ") | bold,separator(), text(" Hãng bay ") | bold,separator(), text(" Sân bay đi ") | bold,separator(), text(" Sân bay đến ") | bold},
+                {
+                    // Lấy component con từ container để render
+                    container->ChildAt(0)->Render(), // input_flight_number
+                    separator(),
+                    container->ChildAt(1)->Render(), // input_airline
+                    separator(),
+                    container->ChildAt(2)->Render(), // input_departure_airport
+                    separator(),
+                    container->ChildAt(3)->Render(), // input_arrival_airport
+                },
+            }) | border | flex,
+            separator(),
+            // Nút "Thêm"
+            container->ChildAt(4)->Render() | center, // them_button
+            separator(),
+            // Thông báo
+            text(thong_bao) | color(Color::Green) | center
+        });
+    }
+};
+
+// --- Giao diện cho màn hình "Thêm chuyến bay" ---
+class AddFlightInstacneScreen {
+public:
+    // Trạng thái (dữ liệu) của màn hình này
+    std::string flight_number;
+    std::string airline;
+    std::string departure_airport;
+    std::string arrival_airport;
+    std::string thong_bao = "";
+
+    // Component chính chứa các thành phần con
+    Component container;
+
+    AddFlightScreen() {
+        // Tạo các component con
+        Component input_flight_number = Input(&flight_number, "Nhập mã chuyến bay (VD:VN123)");
+        Component input_airline = Input(&airline, "Nhập hãng (VD: Vietnam Airline)");
+        Component input_departure_airport = Input(&departure_airport, "Nhập nơi đi (VD: HAN)");
+        Component input_arrival_airport = Input(&arrival_airport, "Nhập nơi đến (VD: DAN)");
+
+        auto them_button = Button("Thêm", [&] {
+            // Logic khi nhấn nút "Thêm"
+            bool new_flight = flight_manager.createNewFlight(flight_number,airline,departure_airport,arrival_airport);
+
+            if (new_flight){
+                thong_bao = "Thêm thành công tuyến bay " + flight_number + "|" + departure_airport + " - " + arrival_airport +"!";
+                // Xóa dữ liệu cũ
+                flight_number = "";
+                airline = "";
+                departure_airport = "";
+                arrival_airport = "";
+            }
+            else
+                thong_bao = "Không thể thêm tuyến bay trống hoặc đã tồn tại!";
+            
+        });
+
+        container = Container::Vertical({
+            input_flight_number,
+            input_airline,
+            input_departure_airport,
+            input_arrival_airport,
+            them_button
+        });
+    }
+
+    // Hàm vẽ giao diện cho màn hình này
+    Element Render() {
+        return vbox({
+            // Bảng nhập liệu
+            gridbox({
+                {text(" Mã chuyến bay ") | bold,separator(), text(" Hãng bay ") | bold,separator(), text(" Sân bay đi ") | bold,separator(), text(" Sân bay đến ") | bold},
                 {
                     // Lấy component con từ container để render
                     container->ChildAt(0)->Render(), // input_flight_number
@@ -96,15 +174,15 @@ void ShowAdminMenu(){
     std::vector<std::string> menu_tabs = {
         "Danh sách chuyến bay",
         "Danh sách đại lý",
-        "Thêm chuyến bay",
-        "Xóa chuyến bay",
+        "Thêm tuyến bay",
+        "Xóa tuyến bay",
         "Thêm Agent",
     };
 
     // --- CÁC COMPONENT TƯƠNG TÁC ---
     // Tạo component cho màn hình "Thêm chuyến bay"
     AddFlightScreen add_flight_screen;
-    // (Sau này bạn sẽ tạo các screen khác tương tự)
+    // (Sau này sẽ tạo các screen khác tương tự)
 
     // Component Menu để quản lý các nút chức năng
     auto menu = Menu(&menu_tabs, &selected_tab, MenuOption::Vertical());
