@@ -148,4 +148,14 @@ CMakeFiles/core.dir/src/core/MenuManager.cpp.obj: \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/basic_ios.tcc \
  C:/msys64/ucrt64/include/c++/15.2.0/bits/ostream.tcc \
  C:/msys64/ucrt64/include/c++/15.2.0/istream \
- C:/msys64/ucrt64/include/c++/15.2.0/bits/istream.tcc
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/istream.tcc \
+ C:/PBL2/include/core/AccountManager.h C:/PBL2/include/DSA/DynamicArray.h \
+ C:/PBL2/include/entities/AccountAdmin.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/vector \
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_uninitialized.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_vector.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_bvector.h \
+ C:/msys64/ucrt64/include/c++/15.2.0/bits/vector.tcc \
+ C:/PBL2/include/entities/Account.h \
+ C:/PBL2/include/entities/AccountAgent.h \
+ C:/PBL2/include/entities/AccountAgent.h

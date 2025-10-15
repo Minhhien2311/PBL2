@@ -1,3 +1,4 @@
 #pragma once
+class AccountManager;
 // Hàm hiển thị màn hình đăng nhập
-void ShowLoginScreen();
+void ShowLoginScreen(AccountManager& account_manager);

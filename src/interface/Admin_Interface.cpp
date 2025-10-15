@@ -187,9 +187,8 @@ public:
 };
 
 
-void ShowAdminMenu(){
+void ShowAdminMenu(AccountManager& account_manager){
     auto screen = ScreenInteractive::TerminalOutput();
-    AccountManager account_manager("C:/PBL2/data/admins.txt","C:/PBL2:/data/agents.txt");
 
     // --- BIẾN TRẠNG THÁI (STATE) ---
     int selected_tab = 0; // 0: Thêm chuyến bay, 1: Xóa chuyến bay, ...
@@ -245,7 +244,7 @@ void ShowAdminMenu(){
             separatorEmpty() | flex, // Dùng flex để đẩy nút Đăng xuất xuống dưới
             exit_button->Render(),
             logout_button->Render()
-        }) | size(WIDTH, EQUAL, 30) | size(HEIGHT, EQUAL, 20) | border; // Cố định chiều rộng của menu
+        }) | size(WIDTH, EQUAL, 40) | size(HEIGHT, EQUAL, 50) | border; // Cố định chiều rộng của menu
 
         // 2. Nội dung bên phải
         Element right_content;
@@ -287,7 +286,7 @@ void ShowAdminMenu(){
         });
 
         // 4. Đặt toàn bộ layout vào một cửa sổ lớn
-        return window(text(user_name), layout) | size(WIDTH, EQUAL, 130);
+        return window(text(user_name), layout) | size(WIDTH, EQUAL, 200);
     });
 
     screen.Loop(main_renderer);

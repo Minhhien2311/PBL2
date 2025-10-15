@@ -1,4 +1,5 @@
 #include "C:/PBL2/include/entities/Account.h"
+#include <iostream>
 
 // Constructor 
 Account::Account(const std::string& id,
@@ -67,6 +68,9 @@ bool Account::verifyPassword(const std::string& plain, const std::string& hash) 
 }
 
 // --- Getters --- 
+const std::string& Account::getPasswordHash() const {
+    return this->passwordHash;
+}//debug
 const std::string& Account::getId() const { return accountId; }
 const std::string& Account::getUsername() const { return username; }
 Role Account::getRole() const { return role; }
@@ -86,9 +90,22 @@ void Account::setEmail(const std::string& email) {
 }
 
 // --- Chức năng chính ---
+// bool Account::authenticate(const std::string& passwordPlain) const {
+//     return verifyPassword(passwordPlain, this->passwordHash);
+// }
+
+// ==== DEBUG ======
 bool Account::authenticate(const std::string& passwordPlain) const {
-    return verifyPassword(passwordPlain, this->passwordHash);
+    // 1. Hash mật khẩu người dùng nhập vào
+    std::string hashed_input = hashPassword(passwordPlain);
+    
+    // 2. <<< THÊM CÔNG CỤ THÁM TỬ CUỐI CÙNG VÀO ĐÂY
+    std::cout << "[DEBUG]   -> Hash tu input: |" << hashed_input << "|\n";
+
+    // 3. Thực hiện so sánh
+    return this->passwordHash == hashed_input;
 }
+
 
 void Account::changePassword(const std::string& newPasswordPlain) {
     // Chỉ thay đổi mật khẩu nếu mật khẩu mới không rỗng

@@ -552,7 +552,12 @@ CMakeFiles/core.dir/src/core/FlightManager.cpp.obj: C:/PBL2/src/core/FlightManag
   C:/msys64/ucrt64/lib/gcc/x86_64-w64-mingw32/15.2.0/include/syslimits.h
 
 CMakeFiles/core.dir/src/core/MenuManager.cpp.obj: C:/PBL2/src/core/MenuManager.cpp \
+  C:/PBL2/include/DSA/DynamicArray.h \
+  C:/PBL2/include/core/AccountManager.h \
   C:/PBL2/include/core/MenuManager.h \
+  C:/PBL2/include/entities/Account.h \
+  C:/PBL2/include/entities/AccountAdmin.h \
+  C:/PBL2/include/entities/AccountAgent.h \
   C:/PBL2/include/interface/Admin_Interface.h \
   C:/PBL2/include/interface/Agent_Interface.h \
   C:/PBL2/include/interface/Login_Interface.h \
@@ -612,12 +617,15 @@ CMakeFiles/core.dir/src/core/MenuManager.cpp.obj: C:/PBL2/src/core/MenuManager.c
   C:/msys64/ucrt64/include/c++/15.2.0/bits/requires_hosted.h \
   C:/msys64/ucrt64/include/c++/15.2.0/bits/std_abs.h \
   C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_algobase.h \
+  C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_bvector.h \
   C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_construct.h \
   C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_function.h \
   C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_iterator.h \
   C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_iterator_base_funcs.h \
   C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_iterator_base_types.h \
   C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_pair.h \
+  C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_uninitialized.h \
+  C:/msys64/ucrt64/include/c++/15.2.0/bits/stl_vector.h \
   C:/msys64/ucrt64/include/c++/15.2.0/bits/streambuf.tcc \
   C:/msys64/ucrt64/include/c++/15.2.0/bits/streambuf_iterator.h \
   C:/msys64/ucrt64/include/c++/15.2.0/bits/string_view.tcc \
@@ -625,6 +633,7 @@ CMakeFiles/core.dir/src/core/MenuManager.cpp.obj: C:/PBL2/src/core/MenuManager.c
   C:/msys64/ucrt64/include/c++/15.2.0/bits/uses_allocator.h \
   C:/msys64/ucrt64/include/c++/15.2.0/bits/uses_allocator_args.h \
   C:/msys64/ucrt64/include/c++/15.2.0/bits/utility.h \
+  C:/msys64/ucrt64/include/c++/15.2.0/bits/vector.tcc \
   C:/msys64/ucrt64/include/c++/15.2.0/bits/version.h \
   C:/msys64/ucrt64/include/c++/15.2.0/cctype \
   C:/msys64/ucrt64/include/c++/15.2.0/cerrno \
@@ -662,6 +671,7 @@ CMakeFiles/core.dir/src/core/MenuManager.cpp.obj: C:/PBL2/src/core/MenuManager.c
   C:/msys64/ucrt64/include/c++/15.2.0/tuple \
   C:/msys64/ucrt64/include/c++/15.2.0/type_traits \
   C:/msys64/ucrt64/include/c++/15.2.0/typeinfo \
+  C:/msys64/ucrt64/include/c++/15.2.0/vector \
   C:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/atomic_word.h \
   C:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/c++allocator.h \
   C:/msys64/ucrt64/include/c++/15.2.0/x86_64-w64-mingw32/bits/c++config.h \

@@ -24,6 +24,7 @@ private:
     static bool verifyPassword(const std::string& plain, const std::string& hash);
 
 public:
+    const std::string& getPasswordHash() const;//debug
     // Không cho phép tạo đối tượng Account rỗng
     Account() = delete;
 

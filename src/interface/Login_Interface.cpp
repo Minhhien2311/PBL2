@@ -9,9 +9,8 @@
 
 using namespace ftxui;
 
-void ShowLoginScreen() {
+void ShowLoginScreen(AccountManager& account_manager) {
     auto screen = ScreenInteractive::TerminalOutput();
-    AccountManager account_manager("C:/PBL2/data/admins.txt","C:/PBL2/data/agents.txt");
 
     // --- Biến trạng thái cho giao diện ---
     std::string user_name;
@@ -87,7 +86,7 @@ void ShowLoginScreen() {
             separator(),
             login_button->Render() | center,
             separator(),
-            text(login_message) | color(Color::Red) | center
+            text(login_message) | color(Color::Green) | center
         }) | border | center;
     });
 

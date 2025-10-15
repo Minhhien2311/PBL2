@@ -1,13 +1,16 @@
 #include "C:/PBL2/include/core/MenuManager.h"
+#include "C:/PBL2/include/core/AccountManager.h"
 
 void app(){
+    AccountManager account_manager("C:/PBL2/data/admins.txt", "C:/PBL2/data/agents.txt");
+
     while (current_screen != ApplicationScreen::Exit) {
         switch (current_screen) {
             case ApplicationScreen::Login:
-                ShowLoginScreen();
+                ShowLoginScreen(account_manager);
                 break;
             case ApplicationScreen::AdminMenu:
-                ShowAdminMenu();
+                ShowAdminMenu(account_manager);
                 break;
             case ApplicationScreen::AgentMenu:
                 ShowAgentMenu();
