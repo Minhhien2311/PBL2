@@ -42,11 +42,9 @@ void ShowLoginScreen() {
         password_mode = 1 - password_mode; // Lật giữa 0 và 1
     });
 
-    // 5. Nút đăng nhập, sử dụng logic DataManager hiện đại
+    // 5. Nút đăng nhập
     auto login_button = Button("Dang nhap", [&] {
-        // std::shared_ptr<Account> user = dataManager.authenticate(user_name, user_password);
         bool log = account_manager.login(user_name,user_password);
-        // Account user = account_manager.getCurrentUser();
 
         if (log) {
             login_message = "Dang nhap thanh cong!";
@@ -69,7 +67,7 @@ void ShowLoginScreen() {
         login_button,
     });
     
-    // Renderer để vẽ giao diện, kết hợp layout đẹp của code cũ
+    // Renderer để vẽ giao diện
     auto renderer = Renderer(main_container, [&] {
         return vbox({
             text("HE THONG QUAN LY BAN VE MAY BAY") | bold | center,
