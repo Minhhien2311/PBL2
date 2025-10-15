@@ -227,8 +227,8 @@ CMakeFiles/utils.dir/clean:
 # Target rules for target CMakeFiles/entities.dir
 
 # All Build rule for target.
-CMakeFiles/entities.dir/all: CMakeFiles/core.dir/all
 CMakeFiles/entities.dir/all: CMakeFiles/utils.dir/all
+CMakeFiles/entities.dir/all: CMakeFiles/core.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\entities.dir\build.make CMakeFiles/entities.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\entities.dir\build.make CMakeFiles/entities.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=C:\PBL2\build\CMakeFiles --progress-num=78,79,80,81,82,83,84,85,86,87,88 "Built target entities"
@@ -260,8 +260,8 @@ CMakeFiles/entities.dir/clean:
 # Target rules for target CMakeFiles/PBL2.dir
 
 # All Build rule for target.
-CMakeFiles/PBL2.dir/all: CMakeFiles/core.dir/all
 CMakeFiles/PBL2.dir/all: CMakeFiles/utils.dir/all
+CMakeFiles/PBL2.dir/all: CMakeFiles/core.dir/all
 CMakeFiles/PBL2.dir/all: CMakeFiles/entities.dir/all
 CMakeFiles/PBL2.dir/all: ftxui/CMakeFiles/screen.dir/all
 CMakeFiles/PBL2.dir/all: ftxui/CMakeFiles/dom.dir/all
