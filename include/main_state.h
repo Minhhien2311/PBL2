@@ -5,10 +5,10 @@ enum class ApplicationScreen {
     Login,
     //Admin_Interface
     AdminMenu,
-    AdminAddFlight,
-    AdminRemoveFlight,
-    AdminAddAgent,
-    AdminRemoveAgent,
+    // AdminAddFlight,
+    // AdminRemoveFlight,
+    // AdminAddAgent,
+    // AdminRemoveAgent,
     //Agent_Interface
     AgentMenu,
     //

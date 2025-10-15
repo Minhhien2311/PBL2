@@ -1,0 +1,5 @@
+id|fullName|dateOfBirth|email|phone|address|passportNumber|nationality|frequentFlyerNumber
+1|Le Van C|1985-03-12|c.le@email.com|0901111111|789 Pine St|C12345678|Vietnamese|VN001
+2|Pham Thi D|1992-07-25|d.pham@email.com|0902222222|321 Cedar St|D87654321|Vietnamese|VN002
+3|Tran Van E|2018-11-05|e.tran@email.com|0903333333|654 Maple St|E11223344|Vietnamese|
+4|Nguyen Thi F|1978-01-30|f.nguyen@email.com|0904444444|987 Birch St|F44332211|Vietnamese|VN003

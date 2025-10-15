@@ -1,0 +1,4 @@
+ruleId|minDaysBeforeChange|minDaysBeforeCancel|changeFee|cancellationFee|upgradeFee|applicableClasses
+1|7|3|0.2|0.3|0.5|ECONOMY,BUSINESS
+2|3|1|0.5|0.8|0.3|ECONOMY
+3|10|5|0.1|0.2|0.4|BUSINESS

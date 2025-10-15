@@ -50,7 +50,7 @@ double FlightInstance::getFareBusiness() const { return fareBusiness; }
 
 // --- Hàm nghiệp vụ ---
 // Logic trung tâm để xử lý việc đặt vé một cách an toàn.
-bool FlightInstance::bookSeats(SeatClass seatClass, int count = 1) {
+bool FlightInstance::bookSeats(SeatClass seatClass, int count) { // fix int count = 1
     if (count <= 0) return false; // Không thể đặt số lượng ghế âm hoặc bằng 0
 
     switch (seatClass) {
@@ -71,7 +71,7 @@ bool FlightInstance::bookSeats(SeatClass seatClass, int count = 1) {
 }
 
 // Logic trung tâm để xử lý việc hủy vé một cách an toàn.
-void FlightInstance::releaseSeats(SeatClass seatClass, int count = 1) {
+void FlightInstance::releaseSeats(SeatClass seatClass, int count) { // fix int count = 1
     if (count <= 0) return; // Không thể hủy số lượng ghế âm hoặc bằng 0
 
     switch (seatClass) {

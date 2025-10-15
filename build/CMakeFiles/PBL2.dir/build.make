@@ -86,14 +86,65 @@ CMakeFiles/PBL2.dir/app/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/PBL2.dir/app/main.cpp.s"
 	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\PBL2\app\main.cpp -o CMakeFiles\PBL2.dir\app\main.cpp.s
 
+CMakeFiles/PBL2.dir/src/interface/Admin_Interface.cpp.obj: CMakeFiles/PBL2.dir/flags.make
+CMakeFiles/PBL2.dir/src/interface/Admin_Interface.cpp.obj: CMakeFiles/PBL2.dir/includes_CXX.rsp
+CMakeFiles/PBL2.dir/src/interface/Admin_Interface.cpp.obj: C:/PBL2/src/interface/Admin_Interface.cpp
+CMakeFiles/PBL2.dir/src/interface/Admin_Interface.cpp.obj: CMakeFiles/PBL2.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\PBL2\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/PBL2.dir/src/interface/Admin_Interface.cpp.obj"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/PBL2.dir/src/interface/Admin_Interface.cpp.obj -MF CMakeFiles\PBL2.dir\src\interface\Admin_Interface.cpp.obj.d -o CMakeFiles\PBL2.dir\src\interface\Admin_Interface.cpp.obj -c C:\PBL2\src\interface\Admin_Interface.cpp
+
+CMakeFiles/PBL2.dir/src/interface/Admin_Interface.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/PBL2.dir/src/interface/Admin_Interface.cpp.i"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\PBL2\src\interface\Admin_Interface.cpp > CMakeFiles\PBL2.dir\src\interface\Admin_Interface.cpp.i
+
+CMakeFiles/PBL2.dir/src/interface/Admin_Interface.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/PBL2.dir/src/interface/Admin_Interface.cpp.s"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\PBL2\src\interface\Admin_Interface.cpp -o CMakeFiles\PBL2.dir\src\interface\Admin_Interface.cpp.s
+
+CMakeFiles/PBL2.dir/src/interface/Agent_Interface.cpp.obj: CMakeFiles/PBL2.dir/flags.make
+CMakeFiles/PBL2.dir/src/interface/Agent_Interface.cpp.obj: CMakeFiles/PBL2.dir/includes_CXX.rsp
+CMakeFiles/PBL2.dir/src/interface/Agent_Interface.cpp.obj: C:/PBL2/src/interface/Agent_Interface.cpp
+CMakeFiles/PBL2.dir/src/interface/Agent_Interface.cpp.obj: CMakeFiles/PBL2.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\PBL2\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/PBL2.dir/src/interface/Agent_Interface.cpp.obj"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/PBL2.dir/src/interface/Agent_Interface.cpp.obj -MF CMakeFiles\PBL2.dir\src\interface\Agent_Interface.cpp.obj.d -o CMakeFiles\PBL2.dir\src\interface\Agent_Interface.cpp.obj -c C:\PBL2\src\interface\Agent_Interface.cpp
+
+CMakeFiles/PBL2.dir/src/interface/Agent_Interface.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/PBL2.dir/src/interface/Agent_Interface.cpp.i"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\PBL2\src\interface\Agent_Interface.cpp > CMakeFiles\PBL2.dir\src\interface\Agent_Interface.cpp.i
+
+CMakeFiles/PBL2.dir/src/interface/Agent_Interface.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/PBL2.dir/src/interface/Agent_Interface.cpp.s"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\PBL2\src\interface\Agent_Interface.cpp -o CMakeFiles\PBL2.dir\src\interface\Agent_Interface.cpp.s
+
+CMakeFiles/PBL2.dir/src/interface/Login_Interface.cpp.obj: CMakeFiles/PBL2.dir/flags.make
+CMakeFiles/PBL2.dir/src/interface/Login_Interface.cpp.obj: CMakeFiles/PBL2.dir/includes_CXX.rsp
+CMakeFiles/PBL2.dir/src/interface/Login_Interface.cpp.obj: C:/PBL2/src/interface/Login_Interface.cpp
+CMakeFiles/PBL2.dir/src/interface/Login_Interface.cpp.obj: CMakeFiles/PBL2.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\PBL2\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/PBL2.dir/src/interface/Login_Interface.cpp.obj"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/PBL2.dir/src/interface/Login_Interface.cpp.obj -MF CMakeFiles\PBL2.dir\src\interface\Login_Interface.cpp.obj.d -o CMakeFiles\PBL2.dir\src\interface\Login_Interface.cpp.obj -c C:\PBL2\src\interface\Login_Interface.cpp
+
+CMakeFiles/PBL2.dir/src/interface/Login_Interface.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/PBL2.dir/src/interface/Login_Interface.cpp.i"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\PBL2\src\interface\Login_Interface.cpp > CMakeFiles\PBL2.dir\src\interface\Login_Interface.cpp.i
+
+CMakeFiles/PBL2.dir/src/interface/Login_Interface.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/PBL2.dir/src/interface/Login_Interface.cpp.s"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\PBL2\src\interface\Login_Interface.cpp -o CMakeFiles\PBL2.dir\src\interface\Login_Interface.cpp.s
+
 # Object files for target PBL2
 PBL2_OBJECTS = \
-"CMakeFiles/PBL2.dir/app/main.cpp.obj"
+"CMakeFiles/PBL2.dir/app/main.cpp.obj" \
+"CMakeFiles/PBL2.dir/src/interface/Admin_Interface.cpp.obj" \
+"CMakeFiles/PBL2.dir/src/interface/Agent_Interface.cpp.obj" \
+"CMakeFiles/PBL2.dir/src/interface/Login_Interface.cpp.obj"
 
 # External object files for target PBL2
 PBL2_EXTERNAL_OBJECTS =
 
 PBL2.exe: CMakeFiles/PBL2.dir/app/main.cpp.obj
+PBL2.exe: CMakeFiles/PBL2.dir/src/interface/Admin_Interface.cpp.obj
+PBL2.exe: CMakeFiles/PBL2.dir/src/interface/Agent_Interface.cpp.obj
+PBL2.exe: CMakeFiles/PBL2.dir/src/interface/Login_Interface.cpp.obj
 PBL2.exe: CMakeFiles/PBL2.dir/build.make
 PBL2.exe: libcore.a
 PBL2.exe: libentities.a
@@ -106,7 +157,7 @@ PBL2.exe: ftxui/libftxui-screen.a
 PBL2.exe: CMakeFiles/PBL2.dir/linkLibs.rsp
 PBL2.exe: CMakeFiles/PBL2.dir/objects1.rsp
 PBL2.exe: CMakeFiles/PBL2.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\PBL2\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable PBL2.exe"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\PBL2\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable PBL2.exe"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\PBL2.dir\link.txt --verbose=$(VERBOSE)
 	"C:\Program Files\CMake\bin\cmake.exe" -E copy_directory C:/PBL2/data C:/PBL2/build/data
 

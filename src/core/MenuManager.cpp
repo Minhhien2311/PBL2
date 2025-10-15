@@ -1,4 +1,4 @@
-#include "include/core/MenuManager.h"
+#include "C:/PBL2/include/core/MenuManager.h"
 
 void app(){
     while (current_screen != ApplicationScreen::Exit) {
@@ -11,6 +11,8 @@ void app(){
                 break;
             case ApplicationScreen::AgentMenu:
                 ShowAgentMenu();
+            case ApplicationScreen::Exit:
+                exit(0);
         }
     }
 }

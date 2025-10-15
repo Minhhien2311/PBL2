@@ -46,6 +46,7 @@ add_library(utils STATIC)
 target_sources(utils PRIVATE
   src/utils/Helpers.cpp
   src/utils/Time.cpp
+  src/utils/GenID.cpp
 )
 
 # Đường dẫn header + macro cho utils
@@ -83,6 +84,11 @@ add_executable(PBL2)
 # Liệt kê TƯỜNG MINH các file .cpp thuộc app (thường chỉ main.cpp)
 target_sources(PBL2 PRIVATE
   app/main.cpp
+
+    # THÊM CÁC FILE GIAO DIỆN VÀO ĐÂY
+  src/interface/Admin_Interface.cpp
+  src/interface/Agent_Interface.cpp
+  src/interface/Login_Interface.cpp
 )
 
 # App link các module

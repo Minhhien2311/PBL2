@@ -631,6 +631,102 @@ src/entities/Ticket.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\entities.dir\build.make CMakeFiles/entities.dir/src/entities/Ticket.cpp.s
 .PHONY : src/entities/Ticket.cpp.s
 
+src/interface/Admin_Interface.obj: src/interface/Admin_Interface.cpp.obj
+.PHONY : src/interface/Admin_Interface.obj
+
+# target to build an object file
+src/interface/Admin_Interface.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PBL2.dir\build.make CMakeFiles/PBL2.dir/src/interface/Admin_Interface.cpp.obj
+.PHONY : src/interface/Admin_Interface.cpp.obj
+
+src/interface/Admin_Interface.i: src/interface/Admin_Interface.cpp.i
+.PHONY : src/interface/Admin_Interface.i
+
+# target to preprocess a source file
+src/interface/Admin_Interface.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PBL2.dir\build.make CMakeFiles/PBL2.dir/src/interface/Admin_Interface.cpp.i
+.PHONY : src/interface/Admin_Interface.cpp.i
+
+src/interface/Admin_Interface.s: src/interface/Admin_Interface.cpp.s
+.PHONY : src/interface/Admin_Interface.s
+
+# target to generate assembly for a file
+src/interface/Admin_Interface.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PBL2.dir\build.make CMakeFiles/PBL2.dir/src/interface/Admin_Interface.cpp.s
+.PHONY : src/interface/Admin_Interface.cpp.s
+
+src/interface/Agent_Interface.obj: src/interface/Agent_Interface.cpp.obj
+.PHONY : src/interface/Agent_Interface.obj
+
+# target to build an object file
+src/interface/Agent_Interface.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PBL2.dir\build.make CMakeFiles/PBL2.dir/src/interface/Agent_Interface.cpp.obj
+.PHONY : src/interface/Agent_Interface.cpp.obj
+
+src/interface/Agent_Interface.i: src/interface/Agent_Interface.cpp.i
+.PHONY : src/interface/Agent_Interface.i
+
+# target to preprocess a source file
+src/interface/Agent_Interface.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PBL2.dir\build.make CMakeFiles/PBL2.dir/src/interface/Agent_Interface.cpp.i
+.PHONY : src/interface/Agent_Interface.cpp.i
+
+src/interface/Agent_Interface.s: src/interface/Agent_Interface.cpp.s
+.PHONY : src/interface/Agent_Interface.s
+
+# target to generate assembly for a file
+src/interface/Agent_Interface.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PBL2.dir\build.make CMakeFiles/PBL2.dir/src/interface/Agent_Interface.cpp.s
+.PHONY : src/interface/Agent_Interface.cpp.s
+
+src/interface/Login_Interface.obj: src/interface/Login_Interface.cpp.obj
+.PHONY : src/interface/Login_Interface.obj
+
+# target to build an object file
+src/interface/Login_Interface.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PBL2.dir\build.make CMakeFiles/PBL2.dir/src/interface/Login_Interface.cpp.obj
+.PHONY : src/interface/Login_Interface.cpp.obj
+
+src/interface/Login_Interface.i: src/interface/Login_Interface.cpp.i
+.PHONY : src/interface/Login_Interface.i
+
+# target to preprocess a source file
+src/interface/Login_Interface.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PBL2.dir\build.make CMakeFiles/PBL2.dir/src/interface/Login_Interface.cpp.i
+.PHONY : src/interface/Login_Interface.cpp.i
+
+src/interface/Login_Interface.s: src/interface/Login_Interface.cpp.s
+.PHONY : src/interface/Login_Interface.s
+
+# target to generate assembly for a file
+src/interface/Login_Interface.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\PBL2.dir\build.make CMakeFiles/PBL2.dir/src/interface/Login_Interface.cpp.s
+.PHONY : src/interface/Login_Interface.cpp.s
+
+src/utils/GenID.obj: src/utils/GenID.cpp.obj
+.PHONY : src/utils/GenID.obj
+
+# target to build an object file
+src/utils/GenID.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\utils.dir\build.make CMakeFiles/utils.dir/src/utils/GenID.cpp.obj
+.PHONY : src/utils/GenID.cpp.obj
+
+src/utils/GenID.i: src/utils/GenID.cpp.i
+.PHONY : src/utils/GenID.i
+
+# target to preprocess a source file
+src/utils/GenID.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\utils.dir\build.make CMakeFiles/utils.dir/src/utils/GenID.cpp.i
+.PHONY : src/utils/GenID.cpp.i
+
+src/utils/GenID.s: src/utils/GenID.cpp.s
+.PHONY : src/utils/GenID.s
+
+# target to generate assembly for a file
+src/utils/GenID.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\utils.dir\build.make CMakeFiles/utils.dir/src/utils/GenID.cpp.s
+.PHONY : src/utils/GenID.cpp.s
+
 src/utils/Helpers.obj: src/utils/Helpers.cpp.obj
 .PHONY : src/utils/Helpers.obj
 
@@ -745,6 +841,18 @@ help:
 	@echo ... src/entities/Ticket.obj
 	@echo ... src/entities/Ticket.i
 	@echo ... src/entities/Ticket.s
+	@echo ... src/interface/Admin_Interface.obj
+	@echo ... src/interface/Admin_Interface.i
+	@echo ... src/interface/Admin_Interface.s
+	@echo ... src/interface/Agent_Interface.obj
+	@echo ... src/interface/Agent_Interface.i
+	@echo ... src/interface/Agent_Interface.s
+	@echo ... src/interface/Login_Interface.obj
+	@echo ... src/interface/Login_Interface.i
+	@echo ... src/interface/Login_Interface.s
+	@echo ... src/utils/GenID.obj
+	@echo ... src/utils/GenID.i
+	@echo ... src/utils/GenID.s
 	@echo ... src/utils/Helpers.obj
 	@echo ... src/utils/Helpers.i
 	@echo ... src/utils/Helpers.s

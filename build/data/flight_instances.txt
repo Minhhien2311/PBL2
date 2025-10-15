@@ -1,0 +1,1 @@
+instanceId|flightId|departureIso|arrivalIso|economyTotal|economyAvailable|businessTotal|businessAvailable|fareEconomy|fareBusiness

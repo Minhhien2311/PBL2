@@ -101,19 +101,36 @@ CMakeFiles/utils.dir/src/utils/Time.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/utils.dir/src/utils/Time.cpp.s"
 	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\PBL2\src\utils\Time.cpp -o CMakeFiles\utils.dir\src\utils\Time.cpp.s
 
+CMakeFiles/utils.dir/src/utils/GenID.cpp.obj: CMakeFiles/utils.dir/flags.make
+CMakeFiles/utils.dir/src/utils/GenID.cpp.obj: CMakeFiles/utils.dir/includes_CXX.rsp
+CMakeFiles/utils.dir/src/utils/GenID.cpp.obj: C:/PBL2/src/utils/GenID.cpp
+CMakeFiles/utils.dir/src/utils/GenID.cpp.obj: CMakeFiles/utils.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=C:\PBL2\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/utils.dir/src/utils/GenID.cpp.obj"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/utils.dir/src/utils/GenID.cpp.obj -MF CMakeFiles\utils.dir\src\utils\GenID.cpp.obj.d -o CMakeFiles\utils.dir\src\utils\GenID.cpp.obj -c C:\PBL2\src\utils\GenID.cpp
+
+CMakeFiles/utils.dir/src/utils/GenID.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/utils.dir/src/utils/GenID.cpp.i"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E C:\PBL2\src\utils\GenID.cpp > CMakeFiles\utils.dir\src\utils\GenID.cpp.i
+
+CMakeFiles/utils.dir/src/utils/GenID.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/utils.dir/src/utils/GenID.cpp.s"
+	C:\msys64\ucrt64\bin\g++.exe $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S C:\PBL2\src\utils\GenID.cpp -o CMakeFiles\utils.dir\src\utils\GenID.cpp.s
+
 # Object files for target utils
 utils_OBJECTS = \
 "CMakeFiles/utils.dir/src/utils/Helpers.cpp.obj" \
-"CMakeFiles/utils.dir/src/utils/Time.cpp.obj"
+"CMakeFiles/utils.dir/src/utils/Time.cpp.obj" \
+"CMakeFiles/utils.dir/src/utils/GenID.cpp.obj"
 
 # External object files for target utils
 utils_EXTERNAL_OBJECTS =
 
 libutils.a: CMakeFiles/utils.dir/src/utils/Helpers.cpp.obj
 libutils.a: CMakeFiles/utils.dir/src/utils/Time.cpp.obj
+libutils.a: CMakeFiles/utils.dir/src/utils/GenID.cpp.obj
 libutils.a: CMakeFiles/utils.dir/build.make
 libutils.a: CMakeFiles/utils.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\PBL2\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX static library libutils.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=C:\PBL2\build\CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX static library libutils.a"
 	$(CMAKE_COMMAND) -P CMakeFiles\utils.dir\cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles\utils.dir\link.txt --verbose=$(VERBOSE)
 

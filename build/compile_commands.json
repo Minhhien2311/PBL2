@@ -37,6 +37,12 @@
 },
 {
   "directory": "C:/PBL2/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -DDATA_DIR=\\\"C:/PBL2/build/data\\\" @CMakeFiles/utils.dir/includes_CXX.rsp -g -std=gnu++20 -Wall -Wextra -Wpedantic -o CMakeFiles\\utils.dir\\src\\utils\\GenID.cpp.obj -c C:\\PBL2\\src\\utils\\GenID.cpp",
+  "file": "C:/PBL2/src/utils/GenID.cpp",
+  "output": "CMakeFiles/utils.dir/src/utils/GenID.cpp.obj"
+},
+{
+  "directory": "C:/PBL2/build",
   "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -DDATA_DIR=\\\"C:/PBL2/build/data\\\" @CMakeFiles/entities.dir/includes_CXX.rsp -g -std=gnu++20 -Wall -Wextra -Wpedantic -o CMakeFiles\\entities.dir\\src\\entities\\Account.cpp.obj -c C:\\PBL2\\src\\entities\\Account.cpp",
   "file": "C:/PBL2/src/entities/Account.cpp",
   "output": "CMakeFiles/entities.dir/src/entities/Account.cpp.obj"
@@ -100,6 +106,24 @@
   "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -DDATA_DIR=\\\"C:/PBL2/build/data\\\" @CMakeFiles/PBL2.dir/includes_CXX.rsp -g -std=gnu++20 -Wall -Wextra -Wpedantic -o CMakeFiles\\PBL2.dir\\app\\main.cpp.obj -c C:\\PBL2\\app\\main.cpp",
   "file": "C:/PBL2/app/main.cpp",
   "output": "CMakeFiles/PBL2.dir/app/main.cpp.obj"
+},
+{
+  "directory": "C:/PBL2/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -DDATA_DIR=\\\"C:/PBL2/build/data\\\" @CMakeFiles/PBL2.dir/includes_CXX.rsp -g -std=gnu++20 -Wall -Wextra -Wpedantic -o CMakeFiles\\PBL2.dir\\src\\interface\\Admin_Interface.cpp.obj -c C:\\PBL2\\src\\interface\\Admin_Interface.cpp",
+  "file": "C:/PBL2/src/interface/Admin_Interface.cpp",
+  "output": "CMakeFiles/PBL2.dir/src/interface/Admin_Interface.cpp.obj"
+},
+{
+  "directory": "C:/PBL2/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -DDATA_DIR=\\\"C:/PBL2/build/data\\\" @CMakeFiles/PBL2.dir/includes_CXX.rsp -g -std=gnu++20 -Wall -Wextra -Wpedantic -o CMakeFiles\\PBL2.dir\\src\\interface\\Agent_Interface.cpp.obj -c C:\\PBL2\\src\\interface\\Agent_Interface.cpp",
+  "file": "C:/PBL2/src/interface/Agent_Interface.cpp",
+  "output": "CMakeFiles/PBL2.dir/src/interface/Agent_Interface.cpp.obj"
+},
+{
+  "directory": "C:/PBL2/build",
+  "command": "C:\\msys64\\ucrt64\\bin\\g++.exe -DDATA_DIR=\\\"C:/PBL2/build/data\\\" @CMakeFiles/PBL2.dir/includes_CXX.rsp -g -std=gnu++20 -Wall -Wextra -Wpedantic -o CMakeFiles\\PBL2.dir\\src\\interface\\Login_Interface.cpp.obj -c C:\\PBL2\\src\\interface\\Login_Interface.cpp",
+  "file": "C:/PBL2/src/interface/Login_Interface.cpp",
+  "output": "CMakeFiles/PBL2.dir/src/interface/Login_Interface.cpp.obj"
 },
 {
   "directory": "C:/PBL2/build/ftxui",
