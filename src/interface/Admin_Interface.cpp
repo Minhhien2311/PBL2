@@ -12,19 +12,16 @@
 
 using namespace ftxui;
 
+FlightManager flight_manager("C:/PBL2/data/flights.txt","C:/PBL2/data/flight_instances.txt");
+
 // --- Giao diện cho màn hình "Thêm chuyến bay" ---
 class AddFlightScreen {
 public:
     // Trạng thái (dữ liệu) của màn hình này
     std::string flight_number;
     std::string airline;
-    std::string aircraft_type;
     std::string departure_airport;
     std::string arrival_airport;
-    std::string base_price;
-    std::string total_seats;
-    std::string business_seats;
-    std::string economy_seats;
     std::string thong_bao = "";
 
     // Component chính chứa các thành phần con
@@ -34,17 +31,12 @@ public:
         // Tạo các component con
         Component input_flight_number = Input(&flight_number, "Nhập mã chuyến bay (VD:VN123)");
         Component input_airline = Input(&airline, "Nhập hãng (VD: Vietnam Airline)");
-        Component input_airline = Input(&aircraft_type, "Nhập loại máy bay (VD: B737)");
         Component input_departure_airport = Input(&departure_airport, "Nhập nơi đi (VD: HAN)");
         Component input_arrival_airport = Input(&arrival_airport, "Nhập nơi đến (VD: DAN)");
-        Component input_base_price = Input(&base_price, "Nhập giá cơ bản");
-        Component input_total_seats = Input(&total_seats, "Nhập tổng số ghế ");
-        Component input_business_seats = Input(&business_seats, "Nhập số ghế thương gia");
-        Component input_economy_seats = Input(&economy_seats, "Nhập số ghế thường");
 
         auto them_button = Button("Thêm", [&] {
             // Logic khi nhấn nút "Thêm"
-            FlightManager flight_manager()
+            
             if ()
             thong_bao = "Thêm thành công chuyến bay " + flight_number + "!";
             // Xóa dữ liệu cũ

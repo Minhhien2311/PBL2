@@ -1,0 +1,5 @@
+# Thư mục build được tạo bởi CMake
+build/
+
+# Các file cài đặt riêng của VS Code (tùy chọn)
+.vscode/
