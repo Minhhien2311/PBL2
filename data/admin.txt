@@ -1,1 +1,2 @@
-accountId|username|passwordHash|role|fullName|phoneNumber|email
+001|admin|48521f5825a07530|0|Admin User One|0123456789|admin1@example.com
+002|admin001|0d463777d48347f9|0|Admin User Two|0987654321|admin2@example.com
