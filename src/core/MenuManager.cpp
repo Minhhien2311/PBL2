@@ -1,13 +1,6 @@
-#include "include/main_state.h"
-#include "include/interface/Login_Interface.h"
-#include "include/interface/Admin_Interface.h"
-#include "include/interface/Agent_Interface.h"
-#include <iostream>
+#include "include/core/MenuManager.h"
 
-ApplicationScreen current_screen = ApplicationScreen::Login;
-
-int main() {
-
+void app(){
     while (current_screen != ApplicationScreen::Exit) {
         switch (current_screen) {
             case ApplicationScreen::Login:
@@ -20,5 +13,4 @@ int main() {
                 ShowAgentMenu();
         }
     }
-    return 0;
 }
