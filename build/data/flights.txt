@@ -1,4 +1,3 @@
-flightId|flightNumber|airline|departureAirport|arrivalAirport
 1|VN123|Vietnam Airlines|HAN|SGN
 2|VN456|Vietnam Airlines|SGN|HAN
 3|VJ789|Vietjet Air|HAN|DAD

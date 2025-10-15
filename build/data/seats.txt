@@ -1,4 +1,3 @@
-seatId|instanceId|seatNumber|seatClass|isAvailable|extraFee
 1|1002|1A|BUSINESS|1|500000
 2|1002|1B|BUSINESS|1|500000
 3|1002|1C|BUSINESS|0|500000
