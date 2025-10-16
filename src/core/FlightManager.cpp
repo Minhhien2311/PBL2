@@ -229,6 +229,9 @@ bool FlightManager::createNewInstance(const std::string& flightId,
     if (totalEconomySeats < 0 || totalBusinessSeats < 0 || fareEconomy < 0.0 || fareBusiness < 0.0) {
         return false; // Số ghế và giá vé không được âm.
     }
+    // 3. Kiểm tra dữ liệu rỗng. //Thêm cái này
+    if (flightId.empty() || departureIso.empty() || arrivalIso.empty() || totalEconomySeats == 0 || totalBusinessSeats == 0 || fareEconomy == 0 || fareBusiness == 0)
+        return false;
 
     // <<< THAY ĐỔI: Tạo đối tượng trên heap bằng 'new'
     this->allInstances.push_back(new FlightInstance(flightId, departureIso, arrivalIso, totalEconomySeats, totalBusinessSeats, fareEconomy, fareBusiness));
@@ -276,16 +279,18 @@ DynamicArray<FlightInstance*> FlightManager::findInstancesByFlightId(const std::
 
 // --- Chức năng Lưu trữ (Persistence) ---
 
-bool FlightManager::saveDataToFiles(const std::string& flightsFilePath, const std::string& instancesFilePath) const {
+bool FlightManager::saveFlightsToFiles(const std::string& flightsFilePath) const {
     // Lưu danh sách Flight
     std::ofstream flightsFile(flightsFilePath);
     if (!flightsFile.is_open()) return false;
     for (size_t i = 0; i < allFlights.size(); ++i) {
         // <<< THAY ĐỔI: Dùng toán tử -> cho con trỏ
         flightsFile << allFlights[i]->toRecordLine() << "\n";
-    }
-    flightsFile.close();
 
+    return true;
+}
+
+bool FlightManager::saveInstancesToFiles(const std::string& instancesFilePath) const {
     // Lưu danh sách FlightInstance
     std::ofstream instancesFile(instancesFilePath);
     if (!instancesFile.is_open()) return false;

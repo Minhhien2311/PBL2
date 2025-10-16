@@ -76,7 +76,7 @@ public:
                     separator(),
                     container->ChildAt(3)->Render(), // input_economyTotal
                 },
-            }) | border | flex,
+            }) | border ,
             separator(),
             // Nút "Thêm"
             container->ChildAt(4)->Render() | center, // them_button
@@ -105,13 +105,13 @@ public:
 
     AddFlightInstanceScreen() {
         // Tạo các component con
-        Component input_flightID = Input(&flightID, "Nhập ID tuyến bay (VD: 1)");
-        Component input_departureIso = Input(&departureIso, "Nhập giờ khởi hành (YYYY-MM-DDTHH:MM:SSZ)");
-        Component input_arrivalIso = Input(&arrivalIso, "Nhập giờ hạ cánh (YYYY-MM-DDTHH:MM:SSZ)");
-        Component input_economyTotal = Input(&economyTotal, "Nhập số ghế hạng phổ thông (VD: 120)");
-        Component input_businessTotal = Input(&businessTotal, "Nhập số ghế hạng thương gia (VD: 40)");
-        Component input_fareEconomy = Input(&fareEconomy, "Nhập giá vé phổ thông (VD: 1500000)");
-        Component input_fareBusiness = Input(&fareBusiness, "Nhập giá vé thương gia (VD: 3500000)");
+        Component input_flightID = Input(&flightID, "(VD: 1)");
+        Component input_departureIso = Input(&departureIso, "(YYYY-MM-DDTHH:MM:SSZ)");
+        Component input_arrivalIso = Input(&arrivalIso, "(YYYY-MM-DDTHH:MM:SSZ)");
+        Component input_economyTotal = Input(&economyTotal, "(VD: 120)");
+        Component input_businessTotal = Input(&businessTotal, "(VD: 40)");
+        Component input_fareEconomy = Input(&fareEconomy, "(VD: 1500000)");
+        Component input_fareBusiness = Input(&fareBusiness, "(VD: 3500000)");
 
         auto them_button = Button("Thêm", [&] {
             // Logic khi nhấn nút "Thêm"
@@ -175,13 +175,13 @@ public:
                     separator(),
                     container->ChildAt(6)->Render(), // input_faceBusiness
                 },
-            }) | border | flex,
-            separator(),
+            }) | border, // flex
+            separatorEmpty(),
             // Nút "Thêm"
             container->ChildAt(7)->Render() | center, // them_button
             separator(),
             // Thông báo
-            text(thong_bao) | color(Color::Green) | center
+            text(thong_bao) | color(Color::Green) | center 
         });
     }
 };
@@ -200,9 +200,9 @@ void ShowAdminMenu(AccountManager& account_manager){
         "Danh sách chuyến bay",
         "Danh sách đại lý",
         "Thêm tuyến bay",
-        "Thêm chuyến bay"
+        "Thêm chuyến bay",
         "Xóa tuyến bay",
-        "Xóa chuyến bay"
+        "Xóa chuyến bay",
         "Thêm đại lý",
     };
 
@@ -217,11 +217,9 @@ void ShowAdminMenu(AccountManager& account_manager){
 
     // Component nút Đăng xuất
     auto logout_button = Button("Đăng xuất", [&]{
+        account_manager.logout();
         current_screen = ApplicationScreen::Login;
     });
-
-    //Component nút Thoát
-    auto exit_button = Button("Thoát", screen.ExitLoopClosure());
 
     // Container chính gom nhóm tất cả các phần có thể tương tác
     // Điều này quan trọng để điều hướng bằng phím Tab
@@ -229,7 +227,6 @@ void ShowAdminMenu(AccountManager& account_manager){
         menu,
         add_flight_screen.container, // Thêm container của màn hình con vào
         add_flight_instance_screen.container,
-        exit_button,
         logout_button,
     });
 
@@ -242,7 +239,6 @@ void ShowAdminMenu(AccountManager& account_manager){
         auto left_pane = vbox({
             menu->Render(),
             separatorEmpty() | flex, // Dùng flex để đẩy nút Đăng xuất xuống dưới
-            exit_button->Render(),
             logout_button->Render()
         }) | size(WIDTH, EQUAL, 40) | size(HEIGHT, EQUAL, 50) | border; // Cố định chiều rộng của menu
 

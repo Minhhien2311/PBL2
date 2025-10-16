@@ -14,8 +14,6 @@ void app(){
                 break;
             case ApplicationScreen::AgentMenu:
                 ShowAgentMenu();
-            case ApplicationScreen::Exit:
-                exit(0);
         }
     }
 }

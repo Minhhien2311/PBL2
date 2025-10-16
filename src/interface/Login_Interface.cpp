@@ -74,10 +74,10 @@ void ShowLoginScreen(AccountManager& account_manager) {
             window(text("Thong tin dang nhap"),
                 // Dùng gridbox để căn chỉnh các dòng cho đẹp
                 gridbox({
-                    {text(" Ten dang nhap: ") | align_right, user_name_input->Render()},
+                    {text(" Ten dang nhap: ") | align_right, user_name_input->Render() | size(WIDTH, LESS_THAN, 12)},
                     {text(" Mat khau:      ") | align_right, hbox({
                         // Đặt Input và nút Hiện/Ẩn trên cùng một dòng
-                        password_container->Render() | flex,
+                        password_container->Render() | flex | size(WIDTH, LESS_THAN, 12),
                         separatorEmpty(),
                         eye_button->Render()
                     })},
@@ -86,7 +86,7 @@ void ShowLoginScreen(AccountManager& account_manager) {
             separator(),
             login_button->Render() | center,
             separator(),
-            text(login_message) | color(Color::Green) | center
+            text(login_message) | color(Color::Red) | center
         }) | border | center;
     });
 

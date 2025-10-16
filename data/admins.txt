@@ -1,2 +1,2 @@
-001|admin|70bf25e562eb0f78|0|Admin User One|0123456789|admin1@example.com
-002|admin001|0d463777d48347f9|0|Admin User Two|0987654321|admin2@example.com
+001|admin|70bf25e562eb0f78|0|Minh Hien|0123456789|admin1@example.com
+002|admin001|70bf25e562eb0f78|0|Khanh Linh|0987654321|admin2@example.com

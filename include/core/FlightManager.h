@@ -102,7 +102,8 @@ public:
     
     DynamicArray<FlightInstance*> findInstancesByFlightId(const std::string& flightId);
 
-    bool saveDataToFiles(const std::string& flightsFilePath, const std::string& instancesFilePath) const;
+    bool saveFlightsToFiles(const std::string& flightsFilePath) const;
+    bool saveInstancesToFiles(const std::string& instancesFilePath) const;
 };
 
 #endif // FLIGHT_MANAGER_H
