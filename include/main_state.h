@@ -9,7 +9,7 @@ enum class ApplicationScreen {
     // AdminRemoveFlight,
     // AdminAddAgent,
     // AdminRemoveAgent,
-    //Agent_Interface
+    // Agent_Interface
     AgentMenu,
     //
     Exit, // Trạng thái để thoát chương trình
