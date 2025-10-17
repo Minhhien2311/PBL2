@@ -223,6 +223,7 @@ void ShowAdminMenu(AccountManager& account_manager){
     auto logout_button = Button("Đăng xuất", [&]{
         account_manager.logout();
         current_screen = ApplicationScreen::Login;
+        screen.Exit();
     });
 
     // Container chính gom nhóm tất cả các phần có thể tương tác
