@@ -21,11 +21,11 @@ void ShowLoginScreen(AccountManager& account_manager) {
     // --- Components ---
 
     // 1. Input cho tên đăng nhập
-    Component user_name_input = Input(&user_name, "Nhap ten dang nhap");
+    Component user_name_input = Input(&user_name, "Nhập tên đăng nhập");
 
     // 2. Hai phiên bản của Input mật khẩu (ẩn và hiện)
-    Component password_input_hidden = Input(&user_password, "Nhap mat khau", {.password = true});
-    Component password_input_visible = Input(&user_password, "Nhap mat khau", {.password = false});
+    Component password_input_hidden = Input(&user_password, "Nhập mật khẩu", {.password = true});
+    Component password_input_visible = Input(&user_password, "Nhập mật khẩu", {.password = false});
 
     // 3. Container::Tab để chuyển đổi giữa hai phiên bản Input trên
     auto password_container = Container::Tab(
@@ -42,11 +42,11 @@ void ShowLoginScreen(AccountManager& account_manager) {
     });
 
     // 5. Nút đăng nhập
-    auto login_button = Button("Dang nhap", [&] {
+    auto login_button = Button("Đăng nhập", [&] {
         bool log = account_manager.login(user_name,user_password);
 
         if (log) {
-            login_message = "Dang nhap thanh cong!";
+            login_message = "Đăng nhập thành công!";
             if (account_manager.getCurrentUser()->getRole() == Role::Admin) {
                 current_screen = ApplicationScreen::AdminMenu;
             } else {
@@ -54,7 +54,7 @@ void ShowLoginScreen(AccountManager& account_manager) {
             }
             screen.Exit();
         } else {
-            login_message = "Ten dang nhap hoac mat khau khong chinh xac!";
+            login_message = "Tên đăng nhập hoặc mật khẩu không chính xác!";
         }
     });
 
@@ -69,19 +69,19 @@ void ShowLoginScreen(AccountManager& account_manager) {
     // Renderer để vẽ giao diện
     auto renderer = Renderer(main_container, [&] {
         return vbox({
-            text("HE THONG QUAN LY BAN VE MAY BAY") | bold | center,
+            text("HỆ THỐNG QUẢN LÝ BÁN VÉ MÁY BAY") | bold | center,
             separator(),
-            window(text("Thong tin dang nhap"),
+            window(text("Thông tin đăng nhập"),
                 // Dùng gridbox để căn chỉnh các dòng cho đẹp
                 gridbox({
-                    {text(" Ten dang nhap: ") | align_right, user_name_input->Render() | size(WIDTH, LESS_THAN, 12)},
-                    {text(" Mat khau:      ") | align_right, hbox({
+                    {text(" Tên đăng nhập: ") | align_right, user_name_input->Render() | size(WIDTH, EQUAL, 22)},
+                    {text(" Mật khẩu:      ") | align_right, hbox({
                         // Đặt Input và nút Hiện/Ẩn trên cùng một dòng
-                        password_container->Render() | flex | size(WIDTH, LESS_THAN, 12),
+                        hbox(password_container->Render()) | size(WIDTH, EQUAL, 20), // |flex
                         separatorEmpty(),
                         eye_button->Render()
                     })},
-                }) | size(WIDTH, EQUAL, 50)
+                })
             ),
             separator(),
             login_button->Render() | center,
