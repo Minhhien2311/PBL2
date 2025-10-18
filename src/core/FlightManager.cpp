@@ -288,6 +288,7 @@ bool FlightManager::saveFlightsToFiles(const std::string& flightsFilePath) const
         flightsFile << allFlights[i]->toRecordLine() << "\n";
 
     return true;
+    }
 }
 
 bool FlightManager::saveInstancesToFiles(const std::string& instancesFilePath) const {

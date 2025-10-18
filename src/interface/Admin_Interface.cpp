@@ -115,7 +115,10 @@ public:
 
         auto them_button = Button("Thêm", [&] {
             // Logic khi nhấn nút "Thêm"
-            bool new_flight_instance = flight_manager.createNewInstance(flightID,
+            if (economyTotal.empty() || businessTotal.empty() || fareEconomy.empty() || fareBusiness.empty())
+                thong_bao = "Không được để dữ liệu trống!";
+            else{
+                bool new_flight_instance = flight_manager.createNewInstance(flightID,
                                                                         departureIso,
                                                                         arrivalIso,
                                                                         std::stoi(economyTotal),
@@ -123,19 +126,20 @@ public:
                                                                         std::stoi(fareEconomy),
                                                                         std::stoi(fareBusiness));
 
-            if (new_flight_instance){
-                thong_bao = "Thêm thành công chuyến bay " + flightID + " !";
-                // Xóa dữ liệu cũ
-                flightID = "";
-                departureIso = "";
-                arrivalIso = "";
-                economyTotal = "";
-                businessTotal = "";
-                fareEconomy = "";
-                fareBusiness = "";
+                if (new_flight_instance){
+                    thong_bao = "Thêm thành công chuyến bay " + flightID + " !";
+                    // Xóa dữ liệu cũ
+                    flightID = "";
+                    departureIso = "";
+                    arrivalIso = "";
+                    economyTotal = "";
+                    businessTotal = "";
+                    fareEconomy = "";
+                    fareBusiness = "";
+                }
+                else
+                    thong_bao = "Không thể thêm chuyến bay trống hoặc đã tồn tại!";
             }
-            else
-                thong_bao = "Không thể thêm chuyến bay trống hoặc đã tồn tại!";
             
         });
 
@@ -240,7 +244,7 @@ void ShowAdminMenu(AccountManager& account_manager){
             menu->Render(),
             separatorEmpty() | flex, // Dùng flex để đẩy nút Đăng xuất xuống dưới
             logout_button->Render()
-        }) | size(WIDTH, EQUAL, 40) | size(HEIGHT, EQUAL, 50) | border; // Cố định chiều rộng của menu
+        }) | size(WIDTH, EQUAL, 30) | size(HEIGHT, EQUAL, 50) | border; // Cố định chiều rộng của menu
 
         // 2. Nội dung bên phải
         Element right_content;

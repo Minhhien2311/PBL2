@@ -1,9 +1,0 @@
-prefix="C:/Program Files (x86)/PBL2"
-libdir="C:/Program Files (x86)/PBL2/lib"
-includedir="C:/Program Files (x86)/PBL2/include"
-
-Name: ftxui
-Description: 
-Version: 6.1.9
-Cflags: -I${includedir}
-Libs: -L${libdir} -lftxui-component -lftxui-dom -lftxui-screen

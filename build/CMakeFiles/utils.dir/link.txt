@@ -1,2 +1,0 @@
-C:\msys64\ucrt64\bin\ar.exe qc libutils.a CMakeFiles/utils.dir/src/utils/Helpers.cpp.obj CMakeFiles/utils.dir/src/utils/Time.cpp.obj CMakeFiles/utils.dir/src/utils/GenID.cpp.obj
-C:\msys64\ucrt64\bin\ranlib.exe libutils.a
