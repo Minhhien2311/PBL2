@@ -9,7 +9,7 @@ class FlightManager;
 
 class BookingManager {
 private:
-    // <<< THAY ĐỔI: Lưu trữ một mảng các con trỏ thay vì đối tượng
+    // Lưu trữ một mảng các con trỏ thay vì đối tượng
     DynamicArray<Booking*> allBookings; 
     DynamicArray<Ticket*> allTickets;   
 

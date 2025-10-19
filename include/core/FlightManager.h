@@ -8,7 +8,7 @@
 
 class FlightManager {
 private:
-    // <<< THAY ĐỔI: Lưu trữ một mảng các con trỏ thay vì đối tượng
+    // Lưu trữ một mảng các con trỏ thay vì đối tượng
     DynamicArray<Flight*> allFlights;         
     DynamicArray<FlightInstance*> allInstances; 
 
