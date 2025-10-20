@@ -8,15 +8,9 @@
 
 class FlightManager {
 private:
-<<<<<<< HEAD
-    // <<< THAY ĐỔI: Lưu trữ một mảng các con trỏ thay vì đối tượng
-    DynamicArray<Flight*> allFlights;       
-    DynamicArray<FlightInstance*> allInstances;
-=======
     // Lưu trữ một mảng các con trỏ thay vì đối tượng
     DynamicArray<Flight*> allFlights;         
     DynamicArray<FlightInstance*> allInstances; 
->>>>>>> c0b3a243bf8d348e2f053836179c3601032aa1cc
 
     void loadFlightsFromFile(const std::string& filePath);
     void loadInstancesFromFile(const std::string& filePath);
