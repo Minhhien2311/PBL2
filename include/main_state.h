@@ -6,7 +6,15 @@ enum class ApplicationScreen {
     Login,
     //Admin_Interface
     AdminMenu,
+<<<<<<< HEAD
     //Agent_Interface
+=======
+    // AdminAddFlight,
+    // AdminRemoveFlight,
+    // AdminAddAgent,
+    // AdminRemoveAgent,
+    // Agent_Interface
+>>>>>>> c0b3a243bf8d348e2f053836179c3601032aa1cc
     AgentMenu,
     //Thoat chuong trinh
     Exit,
