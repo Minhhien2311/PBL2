@@ -2,6 +2,7 @@
 #define FLIGHT_MANAGER_H
 
 #include "C:/PBL2/include/DSA/DynamicArray.h"           // CTDL nền tảng để lưu trữ
+#include "C:/PBL2/include/DSA/HashTable.h"
 #include "C:/PBL2/include/entities/Flight.h"            // Đối tượng tuyến bay gốc
 #include "C:/PBL2/include/entities/FlightInstance.h"    // Đối tượng chuyến bay cụ thể
 #include <string>
@@ -12,6 +13,10 @@ private:
     DynamicArray<Flight*> allFlights;         
     DynamicArray<FlightInstance*> allInstances; 
 
+    // Các hàm băm để tra cứu nhanh
+    HashTable<std::string, size_t> flightIdMap;       // Key: Flight ID, Value: index trong allFlights
+    HashTable<std::string, size_t> instanceIdMap;     // Key: Instance ID, Value: index trong allInstances
+
     void loadFlightsFromFile(const std::string& filePath);
     void loadInstancesFromFile(const std::string& filePath);
 
@@ -19,6 +24,7 @@ public:
     FlightManager(const std::string& flightsFilePath, const std::string& instancesFilePath);
     ~FlightManager() = default;
 
+    // Thêm tuyến và chuyến bay
     bool createNewFlight(const std::string& number,
                          const std::string& airline,
                          const std::string& departureIATA,
@@ -35,8 +41,14 @@ public:
     Flight* findFlightById(const std::string& flightId);
     FlightInstance* findInstanceById(const std::string& instanceId);
     
-    DynamicArray<FlightInstance*> findInstancesByFlightId(const std::string& flightId);
+    // Hàm tìm instance bằng flight ID, sửa lại kiểu trả về
+    void findInstancesByFlightId(const std::string& flightId, DynamicArray<FlightInstance*>& results) const;
 
+    // Các hàm xóa
+    bool removeFlightById(const std::string& flightId);
+    bool removeInstanceById(const std::string& instanceId);
+
+    // Các hàm lưu
     bool saveFlightsToFiles(const std::string& flightsFilePath) const;
     bool saveInstancesToFiles(const std::string& instancesFilePath) const;
 };
