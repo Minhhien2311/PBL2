@@ -9,15 +9,13 @@ namespace {
 }
 
 //  Constructor 
-Booking::Booking(const std::string& pnr,
-                 const std::string& agentId,
+Booking::Booking(const std::string& agentId,
                  const std::string& flightInstanceId,
                  const std::string& passengerId,
                  const std::string& bookingDate,
                  BookingClass bookingClass,
                  double baseFare)
     : bookingId(IdGenerator::generateBookingId()),
-      pnr(pnr),
       agentId(agentId),
       flightInstanceId(flightInstanceId),
       passengerId(passengerId),
@@ -35,7 +33,6 @@ Booking::Booking(const std::string& pnr,
 
 //  Getters 
 const std::string& Booking::getBookingId()      const { return bookingId; }
-const std::string& Booking::getPNR()            const { return pnr; }
 const std::string& Booking::getAgentId()        const { return agentId; }
 const std::string& Booking::getFlightInstanceId() const { return flightInstanceId; }
 const std::string& Booking::getPassengerId()    const { return passengerId; }
@@ -110,7 +107,6 @@ std::string Booking::toRecordLine() const {
     std::string classStr = std::to_string(static_cast<int>(this->bookingClass));
 
     return this->bookingId + "|" +
-           this->pnr + "|" +
            this->agentId + "|" +
            this->flightInstanceId + "|" +
            this->passengerId + "|" +
@@ -130,10 +126,6 @@ Booking Booking::fromRecordLine(const std::string& line) {
     size_t end = line.find('|');
     
     std::string id = line.substr(start, end - start);
-    start = end + 1;
-    end = line.find('|', start);
-
-    std::string pnr = line.substr(start, end - start);
     start = end + 1;
     end = line.find('|', start);
 
@@ -181,7 +173,7 @@ Booking Booking::fromRecordLine(const std::string& line) {
 
     // Dùng constructor để tạo đối tượng
     // Lưu ý: ID và PNR sẽ được sinh tự động, sau đó ta ghi đè lại
-    Booking booking(pnr, agentId, instanceId, passengerId, bookingDate, bClass, baseFare);
+    Booking booking(agentId, instanceId, passengerId, bookingDate, bClass, baseFare);
     
     // Ghi đè các giá trị đã đọc từ file
     booking.overrideIdForLoad(id);

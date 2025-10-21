@@ -11,7 +11,9 @@ class BookingManager {
 private:
     // Lưu trữ một mảng các con trỏ thay vì đối tượng
     DynamicArray<Booking*> allBookings;
-    DynamicArray<Ticket*> allTickets; 
+    DynamicArray<Ticket*> allTickets;
+
+    
 
     void loadBookingsFromFile(const std::string& filePath);
     void loadTicketsFromFile(const std::string& filePath);
