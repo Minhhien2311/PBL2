@@ -6,13 +6,118 @@
 #include "C:/PBL2/include/core/AccountManager.h"
 #include "C:/PBL2/include/main_state.h"
 #include "C:/PBL2/include/core/FlightManager.h"
+#include "C:/PBL2/include/entities/Flight.h"
+#include "C:/PBL2/include/DSA/DynamicArray.h" 
 #include "ftxui/component/component.hpp"
 #include "ftxui/component/screen_interactive.hpp"
 #include "ftxui/dom/elements.hpp"
+// #include <ftxui/dom/scroll_indicator.hpp>
 
 using namespace ftxui;
 
 FlightManager flight_manager("C:/PBL2/data/flights.txt","C:/PBL2/data/flight_instances.txt");
+
+class FlightList {
+public:
+    int scroll_position = 0;
+    int visible_rows = 15;  // số dòng hiển thị
+    std::vector<std::vector<std::string>> flight_data;
+    Component container;
+
+    FlightList() {
+        LoadData();
+
+        auto table_renderer = Renderer([&] {
+            Elements rows;
+            int total = flight_data.size();
+            int end_index = std::min(scroll_position + visible_rows, total);
+
+            // --- Tiêu đề bảng ---
+            auto header = hbox({
+                text("ID tuyến bay") | bold | center | size(WIDTH, EQUAL, 15),
+                separator(),
+                text("Mã tuyến bay") | bold | center | size(WIDTH, EQUAL, 15),
+                separator(),
+                text("Hãng bay") | bold | center | size(WIDTH, EQUAL, 25),
+                separator(),
+                text("Sân bay đi") | bold | center | size(WIDTH, EQUAL, 10),
+                separator(),
+                text("Sân bay đến") | bold | center | size(WIDTH, EQUAL, 11),
+            });
+
+            rows.push_back(header);
+            rows.push_back(separator());
+
+            // --- Dòng dữ liệu ---
+            for (int i = scroll_position; i < end_index; i++) {
+                const auto& f = flight_data[i];
+                rows.push_back(hbox({
+                    text(f[0]) | center | size(WIDTH, EQUAL, 15),
+                    text(f[1]) | center | size(WIDTH, EQUAL, 18),
+                    text(f[2]) | center | size(WIDTH, EQUAL, 25),
+                    text(f[3]) | center | size(WIDTH, EQUAL, 11),
+                    text(f[4]) | center | size(WIDTH, EQUAL, 10),
+                }));
+            }
+
+            // --- Thanh trạng thái ---
+            rows.push_back(separator());
+            rows.push_back(text("Dùng chuột để cuộn — Tổng số chuyến: " + std::to_string(total))
+                | dim | center);
+
+            return vbox({
+                text("DANH SÁCH TUYẾN BAY") | bold | center,
+                vbox(std::move(rows)) | border | size(HEIGHT, LESS_THAN, 25),
+            });
+        });
+
+        // --- Bắt sự kiện cuộn ---
+        container = CatchEvent(table_renderer, [&](Event event) {
+            int total = flight_data.size();
+
+            // --- Cuộn bằng chuột ---
+            if (event.is_mouse()) {
+                if (event.mouse().button == Mouse::WheelDown) {
+                    if (scroll_position + visible_rows < total)
+                        scroll_position++;
+                    return true;
+                }
+                if (event.mouse().button == Mouse::WheelUp) {
+                    if (scroll_position > 0)
+                        scroll_position--;
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+
+    Element Render() { return container->Render(); }
+
+private:
+    void LoadData() {
+        flight_data.clear();
+        auto flights = flight_manager.getAllFlights();
+
+        // --- Duyệt mảng flights đúng cách ---
+        for (int i = 0; i < flights.size(); i++) {
+            Flight* f = flights[i];
+            if (!f) continue;
+
+            std::stringstream ss(f->toRecordLine());
+            std::string col;
+            std::vector<std::string> cols;
+
+            while (std::getline(ss, col, '|'))
+                cols.push_back(col);
+
+            if (cols.size() < 5)
+                cols.resize(5, "");
+
+            flight_data.push_back(cols);
+        }
+    }
+};
 
 // --- Giao diện cho màn hình "Thêm tuyến bay" ---
 class AddFlightScreen {
@@ -37,9 +142,11 @@ public:
         auto them_button = Button("Thêm ", [&] {
             // Logic khi nhấn nút "Thêm"
             bool new_flight = flight_manager.createNewFlight(flightID,departureIso,arrivalIso,economyTotal);
-
             if (new_flight){
-                thong_bao = "Thêm thành công tuyến bay " + flightID + "|" + arrivalIso + " - " + economyTotal +"!";
+                if (flight_manager.saveFlightsToFiles("C:/PBL2/data/flights.txt") == 1) 
+                    thong_bao = "Thêm thành công tuyến bay " + flightID + "|" + arrivalIso + " - " + economyTotal +"!";
+                else
+                    thong_bao = "Xảy ra lỗi trong quá trình thêm tuyến bay!";
                 // Xóa dữ liệu cũ
                 flightID = "";
                 departureIso = "";
@@ -65,7 +172,7 @@ public:
         return vbox({
             // Bảng nhập liệu
             gridbox({
-                {text(" Mã chuyến bay ") | bold |center,separator(), text(" Hãng bay ") | bold |center,separator(), text(" Sân bay đi ") | bold |center,separator(), text(" Sân bay đến ") | bold |center},
+                {text(" Mã tuyến bay ") | bold |center,separator(), text(" Hãng bay ") | bold |center,separator(), text(" Sân bay đi ") | bold |center,separator(), text(" Sân bay đến ") | bold |center},
                 {
                     // Lấy component con từ container để render
                     container->ChildAt(0)->Render() |center ,// input_flightID
@@ -104,7 +211,7 @@ public:
 
     AddFlightInstanceScreen() {
         // Tạo các component con
-        Component input_flightID = Input(&flightID, "(VD: 1)");
+        Component input_flightID = Input(&flightID, "(VD: FI-001)");
         Component input_departureIso = Input(&departureIso, "(YYYY-MM-DDTHH:MM:SSZ)");
         Component input_arrivalIso = Input(&arrivalIso, "(YYYY-MM-DDTHH:MM:SSZ)");
         Component input_economyTotal = Input(&economyTotal, "(VD: 120)");
@@ -126,7 +233,10 @@ public:
                                                                         std::stoi(fareBusiness));
 
                 if (new_flight_instance){
-                    thong_bao = "Thêm thành công chuyến bay " + flightID + " !";
+                    if (flight_manager.saveInstancesToFiles("C:/PBL2/data/flight_instances.txt"))
+                        thong_bao = "Thêm thành công chuyến bay " + flightID + " !";
+                    else 
+                        thong_bao = "Xảy ra lỗi trong quá trình thêm chuyến bay!";
                     // Xóa dữ liệu cũ
                     flightID = "";
                     departureIso = "";
@@ -159,7 +269,7 @@ public:
         return vbox({
             // Bảng nhập liệu
             gridbox({
-                {text(" ID tuyến bay ") | bold | center,separator(), text(" Giờ khởi hành ") | bold | center,separator(), text(" Giờ hạ cánh ") | bold | center,separator(), 
+                {text(" ID chuyến bay ") | bold | center,separator(), text(" Giờ khởi hành ") | bold | center,separator(), text(" Giờ hạ cánh ") | bold | center,separator(), 
                 text(" Số ghế phổ thông ") | bold | center, separator(),text(" Số ghế thương gia ") | bold | center,separator(), text(" Giá vé phổ thông ") | bold | center, separator(),
                 text(" Giá vé thương gia ") | bold | center},
                 {
@@ -198,7 +308,7 @@ void ShowAdminMenu(AccountManager& account_manager){
     std::string user_name = " 👤" + account_manager.getCurrentUser()->getFullName() + " - Admin ";
     
     std::vector<std::string> menu_tabs = {
-        "Danh sách chuyến bay",
+        "Danh sách tuyến bay",
         "Danh sách đại lý",
         "Thêm tuyến bay",
         "Thêm chuyến bay",
@@ -208,6 +318,7 @@ void ShowAdminMenu(AccountManager& account_manager){
     };
 
     // --- CÁC COMPONENT TƯƠNG TÁC ---
+    FlightList flight_list;
     AddFlightScreen add_flight_screen;
     AddFlightInstanceScreen add_flight_instance_screen;
 
@@ -218,7 +329,7 @@ void ShowAdminMenu(AccountManager& account_manager){
     // Nó cũng được điều khiển bởi cùng một biến `selected_tab`.
     auto tab_container = Container::Tab(
         {
-            Container::Vertical({}), // Tab 0: Danh sách chuyến bay
+            flight_list.container, // Tab 0: Danh sách tuyến bay
             Container::Vertical({}), // Tab 1: Danh sách đại lý
             add_flight_screen.container,          // Tab 2: Thêm tuyến bay
             add_flight_instance_screen.container, // Tab 3: Thêm chuyến bay
@@ -242,8 +353,6 @@ void ShowAdminMenu(AccountManager& account_manager){
         tab_container,
         logout_button,
     });
-    // Thêm nút logout vào một container riêng để nó tách biệt
-    // khỏi luồng điều hướng Tab chính giữa menu và nội dung.
 
     // --- HỌA SĨ (RENDERER) ---
     // Phần Renderer vẫn giữ nguyên logic hiển thị dựa trên `selected_tab`.
@@ -258,7 +367,7 @@ void ShowAdminMenu(AccountManager& account_manager){
         // 2. Nội dung bên phải
         Element right_content;
         switch (selected_tab) {
-            case 0: right_content = text("Giao diện Danh sách chuyến bay") | center; break;
+            case 0: right_content = flight_list.Render() | center; break;
             case 1: right_content = text("Giao diện Danh sách đại lý") | center; break;
             case 2: right_content = add_flight_screen.Render(); break;
             case 3: right_content = add_flight_instance_screen.Render(); break;
