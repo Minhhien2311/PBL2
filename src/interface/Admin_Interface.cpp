@@ -66,7 +66,7 @@ public:
                 | dim | center);
 
             return vbox({
-                text("📋 DANH SÁCH TUYẾN BAY") | bold | center,
+                text("DANH SÁCH TUYẾN BAY") | bold | center,
                 vbox(std::move(rows)) | border | size(HEIGHT, LESS_THAN, 25),
             });
         });
@@ -74,18 +74,6 @@ public:
         // --- Bắt sự kiện cuộn ---
         container = CatchEvent(table_renderer, [&](Event event) {
             int total = flight_data.size();
-
-            // --- Cuộn bằng phím ---
-            if (event == Event::ArrowDown || event == Event::Character('s')) {
-                if (scroll_position + visible_rows < total)
-                    scroll_position++;
-                return true;
-            }
-            if (event == Event::ArrowUp || event == Event::Character('w')) {
-                if (scroll_position > 0)
-                    scroll_position--;
-                return true;
-            }
 
             // --- Cuộn bằng chuột ---
             if (event.is_mouse()) {
@@ -223,7 +211,7 @@ public:
 
     AddFlightInstanceScreen() {
         // Tạo các component con
-        Component input_flightID = Input(&flightID, "(VD: 1)");
+        Component input_flightID = Input(&flightID, "(VD: FI-001)");
         Component input_departureIso = Input(&departureIso, "(YYYY-MM-DDTHH:MM:SSZ)");
         Component input_arrivalIso = Input(&arrivalIso, "(YYYY-MM-DDTHH:MM:SSZ)");
         Component input_economyTotal = Input(&economyTotal, "(VD: 120)");
