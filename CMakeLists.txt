@@ -110,10 +110,6 @@ target_compile_definitions(PBL2 PRIVATE DATA_DIR="${DATA_DIR}")
 
 # ...
 
-# Liên kết thư viện ftxui với chương trình của bạn
-# target_link_libraries(program.exe PRIVATE ftxui::component ftxui::screen)
-
-
 # Sau khi build, copy toàn bộ thư mục data/ ở source sang thư mục build (đặt cạnh file chạy)
 add_custom_command(TARGET PBL2 POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory

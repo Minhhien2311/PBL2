@@ -51,6 +51,10 @@ public:
     // Các hàm lưu
     bool saveFlightsToFiles(const std::string& flightsFilePath) const;
     bool saveInstancesToFiles(const std::string& instancesFilePath) const;
+
+    //Thêm
+    DynamicArray<Flight*> getAllFlights() const;       
+    DynamicArray<FlightInstance*> getAllInstances() const;
 };
 
 #endif // FLIGHT_MANAGER_H

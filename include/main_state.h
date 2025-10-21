@@ -1,18 +1,15 @@
 #pragma once
 
-// Enum định nghĩa tất cả các "màn hình" có thể có trong ứng dụng
+// Enum định nghĩa tất cả các "màn hình chính" có thể có trong ứng dụng
 enum class ApplicationScreen {
+    //Login_Interface
     Login,
     //Admin_Interface
     AdminMenu,
-    // AdminAddFlight,
-    // AdminRemoveFlight,
-    // AdminAddAgent,
-    // AdminRemoveAgent,
-    // Agent_Interface
+    //Agent_Interface
     AgentMenu,
-    //
-    Exit, // Trạng thái để thoát chương trình
+    //Thoat chuong trinh
+    Exit,
 };
 
 // Biến toàn cục để theo dõi màn hình hiện tại
