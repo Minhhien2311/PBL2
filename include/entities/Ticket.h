@@ -19,8 +19,6 @@ private:
     std::string issueDateTime;    // "YYYY-MM-DDTHH:MM:SS"
 
     double baseFare;
-    double discount;
-    double totalAmount;
 
     TicketStatus status;
 
@@ -31,8 +29,6 @@ public:
            const std::string& bookingClass,
            const std::string& issueDateTime,
            double baseFare,
-           double discount,
-           double totalAmount,
            TicketStatus status = TicketStatus::Active);
 
     // Getters
@@ -43,8 +39,6 @@ public:
     const std::string& getBookingClass() const;
     const std::string& getIssueDateTime() const;
     double getBaseFare() const;
-    double getDiscount() const;
-    double getTotalAmount() const;
     TicketStatus getStatus() const;
 
     void setStatus(TicketStatus s);  // dùng khi cancel

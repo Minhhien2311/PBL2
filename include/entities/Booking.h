@@ -27,9 +27,7 @@ private:
     BookingClass bookingClass;
 
     // Chi tiết giá vé  
-    double baseFare;               
-    double discount;               
-    double totalAmount;            
+    double baseFare;       
 
 public:
     Booking() = default;

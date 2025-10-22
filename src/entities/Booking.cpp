@@ -1,13 +1,6 @@
 #include "C:/PBL2/include/entities/Booking.h"
 #include "C:/PBL2/include/utils/GenID.h"
-#include <algorithm>
 #include <string> 
-
-namespace {
-    static double clampNonNegative(double v) {
-        return (v < 0.0) ? 0.0 : v;
-    }
-}
 
 //  Constructor
 Booking::Booking(const std::string& flightInstanceId,
@@ -21,11 +14,7 @@ Booking::Booking(const std::string& flightInstanceId,
       // (Đã xóa seatId)
       bookingDate(bookingDate),
       bookingClass(bookingClass),
-      baseFare(baseFare < 0.0 ? 0.0 : baseFare),
-      discount(0.0), 
-      totalAmount(baseFare < 0.0 ? 0.0 : baseFare)
-{
-}
+      baseFare(baseFare < 0.0 ? 0.0 : baseFare) {}
 
 //  Getters
 const std::string& Booking::getBookingId()      const { return bookingId; }
@@ -34,16 +23,14 @@ const std::string& Booking::getPassengerId()    const { return passengerId; }
 const std::string& Booking::getBookingDate()    const { return bookingDate; }
 BookingClass       Booking::getClass()          const { return bookingClass; }
 double             Booking::getBaseFare()       const { return baseFare; }
-double             Booking::getTotalAmount()    const { return totalAmount; }
 
 //  Setters
 void Booking::setBaseFare(double value) {
     if (value < 0.0) value = 0.0;
     baseFare = value;
-    totalAmount = clampNonNegative(baseFare - discount);
 }
 
-// --- Đọc/Ghi file (Đã bỏ seatId) ---
+// --- Đọc/Ghi file ---
 
 std::string Booking::toRecordLine() const {
     std::string classStr = std::to_string(static_cast<int>(this->bookingClass));
@@ -54,9 +41,7 @@ std::string Booking::toRecordLine() const {
            // (Đã xóa seatId)
            this->bookingDate + "|" +
            classStr + "|" +
-           std::to_string(this->baseFare) + "|" +
-           std::to_string(this->discount) + "|" +
-           std::to_string(this->totalAmount);
+           std::to_string(this->baseFare);
 }
 
 Booking Booking::fromRecordLine(const std::string& line) {
@@ -89,20 +74,11 @@ Booking Booking::fromRecordLine(const std::string& line) {
     start = end + 1;
     end = line.find('|', start);
 
-    double discount = std::stod(line.substr(start, end - start));
-    start = end + 1;
-    end = line.length(); 
-
-    double totalAmount = std::stod(line.substr(start, end - start));
-
     // Tạo đối tượng
     Booking booking(instanceId, passengerId, bookingDate, bClass, baseFare);
     
     // Ghi đè các giá trị đã đọc từ file
     booking.overrideIdForLoad(id);
-    // (Đã xóa gán seatId)
-    booking.discount = discount;
-    booking.totalAmount = totalAmount;
 
     return booking;
 }
