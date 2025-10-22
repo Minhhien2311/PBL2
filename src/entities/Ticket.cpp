@@ -4,7 +4,6 @@
 #include <iostream> // Thêm thư viện để dùng cho printTicket
 
 Ticket::Ticket(const std::string& bookingId,
-           const std::string& pnr,
            const std::string& passengerId,
            const std::string& flightInstanceId,
            const std::string& seatId,
@@ -14,7 +13,7 @@ Ticket::Ticket(const std::string& bookingId,
            double discount,
            double totalAmount,
            TicketStatus status) // Bỏ giá trị mặc định ở đây để tránh lỗi biên dịch
-        : ticketNumber(IdGenerator::generateTicketNumber()), bookingId(bookingId), pnr(pnr),
+        : ticketNumber(IdGenerator::generateTicketNumber()), bookingId(bookingId),
           passengerId(passengerId), flightInstanceId(flightInstanceId), seatId(seatId),
           bookingClass(bookingClass), issueDateTime(issueDateTime),
           baseFare(baseFare), discount(discount), totalAmount(totalAmount), status(status) {}
@@ -22,7 +21,6 @@ Ticket::Ticket(const std::string& bookingId,
 // --- Getters (đã có) ---
 const std::string& Ticket::getTicketNumber() const { return ticketNumber; }
 const std::string& Ticket::getBookingId() const { return bookingId; }
-const std::string& Ticket::getPNR() const { return pnr; }
 const std::string& Ticket::getPassengerId() const { return passengerId; }
 const std::string& Ticket::getFlightInstanceId() const { return flightInstanceId; }
 const std::string& Ticket::getSeatId() const { return seatId; }
@@ -44,7 +42,6 @@ std::string Ticket::toRecordLine() const {
 
     return this->ticketNumber + "|" +
            this->bookingId + "|" +
-           this->pnr + "|" +
            this->passengerId + "|" +
            this->flightInstanceId + "|" +
            this->seatId + "|" +
@@ -66,10 +63,6 @@ Ticket Ticket::fromRecordLine(const std::string& line) {
     end = line.find('|', start);
 
     std::string bookingId = line.substr(start, end - start);
-    start = end + 1;
-    end = line.find('|', start);
-
-    std::string pnr = line.substr(start, end - start);
     start = end + 1;
     end = line.find('|', start);
 
@@ -109,7 +102,7 @@ Ticket Ticket::fromRecordLine(const std::string& line) {
     TicketStatus status = static_cast<TicketStatus>(statusInt);
 
     // Tạo đối tượng bằng constructor và sau đó gán lại ticketNumber
-    Ticket t(bookingId, pnr, passengerId, flightInstanceId, seatId, bookingClass, issueDateTime, baseFare, discount, totalAmount, status);
+    Ticket t(bookingId, passengerId, flightInstanceId, seatId, bookingClass, issueDateTime, baseFare, discount, totalAmount, status);
     
     // Ghi đè ID tự sinh bằng ID đọc từ file
     t.overrideTicketNumberForLoad(ticketNum);

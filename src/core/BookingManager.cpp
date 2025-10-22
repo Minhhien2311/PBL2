@@ -69,7 +69,6 @@ bool BookingManager::saveDataToFiles(const std::string& bookingsFilePath, const 
 // --- Nghiệp vụ chính ---
 
 Booking* BookingManager::createNewBooking( FlightManager& flightManager,
-                                           const std::string& pnr,
                                            const std::string& agentId,
                                            const std::string& flightInstanceId,
                                            const std::string& passengerId,
@@ -77,7 +76,7 @@ Booking* BookingManager::createNewBooking( FlightManager& flightManager,
                                            double baseFare)
 {
     // 1. Kiểm tra đầu vào ("Guard Clauses")
-    if (pnr.empty() || agentId.empty() || flightInstanceId.empty() || passengerId.empty() || baseFare < 0) {
+    if (agentId.empty() || flightInstanceId.empty() || passengerId.empty() || baseFare < 0) {
         return nullptr; // Dữ liệu không hợp lệ
     }
 
@@ -99,7 +98,7 @@ Booking* BookingManager::createNewBooking( FlightManager& flightManager,
     std::string currentDate = utils::Time::formatLocal(utils::Time::nowUtc(), "%Y-%m-%d %H:%M:%S");
     
     // <<< THAY ĐỔI: Tạo con trỏ mới bằng 'new'
-    Booking* newBooking = new Booking(pnr, agentId, flightInstanceId, passengerId, currentDate, bookingClass, baseFare);
+    Booking* newBooking = new Booking(agentId, flightInstanceId, passengerId, currentDate, bookingClass, baseFare);
     this->allBookings.push_back(newBooking);
 
     // 5. Trả về con trỏ vừa tạo
@@ -112,17 +111,6 @@ Booking* BookingManager::findBookingById(const std::string& bookingId) {
     for (size_t i = 0; i < allBookings.size(); ++i) {
         // <<< THAY ĐỔI: Dùng toán tử -> cho con trỏ
         if (allBookings[i]->getBookingId() == bookingId) {
-            // <<< THAY ĐỔI: Trả về con trỏ trực tiếp
-            return allBookings[i];
-        }
-    }
-    return nullptr; // Không tìm thấy
-}
-
-Booking* BookingManager::findBookingByPNR(const std::string& pnr) {
-    for (size_t i = 0; i < allBookings.size(); ++i) {
-        // <<< THAY ĐỔI: Dùng toán tử -> cho con trỏ
-        if (allBookings[i]->getPNR() == pnr) {
             // <<< THAY ĐỔI: Trả về con trỏ trực tiếp
             return allBookings[i];
         }
