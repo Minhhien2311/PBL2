@@ -10,6 +10,18 @@ FlightManager::FlightManager(const std::string& flightsFilePath, const std::stri
     this->loadInstancesFromFile(instancesFilePath);
 }
 
+FlightManager::~FlightManager() {
+    
+    //Xóa tất cả các đối tượng Flight đã cấp phát
+    for (int i = 0; i < allFlights.size(); i++) {
+        delete allFlights[i]; // Giải phóng bộ nhớ của từng đối tượng
+    }
+    
+    //Xóa tất cả các đối tượng FlightInstance đã cấp phát
+    for (int i = 0; i < allInstances.size(); i++) {
+        delete allInstances[i]; // Giải phóng bộ nhớ của từng đối tượng
+    }
+}
 // --- Hàm trợ giúp nội bộ ---
 
 void FlightManager::loadFlightsFromFile(const std::string& filePath) {
@@ -18,7 +30,6 @@ void FlightManager::loadFlightsFromFile(const std::string& filePath) {
     if (file.is_open()) {
         while (std::getline(file, line)) {
             if (!line.empty()) {
-                // <<< THAY ĐỔI: Tạo đối tượng trên heap bằng 'new'
                 Flight flightOnStack = Flight::fromRecordLine(line);
                 this->allFlights.push_back(new Flight(flightOnStack));
             }
@@ -33,7 +44,6 @@ void FlightManager::loadInstancesFromFile(const std::string& filePath) {
     if (file.is_open()) {
         while (std::getline(file, line)) {
             if (!line.empty()) {
-                // <<< THAY ĐỔI: Tạo đối tượng trên heap bằng 'new'
                 FlightInstance instanceOnStack = FlightInstance::fromRecordLine(line);
                 this->allInstances.push_back(new FlightInstance(instanceOnStack));
             }
@@ -86,7 +96,6 @@ bool FlightManager::createNewInstance(const std::string& flightId,
     if (flightId.empty() || departureIso.empty() || arrivalIso.empty() || totalEconomySeats == 0 || totalBusinessSeats == 0 || fareEconomy == 0 || fareBusiness == 0)
         return false;
 
-    // <<< THAY ĐỔI: Tạo đối tượng trên heap bằng 'new'
     this->allInstances.push_back(new FlightInstance(flightId, departureIso, arrivalIso, totalEconomySeats, totalBusinessSeats, fareEconomy, fareBusiness));
     return true;
 }
@@ -96,9 +105,7 @@ bool FlightManager::createNewInstance(const std::string& flightId,
 Flight* FlightManager::findFlightById(const std::string& flightId) {
     // Tìm kiếm tuyến tính (chưa tối ưu, sẽ nâng cấp bằng Bảng Băm sau).
     for (size_t i = 0; i < allFlights.size(); ++i) {
-        // <<< THAY ĐỔI: Dùng toán tử -> cho con trỏ
         if (allFlights[i]->getFlightId() == flightId) {
-            // <<< THAY ĐỔI: Trả về con trỏ trực tiếp
             return allFlights[i]; 
         }
     }
@@ -108,9 +115,7 @@ Flight* FlightManager::findFlightById(const std::string& flightId) {
 FlightInstance* FlightManager::findInstanceById(const std::string& instanceId) {
     // Tìm kiếm tuyến tính.
     for (size_t i = 0; i < allInstances.size(); ++i) {
-        // <<< THAY ĐỔI: Dùng toán tử -> cho con trỏ
         if (allInstances[i]->getInstanceId() == instanceId) {
-            // <<< THAY ĐỔI: Trả về con trỏ trực tiếp
             return allInstances[i];
         }
     }
@@ -121,9 +126,7 @@ FlightInstance* FlightManager::findInstanceById(const std::string& instanceId) {
 DynamicArray<FlightInstance*> FlightManager::findInstancesByFlightId(const std::string& flightId) {
     DynamicArray<FlightInstance*> results;
     for (size_t i = 0; i < allInstances.size(); ++i) {
-        // <<< THAY ĐỔI: Dùng toán tử -> cho con trỏ
         if (allInstances[i]->getFlightId() == flightId) {
-            // <<< THAY ĐỔI: Thêm con trỏ trực tiếp vào mảng kết quả.
             results.push_back(allInstances[i]);
         }
     }
@@ -137,7 +140,6 @@ bool FlightManager::saveFlightsToFiles(const std::string& flightsFilePath) const
     std::ofstream flightsFile(flightsFilePath);
     if (!flightsFile.is_open()) return false;
     for (size_t i = 0; i < allFlights.size(); ++i) {
-        // <<< THAY ĐỔI: Dùng toán tử -> cho con trỏ
         flightsFile << allFlights[i]->toRecordLine() << "\n";
     }
     flightsFile.close();
@@ -149,7 +151,6 @@ bool FlightManager::saveInstancesToFiles(const std::string& instancesFilePath) c
     std::ofstream instancesFile(instancesFilePath);
     if (!instancesFile.is_open()) return false;
     for (size_t i = 0; i < allInstances.size(); ++i) {
-        // <<< THAY ĐỔI: Dùng toán tử -> cho con trỏ
         instancesFile << allInstances[i]->toRecordLine() << "\n";
     }
     instancesFile.close();
@@ -157,10 +158,10 @@ bool FlightManager::saveInstancesToFiles(const std::string& instancesFilePath) c
     return true;
 }
 
-DynamicArray<Flight*> FlightManager::getAllFlights() const{
+const DynamicArray<Flight*>& FlightManager::getAllFlights() const{
     return this->allFlights;
 }     
 
-DynamicArray<FlightInstance*> FlightManager::getAllInstances() const{
+const DynamicArray<FlightInstance*>& FlightManager::getAllInstances() const{
     return this->allInstances;
 }

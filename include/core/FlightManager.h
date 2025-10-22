@@ -17,7 +17,7 @@ private:
 
 public:
     FlightManager(const std::string& flightsFilePath, const std::string& instancesFilePath);
-    ~FlightManager() = default;
+    ~FlightManager(); // xóa default, viết lại hàm hủy
 
     bool createNewFlight(const std::string& number,
                          const std::string& airline,
@@ -41,8 +41,8 @@ public:
     bool saveInstancesToFiles(const std::string& instancesFilePath) const;
 
     //Thêm
-    DynamicArray<Flight*> getAllFlights() const;       
-    DynamicArray<FlightInstance*> getAllInstances() const;
+    const DynamicArray<Flight*>& getAllFlights() const;       
+    const DynamicArray<FlightInstance*>& getAllInstances() const;
 };
 
 #endif // FLIGHT_MANAGER_H
