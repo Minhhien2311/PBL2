@@ -37,12 +37,8 @@ public:
     
     ~BookingManager() = default;
 
-   /*
-    (NGHIỆP VỤ CỐT LÕI) Tạo một đặt chỗ (Booking) mới.
-    ... (comment cũ giữ nguyên) ...
-     */
+    // (NGHIỆP VỤ CỐT LÕI) Tạo một đặt chỗ (Booking) mới.
     Booking* createNewBooking( FlightManager& flightManager,
-                               const std::string& agentId,
                                const std::string& flightInstanceId,
                                const std::string& passengerId,
                                BookingClass bookingClass,
