@@ -15,7 +15,6 @@ class Ticket {
 private:
     std::string ticketNumber;     // số vé (khác PNR); ví dụ: 123-4567890123
     std::string bookingId;        // tham chiếu về booking gốc
-    std::string pnr;              // lưu lại PNR lúc xuất
 
     // Ảnh chụp hành trình/khách/ghế/giá tại thời điểm xuất
     std::string passengerId;
@@ -32,7 +31,6 @@ private:
 
 public:
     Ticket(const std::string& bookingId,
-           const std::string& pnr,
            const std::string& passengerId,
            const std::string& flightInstanceId,
            const std::string& seatId,
@@ -46,7 +44,6 @@ public:
     // Getters (rút gọn)
     const std::string& getTicketNumber() const;
     const std::string& getBookingId() const;
-    const std::string& getPNR() const;
     const std::string& getPassengerId() const;
     const std::string& getFlightInstanceId() const;
     const std::string& getSeatId() const;

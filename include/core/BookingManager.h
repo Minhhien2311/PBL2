@@ -23,7 +23,6 @@ public:
     ~BookingManager() = default;
 
     Booking* createNewBooking( FlightManager& flightManager,
-                               const std::string& pnr,
                                const std::string& agentId,
                                const std::string& flightInstanceId,
                                const std::string& passengerId,
@@ -34,7 +33,6 @@ public:
     bool cancelBooking(const std::string& bookingId, const std::string& reason);
 
     Booking* findBookingById(const std::string& bookingId);
-    Booking* findBookingByPNR(const std::string& pnr);
     Ticket* findTicketById(const std::string& ticketId);
     
     bool saveDataToFiles(const std::string& bookingsFilePath, const std::string& ticketsFilePath) const;
