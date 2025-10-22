@@ -45,7 +45,7 @@ public:
         table = new Node*[tableSize];
 
         // Khởi tạo cho mỗi con trỏ trong mảng trỏ tới null (chưa trỏ tới đầu DSLK)
-        for (int i = 0; i < tableSize; ++i) {
+        for (size_t i = 0; i < tableSize; ++i) {
             table[i] = nullptr;
         }
     }
@@ -53,7 +53,7 @@ public:
     // Destructor
     ~HashTable() {
         // Duyêt từng ngăn trong mảng con trỏ
-        for (int i = 0; i < tableSize; ++i) {
+        for (size_t i = 0; i < tableSize; ++i) {
             Node *entry = table[i];
             // Duyệt qua DSLK và xóa từng Node
             while (entry != nullptr) {
@@ -133,9 +133,9 @@ public:
     }
 
     // Các hàm tiện ích
-    size_t getSize() const {return currentSize; }
-    bool isEmpty() const { return currentSize == 0};
+    size_t getSize() const { return currentSize; }
+    bool isEmpty() const { return currentSize == 0; }
 
 };
 
-#endif HASH_TABLE_H
+#endif
