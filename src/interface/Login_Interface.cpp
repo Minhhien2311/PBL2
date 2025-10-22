@@ -86,7 +86,7 @@ void ShowLoginScreen(AccountManager& account_manager) {
             separator(),
             login_button->Render() | center,
             separator(),
-            text(login_message) | color(Color::Red) | center
+            text(login_message) | center | (login_message.find("thành công") != std::string::npos ? color(Color::Green) : color(Color::Red))
         }) | border | center;
     });
 
