@@ -19,14 +19,17 @@ void FlightManager::loadFlightsFromFile(const std::string& filePath) {
     if (file.is_open()) {
         while (std::getline(file, line)) {
             if (!line.empty()) {
-                // Sửa lại: Gọi fromRecordLine (giả sử nó trả về con trỏ) và thêm trực tiếp
-                // Tạo đối tượng Flight trên stack, sau đó cấp phát trên heap và sao chép
+                // 1. Tạo đối tượng Flight tạm trên stack từ dữ liệu file
                 Flight flightOnStack = Flight::fromRecordLine(line);
+                // 2. Tạo bản sao trên heap
                 Flight* newFlight = new Flight(flightOnStack);
-                if (newFlight) { // Kiểm tra con trỏ hợp lệ (cấp phát thành công)
-                    // Lấy index mới nhất (chuyển đổi kiểu tường minh từ int sang size_t)
-                    size_t newIndex = static_cast<size_t>(allFlights.size() - 1);
-                    // Thêm vào HashTable
+                
+                if (newFlight) { // Kiểm tra cấp phát thành công
+                    // 3. Lấy index *tiếp theo* (chính là size hiện tại)
+                    size_t newIndex = static_cast<size_t>(allFlights.size());
+                    // 4. Thêm vào mảng (lúc này size() mới tăng lên)
+                    allFlights.push_back(newFlight);
+                    // 5. Thêm vào HashTable: ánh xạ ID tới vị trí (index) vừa thêm
                     flightIdMap.insert(newFlight->getFlightId(), newIndex);
                 }
             }
@@ -41,14 +44,12 @@ void FlightManager::loadInstancesFromFile(const std::string& filePath) {
     if (file.is_open()) {
         while (std::getline(file, line)) {
             if (!line.empty()) {
-                 // Sửa lại: Gọi fromRecordLine (giả sử nó trả về con trỏ) và thêm trực tiếp
+                // Tương tự như loadFlightsFromFile
                 FlightInstance instanceOnStack = FlightInstance::fromRecordLine(line);
                 FlightInstance* newInstance = new FlightInstance(instanceOnStack);
-                 if (newInstance) { // Kiểm tra con trỏ hợp lệ (cấp phát thành công)
+                 if (newInstance) {
+                    size_t newIndex = static_cast<size_t>(allInstances.size());
                     allInstances.push_back(newInstance);
-                     // Lấy index mới nhất (chuyển đổi kiểu tường minh)
-                    size_t newIndex = static_cast<size_t>(allInstances.size() - 1);
-                     // Thêm vào HashTable
                     instanceIdMap.insert(newInstance->getInstanceId(), newIndex);
                 }
             }
@@ -63,31 +64,29 @@ bool FlightManager::createNewFlight(const std::string& number,
                                      const std::string& airline,
                                      const std::string& departureIATA,
                                      const std::string& arrivalIATA) {
+    // 1. Kiểm tra dữ liệu đầu vào
     if (number.empty() || airline.empty() || departureIATA.empty() || arrivalIATA.empty()) {
         return false;
     }
-    // Kiểm tra trùng lặp số hiệu chuyến bay (Flight Number)
-    // Cách này chưa tối ưu, nếu cần có thể tạo thêm HashTable cho flightNumber
-    for (int i = 0; i < allFlights.size(); ++i) { // Dùng int vì DynamicArray::size() trả về int
-        if (allFlights[i] && allFlights[i]->getFlightNumber() == number) { // Kiểm tra nullptr
-            return false;
+    // 2. Kiểm tra trùng lặp số hiệu chuyến bay (Flight Number, vd: "VN123")
+    // (Lưu ý: cách này duyệt O(N), nếu cần tối ưu có thể thêm 1 HashTable nữa cho flightNumber)
+    for (int i = 0; i < allFlights.size(); ++i) {
+        if (allFlights[i] && allFlights[i]->getFlightNumber() == number) {
+            return false; // Đã tồn tại
         }
     }
 
-    // Tạo ID mới
-    std::string newId = IdGenerator::generateFlightId(); // Đảm bảo bạn đã có hàm này
+    // 3. Tạo đối tượng mới trên heap
+    // (Constructor của Flight sẽ tự động gọi GenID để tạo ID mới, vd: "FL-005")
+    Flight* newFlight = new Flight(number, airline, departureIATA, arrivalIATA);
+    if (!newFlight) return false; // Lỗi cấp phát bộ nhớ
 
-    // Tạo đối tượng trên heap
-    // *** GIẢ ĐỊNH: Constructor Flight đã được sửa để nhận ID ***
-    Flight* newFlight = new Flight(/*newId,*/ number, airline, departureIATA, arrivalIATA);
-    if (!newFlight) return false; // Kiểm tra cấp phát bộ nhớ
-
-    // Thêm vào DynamicArray
+    // 4. Thêm vào mảng
+    size_t newIndex = static_cast<size_t>(allFlights.size());
     allFlights.push_back(newFlight);
 
-    // Thêm vào HashTable
-    size_t newIndex = static_cast<size_t>(allFlights.size() - 1);
-    flightIdMap.insert(newFlight->getFlightId(), newIndex); // Lấy ID thực từ đối tượng vừa tạo
+    // 5. Thêm vào HashTable để tra cứu bằng ID
+    flightIdMap.insert(newFlight->getFlightId(), newIndex);
 
     return true;
 }
@@ -99,57 +98,57 @@ bool FlightManager::createNewInstance(const std::string& flightId,
                                       int totalBusinessSeats,
                                       double fareEconomy,
                                       double fareBusiness) {
-    // Kiểm tra Flight gốc có tồn tại không (dùng hàm find đã tối ưu)
-    if (findFlightById(flightId) == nullptr) { // Đã dùng hàm find tối ưu
-        return false;
+    // 1. Kiểm tra Flight gốc (vd: "FL-001") có tồn tại không
+    if (findFlightById(flightId) == nullptr) {
+        return false; // Không tìm thấy tuyến bay gốc
     }
+    // 2. Kiểm tra dữ liệu đầu vào
     if (departureIso.empty() || arrivalIso.empty() || totalEconomySeats < 0 || totalBusinessSeats < 0 || fareEconomy < 0.0 || fareBusiness < 0.0) {
         return false;
     }
 
-     // Tạo ID mới
-    std::string newId = IdGenerator::generateInstanceId(); // Đảm bảo bạn đã có hàm này
+    // 3. Tạo đối tượng mới trên heap
+    // (Constructor của FlightInstance sẽ tự gọi GenID để tạo ID mới, vd: "FI-10006")
+    FlightInstance* newInstance = new FlightInstance(flightId, departureIso, arrivalIso, totalEconomySeats, totalBusinessSeats, fareEconomy, fareBusiness);
+    if (!newInstance) return false;
 
-    // Tạo đối tượng trên heap
-    // *** GIẢ ĐỊNH: Constructor FlightInstance đã được sửa để nhận ID ***
-    FlightInstance* newInstance = new FlightInstance(/*newId,*/ flightId, departureIso, arrivalIso, totalEconomySeats, totalBusinessSeats, fareEconomy, fareBusiness);
-    if (!newInstance) return false; // Kiểm tra cấp phát
-
-    // Thêm vào DynamicArray
+    // 4. Thêm vào mảng
+    size_t newIndex = static_cast<size_t>(allInstances.size());
     allInstances.push_back(newInstance);
 
-    // Thêm vào HashTable
-    size_t newIndex = static_cast<size_t>(allInstances.size() - 1);
-    instanceIdMap.insert(newInstance->getInstanceId(), newIndex); // Lấy ID thực
+    // 5. Thêm vào HashTable để tra cứu
+    instanceIdMap.insert(newInstance->getInstanceId(), newIndex);
 
     return true;
 }
 
 // --- Chức năng Đọc/Tìm kiếm (Read) ---
 
-// Bỏ const để cho phép sửa đổi đối tượng trả về nếu cần
 Flight* FlightManager::findFlightById(const std::string& flightId) {
+    // 1. Dùng HashTable để tìm index
     size_t* indexPtr = flightIdMap.find(flightId);
     if (indexPtr == nullptr) {
-        return nullptr;
+        return nullptr; // Không có trong HashTable
     }
-    // Chuyển đổi kiểu và kiểm tra index hợp lệ
+    
+    // 2. Lấy giá trị index
     int index = static_cast<int>(*indexPtr);
+    
+    // 3. Kiểm tra tính hợp lệ của index (phòng trường hợp dữ liệu lỗi)
     if (index < 0 || index >= allFlights.size()) {
-         // Dữ liệu không nhất quán, xóa entry lỗi khỏi map
-        flightIdMap.remove(flightId);
+        flightIdMap.remove(flightId); // Xóa entry lỗi khỏi map
         return nullptr;
     }
+    // 4. Trả về con trỏ tại vị trí index
     return allFlights[index];
 }
 
-// Bỏ const để cho phép sửa đổi
 FlightInstance* FlightManager::findInstanceById(const std::string& instanceId) {
+    // Tương tự hàm findFlightById
     size_t* indexPtr = instanceIdMap.find(instanceId);
     if (indexPtr == nullptr) {
         return nullptr;
     }
-    // Chuyển đổi kiểu và kiểm tra index hợp lệ
     int index = static_cast<int>(*indexPtr);
     if (index < 0 || index >= allInstances.size()) {
         instanceIdMap.remove(instanceId); // Xóa entry lỗi
@@ -158,49 +157,53 @@ FlightInstance* FlightManager::findInstanceById(const std::string& instanceId) {
     return allInstances[index];
 }
 
-// Tìm tất cả các chuyến bay cụ thể của một tuyến bay gốc.
-// Sửa lại để nhận DynamicArray qua tham chiếu (đã làm ở lần trước)
 void FlightManager::findInstancesByFlightId(const std::string& flightId, DynamicArray<FlightInstance*>& results) const {
-    // Xóa sạch kết quả cũ trước khi tìm kiếm mới
-    // *** GIẢ ĐỊNH: DynamicArray có hàm clear() ***
+    // 1. Xóa sạch kết quả cũ trong mảng 'results'
     results.clear();
 
-    // Duyệt qua allInstances
-    for (int i = 0; i < allInstances.size(); ++i) { // Dùng int vì size() trả về int
-        if (allInstances[i] && allInstances[i]->getFlightId() == flightId) { // Kiểm tra nullptr
+    // 2. Duyệt toàn bộ mảng 'allInstances' (O(N))
+    for (int i = 0; i < allInstances.size(); ++i) {
+        if (allInstances[i] && allInstances[i]->getFlightId() == flightId) {
+            // 3. Nếu tìm thấy, thêm con trỏ vào mảng kết quả
             results.push_back(allInstances[i]);
         }
     }
 }
 
-// --- CÁC HÀM XÓA MỚI (Logic cập nhật index) ---
+// --- CÁC HÀM XÓA ---
 
 bool FlightManager::removeFlightById(const std::string& flightId) {
+    // 1. Tìm vị trí (index) của Flight cần xóa
     size_t* indexPtr = flightIdMap.find(flightId);
     if (indexPtr == nullptr) {
         return false; // Không tìm thấy
     }
-    int indexToDelete = static_cast<int>(*indexPtr); // Chuyển sang int
+    int indexToDelete = static_cast<int>(*indexPtr);
 
-    // Kiểm tra index hợp lệ trước khi xóa
-     if (indexToDelete < 0 || indexToDelete >= allFlights.size()) {
-        flightIdMap.remove(flightId); // Xóa khỏi map nếu index không hợp lệ
+    if (indexToDelete < 0 || indexToDelete >= allFlights.size()) {
+        flightIdMap.remove(flightId); 
         return false; // Lỗi dữ liệu
     }
 
-    // Bước 1: Xóa khỏi DynamicArray (hàm erase tự động gọi delete đối tượng)
+    // 2. Xóa khỏi DynamicArray.
+    // Hàm erase(index) sẽ:
+    //    a. `delete allFlights[indexToDelete]` (giải phóng bộ nhớ)
+    //    b. Dịch chuyển các phần tử từ [indexToDelete + 1] trở về sau lên 1 vị trí.
     bool erased = allFlights.erase(indexToDelete);
     if (!erased) {
-        return false; // Lỗi khi xóa khỏi DynamicArray
+        return false; // Lỗi khi xóa
     }
 
-    // Bước 2: Xóa khỏi HashTable
+    // 3. Xóa entry cũ khỏi HashTable
     flightIdMap.remove(flightId);
 
-    // Bước 3: Cập nhật lại index trong HashTable cho các phần tử bị dịch chuyển
-    for (int i = indexToDelete; i < allFlights.size(); ++i) { // Dùng int
-        // Cập nhật lại index mới (kiểu size_t) cho ID tương ứng trong Map
-        if(allFlights[i]) { // Kiểm tra nullptr
+    // 4. QUAN TRỌNG: Cập nhật lại index trong HashTable
+    // Vì các phần tử từ [indexToDelete] trở đi đã bị dịch chuyển,
+    // ta phải cập nhật lại index mới của chúng trong HashTable.
+    for (int i = indexToDelete; i < allFlights.size(); ++i) {
+        if(allFlights[i]) {
+             // Dùng 'insert' để ghi đè (hoặc thêm mới nếu chưa có)
+             // Ánh xạ ID tới vị trí `i` (là vị trí mới của nó)
              flightIdMap.insert(allFlights[i]->getFlightId(), static_cast<size_t>(i));
         }
     }
@@ -209,30 +212,30 @@ bool FlightManager::removeFlightById(const std::string& flightId) {
 }
 
 bool FlightManager::removeInstanceById(const std::string& instanceId) {
+    // Logic tương tự như removeFlightById
     size_t* indexPtr = instanceIdMap.find(instanceId);
     if (indexPtr == nullptr) {
         return false;
     }
-    int indexToDelete = static_cast<int>(*indexPtr); // Chuyển sang int
+    int indexToDelete = static_cast<int>(*indexPtr);
 
-    // Kiểm tra index hợp lệ
     if (indexToDelete < 0 || indexToDelete >= allInstances.size()) {
         instanceIdMap.remove(instanceId);
-        return false; // Lỗi dữ liệu
+        return false;
     }
 
-    // Bước 1: Xóa khỏi DynamicArray
+    // 1. Xóa khỏi mảng (DynamicArray tự 'delete' con trỏ)
     bool erased = allInstances.erase(indexToDelete);
      if (!erased) {
         return false;
     }
 
-    // Bước 2: Xóa khỏi HashTable
+    // 2. Xóa khỏi HashTable
     instanceIdMap.remove(instanceId);
 
-    // Bước 3: Cập nhật index trong HashTable
-    for (int i = indexToDelete; i < allInstances.size(); ++i) { // Dùng int
-         if(allInstances[i]) { // Kiểm tra nullptr
+    // 3. Cập nhật lại index trong HashTable cho các phần tử bị dịch
+    for (int i = indexToDelete; i < allInstances.size(); ++i) {
+         if(allInstances[i]) {
             instanceIdMap.insert(allInstances[i]->getInstanceId(), static_cast<size_t>(i));
          }
     }
@@ -245,25 +248,32 @@ bool FlightManager::removeInstanceById(const std::string& instanceId) {
 bool FlightManager::saveFlightsToFiles(const std::string& flightsFilePath) const {
     std::ofstream flightsFile(flightsFilePath);
     if (!flightsFile.is_open()) return false;
-    for (int i = 0; i < allFlights.size(); ++i) { // Dùng int
-        // Thêm kiểm tra con trỏ trước khi ghi
+    for (int i = 0; i < allFlights.size(); ++i) {
         if (allFlights[i]) {
             flightsFile << allFlights[i]->toRecordLine() << "\n";
         }
     }
-    flightsFile.close(); // Đặt close() ra ngoài vòng lặp
+    flightsFile.close();
     return true;
 }
 
 bool FlightManager::saveInstancesToFiles(const std::string& instancesFilePath) const {
     std::ofstream instancesFile(instancesFilePath);
     if (!instancesFile.is_open()) return false;
-    for (int i = 0; i < allInstances.size(); ++i) { // Dùng int
-         // Thêm kiểm tra con trỏ trước khi ghi
+    for (int i = 0; i < allInstances.size(); ++i) {
         if (allInstances[i]) {
             instancesFile << allInstances[i]->toRecordLine() << "\n";
         }
     }
     instancesFile.close();
     return true;
+}
+
+// --- Getters (Thêm) ---
+DynamicArray<Flight*> FlightManager::getAllFlights() const {
+    return allFlights;
+}
+
+DynamicArray<FlightInstance*> FlightManager::getAllInstances() const {
+    return allInstances;
 }

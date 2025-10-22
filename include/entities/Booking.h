@@ -20,7 +20,6 @@ class Booking {
 private:
     // Định danh & Liên kết
     std::string bookingId;         // Khóa nội bộ duy nhất
-    std::string agentId;           // Đại lý/admin tạo booking
     std::string flightInstanceId;  // Chuyến bay cụ thể
     std::string passengerId;       // ID duy nhất của hành khách
     std::string seatId;            // Ghế đã gán; rỗng nếu chưa gán
@@ -43,8 +42,7 @@ public:
     Booking() = default;
 
     // Constructor chính để tạo một booking mới
-    explicit Booking(const std::string& agentId,
-            const std::string& flightInstanceId,
+    explicit Booking(const std::string& flightInstanceId,
             const std::string& passengerId,
             const std::string& bookingDate,
             BookingClass bookingClass,
@@ -52,7 +50,6 @@ public:
 
     // Getters (Truy xuất thông tin)  
     const std::string& getBookingId() const;
-    const std::string& getAgentId() const;
     const std::string& getFlightInstanceId() const;
     const std::string& getPassengerId() const;
     const std::string& getSeatId() const;

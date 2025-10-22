@@ -21,7 +21,7 @@ void AccountManager::loadAdminsFromFile(const std::string& filePath) {
         while (std::getline(file, line)) {
             // Chỉ xử lý các dòng không rỗng
             if (!line.empty()) {
-                // <<< THAY ĐỔI: Tạo đối tượng trên heap bằng 'new' và đẩy con trỏ vào mảng
+                // Tạo đối tượng trên heap bằng 'new' và đẩy con trỏ vào mảng
                 AccountAdmin adminOnStack = AccountAdmin::fromRecordLine(line);
                 this->allAdmins.push_back(new AccountAdmin(adminOnStack)); 
             }
@@ -38,7 +38,7 @@ void AccountManager::loadAgentsFromFile(const std::string& filePath) {
     if (file.is_open()) {
         while (std::getline(file, line)) {
             if (!line.empty()) {
-                // <<< THAY ĐỔI: Tạo đối tượng trên heap bằng 'new' và đẩy con trỏ vào mảng
+                // Tạo đối tượng trên heap bằng 'new' và đẩy con trỏ vào mảng
                 AccountAgent agentOnStack = AccountAgent::fromRecordLine(line);
                 this->allAgents.push_back(new AccountAgent(agentOnStack));
             }
@@ -58,9 +58,8 @@ bool AccountManager::login(const std::string& username, const std::string& passw
 
     // 1. Tìm trong danh sách Admin
     for (size_t i = 0; i < allAdmins.size(); ++i) {
-        // <<< THAY ĐỔI: Dùng toán tử -> cho con trỏ thay vì .
         if (allAdmins[i]->getUsername() == username && allAdmins[i]->authenticate(password)) {
-            // <<< THAY ĐỔI: allAdmins[i] đã là một con trỏ, gán trực tiếp
+            // allAdmins[i] đã là một con trỏ, gán trực tiếp
             this->currentUser = allAdmins[i];
             return true;
         }
@@ -68,9 +67,8 @@ bool AccountManager::login(const std::string& username, const std::string& passw
 
     // 2. Nếu không tìm thấy trong Admin, tìm trong danh sách Agent
     for (size_t i = 0; i < allAgents.size(); ++i) {
-        // <<< THAY ĐỔI: Dùng toán tử -> cho con trỏ thay vì .
         if (allAgents[i]->getUsername() == username && allAgents[i]->authenticate(password)) {
-            // <<< THAY ĐỔI: allAgents[i] đã là một con trỏ, gán trực tiếp
+            // allAgents[i] đã là một con trỏ, gán trực tiếp
             this->currentUser = allAgents[i];
             return true;
         }
@@ -96,9 +94,8 @@ bool AccountManager::isLoggedIn() const {
 
 AccountAgent* AccountManager::findAgentById(const std::string& agentId) {
     for (size_t i = 0; i < allAgents.size(); ++i) {
-        // <<< THAY ĐỔI: Dùng toán tử -> cho con trỏ thay vì .
         if (allAgents[i]->getId() == agentId) {
-            // <<< THAY ĐỔI: allAgents[i] đã là một con trỏ, trả về nó
+            // allAgents[i] đã là một con trỏ, trả về nó
             return allAgents[i];
         }
     }
@@ -110,7 +107,7 @@ const DynamicArray<AccountAgent*>& AccountManager::getAllAgents() const {
     return this->allAgents;
 }
 
-// "Người Gác Cổng" kiểm tra dữ liệu trước khi tạo Agent mới.
+// Kiểm tra dữ liệu trước khi tạo Agent mới.
 bool AccountManager::createNewAgent(const std::string& username,
                                      const std::string& password,
                                      const std::string& fullName,
@@ -123,15 +120,13 @@ bool AccountManager::createNewAgent(const std::string& username,
 
     // Kiểm tra xem username đã tồn tại chưa
     for (size_t i = 0; i < allAdmins.size(); ++i) {
-        // <<< THAY ĐỔI: Dùng toán tử -> cho con trỏ thay vì .
         if (allAdmins[i]->getUsername() == username) return false;
     }
     for (size_t i = 0; i < allAgents.size(); ++i) {
-        // <<< THAY ĐỔI: Dùng toán tử -> cho con trỏ thay vì .
         if (allAgents[i]->getUsername() == username) return false;
     }
 
-    // <<< THAY ĐỔI: Tạo đối tượng mới trên heap bằng 'new' và thêm con trỏ vào danh sách
+    // Tạo đối tượng mới trên heap bằng 'new' và thêm con trỏ vào danh sách
     this->allAgents.push_back(new AccountAgent(username, password, fullName, phone, email));
     
     return true;
@@ -153,7 +148,6 @@ bool AccountManager::saveDataToFiles(const std::string& adminsFilePath, const st
     std::ofstream adminFile(adminsFilePath);
     if (!adminFile.is_open()) return false; // Không mở được file để ghi
     for (size_t i = 0; i < allAdmins.size(); ++i) {
-        // <<< THAY ĐỔI: Dùng toán tử -> cho con trỏ thay vì .
         adminFile << allAdmins[i]->toRecordLine() << "\n";
     }
     adminFile.close();
@@ -162,7 +156,6 @@ bool AccountManager::saveDataToFiles(const std::string& adminsFilePath, const st
     std::ofstream agentFile(agentsFilePath);
     if (!agentFile.is_open()) return false;
     for (size_t i = 0; i < allAgents.size(); ++i) {
-        // <<< THAY ĐỔI: Dùng toán tử -> cho con trỏ thay vì .
         agentFile << allAgents[i]->toRecordLine() << "\n";
     }
     agentFile.close();
