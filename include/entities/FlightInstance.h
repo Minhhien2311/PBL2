@@ -18,8 +18,11 @@ class FlightInstance {
 private:
     std::string instanceId;     // ID nội bộ duy nhất, được sinh tự động (VD: "FI-12345")
     std::string flightId;       // Khóa ngoại, tham chiếu tới Flight gốc
-    std::string departureIso;   // Thời gian cất cánh, định dạng "YYYY-MM-DDTHH:MM:SSZ"
-    std::string arrivalIso;     // Thời gian hạ cánh
+    
+    std::string departureDate;  // Định dạng "DD/MM/YYYY"
+    std::string departureTime;  // Định dạng "HH:MM"
+    std::string arrivalDate;    // Định dạng "DD/MM/YYYY"
+    std::string arrivalTime;    // Định dạng "HH:MM"
 
     // --- Quản lý ghế ---
     // Chỉ lưu trữ các thông tin gốc, các thông tin khác sẽ được tính toán.
@@ -29,8 +32,8 @@ private:
     int businessAvailable;      // Số ghế thương gia còn trống
 
     // --- Giá vé ---
-    double fareEconomy;
-    double fareBusiness;
+    int fareEconomy;
+    int fareBusiness;
 
 public:
     // Không cho phép tạo đối tượng rỗng
@@ -39,18 +42,22 @@ public:
     // Constructor chính: Tự động sinh ID và tính toán số ghế ban đầu.
     // Chỉ cần cung cấp thông tin gốc, không cần truyền vào số ghế trống.
     explicit FlightInstance(const std::string& flightId,
-                            const std::string& departureIso,
-                            const std::string& arrivalIso,
+                            const std::string& departureDate,
+                            const std::string& departureTime,
+                            const std::string& arrivalDate,
+                            const std::string& arrivalTime,
                             int totalEconomySeats,
                             int totalBusinessSeats,
-                            double fareEconomy,
-                            double fareBusiness);
+                            int fareEconomy,
+                            int fareBusiness);
 
     // --- Getters ---
     const std::string& getInstanceId() const;
     const std::string& getFlightId() const;
-    const std::string& getDepartureIso() const;
-    const std::string& getArrivalIso() const;
+    const std::string& getDepartureDate() const;
+    const std::string& getDepartureTime() const;
+    const std::string& getArrivalDate() const;
+    const std::string& getArrivalTime() const;
 
     // Getters cho ghế: Các giá trị tổng được tính toán tự động, đảm bảo luôn đúng.
     int getTotalCapacity() const;       // Trả về: economyTotal + businessTotal

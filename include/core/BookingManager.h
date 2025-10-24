@@ -1,41 +1,57 @@
 #ifndef BOOKING_MANAGER_H
 #define BOOKING_MANAGER_H
 
+// Khai báo tiền định (forward declaration)
 class FlightManager; 
+class FlightRule;
+
 #include "C:/PBL2/include/DSA/DynamicArray.h"
 #include "C:/PBL2/include/entities/Booking.h"
-#include "C:/PBL2/include/entities/Ticket.h"
+#include "C:/PBL2/include/DSA/HashTable.h"
 #include <string>
+#include <chrono> 
 
+// BookingManager (Đã tái cấu trúc - Gộp Ticket)
+// Chịu trách nhiệm cho nghiệp vụ Bán vé và Hủy vé (bao gồm kiểm tra logic)
 class BookingManager {
 private:
-    // Lưu trữ một mảng các con trỏ thay vì đối tượng
-    DynamicArray<Booking*> allBookings; 
-    DynamicArray<Ticket*> allTickets;   
+    DynamicArray<Booking*> allBookings;
+    FlightRule* currentRule; // Giữ nguyên
 
+    // <<< THÊM MỚI: Bảng băm >>>
+    HashTable<std::string, Booking*> bookingIdTable;
+
+    // --- Hàm trợ giúp nội bộ ---
     void loadBookingsFromFile(const std::string& filePath);
-    void loadTicketsFromFile(const std::string& filePath);
+
+    // <<< THÊM MỚI: Hàm xây dựng bảng băm >>>
+    void buildBookingIdTable();
 
 public:
-    BookingManager(const std::string& bookingsFilePath, const std::string& ticketsFilePath);
-    ~BookingManager() = default;
+    // Hàm khởi tạo 
+    BookingManager(const std::string& bookingsFilePath, FlightRule* rule);
+    
+    // Hàm hủy 
+    ~BookingManager();
 
+    // NGHIỆP VỤ Bán vé 
     Booking* createNewBooking( FlightManager& flightManager,
-                               const std::string& pnr,
-                               const std::string& agentId,
                                const std::string& flightInstanceId,
                                const std::string& passengerId,
                                BookingClass bookingClass,
                                double baseFare);
 
-    Ticket* issueTicketForBooking(const std::string& bookingId);
-    bool cancelBooking(const std::string& bookingId, const std::string& reason);
+    // NGHIỆP VỤ Hủy vé
+    bool cancelBooking(FlightManager& flightManager, const std::string& bookingId);
 
+    // --- Tìm kiếm  ---
     Booking* findBookingById(const std::string& bookingId);
-    Booking* findBookingByPNR(const std::string& pnr);
-    Ticket* findTicketById(const std::string& ticketId);
     
-    bool saveDataToFiles(const std::string& bookingsFilePath, const std::string& ticketsFilePath) const;
+    // --- Lấy dữ liệu  ---
+    const DynamicArray<Booking*>& getAllBookings() const;
+
+    // --- Lưu trữ  ---
+    bool saveDataToFiles(const std::string& bookingsFilePath) const; 
 };
 
 #endif

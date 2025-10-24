@@ -14,7 +14,6 @@ namespace IdGenerator {
     static int flightCounter = 0;
     static int instanceCounter = 0;
     static int passengerCounter = 0;
-    static int ticketCounter = 0;
     static int bookingCounter = 0;
 
     // 2 hàm này cần thiết để tránh bug sinh ID khi tạo đối tượng từ file
@@ -48,8 +47,6 @@ namespace IdGenerator {
                 instanceCounter = value;
             } else if (key == "PASSENGER_COUNTER") {
                 passengerCounter = value;
-            } else if (key == "TICKET_COUNTER") {
-                ticketCounter = value;
             } else if (key == "BOOKING_COUNTER") {
                 bookingCounter = value;
             }
@@ -70,7 +67,6 @@ namespace IdGenerator {
         file << "FLIGHT_COUNTER:" << flightCounter << "\n";
         file << "INSTANCE_COUNTER:" << instanceCounter << "\n";
         file << "PASSENGER_COUNTER:" << passengerCounter << "\n";
-        file << "TICKET_COUNTER:" << ticketCounter << "\n";
         file << "BOOKING_COUNTER:" << bookingCounter << "\n";
 
         file.close();
@@ -130,16 +126,6 @@ namespace IdGenerator {
         // Dùng 5 chữ số để có thể lưu được nhiều chuyến bay
         std::stringstream ss;
         ss << "PAX-" << std::setw(5) << std::setfill('0') << passengerCounter;
-        return ss.str();
-    }
-
-    std::string generateTicketNumber() {
-        ++ticketCounter;
-        
-        // Dùng stringstream để tạo định dạng "TKT-0000001"
-        // Dùng 5 chữ số để có thể lưu được nhiều chuyến bay
-        std::stringstream ss;
-        ss << "TKT-" << std::setw(7) << std::setfill('0') << ticketCounter;
         return ss.str();
     }
 
