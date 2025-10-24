@@ -50,3 +50,5 @@ FL-049|VJ401|Vietjet Air|SGN|DAD
 FL-050|BL412|Pacific Airlines|HAN|SGN
 FL-051|vn342|vietnam|dut|due
 FL-052|L123|Laos Airlines|DNG|HAN
+FL-053|vn1221|fsfsf|dfdf|fndkf
+FL-054|fgfg34|fgfg|fgfg|dfdf
