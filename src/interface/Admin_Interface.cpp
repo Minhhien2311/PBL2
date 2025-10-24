@@ -312,9 +312,6 @@ void ShowAdminMenu(AccountManager& account_manager, FlightManager& flight_manage
 
     auto none_screen = Renderer([] {
         return vbox({text("HỆ THỐNG QUẢN LÝ BÁN VÉ MÁY BAY") | bold | center | dim,
-                     separatorEmpty(),
-                     text("Sinh vien thuc hien: Pham Minh Hien"),
-                     text("                     Nguyen Do Khanh Linh"),
         });
     });
     auto search_flight_screen = Renderer([] { return text("Giao diện Tìm kiếm Tuyến bay") | center; });
@@ -371,7 +368,8 @@ void ShowAdminMenu(AccountManager& account_manager, FlightManager& flight_manage
         menu_selector = 0;   // Quay về menu Main (index 0)
         content_selector = 0; // Quay về screen None (index 0)
     });
-    auto flight_menu_group = Container::Vertical({ back_button_flight, flight_menu });
+
+    auto flight_menu_group = Container::Vertical({ flight_menu, back_button_flight });
 
     // === Menu Chuyến Bay (Level 2) ===
     std::vector<std::string> instance_menu_entries = { "Danh sách chuyến bay", "Thêm chuyến bay mới", "Tìm kiếm chuyến bay" };
@@ -386,7 +384,7 @@ void ShowAdminMenu(AccountManager& account_manager, FlightManager& flight_manage
         menu_selector = 0; 
         content_selector = 0; 
     });
-    auto instance_menu_group = Container::Vertical({ back_button_instance, instance_menu });
+    auto instance_menu_group = Container::Vertical({ instance_menu, back_button_instance });
 
     // === Menu Đại Lý (Level 2) ===
     std::vector<std::string> agent_menu_entries = { "Danh sách đại lý", "Thêm đại lý mới", "Tìm kiếm đại lý" };
@@ -401,7 +399,7 @@ void ShowAdminMenu(AccountManager& account_manager, FlightManager& flight_manage
         menu_selector = 0; 
         content_selector = 0; 
     });
-    auto agent_menu_group = Container::Vertical({ back_button_agent, agent_menu });
+    auto agent_menu_group = Container::Vertical({ agent_menu , back_button_agent });
 
 
     // --- TẠO CÁC CONTAINER TAB ---
@@ -443,7 +441,7 @@ auto right_pane_container = Container::Tab(
 );
 
     // --- Nút Đăng xuất ---
-    auto logout_button = Button("Đăng xuất", [&]{
+    auto logout_button = Button("        Đăng xuất", [&]{
         account_manager.logout();
         current_screen = ApplicationScreen::Login;
         screen.Exit();
@@ -468,7 +466,7 @@ auto right_pane_container = Container::Tab(
         auto left_pane = vbox({
                 left_pane_container->Render(), // render Tab container
                 separatorEmpty() | flex,
-                logout_button->Render()
+                logout_button->Render(),
         }) | size(WIDTH, EQUAL, 30) | size(HEIGHT, EQUAL, 40) | border;
 
         // Nội dung bên phải
