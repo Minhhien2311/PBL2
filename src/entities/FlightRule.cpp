@@ -1,6 +1,6 @@
 #include "C:/PBL2/include/entities/FlightRule.h"
 #include <string>
-#include <stdexcept> // Cần cho std::stoi, std::stod
+#include <stdexcept>
 
 // --- Constructor (Đã đơn giản hóa) ---
 FlightRule::FlightRule(bool allowCancel,

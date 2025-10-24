@@ -48,7 +48,6 @@ public:
     const std::string& getBookingDate() const;
     BookingClass getClass() const;
     double getBaseFare() const;
-    double getTotalAmount() const;
     BookingStatus getStatus() const;
 
     // --- Setters ---
