@@ -7,14 +7,15 @@ Booking::Booking(const std::string& flightInstanceId,
                  const std::string& passengerId,
                  const std::string& bookingDate,
                  BookingClass bookingClass,
-                 double baseFare)
+                 double baseFare,
+                BookingStatus status)
     : bookingId(IdGenerator::generateBookingId()),
       flightInstanceId(flightInstanceId),
       passengerId(passengerId),
-      // (Đã xóa seatId)
       bookingDate(bookingDate),
       bookingClass(bookingClass),
-      baseFare(baseFare < 0.0 ? 0.0 : baseFare) {}
+      baseFare(baseFare < 0.0 ? 0.0 : baseFare),
+      status(status) {}
 
 //  Getters
 const std::string& Booking::getBookingId()      const { return bookingId; }
@@ -23,6 +24,7 @@ const std::string& Booking::getPassengerId()    const { return passengerId; }
 const std::string& Booking::getBookingDate()    const { return bookingDate; }
 BookingClass       Booking::getClass()          const { return bookingClass; }
 double             Booking::getBaseFare()       const { return baseFare; }
+BookingStatus      Booking::getStatus()         const { return status; }
 
 //  Setters
 void Booking::setBaseFare(double value) {
@@ -30,18 +32,23 @@ void Booking::setBaseFare(double value) {
     baseFare = value;
 }
 
+void Booking::setStatus(BookingStatus newStatus) {
+    this->status = newStatus;
+}
+
 // --- Đọc/Ghi file ---
 
 std::string Booking::toRecordLine() const {
     std::string classStr = std::to_string(static_cast<int>(this->bookingClass));
+    std::string statusStr = std::to_string(static_cast<int>(this->status)); // Thêm status
 
     return this->bookingId + "|" +
            this->flightInstanceId + "|" +
            this->passengerId + "|" +
-           // (Đã xóa seatId)
            this->bookingDate + "|" +
            classStr + "|" +
-           std::to_string(this->baseFare);
+           std::to_string(this->baseFare) + "|" +
+           statusStr; // Nối status vào cuối
 }
 
 Booking Booking::fromRecordLine(const std::string& line) {
@@ -60,8 +67,6 @@ Booking Booking::fromRecordLine(const std::string& line) {
     start = end + 1;
     end = line.find('|', start);
     
-    // (Đã xóa logic đọc seatId)
-
     std::string bookingDate = line.substr(start, end - start);
     start = end + 1;
     end = line.find('|', start);
@@ -72,12 +77,16 @@ Booking Booking::fromRecordLine(const std::string& line) {
 
     double baseFare = std::stod(line.substr(start, end - start));
     start = end + 1;
-    end = line.find('|', start);
+    end = line.length(); // Thay đổi ở đây
 
-    // Tạo đối tượng
-    Booking booking(instanceId, passengerId, bookingDate, bClass, baseFare);
+    // Đọc status từ cuối dòng
+    int statusInt = std::stoi(line.substr(start, end - start));
+    BookingStatus status = static_cast<BookingStatus>(statusInt);
+
+    // Tạo đối tượng với đầy đủ thông tin
+    Booking booking(instanceId, passengerId, bookingDate, bClass, baseFare, status);
     
-    // Ghi đè các giá trị đã đọc từ file
+    // Ghi đè ID
     booking.overrideIdForLoad(id);
 
     return booking;

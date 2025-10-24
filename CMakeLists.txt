@@ -67,7 +67,6 @@ target_sources(entities PRIVATE
   src/entities/FlightRule.cpp
   src/entities/Passenger.cpp
   src/entities/Promotion.cpp
-  src/entities/Ticket.cpp
 )
 
 # entities phụ thuộc core, utils (PUBLIC để app/link khác kế thừa)
