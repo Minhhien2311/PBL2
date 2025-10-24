@@ -14,8 +14,8 @@ FlightInstance::FlightInstance(const std::string& flightId,
                                const std::string& arrivalTime,
                                int totalEconomySeats,
                                int totalBusinessSeats,
-                               double fareEconomy,
-                               double fareBusiness)
+                               int fareEconomy,
+                               int fareBusiness)
     : instanceId(IdGenerator::generateInstanceId()),
       flightId(flightId),
       departureDate(departureDate), 

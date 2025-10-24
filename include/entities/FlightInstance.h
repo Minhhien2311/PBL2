@@ -32,8 +32,8 @@ private:
     int businessAvailable;      // Số ghế thương gia còn trống
 
     // --- Giá vé ---
-    double fareEconomy;
-    double fareBusiness;
+    int fareEconomy;
+    int fareBusiness;
 
 public:
     // Không cho phép tạo đối tượng rỗng
@@ -48,8 +48,8 @@ public:
                             const std::string& arrivalTime,
                             int totalEconomySeats,
                             int totalBusinessSeats,
-                            double fareEconomy,
-                            double fareBusiness);
+                            int fareEconomy,
+                            int fareBusiness);
 
     // --- Getters ---
     const std::string& getInstanceId() const;

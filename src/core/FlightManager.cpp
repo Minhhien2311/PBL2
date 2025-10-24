@@ -98,8 +98,8 @@ bool FlightManager::createNewInstance(const std::string& flightId,
                                       const std::string& arrivalTime,
                                       int totalEconomySeats,
                                       int totalBusinessSeats,
-                                      double fareEconomy,
-                                      double fareBusiness) {
+                                      int fareEconomy,
+                                      int fareBusiness) {
     // Kiểm tra Flight gốc bằng HashTable
     if (findFlightById(flightId) == nullptr) return false; 
     if (totalEconomySeats <= 0 || totalBusinessSeats <= 0 || fareEconomy <= 0.0 || fareBusiness <= 0.0) return false;
