@@ -72,4 +72,33 @@ std::chrono::system_clock::time_point Time::fromUnix(std::time_t sec) {
     return std::chrono::system_clock::from_time_t(sec);
 }
 
+// ----- HÀM MỚI: fromDmYHm -----
+std::chrono::system_clock::time_point 
+Time::fromDmYHm(const std::string& date, const std::string& time) {
+    std::tm tm = {};
+    std::string dateTimeStr = date + " " + time;
+    std::stringstream ss(dateTimeStr);
+    
+    // Parse chuỗi "DD/MM/YYYY HH:MM"
+    ss >> std::get_time(&tm, "%d/%m/%Y %H:%M");
+    
+    // Chuyển đổi struct tm (giờ địa phương) thành time_t
+    std::time_t tt = std::mktime(&tm);
+    
+    // Chuyển đổi time_t thành time_point
+    return std::chrono::system_clock::from_time_t(tt);
+}
+
+// ----- HÀM MỚI: formatDmY -----
+std::string Time::formatDmY(std::chrono::system_clock::time_point tp) {
+    // Dùng lại hàm formatLocal đã có với định dạng mới
+    return formatLocal(tp, "%d/%m/%Y");
+}
+
+// ----- HÀM MỚI: formatHm -----
+std::string Time::formatHm(std::chrono::system_clock::time_point tp) {
+    // Dùng lại hàm formatLocal đã có với định dạng mới
+    return formatLocal(tp, "%H:%M");
+}
+
 } // namespace utils

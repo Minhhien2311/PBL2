@@ -27,6 +27,19 @@ public:
     // Chuyển đổi tiện ích epoch seconds <-> time_point (nếu cần lưu file .txt)
     static std::time_t toUnix(std::chrono::system_clock::time_point tp);
     static std::chrono::system_clock::time_point fromUnix(std::time_t sec);
+
+    // --- HÀM MỚI ĐỂ HỖ TRỢ ĐỊNH DẠNG MỚI ---
+
+    // Chuyển đổi chuỗi ngày (DD/MM/YYYY) và giờ (HH:MM) thành time_point.
+    // Giả định đây là giờ địa phương.
+    static std::chrono::system_clock::time_point 
+    fromDmYHm(const std::string& date, const std::string& time);
+
+    // Định dạng time_point thành chuỗi "DD/MM/YYYY" (Giờ địa phương).
+    static std::string formatDmY(std::chrono::system_clock::time_point tp);
+
+    // Định dạng time_point thành chuỗi "HH:MM" (Giờ địa phương).
+    static std::string formatHm(std::chrono::system_clock::time_point tp);
 };
 
 }
