@@ -1,24 +1,37 @@
+#include "C:/PBL2/include/core/BookingManager.h"
+#include "C:/PBL2/include/core/FlightManager.h"         // Cần để tìm FlightInstance
+#include "C:/PBL2/include/entities/FlightInstance.h"    // Cần để gọi bookSeats/releaseSeats
+#include "C:/PBL2/include/utils/Time.h"                 // Cần để lấy ngày giờ
+#include "C:/PBL2/include/entities/FlightRule.h"        // Cần để kiểm tra luật
 #include <fstream>
 #include <string>
-#include "C:/PBL2/include/utils/Time.h" // Sẽ cần để lấy ngày giờ khi xuất vé
-#include "C:/PBL2/include/core/BookingManager.h"
-#include "C:/PBL2/include/core/FlightManager.h"
+#include <chrono> 
 
-// --- Constructor ---
-BookingManager::BookingManager(const std::string& bookingsFilePath, const std::string& ticketsFilePath) {
+// --- Constructor  ---
+BookingManager::BookingManager(const std::string& bookingsFilePath, FlightRule* rule) 
+    : currentRule(rule) 
+{ 
     this->loadBookingsFromFile(bookingsFilePath);
-    this->loadTicketsFromFile(ticketsFilePath);
+
+    // <<< THÊM MỚI: Xây dựng bảng băm >>>
+    this->buildBookingIdTable();
 }
 
-// --- Hàm trợ giúp nội bộ ---
+// --- Destructor  ---
+BookingManager::~BookingManager() {
+    for (int i = 0; i < allBookings.size(); i++) {
+        delete allBookings[i];
+    }
+}
 
+
+// --- loadBookingsFromFile  ---
 void BookingManager::loadBookingsFromFile(const std::string& filePath) {
     std::ifstream file(filePath);
     std::string line;
     if (file.is_open()) {
         while (std::getline(file, line)) {
             if (!line.empty()) {
-                // <<< THAY ĐỔI: Tạo đối tượng trên heap bằng 'new'
                 Booking bookingOnStack = Booking::fromRecordLine(line);
                 this->allBookings.push_back(new Booking(bookingOnStack));
             }
@@ -27,116 +40,130 @@ void BookingManager::loadBookingsFromFile(const std::string& filePath) {
     }
 }
 
-void BookingManager::loadTicketsFromFile(const std::string& filePath) {
-    std::ifstream file(filePath);
-    std::string line;
-    if (file.is_open()) {
-        while (std::getline(file, line)) {
-            if (!line.empty()) {
-                // <<< THAY ĐỔI: Tạo đối tượng trên heap bằng 'new'
-                Ticket ticketOnStack = Ticket::fromRecordLine(line);
-                this->allTickets.push_back(new Ticket(ticketOnStack));
-            }
+// <<< THÊM MỚI: Xây dựng bảng băm >>>
+void BookingManager::buildBookingIdTable() {
+    for (int i = 0; i < allBookings.size(); ++i) {
+        if (allBookings[i] != nullptr) {
+            bookingIdTable.insert(allBookings[i]->getBookingId(), allBookings[i]);
         }
-        file.close();
     }
 }
 
-// --- Chức năng Lưu trữ (Persistence) ---
-
-bool BookingManager::saveDataToFiles(const std::string& bookingsFilePath, const std::string& ticketsFilePath) const {
-    // Lưu danh sách Booking
+// --- saveDataToFiles  ---
+bool BookingManager::saveDataToFiles(const std::string& bookingsFilePath) const { 
     std::ofstream bookingsFile(bookingsFilePath);
     if (!bookingsFile.is_open()) return false;
     for (size_t i = 0; i < allBookings.size(); ++i) {
-        // <<< THAY ĐỔI: Dùng toán tử -> cho con trỏ
         bookingsFile << allBookings[i]->toRecordLine() << "\n";
     }
     bookingsFile.close();
-
-    // Lưu danh sách Ticket
-    std::ofstream ticketsFile(ticketsFilePath);
-    if (!ticketsFile.is_open()) return false;
-    for (size_t i = 0; i < allTickets.size(); ++i) {
-        // <<< THAY ĐỔI: Dùng toán tử -> cho con trỏ
-        ticketsFile << allTickets[i]->toRecordLine() << "\n";
-    }
-    ticketsFile.close();
-
     return true;
 }
 
-// --- Nghiệp vụ chính ---
-
+// --- NGHIỆP VỤ 1: BÁN VÉ (TẠO BOOKING) ---
+// <<< THAY ĐỔI: Cập nhật HashTable >>>
 Booking* BookingManager::createNewBooking( FlightManager& flightManager,
-                                           const std::string& pnr,
-                                           const std::string& agentId,
                                            const std::string& flightInstanceId,
                                            const std::string& passengerId,
                                            BookingClass bookingClass,
                                            double baseFare)
 {
-    // 1. Kiểm tra đầu vào ("Guard Clauses")
-    if (pnr.empty() || agentId.empty() || flightInstanceId.empty() || passengerId.empty() || baseFare < 0) {
-        return nullptr; // Dữ liệu không hợp lệ
-    }
-
-    // 2. Tìm chuyến bay tương ứng
+    // ... (logic kiểm tra và trừ ghế giữ nguyên) ...
+    if (flightInstanceId.empty() || passengerId.empty() || baseFare < 0) return nullptr;
     FlightInstance* instance = flightManager.findInstanceById(flightInstanceId);
-    if (instance == nullptr) {
-        return nullptr; // Chuyến bay không tồn tại
-    }
+    if (instance == nullptr) return nullptr; 
+    SeatClass seatClassToBook = (bookingClass == BookingClass::Economy) 
+                                ? SeatClass::Economy 
+                                : SeatClass::Business;
+    if (!instance->bookSeats(seatClassToBook, 1)) return nullptr; 
 
-    // 3. Kiểm tra và đặt chỗ
-    SeatClass seatClassToBook = (bookingClass == BookingClass::Economy) ? SeatClass::Economy : SeatClass::Business;
-    
-    // Gọi hàm bookSeats của FlightInstance. Hàm này sẽ tự động trừ số ghế nếu còn.
-    if (!instance->bookSeats(seatClassToBook, 1)) {
-        return nullptr; // Hết ghế
-    }
-
-    // 4. Nếu đặt chỗ thành công, tạo đối tượng Booking
     std::string currentDate = utils::Time::formatLocal(utils::Time::nowUtc(), "%Y-%m-%d %H:%M:%S");
+    Booking* newBooking = new Booking(flightInstanceId, passengerId, currentDate, bookingClass, baseFare, BookingStatus::Issued);
     
-    // <<< THAY ĐỔI: Tạo con trỏ mới bằng 'new'
-    Booking* newBooking = new Booking(pnr, agentId, flightInstanceId, passengerId, currentDate, bookingClass, baseFare);
+    // Thêm vào DynamicArray
     this->allBookings.push_back(newBooking);
-
-    // 5. Trả về con trỏ vừa tạo
+    
+    // <<< THÊM MỚI: Cập nhật bảng băm >>>
+    this->bookingIdTable.insert(newBooking->getBookingId(), newBooking);
+    
     return newBooking;
 }
 
-// CÁC HÀM TÌM KIẾM
+// --- NGHIỆP VỤ 2: HỦY BOOKING (ĐÃ CẬP NHẬT LOGIC THỜI GIAN) ---
 
+bool BookingManager::cancelBooking(FlightManager& flightManager, const std::string& bookingId) {
+    
+    // BƯỚC 1 : Tìm booking để hủy
+    Booking* booking = findBookingById(bookingId);
+    // TH không tìm thấy booking
+    if (booking == nullptr) {
+        return false; 
+    }
+    // Trường hợp booking đã bị hủy
+    if (booking->getStatus() != BookingStatus::Issued) {
+        return false; 
+    }
+
+    // BƯỚC 2 : Kiểm tra luật
+    // Không tìm thấy luật
+    if (currentRule == nullptr) {
+        return false; 
+    }
+    // Nếu hệ thống không cho hủy
+    if (!currentRule->isCancelAllowed()) {
+        return false; 
+    }
+
+    // BƯỚC 3: KIỂM TRA THỜI GIAN
+    FlightInstance* instance = flightManager.findInstanceById(booking->getFlightInstanceId());
+    if (instance == nullptr) {
+        // Chuyến bay đã bị xóa, vẫn cho hủy
+    } else {
+        // --- BẮT ĐẦU SỬA ---
+        // Lấy thời gian bay (định dạng mới)
+        std::string depDate = instance->getDepartureDate();
+        std::string depTime = instance->getDepartureTime();
+        
+        // Chuyển đổi sang time_point bằng hàm helper mới
+        // (Hàm này đã có trong utils/Time.cpp)
+        auto departureTime = utils::Time::fromDmYHm(depDate, depTime);
+        // --- KẾT THÚC SỬA ---
+
+        auto now = utils::Time::nowUtc(); // Lấy thời gian hiện tại
+
+        // Tính số giờ còn lại (logic này giờ đã đúng, không còn lỗi timezone)
+        auto duration = std::chrono::duration_cast<std::chrono::hours>(departureTime - now);
+        int hoursUntilDeparture = duration.count();
+
+        // Áp dụng quy tắc
+        if (!currentRule->isCancellable(hoursUntilDeparture)) {
+            return false; // Hủy quá sát giờ bay hoặc chuyến bay đã cất cánh
+        }
+
+        // NẾU HỢP LỆ -> HOÀN TRẢ GHẾ
+        SeatClass seatClassToRelease = (booking->getClass() == BookingClass::Economy)
+                                       ? SeatClass::Economy
+                                       : SeatClass::Business;
+        instance->releaseSeats(seatClassToRelease, 1);
+    }
+
+    // BƯỚC 4 
+    booking->setStatus(BookingStatus::Cancelled);
+    
+    return true; // Hủy thành công
+}
+
+
+// --- CÁC HÀM TÌM KIẾM  ---
+
+// <<< THAY ĐỔI: Dùng HashTable >>>
 Booking* BookingManager::findBookingById(const std::string& bookingId) {
-    for (size_t i = 0; i < allBookings.size(); ++i) {
-        // <<< THAY ĐỔI: Dùng toán tử -> cho con trỏ
-        if (allBookings[i]->getBookingId() == bookingId) {
-            // <<< THAY ĐỔI: Trả về con trỏ trực tiếp
-            return allBookings[i];
-        }
-    }
-    return nullptr; // Không tìm thấy
+    Booking** bookingPtrPtr = bookingIdTable.find(bookingId);
+    return (bookingPtrPtr != nullptr) ? *bookingPtrPtr : nullptr;
 }
 
-Booking* BookingManager::findBookingByPNR(const std::string& pnr) {
-    for (size_t i = 0; i < allBookings.size(); ++i) {
-        // <<< THAY ĐỔI: Dùng toán tử -> cho con trỏ
-        if (allBookings[i]->getPNR() == pnr) {
-            // <<< THAY ĐỔI: Trả về con trỏ trực tiếp
-            return allBookings[i];
-        }
-    }
-    return nullptr; // Không tìm thấy
-}
+// --- Lấy dữ liệu  ---
 
-Ticket* BookingManager::findTicketById(const std::string& ticketId) {
-    for (size_t i = 0; i < allTickets.size(); ++i) {
-        // <<< THAY ĐỔI: Dùng toán tử -> cho con trỏ
-        if (allTickets[i]->getTicketNumber() == ticketId) {
-            // <<< THAY ĐỔI: Trả về con trỏ trực tiếp
-            return allTickets[i];
-        }
-    }
-    return nullptr; // Không tìm thấy
+const DynamicArray<Booking*>& BookingManager::getAllBookings() const {
+    return this->allBookings;
 }

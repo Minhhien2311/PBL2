@@ -8,29 +8,34 @@
     2. Khởi tạo số ghế trống ban đầu bằng tổng số ghế.
 */
 FlightInstance::FlightInstance(const std::string& flightId,
-                               const std::string& departureIso,
-                               const std::string& arrivalIso,
+                               const std::string& departureDate,
+                               const std::string& departureTime,
+                               const std::string& arrivalDate,
+                               const std::string& arrivalTime,
                                int totalEconomySeats,
                                int totalBusinessSeats,
-                               double fareEconomy,
-                               double fareBusiness)
-    : instanceId(IdGenerator::generateInstanceId()), // Tự động gọi hàm tạo ID
+                               int fareEconomy,
+                               int fareBusiness)
+    : instanceId(IdGenerator::generateInstanceId()),
       flightId(flightId),
-      departureIso(departureIso),
-      arrivalIso(arrivalIso),
-      // Đảm bảo các giá trị không âm
+      departureDate(departureDate), 
+      departureTime(departureTime), 
+      arrivalDate(arrivalDate),     
+      arrivalTime(arrivalTime),     
       economyTotal(totalEconomySeats),
-      economyAvailable(totalEconomySeats), // Ban đầu, số ghế trống = tổng số ghế
+      economyAvailable(totalEconomySeats),
       businessTotal(totalBusinessSeats),
-      businessAvailable(totalBusinessSeats), // Ban đầu, số ghế trống = tổng số ghế
+      businessAvailable(totalBusinessSeats),
       fareEconomy(fareEconomy),
       fareBusiness(fareBusiness) {}
 
 // --- Getters ---
 const std::string& FlightInstance::getInstanceId() const { return instanceId; }
 const std::string& FlightInstance::getFlightId() const { return flightId; }
-const std::string& FlightInstance::getDepartureIso() const { return departureIso; }
-const std::string& FlightInstance::getArrivalIso() const { return arrivalIso; }
+const std::string& FlightInstance::getDepartureDate() const { return departureDate; }
+const std::string& FlightInstance::getDepartureTime() const { return departureTime; }
+const std::string& FlightInstance::getArrivalDate() const { return arrivalDate; }
+const std::string& FlightInstance::getArrivalTime() const { return arrivalTime; }
 
 // Các getters tính toán, đảm bảo dữ liệu luôn nhất quán
 int FlightInstance::getTotalCapacity() const {
@@ -115,8 +120,10 @@ void FlightInstance::displayInfo() const {
 std::string FlightInstance::toRecordLine() const {
     return this->instanceId + "|" +
            this->flightId + "|" +
-           this->departureIso + "|" +
-           this->arrivalIso + "|" +
+           this->departureDate + "|" + 
+           this->departureTime + "|" + 
+           this->arrivalDate + "|" +   
+           this->arrivalTime + "|" +   
            std::to_string(this->economyTotal) + "|" +
            std::to_string(this->economyAvailable) + "|" +
            std::to_string(this->businessTotal) + "|" +
@@ -125,12 +132,10 @@ std::string FlightInstance::toRecordLine() const {
            std::to_string(this->fareBusiness);
 }
 
-// Tạo đối tượng FlightInstance từ một dòng string.
 FlightInstance FlightInstance::fromRecordLine(const std::string& line) {
     size_t start = 0;
     size_t end = line.find('|');
     
-    // Tách các thành phần từ chuỗi
     std::string id = line.substr(start, end - start);
     start = end + 1;
     end = line.find('|', start);
@@ -139,11 +144,19 @@ FlightInstance FlightInstance::fromRecordLine(const std::string& line) {
     start = end + 1;
     end = line.find('|', start);
 
-    std::string depIso = line.substr(start, end - start);
+    std::string depDate = line.substr(start, end - start); 
     start = end + 1;
     end = line.find('|', start);
 
-    std::string arrIso = line.substr(start, end - start);
+    std::string depTime = line.substr(start, end - start); 
+    start = end + 1;
+    end = line.find('|', start);
+
+    std::string arrDate = line.substr(start, end - start); 
+    start = end + 1;
+    end = line.find('|', start);
+
+    std::string arrTime = line.substr(start, end - start); 
     start = end + 1;
     end = line.find('|', start);
 
@@ -169,15 +182,13 @@ FlightInstance FlightInstance::fromRecordLine(const std::string& line) {
 
     double fareBus = std::stod(line.substr(start, end - start));
 
-    // Kỹ thuật "Tạo tạm rồi sửa lỗi":
-    // 1. Dùng constructor public để tạo đối tượng. Nó sẽ có ID tạm thời.
-    FlightInstance instance(fId, depIso, arrIso, ecoTotal, busTotal, fareEco, fareBus);
+    // Dùng constructor public đã thay đổi
+    FlightInstance instance(fId, depDate, depTime, arrDate, arrTime, ecoTotal, busTotal, fareEco, fareBus);
 
-    // 2. Ghi đè lại các giá trị có thể bị tính toán sai bởi constructor.
-    //    Trong trường hợp này, ID và số ghế trống cần được cập nhật.
+    // Ghi đè lại các giá trị
     instance.overrideIdForLoad(id);
-    instance.economyAvailable = ecoAvail;   // Ghi đè trực tiếp vì không có setter
-    instance.businessAvailable = busAvail; // Ghi đè trực tiếp vì không có setter
+    instance.economyAvailable = ecoAvail;   
+    instance.businessAvailable = busAvail; 
 
     return instance;
 }
