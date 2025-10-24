@@ -18,7 +18,7 @@ using namespace ftxui;
 class FlightList {
 public:
     int scroll_position = 0;
-    int visible_rows = 15;
+    int visible_rows = 25;
     std::vector<std::vector<std::string>> flight_data;
     FlightManager& flight_manager;
     Component container;       // Container chính
@@ -67,7 +67,7 @@ public:
             rows.push_back(separator());
             rows.push_back(text("Dùng chuột để cuộn — Tổng số chuyến: " + std::to_string(total)) | dim | center);
 
-            return vbox(std::move(rows)) | border | size(HEIGHT, LESS_THAN, 25);
+            return vbox(std::move(rows)) | border | size(HEIGHT, LESS_THAN, 35);
         });
 
         table_component = CatchEvent(table_renderer, [&](Event event) {
@@ -212,10 +212,10 @@ public:
     AddFlightInstanceScreen(FlightManager& flight_manager) : flight_manager(flight_manager){
         // Tạo các component con
         Component input_flightID = Input(&flightID, "(VD: FI-001)");
-        Component input_departureDate = Input(&departureDate, "(YYYY-MM-DDTHH:MM:SSZ)");
-        Component input_departureTime = Input(&departureTime, "(YYYY-MM-DDTHH:MM:SSZ)");
-        Component input_arrivalDate = Input(&arrivalDate, "(YYYY-MM-DDTHH:MM:SSZ)");
-        Component input_arrivalTime = Input(&arrivalTime, "(YYYY-MM-DDTHH:MM:SSZ)");
+        Component input_departureDate = Input(&departureDate, "(DD/MM/YYYY)");
+        Component input_departureTime = Input(&departureTime, "(TT/MM)");
+        Component input_arrivalDate = Input(&arrivalDate, "(DD/MM/YYYY)");
+        Component input_arrivalTime = Input(&arrivalTime, "(TT/MM)");
         Component input_economyTotal = Input(&economyTotal, "(VD: 120)");
         Component input_businessTotal = Input(&businessTotal, "(VD: 40)");
         Component input_fareEconomy = Input(&fareEconomy, "(VD: 1500000)");
@@ -278,15 +278,15 @@ public:
             text("THÊM CHUYẾN BAY MỚI") | bold | center | color(Color::Green),
             separator(),
             vbox({
-                hbox({ text("ID tuyến bay:    "), container->ChildAt(0)->Render() }) | borderLight,
-                hbox({ text("Ngay khởi hành:   "), container->ChildAt(1)->Render() }) | borderLight,
-                hbox({ text("Giờ khởi hành:   "), container->ChildAt(2)->Render() }) | borderLight,
-                hbox({ text("Ngay hạ cánh:     "), container->ChildAt(3)->Render() }) | borderLight,
-                hbox({ text("Giờ hạ cánh:     "), container->ChildAt(4)->Render() }) | borderLight,
-                hbox({ text("Ghế phổ thông:   "), container->ChildAt(5)->Render() }) | borderLight,
-                hbox({ text("Ghế thương gia:  "), container->ChildAt(6)->Render() }) | borderLight,
-                hbox({ text("Giá vé PT:       "), container->ChildAt(7)->Render() }) | borderLight,
-                hbox({ text("Giá vé TG:       "), container->ChildAt(8)->Render() }) | borderLight,
+                hbox({ text("ID tuyến bay:        "), container->ChildAt(0)->Render() }) | borderLight,
+                hbox({ text("Ngày khởi hành:      "), container->ChildAt(1)->Render() }) | borderLight,
+                hbox({ text("Giờ khởi hành:       "), container->ChildAt(2)->Render() }) | borderLight,
+                hbox({ text("Ngày hạ cánh:        "), container->ChildAt(3)->Render() }) | borderLight,
+                hbox({ text("Giờ hạ cánh:         "), container->ChildAt(4)->Render() }) | borderLight,
+                hbox({ text("Ghế phổ thông:       "), container->ChildAt(5)->Render() }) | borderLight,
+                hbox({ text("Ghế thương gia:      "), container->ChildAt(6)->Render() }) | borderLight,
+                hbox({ text("Giá vé phổ thông:    "), container->ChildAt(7)->Render() }) | borderLight,
+                hbox({ text("Giá vé thương gia:   "), container->ChildAt(8)->Render() }) | borderLight,
             }) | size(WIDTH, EQUAL, 80),
             separator(),
             container->ChildAt(9)->Render() | center,
@@ -376,12 +376,19 @@ void ShowAdminMenu(AccountManager& account_manager, FlightManager& flight_manage
         if (selected_flight == 2) content_selector = 3; // SearchFlight
     };
     auto flight_menu = Menu(&flight_menu_entries, &selected_flight, flight_menu_options);
-    auto back_button_flight = Button("< Quay về", [&] { 
+    auto back_button_flight = Button("       < Quay lại", [&] { 
         menu_selector = 0;   // Quay về menu Main (index 0)
         content_selector = 0; // Quay về screen None (index 0)
     });
-
     auto flight_menu_group = Container::Vertical({ flight_menu, back_button_flight });
+
+    auto flight_menu_renderer = Renderer(flight_menu_group, [&] {
+        return vbox({
+            flight_menu->Render()| flex ,
+            separatorLight(),
+            back_button_flight->Render()
+        }) | size(HEIGHT, EQUAL, 40) | flex;
+    });
 
     // === Menu Chuyến Bay (Level 2) ===
     std::vector<std::string> instance_menu_entries = { "Danh sách chuyến bay", "Thêm chuyến bay mới", "Tìm kiếm chuyến bay" };
@@ -392,11 +399,19 @@ void ShowAdminMenu(AccountManager& account_manager, FlightManager& flight_manage
         if (selected_instance == 2) content_selector = 6; // SearchInstance
     };
     auto instance_menu = Menu(&instance_menu_entries, &selected_instance, instance_menu_options);
-    auto back_button_instance = Button("< Quay về", [&] { 
+    auto back_button_instance = Button("       < Quay lại", [&] { 
         menu_selector = 0; 
         content_selector = 0; 
     });
+
     auto instance_menu_group = Container::Vertical({ instance_menu, back_button_instance });
+    auto instance_menu_renderer = Renderer(instance_menu_group, [&] {
+        return vbox({
+            instance_menu->Render()| flex ,
+            separatorLight(),
+            back_button_instance->Render()
+        }) | size(HEIGHT, EQUAL, 40)| flex;
+    });
 
     // === Menu Đại Lý (Level 2) ===
     std::vector<std::string> agent_menu_entries = { "Danh sách đại lý", "Thêm đại lý mới", "Tìm kiếm đại lý" };
@@ -407,22 +422,28 @@ void ShowAdminMenu(AccountManager& account_manager, FlightManager& flight_manage
         if (selected_agent == 2) content_selector = 9; // SearchAgent
     };
     auto agent_menu = Menu(&agent_menu_entries, &selected_agent, agent_menu_options);
-    auto back_button_agent = Button("< Quay về", [&] { 
+    auto back_button_agent = Button("       < Quay lại", [&] { 
         menu_selector = 0; 
         content_selector = 0; 
     });
-    auto agent_menu_group = Container::Vertical({ agent_menu , back_button_agent });
-
+    auto agent_menu_group = Container::Vertical({ agent_menu, back_button_agent });
+    auto agent_menu_renderer = Renderer(agent_menu_group, [&] {
+        return vbox({
+            agent_menu->Render() | flex ,
+            separatorLight(),
+            back_button_agent->Render()
+        }) | size(HEIGHT, EQUAL, 40) |flex;
+    });
 
     // --- TẠO CÁC CONTAINER TAB ---
 
     // Container cho BÊN TRÁI (Menus)
     auto left_pane_container = Container::Tab(
         {
-            main_menu,           // index 0
-            flight_menu_group,   // index 1
-            instance_menu_group, // index 2
-            agent_menu_group,    // index 3
+            main_menu,              // index 0
+            flight_menu_renderer,   // index 1
+            instance_menu_renderer, // index 2
+            agent_menu_renderer,    // index 3
         },
         &menu_selector // Biến int này điều khiển menu nào đang active
     );
