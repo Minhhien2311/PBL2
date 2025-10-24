@@ -42,8 +42,8 @@ public:
                            const std::string& arrivalTime,    // Thay đổi
                            int totalEconomySeats,
                            int totalBusinessSeats,
-                           double fareEconomy,
-                           double fareBusiness);
+                           int fareEconomy,
+                           int fareBusiness);
 
     // Các hàm tìm kiếm 
     Flight* findFlightById(const std::string& flightId);
