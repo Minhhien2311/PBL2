@@ -66,7 +66,7 @@ Booking* BookingManager::createNewBooking( FlightManager& flightManager,
                                            const std::string& flightInstanceId,
                                            const std::string& passengerId,
                                            BookingClass bookingClass,
-                                           double baseFare)
+                                           int baseFare)
 {
     // ... (logic kiểm tra và trừ ghế giữ nguyên) ...
     if (flightInstanceId.empty() || passengerId.empty() || baseFare < 0) return nullptr;
