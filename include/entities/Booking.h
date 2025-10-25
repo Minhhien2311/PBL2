@@ -39,7 +39,7 @@ public:
             const std::string& passengerId,
             const std::string& bookingDate,
             BookingClass bookingClass,
-            double baseFare, BookingStatus status = BookingStatus::Issued); 
+            int baseFare, BookingStatus status = BookingStatus::Issued); 
 
     // --- Getters ---
     const std::string& getBookingId() const;
@@ -47,11 +47,11 @@ public:
     const std::string& getPassengerId() const;
     const std::string& getBookingDate() const;
     BookingClass getClass() const;
-    double getBaseFare() const;
+    int getBaseFare() const;
     BookingStatus getStatus() const;
 
     // --- Setters ---
-    void setBaseFare(double value);
+    void setBaseFare(int value);
     void setStatus(BookingStatus newStatus);
 
     // --- Đọc/Ghi file ---

@@ -7,14 +7,14 @@ Booking::Booking(const std::string& flightInstanceId,
                  const std::string& passengerId,
                  const std::string& bookingDate,
                  BookingClass bookingClass,
-                 double baseFare,
+                 int baseFare,
                 BookingStatus status)
     : bookingId(IdGenerator::generateBookingId()),
       flightInstanceId(flightInstanceId),
       passengerId(passengerId),
       bookingDate(bookingDate),
       bookingClass(bookingClass),
-      baseFare(baseFare < 0.0 ? 0.0 : baseFare),
+      baseFare(baseFare < 0 ? 0 : baseFare),
       status(status) {}
 
 //  Getters
@@ -23,12 +23,12 @@ const std::string& Booking::getFlightInstanceId() const { return flightInstanceI
 const std::string& Booking::getPassengerId()    const { return passengerId; }
 const std::string& Booking::getBookingDate()    const { return bookingDate; }
 BookingClass       Booking::getClass()          const { return bookingClass; }
-double             Booking::getBaseFare()       const { return baseFare; }
+int                Booking::getBaseFare()       const { return baseFare; }
 BookingStatus      Booking::getStatus()         const { return status; }
 
 //  Setters
-void Booking::setBaseFare(double value) {
-    if (value < 0.0) value = 0.0;
+void Booking::setBaseFare(int value) {
+    if (value < 0) value = 0;
     baseFare = value;
 }
 
@@ -75,7 +75,7 @@ Booking Booking::fromRecordLine(const std::string& line) {
     start = end + 1;
     end = line.find('|', start);
 
-    double baseFare = std::stod(line.substr(start, end - start));
+    int baseFare = std::stod(line.substr(start, end - start));
     start = end + 1;
     end = line.length(); // Thay đổi ở đây
 
