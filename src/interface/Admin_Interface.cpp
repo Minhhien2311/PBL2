@@ -257,7 +257,7 @@ public:
             for (int i = scroll_position; i < end_index; i++) {
                 const auto& f = flight_instance_data[i];
                 rows.push_back(hbox({
-                    text(f[0]) | size(WIDTH, EQUAL, 14), //id chuyen
+                    text(f[0]) | size(WIDTH, EQUAL, 15), //id chuyen
                     text(f[1])  | center | size(WIDTH, EQUAL, 14), //id tuyen
                     text(f[2])  | center | size(WIDTH, EQUAL, 18), // ngay di
                     text(f[3])  | center | size(WIDTH, EQUAL, 12), // gio di

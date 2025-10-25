@@ -1,5 +1,5 @@
 #pragma once
 class AccountManager;
-class FlightManager;
+class BookingManager;
 // Hàm hiển thị màn hình đăng nhập
-void ShowAgentMenu(AccountManager& account_manager,FlightManager& flight_manager);
+void ShowAgentMenu(AccountManager& account_manager, BookingManager& booking_manager);
