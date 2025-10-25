@@ -11,20 +11,17 @@ class FlightRule;
 #include <string>
 #include <chrono> 
 
-// BookingManager (Đã tái cấu trúc - Gộp Ticket)
 // Chịu trách nhiệm cho nghiệp vụ Bán vé và Hủy vé (bao gồm kiểm tra logic)
 class BookingManager {
 private:
     DynamicArray<Booking*> allBookings;
     FlightRule* currentRule; // Giữ nguyên
 
-    // <<< THÊM MỚI: Bảng băm >>>
     HashTable<std::string, Booking*> bookingIdTable;
 
     // --- Hàm trợ giúp nội bộ ---
     void loadBookingsFromFile(const std::string& filePath);
 
-    // <<< THÊM MỚI: Hàm xây dựng bảng băm >>>
     void buildBookingIdTable();
 
 public:
