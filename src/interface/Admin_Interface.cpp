@@ -15,6 +15,11 @@
 
 using namespace ftxui;
 
+// ======================================
+// ========= FLIGHT INTERFACE ===========
+// ======================================
+
+// ------ I. Danh sách tuyến bay -----------
 class FlightList {
 public:
     int scroll_position = 0;
@@ -26,7 +31,7 @@ public:
     Component reload_button;   // Nút làm mới
 
     FlightList(FlightManager& manager) : flight_manager(manager) {
-        reload_button = Button(" [ Làm mới danh sách ] ", [&] {
+        reload_button = Button("     [ Làm mới danh sách ]", [&] {
             this->LoadData();
             this->scroll_position = 0; 
         });
@@ -87,7 +92,7 @@ public:
 
         container = Container::Vertical({
             table_component, // Component bảng
-            reload_button    // Component nút
+            reload_button  | size(WIDTH, EQUAL, 35) | center // Component nút
         });
         
         LoadData(); 
@@ -96,9 +101,9 @@ public:
     Element Render() { 
         return vbox({
             text("DANH SÁCH TUYẾN BAY") | bold | center,
-            table_component->Render() | center, // Render component bảng
+            table_component->Render() | center,
             separator(),
-            reload_button->Render() | center // Render component nút
+            reload_button->Render()
         });
     }
 
@@ -121,7 +126,7 @@ private:
     }
 };
 
-// --- Giao diện cho màn hình "Thêm tuyến bay" ---
+// --- II. Thêm tuyến bay ---
 class AddFlightScreen {
 public:
     // Trạng thái (dữ liệu) của màn hình này
@@ -170,13 +175,12 @@ public:
         });
     }
 
-    // Hàm vẽ giao diện cho màn hình này
     Element Render() {
         return vbox({
             text("THÊM TUYẾN BAY MỚI") | bold | center | color(Color::Green),
             separator(),
             vbox({
-                hbox({ text("Mã tuyến bay: "), container->ChildAt(0)->Render() }) | borderLight,
+                hbox({ text("Mã tuyến bay:  "), container->ChildAt(0)->Render() }) | borderLight,
                 hbox({ text("Hãng bay:      "), container->ChildAt(1)->Render() }) | borderLight,
                 hbox({ text("Sân bay đi:    "), container->ChildAt(2)->Render() }) | borderLight,
                 hbox({ text("Sân bay đến:   "), container->ChildAt(3)->Render() }) | borderLight,
@@ -190,7 +194,143 @@ public:
     }
 };
 
-// --- Giao diện cho màn hình "Thêm chuyến bay" ---
+// --------- III. Tìm kiếm tuyến bay ----------------
+
+
+// ===============================================
+// ========= FLIGHT INSTANCE INTERFACE ===========
+// ===============================================
+
+// -------- I. Danh sách chuyến bay --------------
+
+class FlightInstanceList {
+public:
+    int scroll_position = 0;
+    int visible_rows = 25;
+    std::vector<std::vector<std::string>> flight_instance_data;
+    FlightManager& flight_instance_manager;
+    Component container;       // Container chính
+    Component table_component; // Component chứa bảng cuộn được
+    Component reload_button;   // Nút làm mới
+
+    FlightInstanceList(FlightManager& manager) : flight_instance_manager(manager) {
+        reload_button = Button("     [ Làm mới danh sách ]", [&] {
+            this->LoadData();
+            this->scroll_position = 0; 
+        });
+
+        auto table_renderer = Renderer([&] {
+            Elements rows;
+            int total = flight_instance_data.size();
+            int end_index = std::min(scroll_position + visible_rows, total);
+
+            // --- Tiêu đề bảng ---
+            auto header = hbox({
+                text("ID chuyến") | bold | center | size(WIDTH, EQUAL, 14),
+                separator(),
+                text("ID tuyến") | bold | center | size(WIDTH, EQUAL, 13),
+                separator(),
+                text("Ngày đi") | bold | center | size(WIDTH, EQUAL, 16),
+                separator(),
+                text("Giờ đi") | bold | center | size(WIDTH, EQUAL, 10),
+                separator(),
+                text("Ngày đến") | bold | center | size(WIDTH, EQUAL, 21),
+                separator(),
+                text("Giờ đến") | bold | center | size(WIDTH, EQUAL, 11),
+                separator(),
+                text("Ghế phổ thông") | bold | center | size(WIDTH, EQUAL, 22),
+                separator(),
+                text("Trống") | bold | center | size(WIDTH, EQUAL, 14),
+                separator(),
+                text("Giá vé") | bold | center | size(WIDTH, EQUAL, 24),
+                separator(),
+                text("Ghế thương gia") | bold | center | size(WIDTH, EQUAL, 20),
+                separator(),
+                text("Trống") | bold | center | size(WIDTH, EQUAL, 11),
+                separator(),
+                text("Giá vé") | bold | center | size(WIDTH, EQUAL, 24),
+            });
+            rows.push_back(header);
+            rows.push_back(separator());
+
+            // --- Dòng dữ liệu ---
+            for (int i = scroll_position; i < end_index; i++) {
+                const auto& f = flight_instance_data[i];
+                rows.push_back(hbox({
+                    text(f[0]) | size(WIDTH, EQUAL, 14), //id chuyen
+                    text(f[1])  | center | size(WIDTH, EQUAL, 14), //id tuyen
+                    text(f[2])  | center | size(WIDTH, EQUAL, 18), // ngay di
+                    text(f[3])  | center | size(WIDTH, EQUAL, 12), // gio di
+                    text(f[4])  | center | size(WIDTH, EQUAL, 22), // ngay den
+                    text(f[5])  | center | size(WIDTH, EQUAL, 13), // gio den
+                    text(f[6])  | center | size(WIDTH, EQUAL, 23), // ghe pho thong
+                    text(f[7]) | center | size(WIDTH, EQUAL, 16),  // pho thong trong
+                    text(f[10]) | center |size(WIDTH, EQUAL, 25), //gia ve pho thong
+                    text(f[8])  | center |size(WIDTH, EQUAL, 22), // ghe thuong gia
+                    text(f[9])  | center |size(WIDTH, EQUAL, 12), // thuong gia trong
+                    text(f[11]) | center | size(WIDTH, EQUAL, 25), //gia ve thuong gia
+                }));
+            }
+
+            // --- Thanh trạng thái ---
+            rows.push_back(separator());
+            rows.push_back(text("Dùng chuột để cuộn — Tổng số chuyến: " + std::to_string(total)) | dim | center);
+
+            return vbox(std::move(rows)) | border | size(HEIGHT, LESS_THAN, 35);
+        });
+
+        table_component = CatchEvent(table_renderer, [&](Event event) {
+            int total = flight_instance_data.size();
+            if (event.is_mouse()) {
+                if (event.mouse().button == Mouse::WheelDown) {
+                    if (scroll_position + visible_rows < total) scroll_position++;
+                    return true;
+                }
+                if (event.mouse().button == Mouse::WheelUp) {
+                    if (scroll_position > 0) scroll_position--;
+                    return true;
+                }
+            }
+            return false;
+        });
+
+        container = Container::Vertical({
+            table_component, // Component bảng
+            reload_button  | size(WIDTH, EQUAL, 35) | center // Component nút
+        });
+        
+        LoadData(); 
+    }
+
+    Element Render() { 
+        return vbox({
+            text("DANH SÁCH CHUYẾN BAY") | bold | center,
+            table_component->Render() | center,
+            separator(),
+            reload_button->Render()
+        });
+    }
+
+private:
+    void LoadData() {
+        flight_instance_data.clear();
+        const auto& flights_instances = flight_instance_manager.getAllInstances();
+        for (int i = 0; i < flights_instances.size(); i++) {
+            FlightInstance* f = flights_instances[i];
+            if (!f) continue;
+            std::stringstream ss(f->toRecordLine());
+            std::string col;
+            std::vector<std::string> cols;
+            while (std::getline(ss, col, '|'))
+                cols.push_back(col);
+            if (cols.size() < 12)
+                cols.resize(12, "");
+            flight_instance_data.push_back(cols);
+        }
+    }
+};
+
+// ------- II. Thêm chuyến bay  -----------
 class AddFlightInstanceScreen {
 public:
     // Trạng thái (dữ liệu) của màn hình này
@@ -304,7 +444,7 @@ void ShowAdminMenu(AccountManager& account_manager, FlightManager& flight_manage
     // Container::Tab bắt buộc phải dùng int* để điều khiển
 
     // Trạng thái cho menu bên trái
-    int menu_selector = 0; 
+    int menu_selector = 0;
     // 0 = Main
     // 1 = Flight
     // 2 = Instance
@@ -317,18 +457,23 @@ void ShowAdminMenu(AccountManager& account_manager, FlightManager& flight_manage
     // 4 = ListInstances, 5 = AddInstance, 6 = SearchInstance
     // 7 = ListAgents, 8 = AddAgent, 9 = SearchAgent
 
-    // --- TẠO CÁC COMPONENT NỘI DUNG (CHO BÊN PHẢI) ---
-    FlightList flight_list(flight_manager);
-    AddFlightScreen add_flight_screen(flight_manager);
-    AddFlightInstanceScreen add_flight_instance_screen(flight_manager);
+    // --- CÁC COMPONENT NỘI DUNG (CHO BÊN PHẢI) ---
 
     auto none_screen = Renderer([] {
         return vbox({text("HỆ THỐNG QUẢN LÝ BÁN VÉ MÁY BAY") | bold | center | dim,
         });
     });
+    //Flight
+    FlightList flight_list(flight_manager);
+    AddFlightScreen add_flight_screen(flight_manager);
     auto search_flight_screen = Renderer([] { return text("Giao diện Tìm kiếm Tuyến bay") | center; });
-    auto list_instances_screen = Renderer([] { return text("Giao diện Danh sách Chuyến bay") | center; });
+    
+    //Flight Instance
+    FlightInstanceList flight_instance_list(flight_manager);
+    AddFlightInstanceScreen add_flight_instance_screen(flight_manager);
     auto search_instance_screen = Renderer([] { return text("Giao diện Tìm kiếm Chuyến bay") | center; });
+
+    //Agent
     auto list_agents_screen = Renderer([] { return text("Giao diện Danh sách Đại lý") | center; });
     auto add_agent_screen = Renderer([] { return text("Giao diện Thêm Đại lý") | center; });
     auto search_agent_screen = Renderer([] { return text("Giao diện Tìm kiếm Đại lý") | center; });
@@ -452,20 +597,19 @@ void ShowAdminMenu(AccountManager& account_manager, FlightManager& flight_manage
 auto right_pane_container = Container::Tab(
 {
         none_screen,                  // index 0
-        flight_list.container,        // index 1
 
+        flight_list.container,        // index 1
         Renderer(add_flight_screen.container, [&] { // index 2
           return add_flight_screen.Render();
         }),
-        
         search_flight_screen,         // index 3
-        list_instances_screen,        // index 4
 
+        flight_instance_list.container,        // index 4
         Renderer(add_flight_instance_screen.container, [&] { // index 5
                 return add_flight_instance_screen.Render();
         }), 
-
         search_instance_screen,      // index 6
+
         list_agents_screen,          // index 7
         add_agent_screen,            // index 8
         search_agent_screen,         // index 9
