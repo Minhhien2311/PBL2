@@ -15,7 +15,7 @@ void app(){
                 ShowAdminMenu(account_manager,flight_manager);
                 break;
             case ApplicationScreen::AgentMenu:
-                ShowAgentMenu();
+                ShowAgentMenu(account_manager,flight_manager);
         }
     }
 }

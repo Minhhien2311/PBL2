@@ -53,9 +53,7 @@ public:
                  const std::string& phone,
                  const std::string& email);
 
-    // <<< THAY ĐỔI: Thêm constructor mặc định để tương thích tạm thời
-    // Bạn nên xóa dòng này sau khi nâng cấp DynamicArray hoàn chỉnh hơn
-    AccountAdmin() = default; 
+    AccountAdmin() = default;
 
     static AccountAdmin fromRecordLine(const std::string& line);
     std::string toRecordLine() const;
