@@ -39,7 +39,7 @@ public:
                                const std::string& flightInstanceId,
                                const std::string& passengerId,
                                BookingClass bookingClass,
-                               double baseFare);
+                               int baseFare);
 
     // NGHIỆP VỤ Hủy vé
     bool cancelBooking(FlightManager& flightManager, const std::string& bookingId);
