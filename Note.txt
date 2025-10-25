@@ -2,3 +2,8 @@ Terminal:
     - cmake -S . -B build (configure 1 lần)
     - cmake --build build --target utils -j → chỉ build utils
     - cmake --build build --target pbl2 -j → build app
+
+Còn thiếu:
+    - Hàm tìm kiếm theo ngày giờ bay, tìm theo điểm đi đến, khoảng giá
+    - Thiếu giao diện Agent
+    - Hàm thống kê
