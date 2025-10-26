@@ -1,5 +1,5 @@
-#include "C:/PBL2/include/entities/Flight.h"
-#include "C:/PBL2/include/utils/GenID.h"
+#include "entities/Flight.h"
+#include "utils/GenID.h"
 
 Flight::Flight( const std::string& number,
                 const std::string& airline,

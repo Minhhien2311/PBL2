@@ -1,8 +1,8 @@
-#include "C:/PBL2/include/core/BookingManager.h"
-#include "C:/PBL2/include/core/FlightManager.h"         // Cần để tìm FlightInstance
-#include "C:/PBL2/include/entities/FlightInstance.h"    // Cần để gọi bookSeats/releaseSeats
-#include "C:/PBL2/include/utils/Time.h"                 // Cần để lấy ngày giờ
-#include "C:/PBL2/include/entities/FlightRule.h"        // Cần để kiểm tra luật
+#include "core/BookingManager.h"
+#include "core/FlightManager.h"         // Cần để tìm FlightInstance
+#include "entities/FlightInstance.h"    // Cần để gọi bookSeats/releaseSeats
+#include "utils/Time.h"                 // Cần để lấy ngày giờ
+#include "entities/FlightRule.h"        // Cần để kiểm tra luật
 #include <fstream>
 #include <string>
 #include <chrono> 

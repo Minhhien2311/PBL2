@@ -1,4 +1,4 @@
-#include "C:/PBL2/include/entities/Account.h"
+#include "entities/Account.h"
 #include <iostream>
 
 // Constructor 

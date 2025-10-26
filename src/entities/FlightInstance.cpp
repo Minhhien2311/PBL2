@@ -1,5 +1,5 @@
-#include "C:/PBL2/include/entities/FlightInstance.h"
-#include "C:/PBL2/include/utils/GenID.h"          // Cần để gọi hàm tạo ID
+#include "entities/FlightInstance.h"
+#include "utils/GenID.h"          // Cần để gọi hàm tạo ID
 #include <iostream>                             // Cần cho hàm displayInfo
 
 /* --- Constructor ---
