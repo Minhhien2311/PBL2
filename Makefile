@@ -1,137 +1,45 @@
-# --- Compiler and Flags ---
+# Tên trình biên dịch
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -g
-#CXXFLAGS = -std=c++17 -Wall -Wextra -O2 # Example for release build
 
-# --- Directories (Based on your structure image_2eb960.png) ---
-INCLUDE_ROOT = include
-EXTEND_DIR = Extend
-SFML_INCLUDE_DIR = lib/SFML-2.6.1/include
+# Thư mục build để chứa file object và file thực thi
+BUILD_DIR = build
+TARGET = $(BUILD_DIR)/main.exe
 
-# Explicitly list ALL header directories
-IDIRS = $(INCLUDE_ROOT) \
-        $(INCLUDE_ROOT)/core \
-        $(INCLUDE_ROOT)/DSA \
-        $(INCLUDE_ROOT)/entities \
-        $(INCLUDE_ROOT)/UI \
-        $(INCLUDE_ROOT)/UI/components \
-        $(INCLUDE_ROOT)/UI/states \
-        $(INCLUDE_ROOT)/utils \
-        $(EXTEND_DIR) \
-        $(SFML_INCLUDE_DIR)
+# Cờ biên dịch: -g để debug, -Wall để hiện tất cả cảnh báo
+CXXFLAGS = -g -Wall
 
-APP_DIR = app
-SRC_DIR = src
-# Explicitly list ALL source directories where .cpp files reside
-SRCDIRS = $(APP_DIR) \
-          $(SRC_DIR)/core \
-          $(SRC_DIR)/entities \
-          $(SRC_DIR)/UI/components \
-          $(SRC_DIR)/UI/states \
-          $(SRC_DIR)/utils \
-          $(EXTEND_DIR)
+# Các thư mục chứa file header
+INCLUDES = -IC:/PBL2/include -IC:/PBL2/lib/SFML-2.6.1/include
 
-# VPATH tells make where to find source files based on SRCDIRS listing
-VPATH = $(SRCDIRS)
+# Các thư mục chứa thư viện
+LIBDIRS = -LC:/PBL2/lib/SFML-2.6.1/lib
 
-# Build directories
-BUILDDIR = build
-OBJDIR = $(BUILDDIR)/obj
-# Output executable name (As requested: PBL2)
-TARGET_NAME = PBL2
-TARGET = $(BUILDDIR)/$(TARGET_NAME)
-# Add .exe for Windows automatically
-ifeq ($(OS),Windows_NT)
-    TARGET := $(TARGET).exe
-    MKDIR_P = mkdir -p
-    CP = cp -r
-    RM = rm -rf
-else
-    MKDIR_P = mkdir -p
-	CP = cp -r
-	RM = rm -rf
-endif
+# Các thư viện cần link (phiên bản debug)
+LIBS = -lsfml-graphics-d -lsfml-window-d -lsfml-system-d -lsfml-main-d
 
-# --- SFML Configuration ---
-SFML_LIB_PATH = lib/SFML-2.6.1/lib
-SFML_LIBS = -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio -lsfml-network
-SFML_DLL_PATH = lib/SFML-2.6.1/bin
+# Tự động tìm tất cả các file .cpp trong các thư mục con của src và app
+SRCS := $(wildcard app/main.cpp) $(wildcard src/core/*.cpp) $(wildcard src/entities/*.cpp) $(wildcard src/UI/components/*.cpp) $(wildcard src/UI/states/*.cpp) $(wildcard src/utils/*.cpp)
 
-# --- Compiler/Linker Flags ---
-INCLUDES = $(addprefix -I,$(IDIRS))
-LDFLAGS = -L$(SFML_LIB_PATH)
-LDLIBS = $(SFML_LIBS)
+# Tạo danh sách các file object (.o) tương ứng trong thư mục build
+OBJS = $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(SRCS))
 
-# --- Find Source Files and Define Object Files ---
-# Find all .cpp files ONLY in the directories listed in SRCDIRS
-SRC = $(foreach dir,$(SRCDIRS),$(wildcard $(dir)/*.cpp))
-# Make SRC unique
-SRC := $(sort $(SRC))
-# Create object file names in OBJDIR (build/obj/main.o, build/obj/App.o, ...)
-OBJ = $(addprefix $(OBJDIR)/, $(notdir $(SRC:.cpp=.o)))
+# Rule mặc định: build tất cả
+all: $(TARGET)
 
-# --- Debug Print ---
-# These lines will print when 'make' starts processing the Makefile
-$(info ==========================================================)
-$(info Source Dirs (SRCDIRS): $(SRCDIRS))
-$(info Source Files (SRC)  : $(SRC))
-$(info Object Files (OBJ) : $(OBJ))
-$(info ==========================================================)
+# Rule để link các file object thành file thực thi
+$(TARGET): $(OBJS)
+	@mkdir -p $(dir $@)
+	$(CXX) $(OBJS) -o $@ $(LIBDIRS) $(LIBS)
+	@echo "Build successful! Executable is at $(TARGET)"
 
-# --- Rules ---
-
-# Default target: build everything
-all: $(TARGET) copy_resources copy_dlls
-
-# Linking rule: create the executable from object files
-$(TARGET): $(OBJ) | $(BUILDDIR)
-	@echo "Linking..."
-	$(CXX) $(CXXFLAGS) $^ -o $@ $(LDFLAGS) $(LDLIBS)
-	@echo "Build successful: $@"
-
-# Single Compilation Rule using VPATH
-# make will search for %.cpp in directories listed in VPATH
-# $< is the first prerequisite (the .cpp file found via VPATH)
-# $@ is the target name (the .o file)
-$(OBJDIR)/%.o: %.cpp | $(OBJDIR)
-	@echo "Compiling $< (found via VPATH for $@) ..."
+# Rule để biên dịch file .cpp thành file .o
+$(BUILD_DIR)/%.o: %.cpp
+	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
-# Rule to create build directories if they don't exist
-$(BUILDDIR):
-	@echo "Creating directory $(BUILDDIR)..."
-	$(MKDIR_P) $(BUILDDIR)
-
-$(OBJDIR): | $(BUILDDIR) # Ensure BUILDDIR exists before OBJDIR
-	@echo "Creating directory $(OBJDIR)..."
-	$(MKDIR_P) $(OBJDIR)
-
-# Rule to copy resource files (assets, data) to the build directory
-copy_resources: | $(BUILDDIR)
-	@echo "Copying resources to $(BUILDDIR)..."
-	$(CP) assets $(BUILDDIR)/assets || echo "Warning: Could not copy assets."
-	$(CP) data $(BUILDDIR)/data || echo "Warning: Could not copy data."
-
-# Rule to copy SFML DLLs to the build directory (for Windows dynamic linking)
-DLLS = $(wildcard $(SFML_DLL_PATH)/*.dll)
-copy_dlls: | $(BUILDDIR)
-ifeq ($(OS),Windows_NT)
-	$(if $(DLLS), \
-		@echo "Copying SFML DLLs to $(BUILDDIR)..."; \
-		$(CP) $(DLLS) $(BUILDDIR)/, \
-		@echo "SFML DLLs not found in $(SFML_DLL_PATH)." \
-	)
-else
-	@echo "Skipping DLL copy on non-Windows system."
-endif
-
-# Clean rule: remove build directory
+# Rule để dọn dẹp thư mục build
 clean:
-	@echo "Cleaning build files..."
-	$(RM) $(BUILDDIR)
+	@echo "Cleaning build directory..."
+	@rm -rf $(BUILD_DIR)
 
-# Phony targets: targets that are not files
-.PHONY: all clean copy_resources copy_dlls
-
-# Suppress implicit rules to avoid unexpected behavior
-.SUFFIXES:
+.PHONY: all clean
