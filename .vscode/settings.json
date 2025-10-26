@@ -1,5 +1,19 @@
+// .vscode/settings.json
 {
+    // --- C/C++ Extension Settings ---
+    "C_Cpp.default.compilerPath": "C:/mingw64/bin/gcc.exe", // !! QUAN TRỌNG: Kiểm tra lại đường dẫn này! Có thể là c++.exe hoặc g++.exe !!
+    "C_Cpp.default.intelliSenseMode": "windows-gcc-x64",
+    "C_Cpp.default.cppStandard": "c++17", // Khớp với Makefile
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/**" // Bao gồm tất cả thư mục con trong dự án
+        // Bạn KHÔNG cần liệt kê từng thư mục con như include/core, include/entities... nữa
+        // Nó sẽ tự tìm thấy cả lib/SFML-2.6.1/include
+    ],
+    // --- File Associations ---
     "files.associations": {
+        // Giữ nguyên các association bạn đã có hoặc thêm nếu cần
+        "*.h": "cpp",
+        "*.inl": "cpp",
         "array": "cpp",
         "atomic": "cpp",
         "bit": "cpp",
@@ -58,20 +72,10 @@
         "text_encoding": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp",
-        "bitset": "cpp",
-        "codecvt": "cpp",
-        "regex": "cpp",
-        "stack": "cpp",
-        "condition_variable": "cpp",
-        "csignal": "cpp",
-        "cstring": "cpp",
-        "list": "cpp",
-        "mutex": "cpp",
-        "semaphore": "cpp",
-        "stop_token": "cpp",
-        "thread": "cpp",
-        "cinttypes": "cpp",
-        "unordered_set": "cpp",
-        "set": "cpp"
-    }
+        "bitset": "cpp"
+    },
+    // --- Các cài đặt khác ---
+    "editor.formatOnSave": true,
+    "files.encoding": "utf8",
+    "files.eol": "\n"
 }
