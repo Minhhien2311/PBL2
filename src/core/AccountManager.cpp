@@ -1,4 +1,4 @@
-#include "C:/PBL2/include/core/AccountManager.h"
+#include "core/AccountManager.h"
 #include <fstream>
 #include <string>
 
