@@ -100,7 +100,7 @@ target_compile_definitions(PBL2 PRIVATE DATA_DIR="${DATA_DIR}" ASSETS_DIR="${ASS
 
 set_target_properties(PBL2 PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
-  WIN32_EXECUTABLE FALSE
+  WIN32_EXECUTABLE TRUE
 )
 
 # =========================================================
