@@ -12,18 +12,18 @@ App::App() : mWindow(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE) {
 
 void App::loadFonts() {
     // Tải các font bạn đã cung cấp
-    sf::Font poppinsRegular;
-    if (!poppinsRegular.loadFromFile("assets/fonts/Poppins-Regular.ttf")) {
-        std::cerr << "Error loading Poppins-Regular.ttf" << std::endl;
+    sf::Font MulishRegular;
+    if (!MulishRegular.loadFromFile("assets/fonts/Mulish-Regular.ttf")) {
+        std::cerr << "Error loading Mulish-Regular.ttf" << std::endl;
         // Có thể throw exception hoặc xử lý lỗi khác
     }
-    mFontManager["PoppinsRegular"] = poppinsRegular;
+    mFontManager["MulishRegular"] = MulishRegular;
 
-    sf::Font poppinsBold;
-    if (!poppinsBold.loadFromFile("assets/fonts/Poppins-Bold.ttf")) {
-         std::cerr << "Error loading Poppins-Bold.ttf" << std::endl;
+    sf::Font MulishBold;
+    if (!MulishBold.loadFromFile("assets/fonts/Mulish-Bold.ttf")) {
+         std::cerr << "Error loading Mulish-Bold.ttf" << std::endl;
     }
-    mFontManager["PoppinsBold"] = poppinsBold;
+    mFontManager["MulishBold"] = MulishBold;
 
     // Tải thêm các font khác nếu cần (Montserrat, v.v.)
     // sf::Font montserratRegular;

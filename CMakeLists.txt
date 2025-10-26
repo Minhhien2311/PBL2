@@ -6,10 +6,23 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+# Xác định Build Type
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "Setting build type to 'Debug' as none was specified.")
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build." FORCE)
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif()
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
 if (MSVC)
   add_compile_options(/W4 /permissive-)
 else()
   add_compile_options(-Wall -Wextra -Wpedantic)
+  if(CMAKE_BUILD_TYPE MATCHES Debug)
+    add_compile_options(-g) # Thêm -g cho Debug
+  else()
+    add_compile_options(-O3) # Thêm tối ưu hóa -O3 cho Release
+  endif()
 endif()
 
 set(DATA_DIR "${CMAKE_BINARY_DIR}/data")
@@ -21,7 +34,7 @@ option(USE_SFML "Dùng SFML làm giao diện (nếu OFF thì dùng FTXUI)" ON)
 # =========================================================
 # =============   KHAI BÁO CÁC LIB CỦA APP    =========
 # =========================================================
-
+# (Các thư viện utils, entities, core, ui_components, ui_states giữ nguyên)
 # --- LIB: utils ---
 add_library(utils STATIC)
 target_sources(utils PRIVATE
@@ -74,7 +87,7 @@ target_sources(ui_states PRIVATE
   src/UI/states/LoginState.cpp
 )
 target_include_directories(ui_states PUBLIC ${CMAKE_SOURCE_DIR}/include)
-target_link_libraries(ui_states PUBLIC core ui_components entities) # Đã link các thư viện cần thiết trực tiếp
+target_link_libraries(ui_states PUBLIC core ui_components entities) 
 
 # =========================================================
 # =====================     APP     =======================
@@ -84,8 +97,6 @@ target_sources(PBL2 PRIVATE
   app/main.cpp
 )
 target_compile_definitions(PBL2 PRIVATE DATA_DIR="${DATA_DIR}" ASSETS_DIR="${ASSETS_DIR}")
-# Link tất cả các thư viện tĩnh cần thiết trực tiếp vào executable
-# target_link_libraries(PBL2 PRIVATE ui_states) # Thay thế dòng này bằng dòng dưới
 
 set_target_properties(PBL2 PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
@@ -96,80 +107,86 @@ set_target_properties(PBL2 PROPERTIES
 # ============   LIÊN KẾT UI BACKEND (SFML)   =============
 # =========================================================
 if (USE_SFML)
-  # --- Cấu hình build SFML từ source ---
-  set(BUILD_SHARED_LIBS ON CACHE BOOL "" FORCE)
-  set(SFML_USE_STATIC_STD_LIBS OFF CACHE BOOL "" FORCE)
-  set(SFML_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-  set(SFML_BUILD_TEST_SUITE OFF CACHE BOOL "" FORCE)
-  set(SFML_BUILD_AUDIO ON  CACHE BOOL "" FORCE)
-  set(SFML_USE_SYSTEM_DEPS ON CACHE BOOL "" FORCE)
+  
+  # --- TÌM SFML ĐÃ TẢI SẴN (PRE-COMPILED) ---
+  set(SFML_DIR "${CMAKE_SOURCE_DIR}/lib/SFML-2.6.1") 
 
-  if (EXISTS "${CMAKE_SOURCE_DIR}/SFML/CMakeLists.txt")
-      add_subdirectory(${CMAKE_SOURCE_DIR}/SFML)
-  else()
-      message(FATAL_ERROR "Thư mục mã nguồn SFML không tìm thấy tại ${CMAKE_SOURCE_DIR}/SFML")
+  if(NOT EXISTS "${SFML_DIR}/include/SFML/Graphics.hpp")
+    message(FATAL_ERROR "Không tìm thấy SFML headers tại ${SFML_DIR}/include. Bạn đã tải bản pre-compiled và chép vào lib/SFML-2.6.1 chưa?")
   endif()
+  
+  message(STATUS "Using pre-compiled SFML from: ${SFML_DIR}")
 
-  # --- Định nghĩa INTERFACE library cho SFML ---
-  add_library(sfml_libs INTERFACE)
-  if(WIN32)
-      target_link_libraries(sfml_libs INTERFACE sfml-graphics sfml-window sfml-system sfml-audio sfml-main)
+  # Thêm đường dẫn Include của SFML vào TẤT CẢ các thư viện con CẦN nó
+  target_include_directories(core PUBLIC "${SFML_DIR}/include")
+  target_include_directories(ui_components PUBLIC "${SFML_DIR}/include")
+  target_include_directories(ui_states PUBLIC "${SFML_DIR}/include")
+  target_include_directories(PBL2 PRIVATE "${SFML_DIR}/include") 
+
+  # Thêm đường dẫn Lib của SFML cho target chính
+  target_link_directories(PBL2 PRIVATE "${SFML_DIR}/lib")
+  
+  # --- Định nghĩa thư viện SFML cần link dựa trên Build Type ---
+  if(CMAKE_BUILD_TYPE MATCHES Debug)
+    message(STATUS "Linking SFML Debug libraries (-d)")
+    set(SFML_LIBRARIES
+        sfml-graphics-d
+        sfml-window-d
+        sfml-audio-d
+        sfml-system-d
+    )
+    if(WIN32)
+      list(APPEND SFML_LIBRARIES sfml-main-d)
+    endif()
   else()
-      target_link_libraries(sfml_libs INTERFACE sfml-graphics sfml-window sfml-system sfml-audio)
+    message(STATUS "Linking SFML Release libraries")
+    set(SFML_LIBRARIES
+        sfml-graphics
+        sfml-window
+        sfml-audio
+        sfml-system
+    )
+    if(WIN32)
+      list(APPEND SFML_LIBRARIES sfml-main)
+    endif()
   endif()
-
-  # --- Link SFML vào các thư viện của bạn CẦN nó ---
-  target_link_libraries(core PUBLIC sfml_libs)
-  target_link_libraries(ui_components PUBLIC sfml_libs)
-  target_link_libraries(ui_states PUBLIC sfml_libs)
-
-  # --- Link tất cả thư viện cần thiết vào App chính MỘT CÁCH TƯỜNG MINH ---
-  target_link_libraries(PBL2 PRIVATE ui_states core ui_components entities utils sfml_libs)
+  
+  # --- Link mọi thứ vào App chính ---
+  target_link_libraries(PBL2 PRIVATE
+      # --- SỬA LỖI PHỤ THUỘC VÒNG ---
+      -Wl,--start-group
+      ui_states       # Thư viện của bạn
+      core
+      ui_components
+      entities
+      utils
+      -Wl,--end-group
+      # --- HẾT SỬA LỖI ---
+      
+      ${SFML_LIBRARIES} # Link các thư viện SFML (đặt sau cùng)
+  )
 
   target_compile_definitions(PBL2 PRIVATE UI_BACKEND_SFML=1)
 
-  # --- Copy DLL SFML ---
-  set(SFML_DLL_TARGETS sfml-graphics sfml-window sfml-system sfml-audio)
-  # sfml-main là thư viện tĩnh, không cần copy DLL
-
-  foreach(lib IN LISTS SFML_DLL_TARGETS)
-    if (TARGET ${lib})
-      get_target_property(target_type ${lib} TYPE)
-      if(target_type STREQUAL "SHARED_LIBRARY")
-        add_custom_command(TARGET PBL2 POST_BUILD
-          COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                  $<TARGET_FILE:${lib}>  $<TARGET_FILE_DIR:PBL2>
-          COMMENT "Copying ${lib} DLL"
-          VERBATIM)
-      endif()
-    endif()
-  endforeach()
-
-  # --- Copy DLL phụ thuộc (OpenAL) ---
-  find_file(OPENAL_DLL_PATH openal32.dll HINTS
-      "${CMAKE_BINARY_DIR}/lib"
-      "${CMAKE_BINARY_DIR}/bin"
-      "${CMAKE_BINARY_DIR}/SFML/lib/openal-soft-build"
-      "${CMAKE_BINARY_DIR}/SFML/bin"
-      "${CMAKE_INSTALL_PREFIX}/bin"
-      "${CMAKE_SOURCE_DIR}/SFML/extlibs/bin/x64"
-      "${CMAKE_SOURCE_DIR}/SFML/extlibs/bin/x86"
-      "$ENV{SystemRoot}/System32"
-      NO_DEFAULT_PATH
-      DOC "Path to OpenAL32.dll"
-      )
-
-  if (OPENAL_DLL_PATH)
-      message(STATUS "Found OpenAL DLL: ${OPENAL_DLL_PATH}")
+  # --- Copy DLL SFML (từ thư mục bin của bản pre-compiled) ---
+  # Khối này sẽ copy CẢ sfml-*.dll VÀ libstdc++*.dll (phiên bản 13.1.0)
+  set(SFML_BIN_DIR "${SFML_DIR}/bin")
+  if(EXISTS "${SFML_BIN_DIR}")
+    # Lấy danh sách TẤT CẢ các file .dll trong thư mục bin
+    file(GLOB SFML_DLLS "${SFML_BIN_DIR}/*.dll")
+    message(STATUS "Found SFML DLLs: ${SFML_DLLS}")
+    
+    foreach(dll_file IN LISTS SFML_DLLS)
       add_custom_command(TARGET PBL2 POST_BUILD
           COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                  "${OPENAL_DLL_PATH}" "$<TARGET_FILE_DIR:PBL2>"
-          COMMENT "Copying OpenAL DLL"
+                  "${dll_file}" "$<TARGET_FILE_DIR:PBL2>"
+          COMMENT "Copying ${dll_file}"
           VERBATIM)
+    endforeach()
   else()
-      message(WARNING "openal32.dll not found automatically. Audio might not work. Please copy it manually to the executable directory or adjust HINTS in find_file(OPENAL_DLL_PATH...) in CMakeLists.txt.")
+    message(WARNING "SFML bin directory not found at ${SFML_BIN_DIR}. DLLs must be copied manually.")
   endif()
-
+  
 else()
   # ... (phần FTXUI) ...
 endif()
@@ -177,20 +194,16 @@ endif()
 # =========================================================
 # ================     HẬU BIÊN DỊCH     =================
 # =========================================================
-# Copy data/
+# Copy data/ và assets/
 add_custom_command(TARGET PBL2 POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_directory
-          "${CMAKE_SOURCE_DIR}/data"
-          "${DATA_DIR}"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/data" "${DATA_DIR}"
   COMMENT "Copying data directory"
 )
-# Copy assets/
 add_custom_command(TARGET PBL2 POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_directory
-          "${CMAKE_SOURCE_DIR}/assets"
-          "${ASSETS_DIR}"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_SOURCE_DIR}/assets" "${ASSETS_DIR}"
   COMMENT "Copying assets directory"
 )
 
+# Thêm include gốc vào PBL2
 target_include_directories(PBL2 PRIVATE ${CMAKE_SOURCE_DIR}/include)
 
