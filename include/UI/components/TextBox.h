@@ -1,53 +1,41 @@
-#ifndef TEXTBOX_H
-#define TEXTBOX_H
-
+#pragma once
 #include <SFML/Graphics.hpp>
-#include <string>
-#include <functional> // Cho std::function
 
-namespace UI {
-
-class TextBox : public sf::Drawable, public sf::Transformable {
+class TextBox : public sf::Drawable
+{
 public:
     TextBox();
 
-    void setSize(const sf::Vector2f& size);
-    void setFont(const sf::Font& font);
-    void setCharacterSize(unsigned int size);
-    void setPlaceholder(const std::string& text);
-    void setPasswordMode(bool enabled);
-    void setOutlineColor(const sf::Color& color);
-    void setFillColor(const sf::Color& color);
+    void setSize(sf::Vector2f sz);
+    void setPosition(sf::Vector2f center); // ĐỊNH VỊ THEO TÂM
+    sf::Vector2f getPosition() const { return mCenter; }
 
-    std::string getText() const;
-    void setText(const std::string& text); // Thêm hàm này để có thể đặt text từ bên ngoài
-    bool isSelected() const;
+    void setFont(const sf::Font &font);
+    void setCharacterSize(unsigned int s);
 
-    void handleEvent(sf::Event& event, const sf::RenderWindow& window);
-    void update(sf::Time dt); // Cho hiệu ứng con trỏ
+    void setPlaceholder(const sf::String &s); // ← dùng sf::String
+    void setPasswordMode(bool on) { mPassword = on; }
 
-    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+    void setText(const sf::String &s); // ← dùng sf::String
+    sf::String getText() const { return mBuffer; }
+
+    void handleEvent(const sf::Event &e, const sf::RenderWindow &win);
+    void update(sf::Time dt);
 
 private:
-    void updateTextDisplay();
+    virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
+    bool hitTest_(sf::Vector2f p) const;
 
+private:
     sf::RectangleShape mBox;
     sf::Text mText;
-    sf::Text mPlaceholderText;
-    sf::RectangleShape mCursor; // Con trỏ nhấp nháy
+    sf::Text mPlaceholder;
+    sf::RectangleShape mCaret;
 
-    std::string mInputString;
-    std::string mDisplayString; // Chuỗi hiển thị (có thể là '*' nếu là password)
-    std::string mPlaceholderString;
-
-    bool mIsSelected = false;
-    bool mIsPassword = false;
-
-    // Cho hiệu ứng con trỏ
-    sf::Clock mCursorClock;
-    bool mShowCursor = false;
+    sf::Vector2f mCenter{0.f, 0.f};
+    sf::String mBuffer; // ← LƯU NỘI BỘ DẠNG sf::String (UTF-32)
+    bool mFocused{false};
+    bool mPassword{false};
+    float mCaretTimer{0.f};
+    bool mCaretVisible{true};
 };
-
-} // namespace UI
-
-#endif // TEXTBOX_H

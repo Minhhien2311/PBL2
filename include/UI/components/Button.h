@@ -1,44 +1,51 @@
-#ifndef BUTTON_H
-#define BUTTON_H
-
+#pragma once
 #include <SFML/Graphics.hpp>
-#include <string>
-#include <functional> // Cho std::function
+#include <functional>
 
-namespace UI {
-
-class Button : public sf::Drawable, public sf::Transformable {
+// Nút bấm đơn giản, định vị theo TÂM (center)
+class Button : public sf::Drawable
+{
 public:
     Button();
 
-    void setSize(const sf::Vector2f& size);
-    void setPosition(const sf::Vector2f& position); // Ghi đè để cập nhật text
-    void setText(const std::string& text, const sf::Font& font, unsigned int characterSize);
-    void setBackgroundColor(const sf::Color& color);
-    void setTextColor(const sf::Color& color);
-    void setHoverColor(const sf::Color& color); // Màu khi di chuột qua
+    void setEnabled(bool e)
+    {
+        mEnabled = e;
+        if (!e)
+            mPressed = false;
+    }
+    bool enabled() const { return mEnabled; }
 
-    void setOnAction(std::function<void()> action); // Hàm callback khi nhấn
+    void setSize(sf::Vector2f size);
+    void setPosition(sf::Vector2f center); // định vị theo TÂM
+    sf::Vector2f getPosition() const { return mCenter; }
 
-    void handleEvent(sf::Event& event, const sf::RenderWindow& window);
-    void update(const sf::RenderWindow& window); // Cần window để lấy vị trí chuột
+    // Thêm overload để khi truyển std::string utf-8 không lỗi font
+    void setText(const sf::String &s, const sf::Font &font, unsigned int charSize);
 
-    virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+    void setBackgroundColor(sf::Color c)
+    {
+        mBgColor = c;
+        mShape.setFillColor(c);
+    }
+    void setTextColor(sf::Color c) { mText.setFillColor(c); }
+
+    void setOnAction(std::function<void()> cb) { mOnClick = std::move(cb); }
+
+    void handleEvent(const sf::Event &e, const sf::RenderWindow &win);
+    void update(const sf::RenderWindow &win); // hover effect
 
 private:
-    void centerText(); // Hàm helper để căn giữa text
+    virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
+    bool hitTest_(sf::Vector2f p) const;
 
+private:
+    bool mEnabled{true};
     sf::RectangleShape mShape;
     sf::Text mText;
-
-    sf::Color mNormalColor = sf::Color::Blue;
-    sf::Color mHoverColor = sf::Color::Cyan;
-    sf::Color mTextColor = sf::Color::White;
-
-    bool mIsHovered = false;
-    std::function<void()> mAction; // Hành động khi nút được nhấn
+    sf::Vector2f mCenter{0.f, 0.f};
+    sf::Color mBgColor{sf::Color(66, 120, 190)};
+    sf::Color mBgHover{sf::Color(52, 96, 160)};
+    bool mPressed{false};
+    std::function<void()> mOnClick;
 };
-
-} // namespace UI
-
-#endif // BUTTON_H

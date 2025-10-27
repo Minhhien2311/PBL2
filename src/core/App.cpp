@@ -1,104 +1,104 @@
+// core/App.cpp
 #include "core/App.h"
-#include "UI/states/LoginState.h" // State đầu tiên cần chạy
+#include "UI/states/LoginState.h"
+#include "UI/states/AdminDashboardState.h"
 #include <iostream>
 
-App::App() : mWindow(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), WINDOW_TITLE) {
+App::App() : mAccountMgr("data/admins.txt", "data/agents.txt")
+{
+    auto dm = sf::VideoMode::getDesktopMode();
+    mWindow.create(dm, "PBL2", sf::Style::Fullscreen); // <-- full màn
     mWindow.setFramerateLimit(60);
-    loadFonts(); // Tải font ngay khi khởi tạo App
-
-    // Khởi tạo state đầu tiên (LoginState)
-    pushState(std::make_unique<UI::LoginState>(*this));
+    loadFonts_();
+    goTo(AppRoute::Login);
 }
 
-void App::loadFonts() {
-    // Tải các font bạn đã cung cấp
-    sf::Font MulishRegular;
-    if (!MulishRegular.loadFromFile("assets/fonts/Mulish-Regular.ttf")) {
-        std::cerr << "Error loading Mulish-Regular.ttf" << std::endl;
-        // Có thể throw exception hoặc xử lý lỗi khác
-    }
-    mFontManager["MulishRegular"] = MulishRegular;
-
-    sf::Font MulishBold;
-    if (!MulishBold.loadFromFile("assets/fonts/Mulish-Bold.ttf")) {
-         std::cerr << "Error loading Mulish-Bold.ttf" << std::endl;
-    }
-    mFontManager["MulishBold"] = MulishBold;
-
-    // Tải thêm các font khác nếu cần (Montserrat, v.v.)
-    // sf::Font montserratRegular;
-    // if (!montserratRegular.loadFromFile("assets/fonts/Montserrat-Regular.ttf")) { ... }
-    // mFontManager["MontserratRegular"] = montserratRegular;
-}
-
-sf::Font& App::getFont(const std::string& fontName) {
-    // Hàm này trả về font đã tải, cần kiểm tra key tồn tại nếu muốn an toàn hơn
-    return mFontManager.at(fontName);
-}
-
-
-void App::run() {
+void App::run()
+{
     sf::Clock clock;
-    while (mWindow.isOpen()) {
-        sf::Time dt = clock.restart();
-        handleEvents();
-        update(dt);
-        render();
-    }
-}
-
-void App::handleEvents() {
-    sf::Event event;
-    while (mWindow.pollEvent(event)) {
-        // Cho state hiện tại xử lý event trước
-        if (peekState()) {
-            peekState()->handleInput(event);
+    while (mWindow.isOpen())
+    {
+        sf::Event e{};
+        while (mWindow.pollEvent(e))
+        {
+            if (e.type == sf::Event::Closed)
+                mWindow.close();
+            if (e.type == sf::Event::Resized)
+                relayout_();
+            if (e.type == sf::Event::KeyPressed && e.key.code == sf::Keyboard::F11)
+                toggleFullscreen();
+            if (mState)
+                mState->handleInput(e);
         }
 
-        // Xử lý sự kiện chung của App (ví dụ: đóng cửa sổ)
-        if (event.type == sf::Event::Closed) {
-            mWindow.close();
-        }
+        const sf::Time dt = clock.restart();
+        if (mState)
+            mState->update(dt);
+
+        mWindow.clear(sf::Color(245, 248, 255)); // nền nhạt
+        if (mState)
+            mState->draw(mWindow);
+        mWindow.display();
     }
 }
 
-void App::update(sf::Time dt) {
-    if (peekState()) {
-        peekState()->update(dt);
+void App::goTo(AppRoute route)
+{
+    mCurrentRoute = route;
+
+    // Tập trung switch-case điều hướng ở đúng 1 chỗ
+    switch (route)
+    {
+    case AppRoute::Login:
+        mState = std::make_unique<LoginState>(*this);
+        break;
+    case AppRoute::AdminHome:
+        mState = std::make_unique<AdminDashboardState>(*this);
+        break;
     }
+    relayout_(); // tạo xong state thì bố trí lại layout theo size hiện tại
 }
 
-void App::render() {
-    mWindow.clear();
-    if (peekState()) {
-        // Sử dụng draw của RenderTarget, không cần RenderStates ở đây
-        mWindow.draw(*peekState());
+const sf::Font &App::getFont(const std::string &name) const
+{
+    auto it = mFonts.find(name);
+    if (it == mFonts.end())
+    {
+        static sf::Font fallback;
+        std::cerr << "[WARN] Font '" << name << "' not found. Using default.\n";
+        return fallback;
     }
-    mWindow.display();
+    return it->second;
 }
 
-void App::pushState(std::unique_ptr<UI::State> state) {
-    mStates.push(std::move(state));
+void App::loadFonts_()
+{
+    // Đảm bảo rule Makefile đã copy assets sang build/assets
+    // Bạn có thể đổi tên font theo thư mục của bạn
+    sf::Font reg, bold;
+    if (!reg.loadFromFile("assets/fonts/Mulish-Regular.ttf"))
+        std::cerr << "[ERR] Cannot load assets/fonts/Mulish-Regular.ttf\n";
+    if (!bold.loadFromFile("assets/fonts/Mulish-Bold.ttf"))
+        std::cerr << "[ERR] Cannot load assets/fonts/Mulish-Bold.ttf\n";
+    mFonts.emplace("Mulish-Regular", std::move(reg));
+    mFonts.emplace("Mulish-Bold", std::move(bold));
 }
 
-void App::popState() {
-    if (!mStates.empty()) {
-        mStates.pop();
-    }
+void App::relayout_()
+{
+    if (mState)
+        mState->relayout(mWindow.getSize());
 }
 
-void App::changeState(std::unique_ptr<UI::State> state) {
-    popState();
-    pushState(std::move(state));
-}
-
-UI::State* App::peekState() {
-    if (mStates.empty()) {
-        return nullptr;
-    }
-    return mStates.top().get();
-}
-
-sf::RenderWindow& App::getWindow() {
-    return mWindow;
+void App::toggleFullscreen()
+{
+    static bool full = true;
+    full = !full;
+    auto dm = sf::VideoMode::getDesktopMode();
+    if (full)
+        mWindow.create(dm, "PBL2", sf::Style::Fullscreen);
+    else
+        mWindow.create({900, 600}, "PBL2 - Login", sf::Style::Titlebar | sf::Style::Close);
+    mWindow.setFramerateLimit(60);
+    relayout_(); // gọi lại layout cho state hiện tại
 }

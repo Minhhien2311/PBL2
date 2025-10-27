@@ -1,45 +1,44 @@
-#ifndef LOGIN_STATE_H
-#define LOGIN_STATE_H
-
-#include "UI/states/State.h"
-#include "UI/components/TextBox.h" // Cần tạo file này
-#include "UI/components/Button.h"  // Cần tạo file này
+// UI/states/LoginState.h
+#pragma once
+#include "core/State.h"
 #include <SFML/Graphics.hpp>
-#include <string>
 
-namespace UI {
+// NOTE: thay các include dưới bằng đường dẫn component thật của bạn:
+#include "UI/components/Button.h"  // giả định bạn có Button với API setText(...), setPosition, handleEvent, update, draw
+#include "UI/components/TextBox.h" // giả định bạn có TextBox với API setPlaceholder, setPasswordMode, getText, ...
+#include "UI/components/Checkbox.h"
 
-class LoginState : public State {
+class LoginState : public State
+{
 public:
-    LoginState(App& app); // Constructor nhận tham chiếu App
+    explicit LoginState(App &app);
 
-    void handleInput(sf::Event& event) override;
+    void handleInput(const sf::Event &e) override;
     void update(sf::Time dt) override;
-    void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
+    void draw(sf::RenderTarget &target) const override;
+    void relayout(sf::Vector2u winSize) override;
 
 private:
-    void initUI(); // Hàm helper để khởi tạo các thành phần UI
-    void handleLogin(); // Hàm xử lý logic khi nhấn nút Login
+    void onLogin_(); // bấm đăng nhập -> điều hướng
 
-    // Tài nguyên đồ họa
-    sf::Texture mBackgroundTexture;
-    sf::Sprite mBackgroundSprite;
-    sf::Texture mIconTexture;
-    sf::Sprite mIconSprite;
+private:
+    // UI cơ bản
+    sf::Text mTitle;
+    sf::RectangleShape mPanel; // khung form
 
-    // Thành phần UI
-    sf::Text mTitleText;
+    // Labels (nếu bạn muốn)
     sf::Text mUsernameLabel;
     sf::Text mPasswordLabel;
+    sf::Text mForgotText; // "Quên mật khẩu?"
+
+    // Components
+    Checkbox mShowPw; // <-- checkbox hiện/ẩn mật khẩu
     TextBox mUsernameBox;
     TextBox mPasswordBox;
-    Button mLoginButton;
+    Button mLoginBtn;
 
-    // Font (lấy từ App)
-    sf::Font& mFontRegular;
-    sf::Font& mFontBold;
+    // tạm: checkbox show password (nếu component bạn đã có)
+    // Checkbox mShowPw;  // nếu có, bạn thêm vào
+
+    // Trạng thái hover/focus tuỳ component của bạn lo
 };
-
-} // namespace UI
-
-#endif // LOGIN_STATE_H

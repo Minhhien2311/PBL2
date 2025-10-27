@@ -11,7 +11,6 @@
     ],
     // --- File Associations ---
     "files.associations": {
-        // Giữ nguyên các association bạn đã có hoặc thêm nếu cần
         "*.h": "cpp",
         "*.inl": "cpp",
         "array": "cpp",
@@ -72,7 +71,10 @@
         "text_encoding": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp",
-        "bitset": "cpp"
+        "bitset": "cpp",
+        "codecvt": "cpp",
+        "cstring": "cpp",
+        "set": "cpp"
     },
     "C_Cpp.default.includePath": [
         "C:/PBL2/lib/SFML-2.6.1/include"
