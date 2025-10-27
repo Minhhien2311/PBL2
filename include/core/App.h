@@ -1,44 +1,50 @@
-#ifndef APP_H
-#define APP_H
-
+// core/App.h
+#pragma once
 #include <SFML/Graphics.hpp>
-#include <stack>
 #include <memory>
-#include <map>
-#include "UI/states/State.h" // Cần tạo file này
+#include <unordered_map>
+#include <string>
+#include "core/State.h"
+#include "core/AccountManager.h"
 
-// Forward declaration
-namespace UI { class State; }
+// Tuyến điều hướng đơn giản bằng enum + switch-case
+enum class AppRoute
+{
+    Login,
+    AdminHome
+};
 
-class App {
+class App
+{
 public:
     App();
     void run();
 
-    void pushState(std::unique_ptr<UI::State> state);
-    void popState();
-    void changeState(std::unique_ptr<UI::State> state);
-    UI::State* peekState();
+    AccountManager &accountMgr() { return mAccountMgr; }
+    const AccountManager &accountMgr() const { return mAccountMgr; }
 
-    sf::RenderWindow& getWindow();
-    sf::Font& getFont(const std::string& fontName); // Hàm để lấy font
+    // f11 hỗ trợ bật tắt full màn hình
+    void toggleFullscreen();
+
+    // Điều hướng tập trung (chỉ 1 nơi dùng switch-case)
+    void goTo(AppRoute route);
+
+    // Cung cấp tài nguyên dùng chung
+    sf::RenderWindow &window() { return mWindow; }
+    const sf::Font &getFont(const std::string &name) const; // "Mulish-Regular", "Mulish-Bold"
 
 private:
-    void loadFonts(); // Hàm tải các font cần thiết
-    void handleEvents();
-    void update(sf::Time dt);
-    void render();
+    AccountManager mAccountMgr;
+    void loadFonts_(); // nạp font 1 lần
+    void relayout_();  // khi resize, gọi xuống state
 
+private:
     sf::RenderWindow mWindow;
-    std::stack<std::unique_ptr<UI::State>> mStates;
+    std::unique_ptr<State> mState; // state hiện tại
 
-    // Quản lý font đơn giản
-    std::map<std::string, sf::Font> mFontManager;
+    // cache font theo tên
+    std::unordered_map<std::string, sf::Font> mFonts;
 
-    // Các hằng số (có thể đưa ra file config)
-    const unsigned int WINDOW_WIDTH = 800;
-    const unsigned int WINDOW_HEIGHT = 600;
-    const std::string WINDOW_TITLE = "PBL2 Flight Booking";
+    // tiện: lưu route hiện tại (để biết đang ở đâu)
+    AppRoute mCurrentRoute{AppRoute::Login};
 };
-
-#endif // APP_H

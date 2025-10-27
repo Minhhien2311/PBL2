@@ -1,45 +1,112 @@
-# Tên trình biên dịch
-CXX = g++
+# ================== WINDOWS (PowerShell/CMD) ==================
+SHELL := cmd.exe
+.SHELLFLAGS := /Q /C
 
-# Thư mục build để chứa file object và file thực thi
-BUILD_DIR = build
-TARGET = $(BUILD_DIR)/main.exe
+# --- Helper: đổi path / -> \ khi gọi lệnh Windows
+winpath = $(subst /,\,$(1))
 
-# Cờ biên dịch: -g để debug, -Wall để hiện tất cả cảnh báo
-CXXFLAGS = -g -Wall
+# Compiler
+CXX := C:/mingw64/bin/g++.exe
+STD := -std=c++17
 
-# Các thư mục chứa file header
-INCLUDES = -IC:/PBL2/include -IC:/PBL2/lib/SFML-2.6.1/include
+# Output
+BUILD_DIR := build
+OBJ_DIR   := obj
+TARGET    := $(BUILD_DIR)/PBL2.exe
 
-# Các thư mục chứa thư viện
-LIBDIRS = -LC:/PBL2/lib/SFML-2.6.1/lib
+# Debug/Release
+DBG ?= 1
+ifeq ($(DBG),1)
+  CXXFLAGS := $(STD) -Wall -Wextra -O0 -g -D_DEBUG
+else
+  CXXFLAGS := $(STD) -Wall -Wextra -O2
+  LDFLAGS  := -mwindows
+endif
 
-# Các thư viện cần link (phiên bản debug)
-LIBS = -lsfml-graphics-d -lsfml-window-d -lsfml-system-d -lsfml-main-d
+# Vị trí MinGW bin để lấy runtime DLL
+MINGW_BIN := C:/mingw64/bin
 
-# Tự động tìm tất cả các file .cpp trong các thư mục con của src và app
-SRCS := $(wildcard app/main.cpp) $(wildcard src/core/*.cpp) $(wildcard src/entities/*.cpp) $(wildcard src/UI/components/*.cpp) $(wildcard src/UI/states/*.cpp) $(wildcard src/utils/*.cpp)
+ASSETS_DIR := assets
 
-# Tạo danh sách các file object (.o) tương ứng trong thư mục build
-OBJS = $(patsubst %.cpp, $(BUILD_DIR)/%.o, $(SRCS))
+# SFML
+SFML_ROOT := C:/PBL2/lib/SFML-2.6.1
+INCLUDES  := -IC:/PBL2/include -I"$(SFML_ROOT)/include"
+LIBDIRS   := -L"$(SFML_ROOT)/lib"
 
-# Rule mặc định: build tất cả
+# 0 = lib không có hậu tố -d; 1 = lib có -d
+USE_SFML_DEBUG_LIBS ?= 0
+ifeq ($(USE_SFML_DEBUG_LIBS),1)
+  LIBS := -lsfml-graphics-d -lsfml-window-d -lsfml-system-d -lsfml-main-d
+else
+  LIBS := -lsfml-graphics -lsfml-window -lsfml-system -lsfml-main
+endif
+
+# ================== QUÉT NGUỒN ==================
+SRCS := \
+  app/main.cpp \
+  $(wildcard src/core/*.cpp) \
+  $(wildcard src/entities/*.cpp) \
+  $(wildcard src/UI/components/*.cpp) \
+  $(wildcard src/UI/states/*.cpp) \
+  $(wildcard src/utils/*.cpp)
+
+OBJS := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRCS))
+
+# ================== RULES ==================
+.PHONY: all run clean print dlls assets    # <— bổ sung 'assets' ở đây
+
 all: $(TARGET)
 
-# Rule để link các file object thành file thực thi
+# Link: đảm bảo build/ tồn tại
 $(TARGET): $(OBJS)
-	@mkdir -p $(dir $@)
-	$(CXX) $(OBJS) -o $@ $(LIBDIRS) $(LIBS)
-	@echo "Build successful! Executable is at $(TARGET)"
+	@if not exist "$(call winpath,$(BUILD_DIR))" mkdir "$(call winpath,$(BUILD_DIR))"
+	@echo [LD] $@
+	@"$(CXX)" $(OBJS) -o "$(call winpath,$@)" $(LIBDIRS) $(LIBS) $(LDFLAGS)
+	@$(MAKE) dlls --no-print-directory
+	@$(MAKE) assets --no-print-directory
+	@echo Build successful! Executable at $(TARGET)
 
-# Rule để biên dịch file .cpp thành file .o
-$(BUILD_DIR)/%.o: %.cpp
-	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
+# Compile: tạo cây obj/... nếu thiếu
+$(OBJ_DIR)/%.o: %.cpp
+	@for %%d in ("$(call winpath,$(dir $@))") do if not exist "%%~d" mkdir "%%~d"
+	@echo [CXX] $<
+	@"$(CXX)" $(CXXFLAGS) $(INCLUDES) -c "$(call winpath,$<)" -o "$(call winpath,$@)"
 
-# Rule để dọn dẹp thư mục build
+# Copy DLL SFML vào build/
+# --- thay toàn bộ rule dlls bằng đoạn này ---
+dlls:
+	@echo [DLL] Copy SFML ^& MinGW runtime DLLs to $(BUILD_DIR)
+	@REM ===== SFML (release + debug) =====
+	@if exist "$(call winpath,$(SFML_ROOT)/bin/sfml-graphics-2.dll)"    copy /Y "$(call winpath,$(SFML_ROOT)/bin/sfml-graphics-2.dll)"    "$(call winpath,$(BUILD_DIR))\" >NUL
+	@if exist "$(call winpath,$(SFML_ROOT)/bin/sfml-graphics-d-2.dll)"  copy /Y "$(call winpath,$(SFML_ROOT)/bin/sfml-graphics-d-2.dll)"  "$(call winpath,$(BUILD_DIR))\" >NUL
+	@if exist "$(call winpath,$(SFML_ROOT)/bin/sfml-window-2.dll)"      copy /Y "$(call winpath,$(SFML_ROOT)/bin/sfml-window-2.dll)"      "$(call winpath,$(BUILD_DIR))\" >NUL
+	@if exist "$(call winpath,$(SFML_ROOT)/bin/sfml-window-d-2.dll)"    copy /Y "$(call winpath,$(SFML_ROOT)/bin/sfml-window-d-2.dll)"    "$(call winpath,$(BUILD_DIR))\" >NUL
+	@if exist "$(call winpath,$(SFML_ROOT)/bin/sfml-system-2.dll)"      copy /Y "$(call winpath,$(SFML_ROOT)/bin/sfml-system-2.dll)"      "$(call winpath,$(BUILD_DIR))\" >NUL
+	@if exist "$(call winpath,$(SFML_ROOT)/bin/sfml-system-d-2.dll)"    copy /Y "$(call winpath,$(SFML_ROOT)/bin/sfml-system-d-2.dll)"    "$(call winpath,$(BUILD_DIR))\" >NUL
+	@if exist "$(call winpath,$(SFML_ROOT)/bin/sfml-audio-2.dll)"       copy /Y "$(call winpath,$(SFML_ROOT)/bin/sfml-audio-2.dll)"       "$(call winpath,$(BUILD_DIR))\" >NUL
+	@if exist "$(call winpath,$(SFML_ROOT)/bin/sfml-audio-d-2.dll)"     copy /Y "$(call winpath,$(SFML_ROOT)/bin/sfml-audio-d-2.dll)"     "$(call winpath,$(BUILD_DIR))\" >NUL
+	@if exist "$(call winpath,$(SFML_ROOT)/bin/sfml-network-2.dll)"     copy /Y "$(call winpath,$(SFML_ROOT)/bin/sfml-network-2.dll)"     "$(call winpath,$(BUILD_DIR))\" >NUL
+	@if exist "$(call winpath,$(SFML_ROOT)/bin/sfml-network-d-2.dll)"   copy /Y "$(call winpath,$(SFML_ROOT)/bin/sfml-network-d-2.dll)"   "$(call winpath,$(BUILD_DIR))\" >NUL
+	@if exist "$(call winpath,$(SFML_ROOT)/bin/openal32.dll)"           copy /Y "$(call winpath,$(SFML_ROOT)/bin/openal32.dll)"           "$(call winpath,$(BUILD_DIR))\" >NUL
+	@REM ===== MinGW runtime (nếu link động) =====
+	@if exist "$(call winpath,$(MINGW_BIN)/libstdc++-6.dll)"            copy /Y "$(call winpath,$(MINGW_BIN)/libstdc++-6.dll)"            "$(call winpath,$(BUILD_DIR))\" >NUL
+	@if exist "$(call winpath,$(MINGW_BIN)/libgcc_s_seh-1.dll)"         copy /Y "$(call winpath,$(MINGW_BIN)/libgcc_s_seh-1.dll)"         "$(call winpath,$(BUILD_DIR))\" >NUL
+	@if exist "$(call winpath,$(MINGW_BIN)/libwinpthread-1.dll)"        copy /Y "$(call winpath,$(MINGW_BIN)/libwinpthread-1.dll)"        "$(call winpath,$(BUILD_DIR))\" >NUL
+
+assets:
+	@echo [ASSETS] Sync assets to $(BUILD_DIR)\assets
+	@if exist "$(call winpath,$(ASSETS_DIR))" xcopy "$(call winpath,$(ASSETS_DIR))" "$(call winpath,$(BUILD_DIR))/assets/" /E /I /Y >NUL
+
+run: all
+	@cd "$(call winpath,$(BUILD_DIR))" && ".\PBL2.exe"
+
 clean:
-	@echo "Cleaning build directory..."
-	@rm -rf $(BUILD_DIR)
+	@echo [CLEAN] removing build and obj
+	@if exist "$(call winpath,$(BUILD_DIR))" rmdir /S /Q "$(call winpath,$(BUILD_DIR))"
+	@if exist "$(call winpath,$(OBJ_DIR))"   rmdir /S /Q "$(call winpath,$(OBJ_DIR))"
 
-.PHONY: all clean
+print:
+	@echo === SRCS ===
+	@for %%f in ($(SRCS)) do @echo  %%f
+	@echo === OBJS ===
+	@for %%f in ($(OBJS)) do @echo  %%f
