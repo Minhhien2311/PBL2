@@ -7,7 +7,14 @@
 #include <iostream>
 #include <memory>
 
-LoginState::LoginState(App &app) : State(app)
+static inline std::string toUtf8(const sf::String &s)
+{
+    std::string out;
+    sf::Utf32::toUtf8(s.begin(), s.end(), std::back_inserter(out));
+    return out;
+}
+
+LoginState::LoginState(App &app) : UI::State(app)
 {
     // ==== Title ====
     mTitle.setFont(mApp.getFont("Mulish-Bold"));
@@ -34,6 +41,11 @@ LoginState::LoginState(App &app) : State(app)
     mForgotText.setCharacterSize(16);
     mForgotText.setString(L"Quên mật khẩu?");
     mForgotText.setFillColor(sf::Color(100, 120, 160));
+
+    mErrorText.setFont(mApp.getFont("Mulish-Regular"));
+    mErrorText.setCharacterSize(14);
+    mErrorText.setString(L"Tên đăng nhập hoặc mật khẩu không đúng");
+    mErrorText.setFillColor(sf::Color(200, 48, 48));
 
     // ==== Username / Password boxes ====
     // NOTE: tuỳ API TextBox của bạn. Dưới đây là ví dụ thường gặp.
@@ -63,12 +75,32 @@ LoginState::LoginState(App &app) : State(app)
     mLoginBtn.setTextColor(sf::Color::White);
 
     mLoginBtn.setOnAction([this]
-                          { onLogin_(); });
+                          { 
+        // 1) Lấy input
+        const std::string user = toUtf8(mUsernameBox.getText());
+        const std::string pass = toUtf8(mPasswordBox.getText());
+
+        
+
+        // 2) Gọi AccountManager::login
+        // Đổi accountMgr() thành getter bạn đang có (getAccountManager()...) nếu khác tên.
+        bool ok = mApp.accountMgr().login(user, pass);
+        if (!ok)
+        {
+            // Display error message
+            sf::FloatRect eb = mErrorText.getLocalBounds();
+            mErrorText.setOrigin(eb.left + eb.width / 2.f, eb.top + eb.height / 2.f);
+            mErrorText.setPosition(mPanel.getPosition().x, mLoginBtn.getPosition().y + mLoginBtn.getPosition().y + 10.f); // Position below login button
+        }
+
+        // 3) (Tối giản) Đăng nhập OK -> vào AdminShellState
+        if (ok)
+            mApp.goTo(AppRoute::AdminHome); });
 
     relayout(mApp.window().getSize());
 }
 
-void LoginState::handleInput(const sf::Event &e)
+void LoginState::handleInput(sf::Event &e)
 {
     // Gửi event cho components (tùy API của bạn)
     mUsernameBox.handleEvent(e, mApp.window());
@@ -76,11 +108,11 @@ void LoginState::handleInput(const sf::Event &e)
     mPasswordBox.handleEvent(e, mApp.window());
     mLoginBtn.handleEvent(e, mApp.window());
 
-    // Enter để đăng nhập luôn
-    if (e.type == sf::Event::KeyPressed && e.key.code == sf::Keyboard::Enter)
-    {
-        onLogin_();
-    }
+    // // Enter để đăng nhập luôn
+    // if (e.type == sf::Event::KeyPressed || e.key.code == sf::Keyboard::Enter)
+    // {
+    //     onLogin_();
+    // }
 }
 
 void LoginState::update(sf::Time dt)
@@ -91,8 +123,9 @@ void LoginState::update(sf::Time dt)
     mLoginBtn.update(mApp.window());
 }
 
-void LoginState::draw(sf::RenderTarget &target) const
+void LoginState::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
+    (void)states;
     // Vẽ title
     target.draw(mTitle);
     // Vẽ panel khung
@@ -157,31 +190,3 @@ void LoginState::relayout(sf::Vector2u win)
     mForgotText.setOrigin(fb.left + fb.width / 2.f, 0.f);
     mForgotText.setPosition(cx, mLoginBtn.getPosition().y + 32.f); // trước 40–54 → 18 cho sát hơn
 }
-
-void LoginState::onLogin_()
-{
-    // 1) Lấy input
-    const std::string user = toUtf8(mUsernameBox.getText());
-    const std::string pass = toUtf8(mPasswordBox.getText());
-
-    // 2) Gọi AccountManager::login
-    // Đổi accountMgr() thành getter bạn đang có (getAccountManager()...) nếu khác tên.
-    bool ok = mApp.accountMgr().login(user, pass);
-    if (!ok)
-    {
-        // Nếu chưa có mErrorLabel thì comment dòng dưới lại hoặc tạo label ngắn gọn
-        // mErrorLabel.setString(L"Tên đăng nhập hoặc mật khẩu không đúng");
-        return;
-    }
-
-    // 3) (Tối giản) Đăng nhập OK -> vào AdminShellState
-    mApp.goTo(AppRoute::AdminHome);
-}
-
-// helper: sf::String -> std::string (UTF-8) để không lỗi tiếng Việt
-static auto toUtf8 = [](const sf::String &s)
-{
-    std::string out;
-    sf::Utf<8>::fromWide(s.begin(), s.end(), std::back_inserter(out));
-    return out;
-};

@@ -1,40 +1,53 @@
-#ifndef STATE_H
-#define STATE_H
+#ifndef UI_STATES_STATE_H
+#define UI_STATES_STATE_H
+// ============================================================
+// UI/states/State.h
+// Base class cho mọi màn hình (State) trong ứng dụng.
+// - Cung cấp khung xử lý sự kiện, cập nhật, vẽ (chuẩn SFML).
+// - onAttach() để khởi tạo khi State vừa được set vào App.
+// - relayout(windowSize) để cập nhật lại layout khi cửa sổ thay đổi.
+// - Kế thừa sf::Drawable để App vẽ: mWindow.draw(*mState).
+//
+// SỬA LỖI QUAN TRỌNG:
+// - Forward-declare đúng App ở GLOBAL namespace (::App), KHÔNG phải UI::App.
+// - Member mApp có kiểu ::App&.
+//
+// KẾT LUẬN: Base thống nhất chữ ký và ràng buộc đúng với App.
+// ============================================================
 
 #include <SFML/Graphics.hpp>
-#include <SFML/System/Utf.hpp>
-#include <memory>
 
-// Forward declaration
-class App;
+class App; // <-- App ở GLOBAL namespace
 
 namespace UI
 {
-    // Lớp cơ sở trừu tượng cho các trạng thái (màn hình) của ứng dụng
-    // Kế thừa từ sf::Drawable để App có thể gọi window.draw(*state)
+
     class State : public sf::Drawable
     {
     public:
-        // Virtual destructor rất quan trọng cho lớp cơ sở có hàm virtual
-        virtual ~State() = default;
+        explicit State(::App &app);
+        virtual ~State();
 
-        // Hàm ảo thuần túy -> lớp kế thừa BẮT BUỘC phải định nghĩa lại
-        virtual void handleInput(sf::Event &event) = 0;
+        // Gọi ngay sau khi State được set vào App (đã có window/font sẵn sàng)
+        virtual void onAttach();
+
+        // Xử lý input (sự kiện) từ App
+        virtual void handleInput(sf::Event &e) = 0;
+
+        // Cập nhật logic theo thời gian (dt từ App loop)
         virtual void update(sf::Time dt) = 0;
-        // Hàm draw kế thừa từ sf::Drawable, cũng cần định nghĩa lại
-        virtual void draw(sf::RenderTarget &target, sf::RenderStates states) const override = 0;
 
-        virtual void onAttach() {}
+        // Gọi khi kích thước cửa sổ thay đổi để bố trí lại layout (mặc định no-op)
+        virtual void relayout(sf::Vector2u windowSize);
 
     protected:
-        // Constructor được bảo vệ để chỉ lớp con gọi được
-        State(App &app) : mApp(app) {}
+        ::App &mApp; // <-- ĐÃ CHỈNH: tham chiếu tới App ở GLOBAL namespace
 
-        // Tham chiếu đến đối tượng App chính để State có thể tương tác
-        // (ví dụ: chuyển State, lấy tài nguyên)
-        App &mApp;
+        // Vẽ state (chuẩn SFML): App sẽ gọi mWindow.draw(*this).
+        // State con phải override hàm này để vẽ nội dung.
+        void draw(sf::RenderTarget &target, sf::RenderStates states) const override = 0;
     };
 
 } // namespace UI
 
-#endif // STATE_H
+#endif // UI_STATES_STATE_H

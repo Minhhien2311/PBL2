@@ -1,200 +1,228 @@
+// ======================================================================
+// UI/pages/AccountsPage.cpp
+// Trang "Quản lý tài khoản": tiêu đề + 2 cột × 3 hàng + 2 nút.
+// ======================================================================
+
 #include "UI/pages/AccountsPage.h"
 
-// ============= Constructor =============
-AccountsPage::AccountsPage(const sf::Font &uiFont, sf::Vector2f origin, float cw)
-    : mFont(uiFont), mOrigin(origin), mContentW(cw)
+// -------------------- ctor --------------------
+AccountsPage::AccountsPage(const sf::Font &uiFont,
+                           sf::Vector2f originTopLeft,
+                           float contentWidth)
+    : mFont(&uiFont),
+      mOriginTL(originTopLeft),
+      mContentW(contentWidth)
 {
-    // ---- Title ----
-    mTitle.setFont(mFont);
-    mTitle.setCharacterSize(30);
+    // ===== Title =====
+    mTitle.setFont(*mFont);
+    mTitle.setCharacterSize(28);
     mTitle.setFillColor(sf::Color(28, 64, 110)); // #1C406E
     mTitle.setString(L"Thông tin tài khoản");
 
-    // ---- Label factory ----
-    auto makeLabel = [&](sf::Text &t, const sf::String &s)
+    // ===== Labels =====
+    auto cfgLabel = [&](sf::Text &t, const wchar_t *s)
     {
-        t.setFont(mFont);
+        t.setFont(*mFont);
         t.setCharacterSize(18);
         t.setFillColor(sf::Color(28, 64, 110));
         t.setString(s);
     };
-    makeLabel(mLblId, L"ID tài khoản");
-    makeLabel(mLblFullname, L"Họ và tên");
-    makeLabel(mLblUsername, L"Tên tài khoản");
-    makeLabel(mLblPhone, L"Số điện thoại");
-    makeLabel(mLblRole, L"Chức vụ");
-    makeLabel(mLblEmail, L"Email");
+    cfgLabel(mLblId, L"ID tài khoản");
+    cfgLabel(mLblFullName, L"Họ và tên");
+    cfgLabel(mLblUsername, L"Tên tài khoản");
+    cfgLabel(mLblPhone, L"Số điện thoại");
+    cfgLabel(mLblRole, L"Chức vụ");
+    cfgLabel(mLblEmail, L"Email");
 
-    // ---- TextBox style ----
-    auto prepBox = [&](TextBox &tb, const sf::String &placeholder)
+    // ===== TextBoxes (CENTER-based) =====
+    auto cfgEdit = [&](TextBox &tb, const wchar_t *placeholder)
     {
-        tb.setFont(mFont); // quan trọng: setFont cho mọi textbox
-        tb.setCharacterSize(18);
+        tb.setFont(*mFont);
+        tb.setCharacterSize(20);
         tb.setPlaceholder(placeholder);
-        tb.setSize({420.f, 40.f}); // width/height của ô nhập
+        tb.setSize(mEditSize);
     };
-    prepBox(mTxtId, L"");
-    prepBox(mTxtFullname, L"");
-    prepBox(mTxtUsername, L"");
-    prepBox(mTxtPhone, L"");
-    prepBox(mTxtRole, L"");
-    prepBox(mTxtEmail, L"");
+    cfgEdit(mTbId, L"");
+    cfgEdit(mTbFullName, L"Nhập họ và tên");
+    cfgEdit(mTbUsername, L"Nhập tên tài khoản");
+    cfgEdit(mTbPhone, L"Nhập số điện thoại");
+    cfgEdit(mTbRole, L"Nhập chức vụ");
+    cfgEdit(mTbEmail, L"Nhập email");
 
-    // ---- Buttons ----
-    mBtnSave.setSize({260.f, 52.f});
-    mBtnSave.setText(L"Cập nhập thông tin", mFont, 20);
-    mBtnSave.setBackgroundColor(sf::Color(62, 108, 179));
-    mBtnSave.setTextColor(sf::Color::White);
-    mBtnSave.setOnAction([this]
-                         {
-        if (mOnSave) mOnSave(getProfile()); });
+    // ===== Buttons (CENTER-based) =====
+    mBtnUpdate.setSize(mBtnSize);
+    mBtnUpdate.setBackgroundColor(sf::Color(96, 139, 193)); // primary
+    mBtnUpdate.setText(L"Cập nhập thông tin", *mFont, 20);
+    mBtnUpdate.setTextColor(sf::Color::White);
 
-    mBtnChangePw.setSize({260.f, 52.f});
-    mBtnChangePw.setText(L"Đổi mật khẩu", mFont, 20);
-    mBtnChangePw.setBackgroundColor(sf::Color(98, 135, 184));
+    mBtnChangePw.setSize(mBtnSize);
+    mBtnChangePw.setBackgroundColor(sf::Color(96, 139, 193)); // rgba(96, 139, 193, 1)
+    mBtnChangePw.setText(L"Đổi mật khẩu", *mFont, 20);
     mBtnChangePw.setTextColor(sf::Color::White);
-    mBtnChangePw.setOnAction([this]
-                             {
-        if (mOnChangePw) mOnChangePw(); });
 
-    // ---- Form outline ----
-    mFormOutline.setFillColor(sf::Color(0, 0, 0, 0));
-    mFormOutline.setOutlineThickness(2.f);
-    mFormOutline.setOutlineColor(sf::Color(28, 64, 110));
-
-    // ---- Layout tuyệt đối ----
-    layout();
+    // Gắn hành vi & bố trí
+    wireActions_();
+    layout_();
 }
 
-// ============= Layout tuyệt đối =============
-void AccountsPage::layout()
+// -------------------- public: event/update/draw --------------------
+void AccountsPage::handleEvent(const sf::Event &ev, const sf::RenderWindow &win)
 {
-    // Mốc layout — tune theo ảnh của bạn
-    const float left = mOrigin.x + 40.f;      // mép trái content
-    const float top = mOrigin.y + 10.f;       // mép trên
-    const float colW = 420.f;                 // width textbox
-    const float colGap = 120.f;               // gap 2 cột
-    const float col2X = left + colW + colGap; // x cột phải
-    const float rowH = 78.f;                  // mỗi hàng (label + box)
-    const float yForm = top + 56.f;           // bắt đầu form dưới title
+    // Nếu chỉ hiển thị: KHÔNG forward event cho 6 TextBox
+    if (!mReadOnly)
+    {
+        mTbId.handleEvent(ev, win);
+        mTbFullName.handleEvent(ev, win);
+        mTbUsername.handleEvent(ev, win);
+        mTbPhone.handleEvent(ev, win);
+        mTbRole.handleEvent(ev, win);
+        mTbEmail.handleEvent(ev, win);
+    }
 
-    // Title
-    mTitle.setPosition(left, top);
+    // Nút "Cập nhập thông tin":
+    if (!mReadOnly)
+        mBtnUpdate.handleEvent(ev, win); // chỉ bật khi không read-only
 
-    // ----- Hàng 1: ID & Họ tên -----
-    mLblId.setPosition({left, yForm});
-    mTxtId.setPosition({left + colW * 0.5f, yForm + 30.f}); // textbox theo TÂM
-
-    mLblFullname.setPosition({col2X, yForm});
-    mTxtFullname.setPosition({col2X + colW * 0.5f, yForm + 30.f});
-
-    // ----- Hàng 2: Username & Phone -----
-    float y2 = yForm + rowH;
-    mLblUsername.setPosition({left, y2});
-    mTxtUsername.setPosition({left + colW * 0.5f, y2 + 30.f});
-
-    mLblPhone.setPosition({col2X, y2});
-    mTxtPhone.setPosition({col2X + colW * 0.5f, y2 + 30.f});
-
-    // ----- Hàng 3: Role & Email -----
-    float y3 = y2 + rowH;
-    mLblRole.setPosition({left, y3});
-    mTxtRole.setPosition({left + colW * 0.5f, y3 + 30.f});
-
-    mLblEmail.setPosition({col2X, y3});
-    mTxtEmail.setPosition({col2X + colW * 0.5f, y3 + 30.f});
-
-    // ----- Buttons -----
-    float centerX = left + (colW + colGap + colW) * 0.5f;
-    mBtnSave.setPosition({centerX, y3 + 90.f});
-    mBtnChangePw.setPosition({centerX, y3 + 90.f + 72.f});
-
-    // ----- Outline bao quanh form -----
-    const float formLeft = left - 14.f;
-    const float formTop = yForm - 26.f;
-    const float formWidth = (colW * 2.f + colGap) + 28.f;
-    const float formHeight = (rowH * 3.f) + 26.f + 90.f + 72.f + 30.f;
-    mFormOutline.setSize({formWidth, formHeight});
-    mFormOutline.setPosition({formLeft, formTop});
-}
-
-// ============= Data binding =============
-void AccountsPage::setInitialProfile(const Profile &p)
-{
-    mTxtId.setText(p.id);
-    mTxtFullname.setText(p.fullName);
-    mTxtUsername.setText(p.username);
-    mTxtPhone.setText(p.phone);
-    mTxtRole.setText(p.role);
-    mTxtEmail.setText(p.email);
-}
-
-AccountsPage::Profile AccountsPage::getProfile() const
-{
-    Profile p;
-    p.id = mTxtId.getText();
-    p.fullName = mTxtFullname.getText();
-    p.username = mTxtUsername.getText();
-    p.phone = mTxtPhone.getText();
-    p.role = mTxtRole.getText();
-    p.email = mTxtEmail.getText();
-    return p;
-}
-
-// ============= Loop methods =============
-void AccountsPage::handleEvent(const sf::Event &e, const sf::RenderWindow &win)
-{
-    // Forward cho các control
-    mTxtId.handleEvent(e, win);
-    mTxtFullname.handleEvent(e, win);
-    mTxtUsername.handleEvent(e, win);
-    mTxtPhone.handleEvent(e, win);
-    mTxtRole.handleEvent(e, win);
-    mTxtEmail.handleEvent(e, win);
-
-    mBtnSave.handleEvent(e, win);
-    mBtnChangePw.handleEvent(e, win);
+    // Nút "Đổi mật khẩu" vẫn cho bấm
+    mBtnChangePw.handleEvent(ev, win);
 }
 
 void AccountsPage::update(const sf::RenderWindow &win)
 {
-    // Nếu TextBox của em cần dt: đổi thành update(dt). Ở đây cho 0s để tương thích.
-    mTxtId.update(sf::seconds(0.f));
-    mTxtFullname.update(sf::seconds(0.f));
-    mTxtUsername.update(sf::seconds(0.f));
-    mTxtPhone.update(sf::seconds(0.f));
-    mTxtRole.update(sf::seconds(0.f));
-    mTxtEmail.update(sf::seconds(0.f));
-
-    mBtnSave.update(win);
+    // Button hover…
+    if (!mReadOnly)
+        mBtnUpdate.update(win);
     mBtnChangePw.update(win);
 }
 
-// Overload cho trường hợp State gọi update(dt)
-void AccountsPage::update(sf::Time /*dt*/)
+void AccountsPage::draw(sf::RenderTarget &target) const
 {
-    // Không cần gì thêm — phần lớn control của em không phụ thuộc dt
+    // Title
+    target.draw(mTitle);
+
+    // Labels
+    target.draw(mLblId);
+    target.draw(mLblFullName);
+    target.draw(mLblUsername);
+    target.draw(mLblPhone);
+    target.draw(mLblRole);
+    target.draw(mLblEmail);
+
+    // Edits
+    target.draw(mTbId);
+    target.draw(mTbFullName);
+    target.draw(mTbUsername);
+    target.draw(mTbPhone);
+    target.draw(mTbRole);
+    target.draw(mTbEmail);
+
+    // Buttons
+    target.draw(mBtnUpdate);
+    target.draw(mBtnChangePw);
 }
 
-void AccountsPage::draw(sf::RenderTarget &rt) const
+// -------------------- public: form data --------------------
+void AccountsPage::setForm(const AccountForm &f)
 {
-    rt.draw(mTitle);
+    mTbId.setText(f.id);
+    mTbFullName.setText(f.fullName);
+    mTbUsername.setText(f.username);
+    mTbPhone.setText(f.phone);
+    mTbRole.setText(f.role);
+    mTbEmail.setText(f.email);
+}
 
-    rt.draw(mFormOutline);
-    rt.draw(mLblId);
-    rt.draw(mLblFullname);
-    rt.draw(mLblUsername);
-    rt.draw(mLblPhone);
-    rt.draw(mLblRole);
-    rt.draw(mLblEmail);
+AccountsPage::AccountForm AccountsPage::getForm() const
+{
+    return {
+        mTbId.getText(),
+        mTbFullName.getText(),
+        mTbUsername.getText(),
+        mTbPhone.getText(),
+        mTbRole.getText(),
+        mTbEmail.getText()};
+}
 
-    rt.draw(mTxtId);
-    rt.draw(mTxtFullname);
-    rt.draw(mTxtUsername);
-    rt.draw(mTxtPhone);
-    rt.draw(mTxtRole);
-    rt.draw(mTxtEmail);
+// -------------------- private: layout --------------------
+void AccountsPage::layout_()
+{
+    // Khung khả dụng bên trong content (thêm margin trong)
+    const float availLeft = mOriginTL.x + mMarginLR;
+    const float availTop = mOriginTL.y + mMarginTB;
+    const float availW = std::max(0.f, mContentW - 2.f * mMarginLR);
 
-    rt.draw(mBtnSave);
-    rt.draw(mBtnChangePw);
+    // Cột trái/phải: căn theo center của mỗi cột
+    const float colWidth = mEditSize.x;
+    const float totalW = colWidth * 2.f + mColGap;
+    const float startX = availLeft + std::max(0.f, (availW - totalW) * 0.5f);
+
+    const float colLeftCX = startX + colWidth * 0.5f;
+    const float colRightCX = startX + colWidth + mColGap + colWidth * 0.5f;
+
+    float y = availTop;
+
+    // Tiêu đề (top-left)
+    mTitle.setPosition(startX, y);
+    y += mTitle.getLocalBounds().height + mTitleGap;
+
+    // Hàng 1: ID | Họ tên
+    mCId = {colLeftCX, y + mEditSize.y * 0.5f};
+    mCFullName = {colRightCX, y + mEditSize.y * 0.5f};
+    mTbId.setPosition(mCId);
+    mTbFullName.setPosition(mCFullName);
+    placeLabelAbove_(mLblId, mCId);
+    placeLabelAbove_(mLblFullName, mCFullName);
+    y += mEditSize.y + mRowGap;
+
+    // Hàng 2: Tên TK | SĐT
+    mCUsername = {colLeftCX, y + mEditSize.y * 0.5f};
+    mCPhone = {colRightCX, y + mEditSize.y * 0.5f};
+    mTbUsername.setPosition(mCUsername);
+    mTbPhone.setPosition(mCPhone);
+    placeLabelAbove_(mLblUsername, mCUsername);
+    placeLabelAbove_(mLblPhone, mCPhone);
+    y += mEditSize.y + mRowGap;
+
+    // Hàng 3: Chức vụ | Email
+    mCRole = {colLeftCX, y + mEditSize.y * 0.5f};
+    mCEmail = {colRightCX, y + mEditSize.y * 0.5f};
+    mTbRole.setPosition(mCRole);
+    mTbEmail.setPosition(mCEmail);
+    placeLabelAbove_(mLblRole, mCRole);
+    placeLabelAbove_(mLblEmail, mCEmail);
+    y += mEditSize.y + mRowGap;
+
+    // Nút: căn giữa theo 2 cột
+    const float midX = (colLeftCX + colRightCX) * 0.5f;
+    mBtnUpdate.setPosition({midX, y + mBtnSize.y * 0.5f});
+
+    y += mBtnSize.y + 18.f;
+    mBtnChangePw.setPosition({midX, y + mBtnSize.y * 0.5f});
+}
+
+void AccountsPage::placeLabelAbove_(sf::Text &label, const sf::Vector2f &tbCenter) const
+{
+    // TextBox center-based → label top-left đặt lệch lên mLabelDy
+    const float left = tbCenter.x - mEditSize.x * 0.5f;
+    const float top = tbCenter.y - mEditSize.y * 0.5f - mLabelDy;
+    label.setPosition(left, top);
+}
+
+// -------------------- private: actions --------------------
+void AccountsPage::wireActions_()
+{
+    if (!mReadOnly)
+    {
+        mBtnUpdate.setOnAction([this]()
+                               {
+            if (onSubmitUpdate) onSubmitUpdate(getForm()); });
+    }
+    else
+    {
+        mBtnUpdate.setOnAction(nullptr); // vô hiệu
+    }
+
+    mBtnChangePw.setOnAction([this]()
+                             {
+        if (onChangePassword) onChangePassword(); });
 }

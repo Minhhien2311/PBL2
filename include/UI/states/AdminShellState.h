@@ -1,72 +1,89 @@
 #pragma once
+// ============================================================
+// UI/states/AdminShellState.h
+//
+// Shell sau đăng nhập:
+// - Sidebar trái: có SECTION (không click) + ITEM (click để đổi page) + nút "Đăng xuất" ghim đáy.
+// - Content phải: hiện tại chỉ hiển thị AccountsPage.
+// - Lề content: 24px (trên/dưới/trái/phải) giống mockup.
+//
+// Không đổi mạch chương trình, chỉ nâng cấp layout.
+// ============================================================
+
 #include <SFML/Graphics.hpp>
-#include <vector>
+#include <memory>
 #include <string>
+#include <vector>
+
 #include "UI/states/State.h"
 #include "UI/pages/AccountsPage.h"
 
-class AccountsPage;
-
-// AdminShellState: chứa sidebar + vùng content, định tuyến giữa các page.
-// Hiện tại mới gắn sẵn AccountsPage; các mục khác sẽ thêm dần.
 class AdminShellState : public UI::State
 {
 public:
-    AdminShellState(App &app) : UI::State(app), mAccountsPage(app.getFont("Mulish-Regular"), {0.f, 0.f}, 0.f) {} // ctor trùng base
-    void onAttach() override;                                                                                    // KHÔNG override
-    void handleInput(sf::Event &e) override;                                                                     // ĐÚNG tên
+    explicit AdminShellState(::App &app);
+
+    void onAttach() override;
+    void handleInput(sf::Event &e) override;
     void update(sf::Time dt) override;
-    void draw(sf::RenderTarget &rt, sf::RenderStates states) const override;
+    void relayout(sf::Vector2u windowSize) override;
+    void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 
 private:
-    // Router nội bộ
-    enum class PageId
+    // ===== Fonts =====
+    const sf::Font *mFontRegular = nullptr;
+    const sf::Font *mFontBold = nullptr;
+
+    // ===== Sidebar layout =====
+    float mSidebarWidth = 240.f;
+    float mNavItemHeight = 48.f;
+    float mSidebarPadX = 16.f;   // padding trái cho text
+    float mSidebarPadTop = 24.f; // bắt đầu từ top
+    float mSectionGapY = 10.f;   // khoảng cách giữa section title và item đầu
+    float mGroupGapY = 18.f;     // khoảng cách giữa hai group
+
+    struct NavRow
     {
-        Revenue,    // Doanh thu (placeholder, vẽ tiêu đề)
-        Accounts,   // Quản lý tài khoản (đã có page)
-        Agents,     // Danh sách đại lý (placeholder)
-        Routes,     // Quản lý tuyến bay (placeholder)
-        Flights,    // Quản lý chuyến bay (placeholder)
-        Promotions, // Quản lý khuyến mãi (placeholder)
-        TicketsSold // Vé đã bán (placeholder)
+        std::wstring label;
+        sf::FloatRect bounds;   // tọa độ tuyệt đối
+        bool isSection = false; // section title => không click
+        enum class Item
+        {
+            Dashboard,
+            Flights,
+            Routes,
+            Accounts,
+            Logout,
+            None
+        } item = Item::None;
     };
 
-    void buildSidebar();      // tạo item sidebar
-    void switchTo(PageId id); // đổi trang hiện tại
-    void layoutContent();     // bố cục vùng content
+    std::vector<NavRow> mNav; // gồm cả section & item
+    int mHoverIndex = -1;     // index item hover
+    NavRow::Item mActiveItem = NavRow::Item::Accounts;
 
-    // Vẽ placeholder cho các trang chưa làm
-    void drawPlaceholder(sf::RenderTarget &rt, const sf::String &title) const;
+    // Sidebar visuals
+    sf::RectangleShape mSidebarBg;
 
-    // ----------- Sidebar -----------
-    struct MenuItem
-    {
-        sf::Text text;     // label
-        sf::FloatRect hit; // vùng hit test (theo toạ độ global)
-        PageId id;
-    };
-    std::vector<MenuItem> mMenu;          // danh sách menu theo thứ tự
-    sf::RectangleShape mSidebarBg;        // nền sidebar
-    sf::RectangleShape mSidebarHighlight; // thanh highlight mục chọn
-    sf::Text mSidebarHeaderNghiepVu;
-    sf::Text mSidebarHeaderDashboard;
-    sf::Text mSidebarHeaderAccount;
-    sf::RectangleShape mLogoutBtnBg; // nút "Đăng xuất"
+    // ===== Logout button (ghim đáy) =====
+    sf::FloatRect mLogoutBounds{}; // click area
+    sf::RectangleShape mLogoutBg;  // vẽ như 1 nút đơn giản
     sf::Text mLogoutText;
 
-    PageId mCurrent{PageId::Revenue};
+    // ===== Content layout =====
+    sf::Vector2f mContentOrigin{0.f, 0.f}; // TL của vùng content (đÃ có lề 24px)
+    float mContentWidth = 0.f;             // bề rộng content (đÃ trừ 2*24px)
 
-    // ----------- Content -----------
-    sf::Vector2f mContentOrigin{180.f, 24.f};
-    float mContentWidth{1080.f};
+    // ===== Current Page =====
+    std::unique_ptr<AccountsPage> mAccountsPage;
 
-    // Page thật đã có
-    AccountsPage mAccountsPage; // font tạm thời fake, sẽ set trong onAttach()
-
-    // Text tiêu đề placeholder
-    mutable sf::Text mPlaceholderTitle;
-
-    // Font cache (đỡ gọi getFont nhiều lần)
-    const sf::Font *mFontRegular{nullptr};
-    const sf::Font *mFontBold{nullptr};
+private:
+    // Build lại sidebar & bounds
+    void buildSidebar_();
+    // Tạo lại page Accounts (theo origin/width hiện thời)
+    void createAccountsPage_();
+    // Chuyển trang theo item
+    void switchTo_(NavRow::Item item);
+    // Hit test
+    static bool hit_(const sf::Vector2f &p, const sf::FloatRect &r);
 };

@@ -48,6 +48,7 @@ SRCS := \
   $(wildcard src/entities/*.cpp) \
   $(wildcard src/UI/components/*.cpp) \
   $(wildcard src/UI/states/*.cpp) \
+  $(wildcard src/UI/pages/*.cpp) \
   $(wildcard src/utils/*.cpp)
 
 OBJS := $(patsubst %.cpp,$(OBJ_DIR)/%.o,$(SRCS))
@@ -110,3 +111,15 @@ print:
 	@for %%f in ($(SRCS)) do @echo  %%f
 	@echo === OBJS ===
 	@for %%f in ($(OBJS)) do @echo  %%f
+
+# ================== COPY DATA FOLDER ==================
+# Thư mục dữ liệu nguồn
+DATA_DIR := data
+
+# Bổ sung phụ thuộc: gọi 'data' trước khi chạy recipe 'dlls'
+dlls: data
+
+.PHONY: data
+data:
+	@echo [DATA] Sync data to $(BUILD_DIR)\data
+	@if exist "$(call winpath,$(DATA_DIR))" xcopy "$(call winpath,$(DATA_DIR))" "$(call winpath,$(BUILD_DIR))/data/" /E /I /Y >NUL

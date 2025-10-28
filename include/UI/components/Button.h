@@ -30,6 +30,7 @@ public:
     }
     void setTextColor(sf::Color c) { mText.setFillColor(c); }
 
+    // Đăng ký callback khi bấm nút
     void setOnAction(std::function<void()> cb) { mOnClick = std::move(cb); }
 
     void handleEvent(const sf::Event &e, const sf::RenderWindow &win);

@@ -1,50 +1,69 @@
-// core/App.h
 #pragma once
+// ============================================================
+// core/App.h
+//
+// Trung tâm vòng lặp SFML, điều hướng State, quản lý font/tài nguyên.
+// - State kế thừa sf::Drawable → App vẽ bằng mWindow.draw(*mState).
+// - Khi resize/F11 → gọi mState->relayout(windowSize).
+// - Điều hướng route: Login → AdminHome (AdminShellState).
+// ============================================================
+
 #include <SFML/Graphics.hpp>
 #include <memory>
-#include <unordered_map>
 #include <string>
-#include "core/State.h"
-#include "core/AccountManager.h"
+#include <unordered_map>
 
-// Tuyến điều hướng đơn giản bằng enum + switch-case
+#include "UI/states/State.h"     // UI::State base
+#include "core/AccountManager.h" // Quản lý đăng nhập (đã có trong dự án)
+
+// Tuyến (route) của ứng dụng
 enum class AppRoute
 {
-    Login,
+    Login = 0,
     AdminHome
 };
 
 class App
 {
 public:
-    App();
+    explicit App();
+
+    // Vòng lặp chính
     void run();
 
-    AccountManager &accountMgr() { return mAccountMgr; }
-    const AccountManager &accountMgr() const { return mAccountMgr; }
-
-    // f11 hỗ trợ bật tắt full màn hình
-    void toggleFullscreen();
-
-    // Điều hướng tập trung (chỉ 1 nơi dùng switch-case)
+    // Điều hướng giữa các màn hình
     void goTo(AppRoute route);
 
-    // Cung cấp tài nguyên dùng chung
+    // Tài nguyên chung
     sf::RenderWindow &window() { return mWindow; }
-    const sf::Font &getFont(const std::string &name) const; // "Mulish-Regular", "Mulish-Bold"
+    const sf::RenderWindow &window() const { return mWindow; }
+
+    const sf::Font &getFont(const std::string &key) const;
+
+    AccountManager &accountMgr() { return mAccountMgr; }             // Trả về tham chiếu để sửa đổi
+    const AccountManager &accountMgr() const { return mAccountMgr; } // Trả về tham chiếu hằng
 
 private:
-    AccountManager mAccountMgr;
-    void loadFonts_(); // nạp font 1 lần
-    void relayout_();  // khi resize, gọi xuống state
-
-private:
+    // ===== Cửa sổ & trạng thái hiển thị =====
     sf::RenderWindow mWindow;
-    std::unique_ptr<State> mState; // state hiện tại
+    bool mIsFullscreen = false;
+    sf::Vector2u mWindowedSize{1280u, 720u}; // ghi nhớ size khi thoát fullscreen
 
-    // cache font theo tên
+    // ===== State hiện tại =====
+    std::unique_ptr<UI::State> mState;
+
+    // ===== Tài nguyên dùng chung =====
     std::unordered_map<std::string, sf::Font> mFonts;
+    AccountManager mAccountMgr;
 
-    // tiện: lưu route hiện tại (để biết đang ở đâu)
-    AppRoute mCurrentRoute{AppRoute::Login};
+private:
+    // ===== Helpers =====
+    void createWindow_(sf::Vector2u size, bool fullscreen);
+    void toggleFullscreen_();
+
+    void loadFont_(const std::string &key, const std::string &path);
+    void prepareFonts_();
+
+    void relayout_(); // gọi khi resize/F11
+    void render_();   // vẽ khung hình
 };
