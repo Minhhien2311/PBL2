@@ -1,15 +1,40 @@
 #pragma once
+// ======================================================================
+// UI/pages/AccountsPage.h
+//
+// Trang "Quản lý tài khoản" (nội dung bên phải của AdminShellState).
+// - Bố cục: tiêu đề + 2 cột × 3 hàng ô nhập (ID, Tên TK, Chức vụ | Họ tên, SĐT, Email)
+// - Hai nút căn giữa: "Cập nhập thông tin" và "Đổi mật khẩu".
+// - TextBox/Button định vị theo CENTER (đúng API của bạn), Label theo TOP-LEFT.
+// - Không truy cập AccountManager trực tiếp; bắn callback để AdminShell xử lý.
+//
+// Public API:
+//   AccountsPage(const sf::Font& uiFont, sf::Vector2f originTopLeft, float contentWidth);
+//   void handleEvent(const sf::Event&, const sf::RenderWindow&);
+//   void update(const sf::RenderWindow&);
+//   void draw(sf::RenderTarget&) const;
+//
+//   // Dữ liệu form (sf::String để giữ Unicode an toàn):
+//   struct AccountForm { sf::String id, fullName, username, phone, role, email; };
+//   void setForm(const AccountForm&);
+//   AccountForm getForm() const;
+//
+//   // Callback để AdminShell gắn:
+//   std::function<void(const AccountForm&)> onSubmitUpdate;
+//   std::function<void()>                   onChangePassword;
+//
+// ======================================================================
+
 #include <SFML/Graphics.hpp>
 #include <functional>
+
 #include "UI/components/TextBox.h"
 #include "UI/components/Button.h"
 
-// Trang "Quản lý tài khoản" — chỉ giao diện, không xử lý DB ở đây.
-// Dùng tuyệt đối: textbox đặt theo TÂM, label theo góc trái trên.
 class AccountsPage
 {
 public:
-    struct Profile
+    struct AccountForm
     {
         sf::String id;
         sf::String fullName;
@@ -19,61 +44,67 @@ public:
         sf::String email;
     };
 
-    // uiFont: phông chữ giao diện; origin: góc trái vùng content; cw: chiều rộng content
-    AccountsPage(const sf::Font &uiFont, sf::Vector2f origin, float cw);
+public:
+    // ctor: nhận font UI, gốc trái-trên vùng content, và bề rộng content
+    AccountsPage(const sf::Font &uiFont, sf::Vector2f originTopLeft, float contentWidth);
 
-    // Data binding
-    void setInitialProfile(const Profile &p);
-    Profile getProfile() const;
+    // ===== Vòng đời trang =====
+    void handleEvent(const sf::Event &ev, const sf::RenderWindow &win); // nhận event chuột/phím
+    void update(const sf::RenderWindow &win);                           // hover/caret blink, v.v.
+    void draw(sf::RenderTarget &target) const;                          // vẽ toàn bộ trang
 
-    // Callback cho 2 nút
-    void setOnSave(std::function<void(const Profile &)> cb) { mOnSave = std::move(cb); }
-    void setOnChangePassword(std::function<void()> cb) { mOnChangePw = std::move(cb); }
+    // ===== Dữ liệu form =====
+    void setForm(const AccountForm &f); // nạp dữ liệu vào 6 ô
+    AccountForm getForm() const;        // lấy dữ liệu đang hiển thị
 
-    // Vòng đời
-    void handleEvent(const sf::Event &e, const sf::RenderWindow &win);
-    void update(const sf::RenderWindow &win); // kiểu em đang dùng
-    void update(sf::Time /*dt*/);             // overload tương thích (không dùng)
-    void draw(sf::RenderTarget &rt) const;
+    // ===== Callback hành động =====
+    std::function<void(const AccountForm &)> onSubmitUpdate; // "Cập nhập thông tin"
+    std::function<void()> onChangePassword;                  // "Đổi mật khẩu"
 
-    // Cho phép đổi lại layout khi đổi kích thước cửa sổ
-    void setOrigin(sf::Vector2f origin)
-    {
-        mOrigin = origin;
-        layout();
-    }
-    void setContentWidth(float w)
-    {
-        mContentW = w;
-        layout();
-    }
+    void setReadOnly(bool v) { mReadOnly = v; }
+    bool isReadOnly() const { return mReadOnly; }
 
 private:
-    void layout(); // tính lại vị trí tuyệt đối
+    // ===== Tài nguyên & thông số layout =====
+    const sf::Font *mFont = nullptr;
 
-    // Fonts & màu
-    const sf::Font &mFont;
+    sf::Vector2f mOriginTL{0.f, 0.f}; // gốc trái-trên vùng content
+    float mContentW = 0.f;            // bề rộng vùng content
 
-    // Gốc vùng content & kích thước
-    sf::Vector2f mOrigin;
-    float mContentW;
+    // Kích thước control & khoảng cách
+    sf::Vector2f mEditSize{420.f, 40.f};
+    sf::Vector2f mBtnSize{260.f, 52.f};
+    float mColGap = 72.f;   // khoảng cách giữa 2 cột
+    float mRowGap = 64.f;   // khoảng cách giữa các hàng
+    float mTitleGap = 16.f; // khoảng cách từ tiêu đề đến hàng đầu
+    float mLabelDy = 26.f;  // nhãn đặt cao hơn ô nhập 26px
+    float mMarginLR = 24.f; // lề trái-phải bên trong content
+    float mMarginTB = 24.f; // lề trên-dưới bên trong content
 
-    // Title
+private:
+    bool mReadOnly = true; // BẬT mặc định nếu bạn muốn chỉ hiển thị
+
+    // ===== Tiêu đề & Nhãn =====
     sf::Text mTitle;
+    sf::Text mLblId, mLblFullName, mLblUsername, mLblPhone, mLblRole, mLblEmail;
 
-    // Labels
-    sf::Text mLblId, mLblFullname, mLblUsername, mLblPhone, mLblRole, mLblEmail;
+    // ===== 6 TextBox (CENTER-based) =====
+    TextBox mTbId, mTbFullName, mTbUsername, mTbPhone, mTbRole, mTbEmail;
 
-    // TextBoxes (đặt theo tâm)
-    TextBox mTxtId, mTxtFullname, mTxtUsername, mTxtPhone, mTxtRole, mTxtEmail;
+    // Lưu tâm của từng ô để đặt nhãn TOP-LEFT theo đúng cạnh trái ô
+    sf::Vector2f mCId{}, mCFullName{}, mCUsername{}, mCPhone{}, mCRole{}, mCEmail{};
 
-    // Buttons (đặt theo tâm)
-    Button mBtnSave, mBtnChangePw;
+    // ===== 2 Button (CENTER-based) =====
+    Button mBtnUpdate;
+    Button mBtnChangePw;
 
-    // Khung bao quanh form
-    sf::RectangleShape mFormOutline;
+private:
+    // Tính toán & áp vị trí (gọi trong ctor)
+    void layout_();
 
-    // Callbacks
-    std::function<void(const Profile &)> mOnSave;
-    std::function<void()> mOnChangePw;
+    // Đặt nhãn theo TOP-LEFT dựa trên center của textbox
+    void placeLabelAbove_(sf::Text &label, const sf::Vector2f &tbCenter) const;
+
+    // Gắn hành vi cho 2 nút
+    void wireActions_();
 };

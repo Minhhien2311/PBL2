@@ -1,6 +1,6 @@
 // UI/states/LoginState.h
 #pragma once
-#include "core/State.h"
+#include "UI/states/State.h"
 #include <SFML/Graphics.hpp>
 
 // NOTE: thay các include dưới bằng đường dẫn component thật của bạn:
@@ -8,14 +8,14 @@
 #include "UI/components/TextBox.h" // giả định bạn có TextBox với API setPlaceholder, setPasswordMode, getText, ...
 #include "UI/components/Checkbox.h"
 
-class LoginState : public State
+class LoginState : public UI::State
 {
 public:
     explicit LoginState(App &app);
 
-    void handleInput(const sf::Event &e) override;
+    void handleInput(sf::Event &e) override;
     void update(sf::Time dt) override;
-    void draw(sf::RenderTarget &target) const override;
+    void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
     void relayout(sf::Vector2u winSize) override;
 
 private:
@@ -30,6 +30,7 @@ private:
     sf::Text mUsernameLabel;
     sf::Text mPasswordLabel;
     sf::Text mForgotText; // "Quên mật khẩu?"
+    sf::Text mErrorText;  // "Tên đăng nhập hoặc mật khẩu không đúng"
 
     // Components
     Checkbox mShowPw; // <-- checkbox hiện/ẩn mật khẩu
