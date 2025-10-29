@@ -236,8 +236,19 @@ void AdminShellState::createAccountsPage_()
         *mFontRegular, mContentOrigin, mContentWidth);
 }
 
+void AdminShellState::createRoutespage_()
+{
+    if (!mFontRegular)
+        return;
+    mRoutesPage = std::make_unique<RoutesPage>(
+        *mFontRegular, mContentOrigin, mContentWidth);
+}
+void AdminShellState::createFlightspage_() {}
+
+// Hàm này để chuyển hướng, nhưng phải đổi logic để khỏi tạo page thừa
 void AdminShellState::switchTo_(NavRow::Item item)
 {
+    // Dùng switch case nếu cần khởi tạo phức tạp hơn
     mActiveItem = item;
     if (mActiveItem == NavRow::Item::Accounts)
     {

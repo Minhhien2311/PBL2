@@ -15,7 +15,7 @@ AccountsPage::AccountsPage(const sf::Font &uiFont,
 {
     // ===== Title =====
     mTitle.setFont(*mFont);
-    mTitle.setCharacterSize(28);
+    mTitle.setCharacterSize(26);
     mTitle.setFillColor(sf::Color(28, 64, 110)); // #1C406E
     mTitle.setString(L"Thông tin tài khoản");
 
@@ -66,6 +66,7 @@ AccountsPage::AccountsPage(const sf::Font &uiFont,
 }
 
 // -------------------- public: event/update/draw --------------------
+// Xử lý event chuột/phím
 void AccountsPage::handleEvent(const sf::Event &ev, const sf::RenderWindow &win)
 {
     // Nếu chỉ hiển thị: KHÔNG forward event cho 6 TextBox
@@ -144,6 +145,19 @@ AccountsPage::AccountForm AccountsPage::getForm() const
 }
 
 // -------------------- private: layout --------------------
+
+/*
+// Kích thước control & khoảng cách
+    sf::Vector2f mEditSize{420.f, 40.f};
+    sf::Vector2f mBtnSize{260.f, 52.f};
+    float mColGap = 72.f;   // khoảng cách giữa 2 cột
+    float mRowGap = 64.f;   // khoảng cách giữa các hàng
+    float mTitleGap = 16.f; // khoảng cách từ tiêu đề đến hàng đầu
+    float mLabelDy = 26.f;  // nhãn đặt cao hơn ô nhập 26px
+    float mMarginLR = 24.f; // lề trái-phải bên trong content
+    float mMarginTB = 24.f; // lề trên-dưới bên trong content
+*/
+
 void AccountsPage::layout_()
 {
     // Khung khả dụng bên trong content (thêm margin trong)
@@ -156,18 +170,18 @@ void AccountsPage::layout_()
     const float totalW = colWidth * 2.f + mColGap;
     const float startX = availLeft + std::max(0.f, (availW - totalW) * 0.5f);
 
-    const float colLeftCX = startX + colWidth * 0.5f;
+    const float colLeftCX = startX - 30.f + colWidth * 0.5f;
     const float colRightCX = startX + colWidth + mColGap + colWidth * 0.5f;
 
     float y = availTop;
 
     // Tiêu đề (top-left)
-    mTitle.setPosition(startX, y);
+    mTitle.setPosition(startX - 30.f, y);
     y += mTitle.getLocalBounds().height + mTitleGap;
 
     // Hàng 1: ID | Họ tên
-    mCId = {colLeftCX, y + mEditSize.y * 0.5f};
-    mCFullName = {colRightCX, y + mEditSize.y * 0.5f};
+    mCId = {colLeftCX, y + 50.f + mEditSize.y * 0.5f};
+    mCFullName = {colRightCX, y + 50.f + mEditSize.y * 0.5f};
     mTbId.setPosition(mCId);
     mTbFullName.setPosition(mCFullName);
     placeLabelAbove_(mLblId, mCId);
@@ -175,8 +189,8 @@ void AccountsPage::layout_()
     y += mEditSize.y + mRowGap;
 
     // Hàng 2: Tên TK | SĐT
-    mCUsername = {colLeftCX, y + mEditSize.y * 0.5f};
-    mCPhone = {colRightCX, y + mEditSize.y * 0.5f};
+    mCUsername = {colLeftCX, y + 50.f + mEditSize.y * 0.5f};
+    mCPhone = {colRightCX, y + 50.f + mEditSize.y * 0.5f};
     mTbUsername.setPosition(mCUsername);
     mTbPhone.setPosition(mCPhone);
     placeLabelAbove_(mLblUsername, mCUsername);
@@ -184,8 +198,8 @@ void AccountsPage::layout_()
     y += mEditSize.y + mRowGap;
 
     // Hàng 3: Chức vụ | Email
-    mCRole = {colLeftCX, y + mEditSize.y * 0.5f};
-    mCEmail = {colRightCX, y + mEditSize.y * 0.5f};
+    mCRole = {colLeftCX, y + 50.f + mEditSize.y * 0.5f};
+    mCEmail = {colRightCX, y + 50.f + mEditSize.y * 0.5f};
     mTbRole.setPosition(mCRole);
     mTbEmail.setPosition(mCEmail);
     placeLabelAbove_(mLblRole, mCRole);
@@ -194,21 +208,23 @@ void AccountsPage::layout_()
 
     // Nút: căn giữa theo 2 cột
     const float midX = (colLeftCX + colRightCX) * 0.5f;
-    mBtnUpdate.setPosition({midX, y + mBtnSize.y * 0.5f});
+    mBtnUpdate.setPosition({midX, y + 50.f + mBtnSize.y * 0.5f});
 
     y += mBtnSize.y + 18.f;
-    mBtnChangePw.setPosition({midX, y + mBtnSize.y * 0.5f});
+    mBtnChangePw.setPosition({midX, y + 50.f + mBtnSize.y * 0.5f});
 }
 
 void AccountsPage::placeLabelAbove_(sf::Text &label, const sf::Vector2f &tbCenter) const
 {
     // TextBox center-based → label top-left đặt lệch lên mLabelDy
     const float left = tbCenter.x - mEditSize.x * 0.5f;
-    const float top = tbCenter.y - mEditSize.y * 0.5f - mLabelDy;
+    const float top = tbCenter.y - mEditSize.y * 0.5f - mLabelDy - 4.f;
     label.setPosition(left, top);
 }
 
 // -------------------- private: actions --------------------
+
+// "Gắn" các hành động (function) vào sự kiện onClick của các nút bấm.
 void AccountsPage::wireActions_()
 {
     if (!mReadOnly)
