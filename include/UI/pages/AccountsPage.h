@@ -61,6 +61,7 @@ public:
     std::function<void(const AccountForm &)> onSubmitUpdate; // "Cập nhập thông tin"
     std::function<void()> onChangePassword;                  // "Đổi mật khẩu"
 
+    // ===== Chế độ chỉ đọc =====
     void setReadOnly(bool v) { mReadOnly = v; }
     bool isReadOnly() const { return mReadOnly; }
 

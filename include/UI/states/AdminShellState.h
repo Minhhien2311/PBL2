@@ -17,6 +17,8 @@
 
 #include "UI/states/State.h"
 #include "UI/pages/AccountsPage.h"
+#include "UI/pages/FlightsPage.h"
+#include "UI/pages/RoutesPage.h"
 
 class AdminShellState : public UI::State
 {
@@ -77,11 +79,21 @@ private:
     // ===== Current Page =====
     std::unique_ptr<AccountsPage> mAccountsPage;
 
+    // ===== Các page khác trong Menu =====
+    std::unique_ptr<RoutesPage> mFlightsPage;
+    std::unique_ptr<FlightsPage> mFlightsPage;
+
 private:
     // Build lại sidebar & bounds
     void buildSidebar_();
     // Tạo lại page Accounts (theo origin/width hiện thời)
     void createAccountsPage_();
+    void createRoutespage_();
+    void createFlightspage_();
+    void createDashboardpage_();
+    void createReportsPage_();
+    void createPromotionsPage_();
+    void createRevenuePage_();
     // Chuyển trang theo item
     void switchTo_(NavRow::Item item);
     // Hit test
