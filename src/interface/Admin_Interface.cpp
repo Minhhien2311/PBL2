@@ -226,9 +226,9 @@ public:
 
             // --- Tiêu đề bảng ---
             auto header = hbox({
-                text("ID chuyến") | bold | center | size(WIDTH, EQUAL, 14),
+                text("ID tuyến") | bold | center | size(WIDTH, EQUAL, 14),
                 separator(),
-                text("ID tuyến") | bold | center | size(WIDTH, EQUAL, 13),
+                text("ID chuyến") | bold | center | size(WIDTH, EQUAL, 13),
                 separator(),
                 text("Ngày đi") | bold | center | size(WIDTH, EQUAL, 16),
                 separator(),

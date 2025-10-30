@@ -133,7 +133,55 @@ private:
     }
 };
 
-void ShowAgentMenu(AccountManager& account_manager, BookingManager& booking_manager){
+class AddBooking{
+    public:
+        // std::string bookingId;         // Khóa nội bộ duy nhất
+        // std::string flightInstanceId;  // Chuyến bay cụ thể
+        std::string passengerId;
+        // std::string bookingDate;       // Ngày giờ tạo
+        BookingClass bookingClass;
+        // int baseFare;       
+        std::string thong_bao = "";
+
+        BookingManager& booking_manager;
+        FlightManager& flight_manager;
+        FlightInstance* list_instance;
+
+        //phục vụ tìm kiếm
+        std::string departure_arrival;
+        std::string departureTimetoFind;
+        std::string instanceIdtoFind;
+        std::string FaretoFind;
+
+        Component container;
+
+        AddBooking(BookingManager& booking_manager, FlightManager& flight_manager) : booking_manager(booking_manager), flight_manager(flight_manager){
+            Component input_flightID = Input(&instanceIdtoFind, "(VD: FI-001)");
+            Component input_passengerID = Input(&passengerId, "(VD: PI-001)");
+
+            //Các nút bấm
+            auto tim_kiem_button = Button("Tìm kiếm", [&]{
+                if(departure_arrival.empty() && departureTimetoFind.empty() && FaretoFind.empty())
+                    list_instance = flight_manager.findInstanceById(instanceIdtoFind);
+            });
+            auto pho_thong_button = Button("Phổ thông", [&]{
+                bookingClass = BookingClass::Economy;
+            });
+            auto thuong_gia_button = Button("Thương gia", [&]{
+                bookingClass = BookingClass::Business;
+            });
+
+            auto bang_tim_kiem = gridbox(
+                                        {},
+                                        {});
+        }
+
+        Element Render(){
+            return ;
+        }
+};
+
+void ShowAgentMenu(AccountManager& account_manager, BookingManager& booking_manager, FlightManager& flight_manager){
     auto screen = ScreenInteractive::TerminalOutput();
     std::string user_name = " 👤" + account_manager.getCurrentUser()->getFullName() + " - Agent ";
     // --- ĐỊNH NGHĨA CÁC TRẠNG THÁI (DÙNG SỐ NGUYÊN) ---
