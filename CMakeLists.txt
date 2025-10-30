@@ -31,6 +31,7 @@ target_sources(core PRIVATE
   src/core/AccountManager.cpp
   src/core/BookingManager.cpp
   src/core/FlightManager.cpp
+  src/core/ReportManager.cpp
 )
 
 # Khai báo đường dẫn header CHO TARGET (ai link core sẽ kế thừa include/)

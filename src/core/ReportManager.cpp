@@ -47,64 +47,40 @@ int ReportManager::getTotalTicketsSold() const {
 
 // Tạo một báo cáo doanh thu chi tiết cho từng agent
 DynamicArray<AgentReport*>* ReportManager::generateFullAgentReport() const {
-    
-    // 1. Tạo mảng kết quả mới trên heap (người gọi phải delete)
     auto* reportList = new DynamicArray<AgentReport*>();
-
-    // 2. Lấy danh sách tất cả các agent
     const auto& agents = accountManager_.getAllAgents();
-
-    // 3. Lấy danh sách tất cả các booking
     const auto& bookings = bookingManager_.getAllBookings();
 
-    // 4. Duyệt qua từng agent
     for (int i = 0; i < agents.size(); ++i) {
         AccountAgent* agent = agents[i];
-        if (!agent) continue; // Bỏ qua nếu con trỏ agent không hợp lệ
+        if (!agent) continue;
         
-        // Tạo một đối tượng báo cáo mới cho agent này (cũng trên heap)
         auto* agentReport = new AgentReport();
         agentReport->agentId = agent->getId();
         agentReport->agentName = agent->getFullName();
 
-        // 5. Duyệt qua tất cả các booking để tìm booking của agent này
-        for (int j = 0; j < bookings.size(); ++j) {
-            Booking* booking = bookings[j];
-            if (!booking) continue; // Bỏ qua nếu con trỏ booking không hợp lệ
+        // for (int j = 0; j < bookings.size(); ++j) {
+        //     Booking* booking = bookings[j];
+        //     if (!booking) continue; // Bỏ qua nếu con trỏ booking không hợp lệ
 
-            // Kiểm tra xem booking có thuộc agent này không
-            if (booking->getAgentId() == agent->getId()) {
-                agentReport->totalBookings++; // Đếm tất cả booking (cả hủy)
+        //     // Kiểm tra xem booking có thuộc agent này không
+        //     if (booking->getAgentId() == agent->getId()) {
+        //         agentReport->totalBookings++; // Đếm tất cả booking (cả hủy)
                 
-                if (booking->getStatus() == BookingStatus::Issued) {
-                    // Chỉ tính vé đã phát hành
-                    agentReport->issuedTickets++;
-                    agentReport->totalRevenue += booking->getBaseFare();
-                } else if (booking->getStatus() == BookingStatus::Cancelled) {
-                    // Đếm vé đã hủy
-                    agentReport->cancelledTickets++;
-                }
-            }
-        }
+        //         if (booking->getStatus() == BookingStatus::Issued) {
+        //             // Chỉ tính vé đã phát hành
+        //             agentReport->issuedTickets++;
+        //             agentReport->totalRevenue += booking->getBaseFare();
+        //         } else if (booking->getStatus() == BookingStatus::Cancelled) {
+        //             // Đếm vé đã hủy
+        //             agentReport->cancelledTickets++;
+        //         }
+        //     }
+        // }
 
-        // 6. Thêm báo cáo của agent này vào danh sách tổng
         reportList->push_back(agentReport);
     }
 
     // 7. Trả về con trỏ tới danh sách báo cáo
     return reportList;
 }
-// ```
-
-// ---
-// ### Các bước tiếp theo
-
-// 1.  **Thêm file:** Đặt hai file này vào `include/core/` và `src/core/`.
-// 2.  **Cập nhật `CMakeLists.txt`:** Mở file `CMakeLists.txt` của bạn và thêm `src/core/ReportManager.cpp` vào thư viện `core`:
-//     ```cmake
-//     target_sources(core PRIVATE
-//       # ... các file .cpp khác của core ...
-//       src/core/ReportManager.cpp  # <<< THÊM DÒNG NÀY VÀO
-//     )
-    
-
