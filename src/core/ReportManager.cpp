@@ -80,7 +80,6 @@ DynamicArray<AgentReport*>* ReportManager::generateFullAgentReport() const {
 
         reportList->push_back(agentReport);
     }
-
-    // 7. Trả về con trỏ tới danh sách báo cáo
+    
     return reportList;
 }
