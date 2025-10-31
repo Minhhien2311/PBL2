@@ -81,7 +81,3 @@ Passenger Passenger::fromRecordLine(const std::string& line) {
     
     return p;
 }
-
-void Passenger::overrideIdForLoad(const std::string& existingId) {
-    this->id = existingId;
-}
