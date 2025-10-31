@@ -35,6 +35,7 @@ public:
     // NGHIỆP VỤ Bán vé 
     Booking* createNewBooking( FlightManager& flightManager,
                                const std::string& flightInstanceId,
+                               const std::string& agentId,
                                const std::string& passengerId,
                                BookingClass bookingClass,
                                int baseFare);
@@ -47,6 +48,9 @@ public:
     
     // --- Lấy dữ liệu  ---
     const DynamicArray<Booking*>& getAllBookings() const;
+
+    // Lấy danh sách booking theo Agent ID
+    DynamicArray<Booking*> getBookingsByAgentId(const std::string& agentId) const;
 
     // --- Lưu trữ  ---
     bool saveDataToFiles(const std::string& bookingsFilePath) const; 
