@@ -39,9 +39,10 @@ public:
     // Không cho phép tạo đối tượng rỗng
     FlightInstance() = delete;
 
-    // Constructor chính: Tự động sinh ID và tính toán số ghế ban đầu.
+    // Constructor chính: Tự động sinh ID từ flightNumber-YYYYMMDD và tính toán số ghế ban đầu.
     // Chỉ cần cung cấp thông tin gốc, không cần truyền vào số ghế trống.
     explicit FlightInstance(const std::string& flightId,
+                            const std::string& flightNumber,
                             const std::string& departureDate,
                             const std::string& departureTime,
                             const std::string& arrivalDate,
@@ -54,6 +55,7 @@ public:
     // --- Getters ---
     const std::string& getInstanceId() const;
     const std::string& getFlightId() const;
+    const std::string& getFlightNumber() const;
     const std::string& getDepartureDate() const;
     const std::string& getDepartureTime() const;
     const std::string& getArrivalDate() const;

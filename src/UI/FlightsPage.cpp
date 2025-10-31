@@ -221,9 +221,9 @@ void FlightsPage::setupUi()
 
 void FlightsPage::setupModel()
 {
-    model_ = new QStandardItemModel(0, 8, this);
+    model_ = new QStandardItemModel(0, 9, this);
     model_->setHorizontalHeaderLabels({
-        "ID chuyến", "ID tuyến (FlightId)", "Ngày khởi hành", "Giờ khởi hành",
+        "ID chuyến", "ID tuyến (FlightId)", "Số hiệu", "Ngày khởi hành", "Giờ khởi hành",
         "Ngày đến", "Giờ đến", "Ghế P.thông", "Ghế T.gia"
     });
     tableView_->setModel(model_);
@@ -257,6 +257,7 @@ void FlightsPage::refreshTable()
             QList<QStandardItem *> rowItems;
             rowItems << new QStandardItem(QString::fromStdString(inst->getInstanceId()))
                    << new QStandardItem(QString::fromStdString(inst->getFlightId()))
+                   << new QStandardItem(QString::fromStdString(inst->getFlightNumber()))
                    << new QStandardItem(QString::fromStdString(inst->getDepartureDate()))
                    << new QStandardItem(QString::fromStdString(inst->getDepartureTime()))
                    << new QStandardItem(QString::fromStdString(inst->getArrivalDate()))
