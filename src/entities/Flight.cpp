@@ -65,4 +65,5 @@ void Flight::overrideIdForLoad(const std::string& existingId) {
 // Tiện ích nhẹ (không dính I/O hoặc DB)
 std::string Flight::getFlightInfo() const {
     // Sẽ triển khai sau
+    return "";
 }
