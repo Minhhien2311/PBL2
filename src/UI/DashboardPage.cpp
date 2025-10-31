@@ -1,5 +1,7 @@
 #include "DashboardPage.h"
 #include "core/AccountManager.h"
+#include "core/ReportManager.h"
+#include "entities/Account.h"
 
 #include <QLabel>
 #include <QTableView>
@@ -9,9 +11,12 @@
 #include <QFrame>
 #include <QHeaderView> // Để style header của bảng
 
-DashboardPage::DashboardPage(AccountManager* accManager, QWidget *parent)
-    : QWidget(parent), accountManager_(accManager)
+DashboardPage::DashboardPage(AccountManager* accManager, ReportManager* reportManager, QWidget *parent)
+    : QWidget(parent), accountManager_(accManager), reportManager_(reportManager)
 {
+    Q_ASSERT(accountManager_ != nullptr);
+    Q_ASSERT(reportManager_ != nullptr);
+    
     setupUi();
     setupModel();
     refreshData(); // Tải dữ liệu (giả lập)
@@ -178,22 +183,50 @@ void DashboardPage::setupModel()
 }
 
 /**
- * @brief Tải/Làm mới dữ liệu (Giả lập)
+ * @brief Tải/Làm mới dữ liệu
  */
 void DashboardPage::refreshData()
 {
-    // --- [CHỖ NỐI API / CORE LOGIC] ---
-    // Đây là nơi bạn gọi core->getStatsManager()->getDashboardData()
-    // Sau đó cập nhật các Label và Model
+    // Lấy thông tin agent hiện tại
+    Account* currentUser = accountManager_->getCurrentUser();
+    if (!currentUser) {
+        // Không có user đăng nhập, hiển thị giá trị mặc định
+        salesCountLabel_->setText("0");
+        salesTotalLabel_->setText("0");
+        cancelCountLabel_->setText("0");
+        doVeLabel_->setText("0");
+        return;
+    }
     
-    // Giả lập cập nhật Label:
-    salesCountLabel_->setText("20");
-    salesTotalLabel_->setText("20,000,000");
-    cancelCountLabel_->setText("20");
-    doVeLabel_->setText("20");
+    std::string agentId = currentUser->getId();
+    
+    // Lấy thống kê từ ReportManager
+    int dailySales = reportManager_->getDailyTicketsSold(agentId);
+    double dailyRevenue = reportManager_->getDailyRevenue(agentId);
+    int dailyCancellations = reportManager_->getDailyCancellations(agentId);
+    int dailyChanges = reportManager_->getDailyTicketChanges(agentId);
+    
+    // Cập nhật các label
+    salesCountLabel_->setText(QString::number(dailySales));
+    
+    // Format revenue with thousand separators
+    QString revenueStr = QString::number(static_cast<long long>(dailyRevenue), 'f', 0);
+    // Add thousand separators
+    int pos = revenueStr.length() - 3;
+    while (pos > 0) {
+        revenueStr.insert(pos, ',');
+        pos -= 3;
+    }
+    salesTotalLabel_->setText(revenueStr);
+    
+    cancelCountLabel_->setText(QString::number(dailyCancellations));
+    doVeLabel_->setText(QString::number(dailyChanges));
 
     // Giả lập cập nhật Bảng (xóa dữ liệu cũ, thêm dữ liệu mới):
     flightsModel_->removeRows(0, flightsModel_->rowCount());
+    
+    // TODO: Tích hợp dữ liệu chuyến bay thực tế trong ngày
+    // Hiện tại để trống hoặc dữ liệu giả lập
     
     QList<QStandardItem *> row1;
     row1 << new QStandardItem("VN123") << new QStandardItem("SGN-HAN")
