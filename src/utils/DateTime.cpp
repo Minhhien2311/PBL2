@@ -109,6 +109,11 @@ std::string DateTime::formatDateForId(const std::string& ddmmyyyy) {
         return ""; // Định dạng không hợp lệ
     }
     
+    // Validate the format has slashes in correct positions
+    if (ddmmyyyy[2] != '/' || ddmmyyyy[5] != '/') {
+        return ""; // Định dạng không hợp lệ
+    }
+    
     std::string dd = ddmmyyyy.substr(0, 2);
     std::string mm = ddmmyyyy.substr(3, 2);
     std::string yyyy = ddmmyyyy.substr(6, 4);
