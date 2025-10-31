@@ -1,7 +1,7 @@
 #include "core/BookingManager.h"
 #include "core/FlightManager.h"         // Cần để tìm FlightInstance
 #include "entities/FlightInstance.h"    // Cần để gọi bookSeats/releaseSeats
-#include "utils/Time.h"                 // Cần để lấy ngày giờ
+#include "utils/DateTime.h"                 // Cần để lấy ngày giờ
 #include "entities/FlightRule.h"        // Cần để kiểm tra luật
 #include <fstream>
 #include <string>
@@ -77,7 +77,7 @@ Booking* BookingManager::createNewBooking( FlightManager& flightManager,
                                 : SeatClass::Business;
     if (!instance->bookSeats(seatClassToBook, 1)) return nullptr; 
 
-    std::string currentDate = utils::Time::formatLocal(utils::Time::nowUtc(), "%Y-%m-%d %H:%M:%S");
+    std::string currentDate = utils::DateTime::formatLocal(utils::DateTime::nowUtc(), "%Y-%m-%d %H:%M:%S");
     Booking* newBooking = new Booking(flightInstanceId, passengerId, currentDate, bookingClass, baseFare, BookingStatus::Issued);
     
     // Thêm vào DynamicArray
@@ -126,10 +126,10 @@ bool BookingManager::cancelBooking(FlightManager& flightManager, const std::stri
         
         // Chuyển đổi sang time_point bằng hàm helper mới
         // (Hàm này đã có trong utils/Time.cpp)
-        auto departureTime = utils::Time::fromDmYHm(depDate, depTime);
+        auto departureTime = utils::DateTime::fromDmYHm(depDate, depTime);
         // --- KẾT THÚC SỬA ---
 
-        auto now = utils::Time::nowUtc(); // Lấy thời gian hiện tại
+        auto now = utils::DateTime::nowUtc(); // Lấy thời gian hiện tại
 
         // Tính số giờ còn lại (logic này giờ đã đúng, không còn lỗi timezone)
         auto duration = std::chrono::duration_cast<std::chrono::hours>(departureTime - now);
