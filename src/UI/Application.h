@@ -10,7 +10,8 @@ class AdminInterface;
 class AgentInterface;
 class AccountManager; 
 class FlightManager;  // <--- Sửa lỗi: Tên nhất quán (số ít)
-class BookingManager; 
+class BookingManager;
+class ReportManager;
 
 class Application : public QMainWindow
 {
@@ -20,7 +21,8 @@ public:
     // Constructor nhận các con trỏ manager
     explicit Application(AccountManager* accManager, 
                          FlightManager* flManager, 
-                         BookingManager* bkManager, 
+                         BookingManager* bkManager,
+                         ReportManager* reportManager,
                          QWidget *parent = nullptr); 
     ~Application();
 
@@ -42,7 +44,8 @@ private:
     // Con trỏ tới các Manager (không sở hữu, chỉ tham chiếu)
     AccountManager* accountManager_; 
     FlightManager* flightManager_;   // <--- Sửa lỗi: Tên nhất quán (số ít)
-    BookingManager* bookingManager_; 
+    BookingManager* bookingManager_;
+    ReportManager* reportManager_;
 };
 
 #endif // APPLICATION_H
