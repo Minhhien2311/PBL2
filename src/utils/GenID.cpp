@@ -11,10 +11,7 @@ namespace IdGenerator {
 
     static int adminCounter = 0;
     static int agentCounter = 0;
-<<<<<<< HEAD
     static int instanceCounter = 0;
-=======
->>>>>>> 1bf0690d5400cbc135025e79f5a69f9bb5b91863
     static int bookingCounter = 0;
 
     // 2 hàm này cần thiết để tránh bug sinh ID khi tạo đối tượng từ file
@@ -42,11 +39,8 @@ namespace IdGenerator {
                 adminCounter = value;
             } else if (key == "AGENT_COUNTER") {
                 agentCounter = value;
-<<<<<<< HEAD
             } else if (key == "INSTANCE_COUNTER") {
                 instanceCounter = value;
-=======
->>>>>>> 1bf0690d5400cbc135025e79f5a69f9bb5b91863
             } else if (key == "BOOKING_COUNTER") {
                 bookingCounter = value;
             }
@@ -64,10 +58,7 @@ namespace IdGenerator {
 
         file << "ADMIN_COUNTER:" << adminCounter << "\n";
         file << "AGENT_COUNTER:" << agentCounter << "\n";
-<<<<<<< HEAD
         file << "INSTANCE_COUNTER:" << instanceCounter << "\n";
-=======
->>>>>>> 1bf0690d5400cbc135025e79f5a69f9bb5b91863
         file << "BOOKING_COUNTER:" << bookingCounter << "\n";
 
         file.close();
@@ -99,7 +90,6 @@ namespace IdGenerator {
         return ss.str();
     }
 
-<<<<<<< HEAD
     std::string generateInstanceId() {
         ++instanceCounter;
         
@@ -110,8 +100,6 @@ namespace IdGenerator {
         return ss.str();
     }
 
-=======
->>>>>>> 1bf0690d5400cbc135025e79f5a69f9bb5b91863
     std::string generateBookingId() {
         ++bookingCounter;
         
