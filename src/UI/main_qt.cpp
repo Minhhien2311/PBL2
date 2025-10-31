@@ -4,7 +4,8 @@
 // 1. Include các manager từ core logic của bạn
 #include "core/AccountManager.h" 
 #include "core/FlightManager.h"  // <--- Đảm bảo tên file đúng (số ít)
-#include "core/BookingManager.h" 
+#include "core/BookingManager.h"
+#include "core/ReportManager.h"
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
@@ -33,11 +34,12 @@ int main(int argc, char *argv[]) {
     // 2. Tạo các Manager logic
     // (Lưu ý: bạn cần cung cấp đúng đường dẫn file cho constructor)
     AccountManager accountManager("data/admins.txt", "data/agents.txt");
-    FlightManager flightManager("data/flights.txt", "data/instances.txt");
+    FlightManager flightManager("data/flights.txt", "data/flight_instances.txt");
     BookingManager bookingManager("data/bookings.txt", nullptr); // (Tạm thời truyền nullptr cho FlightRule)
+    ReportManager reportManager(accountManager, bookingManager);
 
     // 3. Tạo cửa sổ Application và "truyền" các manager vào
-    Application w(&accountManager, &flightManager, &bookingManager);
+    Application w(&accountManager, &flightManager, &bookingManager, &reportManager);
 
     w.show();      
     return app.exec();

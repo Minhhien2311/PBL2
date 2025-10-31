@@ -10,6 +10,7 @@
 #include "core/AccountManager.h"
 #include "core/FlightManager.h"
 #include "core/BookingManager.h"
+#include "core/ReportManager.h"
 
 #include <QLabel>
 #include <QVBoxLayout>
@@ -23,11 +24,13 @@
 AdminInterface::AdminInterface(AccountManager* accManager,
                                FlightManager* flManager,
                                BookingManager* bkManager,
+                               ReportManager* reportManager,
                                QWidget* parent) 
     : QWidget(parent),
       accountManager_(accManager),
       flightManager_(flManager),
-      bookingManager_(bkManager)
+      bookingManager_(bkManager),
+      reportManager_(reportManager)
 {
     // Bố cục chính là QHBoxLayout (Sidebar + Stack)
     auto *root = new QHBoxLayout(this);
@@ -84,7 +87,7 @@ AdminInterface::AdminInterface(AccountManager* accManager,
     stack_ = new QStackedWidget(this);
     
     // <--- Sửa lỗi: Cập nhật StackWidget theo Sidebar
-    stack_->addWidget(new DashboardPage(accountManager_, this));   // Index 0
+    stack_->addWidget(new DashboardPage(accountManager_, reportManager_, this));   // Index 0
     
     // Truyền FlightManager cho cả RoutesPage (vì nó quản lý tuyến)
     stack_->addWidget(new RoutesPage(flightManager_, this)); // Index 1
