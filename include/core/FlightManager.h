@@ -29,18 +29,19 @@ public:
     FlightManager(const std::string& flightsFilePath, const std::string& instancesFilePath);
     ~FlightManager(); // xóa default, viết lại hàm hủy
 
-    // createNewFlight 
+    // createNewFlight (number parameter kept for backward compatibility but not used)
     bool createNewFlight(const std::string& number,
                          const std::string& airline,
                          const std::string& departureIATA,
                          const std::string& arrivalIATA);
 
-    // Đã đổi tham số từ Iso sang Date/Time
+    // Đã đổi tham số để bao gồm flightNumber
     bool createNewInstance(const std::string& flightId,
-                           const std::string& departureDate,  // Thay đổi
-                           const std::string& departureTime,  // Thay đổi
-                           const std::string& arrivalDate,    // Thay đổi
-                           const std::string& arrivalTime,    // Thay đổi
+                           const std::string& flightNumber,
+                           const std::string& departureDate,  
+                           const std::string& departureTime,  
+                           const std::string& arrivalDate,    
+                           const std::string& arrivalTime,    
                            int totalEconomySeats,
                            int totalBusinessSeats,
                            int fareEconomy,

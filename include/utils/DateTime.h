@@ -40,6 +40,9 @@ public:
 
     // Định dạng time_point thành chuỗi "HH:MM" (Giờ địa phương).
     static std::string formatHm(std::chrono::system_clock::time_point tp);
+
+    // Chuyển đổi ngày từ định dạng "DD/MM/YYYY" sang "YYYYMMDD" để dùng trong ID.
+    static std::string formatDateForId(const std::string& ddmmyyyy);
 };
 
 }
