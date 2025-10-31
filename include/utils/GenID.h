@@ -18,9 +18,11 @@ namespace IdGenerator {
     std::string generateAgentId();
 
     // Hàm tạo ID cho Flight, bắt đầu bằng "FL-"
+    // DEPRECATED: Flight IDs are now generated from airline-departure-arrival format
     std::string generateFlightId();
 
     // Hàm tạo ID cho FlightInstance, bắt đầu bằng "FI-"
+    // DEPRECATED: FlightInstance IDs are now generated from flightNumber-YYYYMMDD format
     std::string generateInstanceId();
     
     // Hàm tạo ID cho Passenger, bắt đầu bằng "PAX-"

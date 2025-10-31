@@ -34,3 +34,5 @@ Vietnam Airlines-CXR-SGN|Vietnam Airlines|CXR|SGN
 Bamboo Airways-HAN-DAD|Bamboo Airways|HAN|DAD
 Pacific Airlines-SGN-THD|Pacific Airlines|SGN|THD
 Bamboo Airways-DAD-CXR|Bamboo Airways|DAD|CXR
+Vietjet Air-HAN-SGN|Vietjet Air|HAN|SGN
+Vietjet Air-SGN-DAD|Vietjet Air|SGN|DAD
