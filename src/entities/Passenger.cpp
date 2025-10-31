@@ -1,13 +1,13 @@
 #include "entities/Passenger.h"
-#include "utils/GenID.h"
 
-Passenger::Passenger(const std::string& name,
+Passenger::Passenger(const std::string& id,
+                     const std::string& name,
                      const std::string& dob,
                      Gender gender,
                      const std::string& phone,
                      const std::string& passport,
                      const std::string& nation)
-                    : id(IdGenerator::generatePassengerId()), fullName(name), dateOfBirth(dob), gender(gender), phoneNumber(phone), passportNumber(passport), nationality(nation) {}
+                    : id(id), fullName(name), dateOfBirth(dob), gender(gender), phoneNumber(phone), passportNumber(passport), nationality(nation) {}
 
 // --- Getters ---
 const std::string& Passenger::getId() const { return id; }
@@ -76,12 +76,9 @@ Passenger Passenger::fromRecordLine(const std::string& line) {
 
     std::string nation = line.substr(start, end - start);
 
-    // Tạo đối tượng Passenger bằng constructor và sau đó gán lại ID đã đọc
-    // Đây là một cách để tái sử dụng constructor chính
-    Passenger p(name, dob, gender, phone, passport, nation);
+    // Tạo đối tượng Passenger bằng constructor với ID đã đọc
+    Passenger p(id, name, dob, gender, phone, passport, nation);
     
-    // Ghi đè ID tự sinh bằng ID đọc từ file
-    p.overrideIdForLoad(id);
     return p;
 }
 

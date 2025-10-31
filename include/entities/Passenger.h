@@ -23,7 +23,8 @@ public:
     // Không cho phép tạo đối tượng rỗng.
     Passenger() = delete;
 
-    Passenger(const std::string& name,
+    Passenger(const std::string& id,
+              const std::string& name,
               const std::string& dob,
               Gender gender,
               const std::string& phone,
