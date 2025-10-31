@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcore.a CMakeFiles/core.dir/src/core/MenuManager.cpp.o CMakeFiles/core.dir/src/core/AccountManager.cpp.o CMakeFiles/core.dir/src/core/BookingManager.cpp.o CMakeFiles/core.dir/src/core/FlightManager.cpp.o CMakeFiles/core.dir/src/core/ReportManager.cpp.o
+/usr/bin/ranlib libcore.a

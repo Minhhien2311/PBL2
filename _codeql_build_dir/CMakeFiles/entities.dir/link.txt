@@ -1,0 +1,2 @@
+/usr/bin/ar qc libentities.a CMakeFiles/entities.dir/src/entities/Account.cpp.o CMakeFiles/entities.dir/src/entities/AccountAdmin.cpp.o CMakeFiles/entities.dir/src/entities/AccountAgent.cpp.o CMakeFiles/entities.dir/src/entities/Booking.cpp.o CMakeFiles/entities.dir/src/entities/Flight.cpp.o CMakeFiles/entities.dir/src/entities/FlightInstance.cpp.o CMakeFiles/entities.dir/src/entities/FlightRule.cpp.o CMakeFiles/entities.dir/src/entities/Passenger.cpp.o CMakeFiles/entities.dir/src/entities/Promotion.cpp.o
+/usr/bin/ranlib libentities.a
