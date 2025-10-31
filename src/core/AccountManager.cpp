@@ -162,3 +162,27 @@ bool AccountManager::saveDataToFiles(const std::string& adminsFilePath, const st
 
     return true;
 }
+
+// --- Hàm bổ sung ---
+
+void AccountManager::updateAgentProfile(const std::string& agentId, std::string newName, std::string newPhone, std::string newEmail) {
+    AccountAgent* agent = findAgentById(agentId);
+    if (agent) {
+        agent->setFullName(newName);
+        agent->setPhone(newPhone);
+        agent->setEmail(newEmail);
+        
+        // Tự động lưu thay đổi vào file
+        saveDataToFiles("data/admins.txt", "data/agents.txt");
+    }
+}
+
+void AccountManager::changeAgentPassword(const std::string& agentId, std::string newPassword) {
+    AccountAgent* agent = findAgentById(agentId);
+    if (agent) {
+        agent->changePassword(newPassword);
+        
+        // Tự động lưu thay đổi vào file
+        saveDataToFiles("data/admins.txt", "data/agents.txt");
+    }
+}
