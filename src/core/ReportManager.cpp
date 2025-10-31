@@ -61,7 +61,7 @@ DynamicArray<AgentReport*>* ReportManager::generateFullAgentReport() const {
 
         // for (int j = 0; j < bookings.size(); ++j) {
         //     Booking* booking = bookings[j];
-        //     if (!booking) continue; // Bỏ qua nếu con trỏ booking không hợp lệ
+        //     if (!booking) continue;
 
         //     // Kiểm tra xem booking có thuộc agent này không
         //     if (booking->getAgentId() == agent->getId()) {
@@ -80,6 +80,6 @@ DynamicArray<AgentReport*>* ReportManager::generateFullAgentReport() const {
 
         reportList->push_back(agentReport);
     }
-    
+
     return reportList;
 }
