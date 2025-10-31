@@ -25,6 +25,7 @@ private:
     void loadInstancesFromFile(const std::string& filePath);
 
 public:
+    FlightManager();
     FlightManager(const std::string& flightsFilePath, const std::string& instancesFilePath);
     ~FlightManager(); // xóa default, viết lại hàm hủy
 
