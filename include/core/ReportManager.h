@@ -61,4 +61,19 @@ public:
     // QUAN TRỌNG: Người gọi có trách nhiệm 'delete' đối tượng mảng này
     // và tất cả các con trỏ AgentReport* bên trong nó sau khi sử dụng xong.
     DynamicArray<AgentReport*>* generateFullAgentReport() const;
+
+    // --- Thống kê theo ngày cho Agent cụ thể ---
+    
+    // Lấy tổng doanh thu trong ngày của một agent cụ thể
+    double getDailyRevenue(const std::string& agentId) const;
+    
+    // Lấy số vé đã bán trong ngày của một agent cụ thể
+    int getDailyTicketsSold(const std::string& agentId) const;
+    
+    // Lấy số vé đã hủy trong ngày của một agent cụ thể
+    int getDailyCancellations(const std::string& agentId) const;
+    
+    // Lấy số vé đã đổi trong ngày của một agent cụ thể
+    // Hiện tại trả về 0 vì chưa có tính năng đổi vé
+    int getDailyTicketChanges(const std::string& agentId) const;
 };
