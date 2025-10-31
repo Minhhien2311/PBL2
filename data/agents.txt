@@ -1,1 +1,1 @@
-002|user001|70bf25e562eb0f78|0|Nguyen Van A|0123456789|user2@example.com
+002|user001|70bf25e562eb0f78|0|Nguyen Van A|0123456789|user2@example.com|0|1

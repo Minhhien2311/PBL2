@@ -10,7 +10,8 @@ class QPushButton;
 class QFrame;
 class AccountManager;
 class FlightManager; // <--- Sửa lỗi: Tên đúng (số ít)
-class BookingManager; 
+class BookingManager;
+class ReportManager;
 
 class AdminInterface : public QWidget
 {
@@ -20,7 +21,8 @@ public:
     // <--- Sửa lỗi: Constructor phải khớp với file .cpp và Application.cpp
     explicit AdminInterface(AccountManager* accManager,
                             FlightManager* flManager, // <--- Sửa lỗi: Tên đúng (số ít)
-                            BookingManager* bkManager, 
+                            BookingManager* bkManager,
+                            ReportManager* reportManager,
                             QWidget* parent = nullptr);
 
 signals:
@@ -41,7 +43,8 @@ private:
     // Con trỏ tới các Manager (không sở hữu)
     AccountManager* accountManager_;
     FlightManager* flightManager_; // <--- Sửa lỗi: Tên đúng (số ít)
-    BookingManager* bookingManager_; 
+    BookingManager* bookingManager_;
+    ReportManager* reportManager_;
 };
 
 #endif // ADMININTERFACE_H

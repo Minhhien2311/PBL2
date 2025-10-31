@@ -10,6 +10,7 @@
 #include "core/AccountManager.h"
 #include "core/FlightManager.h"
 #include "core/BookingManager.h"
+#include "core/ReportManager.h"
 
 #include <QLabel>
 #include <QVBoxLayout>
@@ -19,20 +20,23 @@
 #include <QStackedWidget>
 #include <QFrame>
 
-// <--- CẬP NHẬT: Constructor nhận cả 3 manager
+// <--- CẬP NHẬT: Constructor nhận cả 4 manager
 AgentInterface::AgentInterface(AccountManager* accManager,
                                FlightManager* flManager,
                                BookingManager* bkManager,
+                               ReportManager* reportManager,
                                QWidget *parent) 
     : QWidget(parent),
       accountManager_(accManager),
       flightManager_(flManager),
-      bookingManager_(bkManager)
+      bookingManager_(bkManager),
+      reportManager_(reportManager)
 {
     // Đảm bảo manager không null
     Q_ASSERT(accountManager_ != nullptr);
     Q_ASSERT(flightManager_ != nullptr);
     Q_ASSERT(bookingManager_ != nullptr);
+    Q_ASSERT(reportManager_ != nullptr);
 
     setupUi(); // Gọi hàm tạo UI
 }
@@ -94,7 +98,7 @@ void AgentInterface::setupUi()
     // --- Stack (Nội dung chính của Agent) ---
     stack_ = new QStackedWidget(this);
     
-    stack_->addWidget(new DashboardPage(accountManager_, this));
+    stack_->addWidget(new DashboardPage(accountManager_, reportManager_, this));
 
     // 0. Trang Tìm & Đặt vé
     stack_->addWidget(new SearchBookPage(flightManager_, bookingManager_, accountManager_, this));
