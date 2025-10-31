@@ -29,7 +29,7 @@ public:
     FlightManager(const std::string& flightsFilePath, const std::string& instancesFilePath);
     ~FlightManager(); // xóa default, viết lại hàm hủy
 
-    // createNewFlight 
+    // createNewFlight (number parameter kept for backward compatibility but not used)
     bool createNewFlight(const std::string& number,
                          const std::string& airline,
                          const std::string& departureIATA,

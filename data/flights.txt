@@ -47,3 +47,4 @@ FL-046|Pacific Airlines|SGN|THD
 FL-047|Vietnam Airlines|HAN|SGN
 FL-048|Bamboo Airways|DAD|CXR
 FL-049|Vietjet Air|SGN|DAD
+FL-050|Pacific Airlines|HAN|SGN
