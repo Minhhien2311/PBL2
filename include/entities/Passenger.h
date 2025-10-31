@@ -49,8 +49,6 @@ public:
     void setPhoneNumber(const std::string& phone);
     void setPassportNumber(const std::string& passport);
     void setNationality(const std::string& nation);
-
-    void overrideIdForLoad(const std::string& existingId);
     
     // --- Đọc/Ghi file ---
     // Chuyển đổi đối tượng thành 1 dòng string để lưu vào file.
