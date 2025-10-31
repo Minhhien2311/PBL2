@@ -23,7 +23,8 @@ public:
     // Không cho phép tạo đối tượng rỗng.
     Passenger() = delete;
 
-    Passenger(const std::string& name,
+    Passenger(const std::string& id,
+              const std::string& name,
               const std::string& dob,
               Gender gender,
               const std::string& phone,
@@ -48,8 +49,6 @@ public:
     void setPhoneNumber(const std::string& phone);
     void setPassportNumber(const std::string& passport);
     void setNationality(const std::string& nation);
-
-    void overrideIdForLoad(const std::string& existingId);
     
     // --- Đọc/Ghi file ---
     // Chuyển đổi đối tượng thành 1 dòng string để lưu vào file.

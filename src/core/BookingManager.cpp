@@ -64,6 +64,7 @@ bool BookingManager::saveDataToFiles(const std::string& bookingsFilePath) const 
 // <<< THAY ĐỔI: Cập nhật HashTable >>>
 Booking* BookingManager::createNewBooking( FlightManager& flightManager,
                                            const std::string& flightInstanceId,
+                                           const std::string& agentId,
                                            const std::string& passengerId,
                                            BookingClass bookingClass,
                                            int baseFare)
@@ -78,7 +79,7 @@ Booking* BookingManager::createNewBooking( FlightManager& flightManager,
     if (!instance->bookSeats(seatClassToBook, 1)) return nullptr; 
 
     std::string currentDate = utils::DateTime::formatLocal(utils::DateTime::nowUtc(), "%Y-%m-%d %H:%M:%S");
-    Booking* newBooking = new Booking(flightInstanceId, passengerId, currentDate, bookingClass, baseFare, BookingStatus::Issued);
+    Booking* newBooking = new Booking(flightInstanceId, agentId, passengerId, currentDate, bookingClass, baseFare, BookingStatus::Issued);
     
     // Thêm vào DynamicArray
     this->allBookings.push_back(newBooking);
@@ -166,4 +167,15 @@ Booking* BookingManager::findBookingById(const std::string& bookingId) {
 
 const DynamicArray<Booking*>& BookingManager::getAllBookings() const {
     return this->allBookings;
+}
+
+// Lấy danh sách booking theo Agent ID
+DynamicArray<Booking*> BookingManager::getBookingsByAgentId(const std::string& agentId) const {
+    DynamicArray<Booking*> result;
+    for (int i = 0; i < allBookings.size(); ++i) {
+        if (allBookings[i] != nullptr && allBookings[i]->getAgentId() == agentId) {
+            result.push_back(allBookings[i]);
+        }
+    }
+    return result;
 }
