@@ -363,11 +363,7 @@ void SearchBookPage::onBookClicked()
     Booking* newBk = bookingManager_->createNewBooking(
         *flightManager_,
         instanceId.toStdString(),
-<<<<<<< HEAD
-        accountManager_->getCurrentUser()->getId(),
-=======
         currentAgentId,
->>>>>>> 1bf0690d5400cbc135025e79f5a69f9bb5b91863
         passengerId.toStdString(),
         bkClass,
         fakeFare
