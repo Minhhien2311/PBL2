@@ -4,12 +4,12 @@
 #include <memory>
 #include <sstream>
 
-#include "C:/PBL2/include/core/AccountManager.h"
-#include "C:/PBL2/include/main_state.h"
-#include "C:/PBL2/include/core/BookingManager.h"
-#include "C:/PBL2/include/core/FlightManager.h"
-#include "C:/PBL2/include/entities/Booking.h"
-#include "C:/PBL2/include/DSA/DynamicArray.h" 
+#include "core/AccountManager.h"
+#include "main_state.h"
+#include "core/BookingManager.h"
+#include "core/FlightManager.h"
+#include "entities/Booking.h"
+#include "DSA/DynamicArray.h" 
 #include "ftxui/component/component.hpp"
 #include "ftxui/component/screen_interactive.hpp"
 #include "ftxui/dom/elements.hpp"

@@ -1,10 +1,10 @@
 #ifndef FLIGHT_MANAGER_H
 #define FLIGHT_MANAGER_H
 
-#include "C:/PBL2/include/DSA/DynamicArray.h"           // CTDL nền tảng để lưu trữ
-#include "C:/PBL2/include/entities/Flight.h"            // Đối tượng tuyến bay gốc
-#include "C:/PBL2/include/entities/FlightInstance.h"    // Đối tượng chuyến bay cụ thể
-#include "C:/PBL2/include/DSA/HashTable.h"
+#include "DSA/DynamicArray.h"           // CTDL nền tảng để lưu trữ
+#include "entities/Flight.h"            // Đối tượng tuyến bay gốc
+#include "entities/FlightInstance.h"    // Đối tượng chuyến bay cụ thể
+#include "DSA/HashTable.h"
 #include <string>
 
 class FlightManager {

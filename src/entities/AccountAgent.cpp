@@ -1,5 +1,5 @@
-#include "C:/PBL2/include/entities/AccountAgent.h"
-#include "C:/PBL2/include/utils/GenID.h"
+#include "entities/AccountAgent.h"
+#include "utils/GenID.h"
 #include <iostream>
 
 // Constructor: gọi base Account với role = Agent

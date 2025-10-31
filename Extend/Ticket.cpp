@@ -1,5 +1,5 @@
-#include "C:/PBL2/include/entities/Ticket.h"
-#include "C:/PBL2/include/utils/GenID.h"
+#include "entities/Ticket.h"
+#include "utils/GenID.h"
 #include <string>
 #include <iostream> 
 

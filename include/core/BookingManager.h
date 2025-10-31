@@ -5,9 +5,9 @@
 class FlightManager; 
 class FlightRule;
 
-#include "C:/PBL2/include/DSA/DynamicArray.h"
-#include "C:/PBL2/include/entities/Booking.h"
-#include "C:/PBL2/include/DSA/HashTable.h"
+#include "DSA/DynamicArray.h"
+#include "entities/Booking.h"
+#include "DSA/HashTable.h"
 #include <string>
 #include <chrono> 
 
