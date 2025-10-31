@@ -1,50 +1,50 @@
-FL-001|VN123|Vietnam Airlines|HAN|SGN
-FL-002|VJ234|Vietjet Air|SGN|HAN
-FL-003|QH345|Bamboo Airways|DAD|SGN
-FL-004|VN456|Vietnam Airlines|SGN|DAD
-FL-005|BL567|Pacific Airlines|HAN|CXR
-FL-006|VJ678|Vietjet Air|PQC|SGN
-FL-007|QH789|Bamboo Airways|SGN|HUI
-FL-008|VN890|Vietnam Airlines|CXR|HAN
-FL-009|BL901|Pacific Airlines|DAD|SGN
-FL-010|VJ012|Vietjet Air|SGN|CXR
-FL-011|VN023|Vietnam Airlines|DLI|SGN
-FL-012|QH034|Bamboo Airways|HAN|UIH
-FL-013|VJ045|Vietjet Air|SGN|THD
-FL-014|BL056|Pacific Airlines|CXR|DAD
-FL-015|VN067|Vietnam Airlines|HAN|DAD
-FL-016|QH078|Bamboo Airways|SGN|HPH
-FL-017|VJ089|Vietjet Air|HAN|SGN
-FL-018|BL090|Pacific Airlines|SGN|HAN
-FL-019|VN101|Vietnam Airlines|HAN|CXR
-FL-020|QH112|Bamboo Airways|DAD|SGN
-FL-021|VJ123|Vietjet Air|SGN|DAD
-FL-022|BL134|Pacific Airlines|HAN|PQC
-FL-023|VN145|Vietnam Airlines|SGN|HAN
-FL-024|QH156|Bamboo Airways|CXR|SGN
-FL-025|VJ167|Vietjet Air|SGN|CXR
-FL-026|BL178|Pacific Airlines|HAN|DAD
-FL-027|VN189|Vietnam Airlines|DAD|HAN
-FL-028|QH190|Bamboo Airways|SGN|VCA
-FL-029|VJ201|Vietjet Air|HAN|SGN
-FL-030|BL212|Pacific Airlines|SGN|DAD
-FL-031|VN223|Vietnam Airlines|HAN|SGN
-FL-032|QH234|Bamboo Airways|HAN|CXR
-FL-033|VJ245|Vietjet Air|SGN|HAN
-FL-034|BL256|Pacific Airlines|SGN|HUI
-FL-035|VN267|Vietnam Airlines|PQC|HAN
-FL-036|QH278|Bamboo Airways|DAD|SGN
-FL-037|VJ289|Vietjet Air|SGN|DAD
-FL-038|BL290|Pacific Airlines|HAN|SGN
-FL-039|VN301|Vietnam Airlines|SGN|HAN
-FL-040|QH312|Bamboo Airways|HAN|UIH
-FL-041|VJ323|Vietjet Air|SGN|CXR
-FL-042|BL334|Pacific Airlines|HAN|DAD
-FL-043|VN345|Vietnam Airlines|CXR|SGN
-FL-044|QH356|Bamboo Airways|HAN|DAD
-FL-045|VJ367|Vietjet Air|SGN|HAN
-FL-046|BL378|Pacific Airlines|SGN|THD
-FL-047|VN389|Vietnam Airlines|HAN|SGN
-FL-048|QH390|Bamboo Airways|DAD|CXR
-FL-049|VJ401|Vietjet Air|SGN|DAD
-FL-050|BL412|Pacific Airlines|HAN|SGN
+Vietnam Airlines-HAN-SGN|Vietnam Airlines|HAN|SGN
+Vietjet Air-SGN-HAN|Vietjet Air|SGN|HAN
+Bamboo Airways-DAD-SGN|Bamboo Airways|DAD|SGN
+Vietnam Airlines-SGN-DAD|Vietnam Airlines|SGN|DAD
+Pacific Airlines-HAN-CXR|Pacific Airlines|HAN|CXR
+Vietjet Air-PQC-SGN|Vietjet Air|PQC|SGN
+Bamboo Airways-SGN-HUI|Bamboo Airways|SGN|HUI
+Vietnam Airlines-CXR-HAN|Vietnam Airlines|CXR|HAN
+Pacific Airlines-DAD-SGN|Pacific Airlines|DAD|SGN
+Vietjet Air-SGN-CXR|Vietjet Air|SGN|CXR
+Vietnam Airlines-DLI-SGN|Vietnam Airlines|DLI|SGN
+Bamboo Airways-HAN-UIH|Bamboo Airways|HAN|UIH
+Vietjet Air-SGN-THD|Vietjet Air|SGN|THD
+Pacific Airlines-CXR-DAD|Pacific Airlines|CXR|DAD
+Vietnam Airlines-HAN-DAD|Vietnam Airlines|HAN|DAD
+Bamboo Airways-SGN-HPH|Bamboo Airways|SGN|HPH
+Vietjet Air-HAN-SGN|Vietjet Air|HAN|SGN
+Pacific Airlines-SGN-HAN|Pacific Airlines|SGN|HAN
+Vietnam Airlines-HAN-CXR|Vietnam Airlines|HAN|CXR
+Bamboo Airways-DAD-SGN|Bamboo Airways|DAD|SGN
+Vietjet Air-SGN-DAD|Vietjet Air|SGN|DAD
+Pacific Airlines-HAN-PQC|Pacific Airlines|HAN|PQC
+Vietnam Airlines-SGN-HAN|Vietnam Airlines|SGN|HAN
+Bamboo Airways-CXR-SGN|Bamboo Airways|CXR|SGN
+Vietjet Air-SGN-CXR|Vietjet Air|SGN|CXR
+Pacific Airlines-HAN-DAD|Pacific Airlines|HAN|DAD
+Vietnam Airlines-DAD-HAN|Vietnam Airlines|DAD|HAN
+Bamboo Airways-SGN-VCA|Bamboo Airways|SGN|VCA
+Vietjet Air-HAN-SGN|Vietjet Air|HAN|SGN
+Pacific Airlines-SGN-DAD|Pacific Airlines|SGN|DAD
+Vietnam Airlines-HAN-SGN|Vietnam Airlines|HAN|SGN
+Bamboo Airways-HAN-CXR|Bamboo Airways|HAN|CXR
+Vietjet Air-SGN-HAN|Vietjet Air|SGN|HAN
+Pacific Airlines-SGN-HUI|Pacific Airlines|SGN|HUI
+Vietnam Airlines-PQC-HAN|Vietnam Airlines|PQC|HAN
+Bamboo Airways-DAD-SGN|Bamboo Airways|DAD|SGN
+Vietjet Air-SGN-DAD|Vietjet Air|SGN|DAD
+Pacific Airlines-HAN-SGN|Pacific Airlines|HAN|SGN
+Vietnam Airlines-SGN-HAN|Vietnam Airlines|SGN|HAN
+Bamboo Airways-HAN-UIH|Bamboo Airways|HAN|UIH
+Vietjet Air-SGN-CXR|Vietjet Air|SGN|CXR
+Pacific Airlines-HAN-DAD|Pacific Airlines|HAN|DAD
+Vietnam Airlines-CXR-SGN|Vietnam Airlines|CXR|SGN
+Bamboo Airways-HAN-DAD|Bamboo Airways|HAN|DAD
+Vietjet Air-SGN-HAN|Vietjet Air|SGN|HAN
+Pacific Airlines-SGN-THD|Pacific Airlines|SGN|THD
+Vietnam Airlines-HAN-SGN|Vietnam Airlines|HAN|SGN
+Bamboo Airways-DAD-CXR|Bamboo Airways|DAD|CXR
+Vietjet Air-SGN-DAD|Vietjet Air|SGN|DAD
+Pacific Airlines-HAN-SGN|Pacific Airlines|HAN|SGN

@@ -130,7 +130,6 @@ private:
 class AddFlightScreen {
 public:
     // Trạng thái (dữ liệu) của màn hình này
-    std::string flightID;
     std::string airline;
     std::string departure;
     std::string arrival;
@@ -142,21 +141,19 @@ public:
 
     AddFlightScreen(FlightManager& flight_manager) : flight_manager(flight_manager){
         // Tạo các component con
-        Component input_flightID = Input(&flightID, "(VD:VN123)");
-        Component input_airline = Input(&airline, "(VD: Vietnam Airline)");
+        Component input_airline = Input(&airline, "(VD: Vietnam Airlines)");
         Component input_departure = Input(&departure, "(VD: HAN)");
         Component input_arrival = Input(&arrival, "(VD: DAN)");
 
         auto them_button = Button("Thêm ", [&] {
             // Logic khi nhấn nút "Thêm"
-            bool new_flight = flight_manager.createNewFlight(flightID,airline,departure,arrival);
+            bool new_flight = flight_manager.createNewFlight(airline, departure, arrival);
             if (new_flight){
-                if (flight_manager.saveFlightsToFiles("C:/PBL2/data/flights.txt") == 1) 
-                    thong_bao = "Thêm thành công tuyến bay " + flightID + "|" + departure + " - " + arrival +"!";
+                if (flight_manager.saveFlightsToFiles("data/flights.txt") == 1) 
+                    thong_bao = "Thêm thành công tuyến bay " + airline + "-" + departure + "-" + arrival +"!";
                 else
                     thong_bao = "Xảy ra lỗi trong quá trình thêm tuyến bay!";
                 // Xóa dữ liệu cũ
-                flightID = "";
                 airline = "";
                 departure = "";
                 arrival = "";
@@ -167,7 +164,6 @@ public:
         });
 
         container = Container::Vertical({
-            input_flightID,
             input_airline,
             input_departure,
             input_arrival,
@@ -180,13 +176,12 @@ public:
             text("THÊM TUYẾN BAY MỚI") | bold | center | color(Color::Green),
             separator(),
             vbox({
-                hbox({ text("Mã tuyến bay:  "), container->ChildAt(0)->Render() }) | borderLight,
-                hbox({ text("Hãng bay:      "), container->ChildAt(1)->Render() }) | borderLight,
-                hbox({ text("Sân bay đi:    "), container->ChildAt(2)->Render() }) | borderLight,
-                hbox({ text("Sân bay đến:   "), container->ChildAt(3)->Render() }) | borderLight,
+                hbox({ text("Hãng bay:      "), container->ChildAt(0)->Render() }) | borderLight,
+                hbox({ text("Sân bay đi:    "), container->ChildAt(1)->Render() }) | borderLight,
+                hbox({ text("Sân bay đến:   "), container->ChildAt(2)->Render() }) | borderLight,
             }) | size(WIDTH, EQUAL, 60),
             separator(),
-            container->ChildAt(4)->Render() | center,
+            container->ChildAt(3)->Render() | center,
             separator(),
             text(thong_bao) | center | 
                 (thong_bao.find("thành công") != std::string::npos ? color(Color::Green) : color(Color::Red))
@@ -323,8 +318,8 @@ private:
             std::vector<std::string> cols;
             while (std::getline(ss, col, '|'))
                 cols.push_back(col);
-            if (cols.size() < 12)
-                cols.resize(12, "");
+            if (cols.size() < 13)
+                cols.resize(13, "");
             flight_instance_data.push_back(cols);
         }
     }
@@ -335,6 +330,7 @@ class AddFlightInstanceScreen {
 public:
     // Trạng thái (dữ liệu) của màn hình này
     std::string flightID;
+    std::string flightNumber;
     std::string departureDate;
     std::string departureTime;
     std::string arrivalDate;
@@ -351,11 +347,12 @@ public:
 
     AddFlightInstanceScreen(FlightManager& flight_manager) : flight_manager(flight_manager){
         // Tạo các component con
-        Component input_flightID = Input(&flightID, "(VD: FI-001)");
+        Component input_flightID = Input(&flightID, "(VD: Vietnam Airlines-HAN-SGN)");
+        Component input_flightNumber = Input(&flightNumber, "(VD: VN123)");
         Component input_departureDate = Input(&departureDate, "(DD/MM/YYYY)");
-        Component input_departureTime = Input(&departureTime, "(TT/MM)");
+        Component input_departureTime = Input(&departureTime, "(HH:MM)");
         Component input_arrivalDate = Input(&arrivalDate, "(DD/MM/YYYY)");
-        Component input_arrivalTime = Input(&arrivalTime, "(TT/MM)");
+        Component input_arrivalTime = Input(&arrivalTime, "(HH:MM)");
         Component input_economyTotal = Input(&economyTotal, "(VD: 120)");
         Component input_businessTotal = Input(&businessTotal, "(VD: 40)");
         Component input_fareEconomy = Input(&fareEconomy, "(VD: 1500000)");
@@ -367,6 +364,7 @@ public:
                 thong_bao = "Không được để dữ liệu trống!";
             else{
                 bool new_flight_instance = flight_manager.createNewInstance(flightID,
+                                                                        flightNumber,
                                                                         departureDate,
                                                                         departureTime,
                                                                         arrivalDate,
@@ -377,16 +375,17 @@ public:
                                                                         std::stoi(fareBusiness));
 
                 if (new_flight_instance){
-                    if (flight_manager.saveInstancesToFiles("C:/PBL2/data/flight_instances.txt"))
-                        thong_bao = "Thêm thành công chuyến bay " + flightID + " !";
+                    if (flight_manager.saveInstancesToFiles("data/flight_instances.txt"))
+                        thong_bao = "Thêm thành công chuyến bay " + flightNumber + " !";
                     else 
                         thong_bao = "Xảy ra lỗi trong quá trình thêm chuyến bay!";
                     // Xóa dữ liệu cũ
                     flightID = "";
-                    departureDate,
-                    departureTime,
-                    arrivalDate,
-                    arrivalTime,
+                    flightNumber = "";
+                    departureDate = "";
+                    departureTime = "";
+                    arrivalDate = "";
+                    arrivalTime = "";
                     economyTotal = "";
                     businessTotal = "";
                     fareEconomy = "";
@@ -400,6 +399,7 @@ public:
 
         container = Container::Vertical({
             input_flightID,
+            input_flightNumber,
             input_departureDate,
             input_departureTime,
             input_arrivalDate,
@@ -419,17 +419,18 @@ public:
             separator(),
             vbox({
                 hbox({ text("ID tuyến bay:        "), container->ChildAt(0)->Render() }) | borderLight,
-                hbox({ text("Ngày khởi hành:      "), container->ChildAt(1)->Render() }) | borderLight,
-                hbox({ text("Giờ khởi hành:       "), container->ChildAt(2)->Render() }) | borderLight,
-                hbox({ text("Ngày hạ cánh:        "), container->ChildAt(3)->Render() }) | borderLight,
-                hbox({ text("Giờ hạ cánh:         "), container->ChildAt(4)->Render() }) | borderLight,
-                hbox({ text("Ghế phổ thông:       "), container->ChildAt(5)->Render() }) | borderLight,
-                hbox({ text("Ghế thương gia:      "), container->ChildAt(6)->Render() }) | borderLight,
-                hbox({ text("Giá vé phổ thông:    "), container->ChildAt(7)->Render() }) | borderLight,
-                hbox({ text("Giá vé thương gia:   "), container->ChildAt(8)->Render() }) | borderLight,
+                hbox({ text("Mã chuyến bay:       "), container->ChildAt(1)->Render() }) | borderLight,
+                hbox({ text("Ngày khởi hành:      "), container->ChildAt(2)->Render() }) | borderLight,
+                hbox({ text("Giờ khởi hành:       "), container->ChildAt(3)->Render() }) | borderLight,
+                hbox({ text("Ngày hạ cánh:        "), container->ChildAt(4)->Render() }) | borderLight,
+                hbox({ text("Giờ hạ cánh:         "), container->ChildAt(5)->Render() }) | borderLight,
+                hbox({ text("Ghế phổ thông:       "), container->ChildAt(6)->Render() }) | borderLight,
+                hbox({ text("Ghế thương gia:      "), container->ChildAt(7)->Render() }) | borderLight,
+                hbox({ text("Giá vé phổ thông:    "), container->ChildAt(8)->Render() }) | borderLight,
+                hbox({ text("Giá vé thương gia:   "), container->ChildAt(9)->Render() }) | borderLight,
             }) | size(WIDTH, EQUAL, 80),
             separator(),
-            container->ChildAt(9)->Render() | center,
+            container->ChildAt(10)->Render() | center,
             separator(),
             text(thong_bao) | center | 
                 (thong_bao.find("thành công") != std::string::npos ? color(Color::Green) : color(Color::Red))

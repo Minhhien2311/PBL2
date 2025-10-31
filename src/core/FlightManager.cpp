@@ -72,17 +72,20 @@ void FlightManager::buildInstanceIdTable() {
 // --- Chức năng Tạo mới (Create) ---
 
 // <<< THAY ĐỔI: Cập nhật HashTable >>>
-bool FlightManager::createNewFlight(const std::string& number,
-                                     const std::string& airline,
+bool FlightManager::createNewFlight(const std::string& airline,
                                      const std::string& departureIATA,
                                      const std::string& arrivalIATA) {
-    if (number.empty() || airline.empty() || departureIATA.empty() || arrivalIATA.empty()) return false;
-    // Kiểm tra trùng lặp (có thể dùng bảng băm theo number sau này, tạm thời vẫn lặp)
+    if (airline.empty() || departureIATA.empty() || arrivalIATA.empty()) return false;
+    
+    // Tạo ID dự kiến để kiểm tra trùng lặp
+    std::string expectedId = airline + "-" + departureIATA + "-" + arrivalIATA;
+    
+    // Kiểm tra trùng lặp dựa trên ID
     for (size_t i = 0; i < allFlights.size(); ++i) {
-        if (allFlights[i]->getFlightNumber() == number) return false;
+        if (allFlights[i]->getFlightId() == expectedId) return false;
     }
 
-    Flight* newFlight = new Flight(number, airline, departureIATA, arrivalIATA);
+    Flight* newFlight = new Flight(airline, departureIATA, arrivalIATA);
     this->allFlights.push_back(newFlight);
     
     // <<< THÊM MỚI: Cập nhật bảng băm ID >>>
@@ -92,6 +95,7 @@ bool FlightManager::createNewFlight(const std::string& number,
 
 // <<< THAY ĐỔI: Cập nhật HashTable >>>
 bool FlightManager::createNewInstance(const std::string& flightId,
+                                      const std::string& flightNumber,
                                       const std::string& departureDate,
                                       const std::string& departureTime,
                                       const std::string& arrivalDate,
@@ -103,10 +107,10 @@ bool FlightManager::createNewInstance(const std::string& flightId,
     // Kiểm tra Flight gốc bằng HashTable
     if (findFlightById(flightId) == nullptr) return false; 
     if (totalEconomySeats <= 0 || totalBusinessSeats <= 0 || fareEconomy <= 0.0 || fareBusiness <= 0.0) return false;
-    if (flightId.empty() || departureDate.empty() || departureTime.empty() || arrivalDate.empty() || arrivalTime.empty()) return false;
+    if (flightId.empty() || flightNumber.empty() || departureDate.empty() || departureTime.empty() || arrivalDate.empty() || arrivalTime.empty()) return false;
 
     FlightInstance* newInstance = new FlightInstance(
-        flightId, departureDate, departureTime, arrivalDate, arrivalTime, 
+        flightId, flightNumber, departureDate, departureTime, arrivalDate, arrivalTime, 
         totalEconomySeats, totalBusinessSeats, fareEconomy, fareBusiness
     );
     this->allInstances.push_back(newInstance);

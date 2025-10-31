@@ -1,16 +1,13 @@
 #include "entities/Flight.h"
-#include "utils/GenID.h"
 
-Flight::Flight( const std::string& number,
-                const std::string& airline,
+Flight::Flight( const std::string& airline,
                 const std::string& departureIATA,
                 const std::string& arrivalIATA)
-    : flightId(IdGenerator::generateFlightId()), flightNumber(number), airline(airline), departureAirport(departureIATA), arrivalAirport(arrivalIATA)
+    : flightId(airline + "-" + departureIATA + "-" + arrivalIATA), airline(airline), departureAirport(departureIATA), arrivalAirport(arrivalIATA)
 {}
 
 // Getter (trả const-ref/int để tránh copy)
 const std::string& Flight::getFlightId() const { return flightId; }
-const std::string& Flight::getFlightNumber() const { return flightNumber; }
 const std::string& Flight::getAirline() const { return airline; }
 const std::string& Flight::getDepartureAirport() const { return departureAirport; }
 const std::string& Flight::getArrivalAirport() const { return arrivalAirport; }
@@ -20,7 +17,6 @@ const std::string& Flight::getArrivalAirport() const { return arrivalAirport; }
 // Chuyển đổi đối tượng thành một dòng string, ngăn cách bởi dấu '|'.
 std::string Flight::toRecordLine() const {
     return this->flightId + "|" +
-           this->flightNumber + "|" +
            this->airline + "|" +
            this->departureAirport + "|" +
            this->arrivalAirport;
@@ -36,10 +32,6 @@ Flight Flight::fromRecordLine(const std::string& line) {
     start = end + 1;
     end = line.find('|', start);
 
-    std::string number = line.substr(start, end - start);
-    start = end + 1;
-    end = line.find('|', start);
-
     std::string airline = line.substr(start, end - start);
     start = end + 1;
     end = line.find('|', start);
@@ -52,10 +44,10 @@ Flight Flight::fromRecordLine(const std::string& line) {
 
     // Kỹ thuật "Tạo tạm rồi sửa lỗi":
     // 1. Dùng constructor public để tạo một đối tượng Flight.
-    //    Lúc này, nó sẽ có một ID tạm thời được sinh tự động.
-    Flight flight(number, airline, departure, arrival);
+    //    Lúc này, nó sẽ có một ID được sinh tự động.
+    Flight flight(airline, departure, arrival);
 
-    // 2. Dùng hàm helper để ghi đè ID tạm thời bằng ID chính xác đã đọc từ file.
+    // 2. Dùng hàm helper để ghi đè ID tự sinh bằng ID chính xác đã đọc từ file.
     flight.overrideIdForLoad(id);
 
     return flight;
