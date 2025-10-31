@@ -7,6 +7,7 @@
 #include "entities/Booking.h"
 #include "entities/Account.h"
 #include "DSA/DynamicArray.h" // Cần để nhận kết quả
+#include "BookingDetailsDialog.h" // Dialog xem chi tiết
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -232,8 +233,8 @@ void AgentBookingsPage::setupUi()
         "border-radius:10px; height:40px; padding:0 36px; font-weight:600; }"
         "QPushButton:hover { background:#466a9a; }";
 
-    auto *viewBtn = new QPushButton("Xem chi tiết vé");
-    viewBtn->setStyleSheet(blueBtn);
+    viewDetailsBtn_ = new QPushButton("Xem chi tiết vé");
+    viewDetailsBtn_->setStyleSheet(blueBtn);
 
     cancelBookingBtn_ = new QPushButton("Hủy vé");
     cancelBookingBtn_->setStyleSheet(blueBtn);
@@ -242,7 +243,7 @@ void AgentBookingsPage::setupUi()
     changeBtn->setStyleSheet(blueBtn);
 
     bottomLayout->addStretch();
-    bottomLayout->addWidget(viewBtn);
+    bottomLayout->addWidget(viewDetailsBtn_);
     bottomLayout->addWidget(cancelBookingBtn_);
     bottomLayout->addWidget(changeBtn);
     bottomLayout->addStretch();
@@ -266,6 +267,7 @@ void AgentBookingsPage::setupConnections()
     connect(searchButton_, &QPushButton::clicked, this, &AgentBookingsPage::onSearchClicked);
     connect(refreshButton_, &QPushButton::clicked, this, &AgentBookingsPage::refreshTable);
     connect(cancelBookingBtn_, &QPushButton::clicked, this, &AgentBookingsPage::onCancelBookingClicked);
+    connect(viewDetailsBtn_, &QPushButton::clicked, this, &AgentBookingsPage::onViewDetailsClicked);
 }
 
 // Hàm này tải (hoặc làm mới) TOÀN BỘ vé của Agent
@@ -313,19 +315,70 @@ void AgentBookingsPage::refreshTable()
 
 void AgentBookingsPage::onSearchClicked()
 {
-    // --- [CHỖ NỐI API] ---
-    // (Lưu ý: Core 'BookingManager.h' của bạn chưa có hàm tìm kiếm
-    //  theo ID và Ngày. Bạn cần bổ sung hàm này vào Core)
-    
+    // Lấy thông tin tìm kiếm
     std::string bookingId = bookingIdSearchEdit_->text().toStdString();
     std::string date = dateSearchEdit_->date().toString("dd/MM/yyyy").toStdString();
-
-    QMessageBox::information(this, "WIP", 
-        "Chức năng tìm kiếm đang được phát triển. Đang hiển thị tất cả vé.");
     
-    // Tạm thời, nút tìm kiếm cũng làm mới toàn bộ bảng
-    refreshTable();
-    // --- [HẾT CHỖ NỐI API] ---
+    // Nếu không có gì để tìm, hiển thị tất cả
+    if (bookingId.empty() && dateSearchEdit_->date() == QDate::currentDate()) {
+        refreshTable();
+        return;
+    }
+    
+    // 1. Lấy ID của Agent đang đăng nhập
+    Account* currentUser = accountManager_->getCurrentUser();
+    if (!currentUser) {
+        QMessageBox::warning(this, "Lỗi", "Không thể xác định người dùng. Vui lòng đăng nhập lại.");
+        return;
+    }
+    std::string currentAgentId = currentUser->getId();
+    
+    // 2. Lấy toàn bộ booking của Agent
+    DynamicArray<Booking*> agentBookings = bookingManager_->getBookingsByAgentId(currentAgentId);
+    
+    // 3. Lọc theo điều kiện tìm kiếm
+    model_->removeRows(0, model_->rowCount());
+    
+    for (int i = 0; i < agentBookings.size(); ++i) {
+        Booking* booking = agentBookings[i];
+        if (!booking) continue;
+        
+        // Lọc theo Booking ID nếu có nhập
+        if (!bookingId.empty()) {
+            if (booking->getBookingId().find(bookingId) == std::string::npos) {
+                continue; // Không khớp, bỏ qua
+            }
+        }
+        
+        // Lọc theo ngày nếu không phải ngày hiện tại (mặc định)
+        if (dateSearchEdit_->date() != QDate::currentDate()) {
+            std::string bookingDate = booking->getBookingDate();
+            // bookingDate format: "DD/MM/YYYY HH:MM:SS" hoặc "YYYY-MM-DD HH:MM:SS"
+            if (bookingDate.find(date) == std::string::npos) {
+                continue; // Không khớp, bỏ qua
+            }
+        }
+        
+        // Nếu qua được tất cả bộ lọc, thêm vào bảng
+        QList<QStandardItem *> rowItems;
+        rowItems << new QStandardItem(QString::fromStdString(booking->getBookingId()));
+        rowItems << new QStandardItem(QString::fromStdString(booking->getFlightInstanceId()));
+        rowItems << new QStandardItem(QString::fromStdString(booking->getPassengerId()));
+        rowItems << new QStandardItem(QString::fromStdString(booking->getBookingDate()));
+
+        // Hạng vé
+        QString classStr = (booking->getClass() == BookingClass::Economy) 
+                          ? "Hạng phổ thông" : "Thương gia";
+        rowItems << new QStandardItem(classStr);
+        rowItems << new QStandardItem(QString::number(booking->getBaseFare()));
+
+        // Trạng thái
+        QString statusStr = (booking->getStatus() == BookingStatus::Issued) 
+                           ? "Đang giữ chỗ" : "Đã hủy";
+        rowItems << new QStandardItem(statusStr);
+
+        model_->appendRow(rowItems);
+    }
 }
 
 void AgentBookingsPage::onCancelBookingClicked()
@@ -373,4 +426,30 @@ void AgentBookingsPage::onCancelBookingClicked()
             "Hủy vé thất bại. (Có thể đã quá sát giờ bay, hoặc vé không tồn tại)");
     }
     // --- [HẾT CHỖ NỐI API] ---
+}
+
+void AgentBookingsPage::onViewDetailsClicked()
+{
+    // 1. Lấy hàng đang chọn
+    QModelIndexList selected = tableView_->selectionModel()->selectedRows();
+    if (selected.isEmpty()) {
+        QMessageBox::warning(this, "Lỗi", "Vui lòng chọn một vé để xem chi tiết.");
+        return;
+    }
+    
+    // 2. Lấy Booking ID từ cột đầu tiên
+    QModelIndex idIndex = selected.first().siblingAtColumn(0);
+    QString bookingId = model_->data(idIndex).toString();
+    
+    // 3. Tìm booking từ BookingManager
+    Booking* booking = bookingManager_->findBookingById(bookingId.toStdString());
+    
+    if (!booking) {
+        QMessageBox::warning(this, "Lỗi", "Không tìm thấy thông tin đặt chỗ.");
+        return;
+    }
+    
+    // 4. Hiển thị dialog chi tiết
+    BookingDetailsDialog dialog(booking, flightManager_, accountManager_, this);
+    dialog.exec();
 }
