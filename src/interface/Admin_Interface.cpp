@@ -43,9 +43,7 @@ public:
 
             // --- Tiêu đề bảng ---
             auto header = hbox({
-                text("ID tuyến bay") | bold | center | size(WIDTH, EQUAL, 15),
-                separator(),
-                text("Mã tuyến bay") | bold | center | size(WIDTH, EQUAL, 15),
+                text("ID tuyến bay") | bold | center | size(WIDTH, EQUAL, 35),
                 separator(),
                 text("Hãng bay") | bold | center | size(WIDTH, EQUAL, 25),
                 separator(),
@@ -60,11 +58,10 @@ public:
             for (int i = scroll_position; i < end_index; i++) {
                 const auto& f = flight_data[i];
                 rows.push_back(hbox({
-                    text(f[0]) | center | size(WIDTH, EQUAL, 15),
-                    text(f[1]) | center | size(WIDTH, EQUAL, 18),
-                    text(f[2]) | center | size(WIDTH, EQUAL, 25),
-                    text(f[3]) | center | size(WIDTH, EQUAL, 11),
-                    text(f[4]) | center | size(WIDTH, EQUAL, 10),
+                    text(f[0]) | center | size(WIDTH, EQUAL, 35),
+                    text(f[1]) | center | size(WIDTH, EQUAL, 25),
+                    text(f[2]) | center | size(WIDTH, EQUAL, 11),
+                    text(f[3]) | center | size(WIDTH, EQUAL, 10),
                 }));
             }
 
@@ -119,8 +116,8 @@ private:
             std::vector<std::string> cols;
             while (std::getline(ss, col, '|'))
                 cols.push_back(col);
-            if (cols.size() < 5)
-                cols.resize(5, "");
+            if (cols.size() < 4)
+                cols.resize(4, "");
             flight_data.push_back(cols);
         }
     }
