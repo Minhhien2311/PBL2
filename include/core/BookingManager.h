@@ -49,6 +49,9 @@ public:
     // --- Lấy dữ liệu  ---
     const DynamicArray<Booking*>& getAllBookings() const;
 
+    // Lấy danh sách booking theo Agent ID
+    DynamicArray<Booking*> getBookingsByAgentId(const std::string& agentId) const;
+
     // --- Lưu trữ  ---
     bool saveDataToFiles(const std::string& bookingsFilePath) const; 
 };

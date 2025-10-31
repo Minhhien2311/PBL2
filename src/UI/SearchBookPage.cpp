@@ -349,21 +349,25 @@ void SearchBookPage::onBookClicked()
                             ? BookingClass::Economy
                             : BookingClass::Business;
 
-    // 3. *** CHỖ NỐI API THẬT ***
-    // Bạn nên viết 1 hàm trong BookingManager kiểu:
-    // Booking* createBookingFromAgent(FlightManager& fm,
-    //                                 const std::string& instanceId,
-    //                                 const std::string& passengerId,
-    //                                 BookingClass cls,
-    //                                 int baseFare,
-    //                                 Account* currentAgent);
-    // Rồi tại đây gọi nó.
+    // 3. Lấy ID của agent hiện tại
+    Account* currentUser = accountManager_->getCurrentUser();
+    if (!currentUser) {
+        QMessageBox::warning(this, "Lỗi", "Không thể xác định người dùng. Vui lòng đăng nhập lại.");
+        return;
+    }
+    std::string currentAgentId = currentUser->getId();
+    
+    // 4. *** CHỖ NỐI API THẬT ***
     int fakeFare = 1500000; // tạm
 
     Booking* newBk = bookingManager_->createNewBooking(
         *flightManager_,
         instanceId.toStdString(),
+<<<<<<< HEAD
         accountManager_->getCurrentUser()->getId(),
+=======
+        currentAgentId,
+>>>>>>> 1bf0690d5400cbc135025e79f5a69f9bb5b91863
         passengerId.toStdString(),
         bkClass,
         fakeFare
