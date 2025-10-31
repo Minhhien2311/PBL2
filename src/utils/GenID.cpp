@@ -11,7 +11,6 @@ namespace IdGenerator {
 
     static int adminCounter = 0;
     static int agentCounter = 0;
-    static int flightCounter = 0;
     static int instanceCounter = 0;
     static int passengerCounter = 0;
     static int bookingCounter = 0;
@@ -41,8 +40,6 @@ namespace IdGenerator {
                 adminCounter = value;
             } else if (key == "AGENT_COUNTER") {
                 agentCounter = value;
-            } else if (key == "FLIGHT_COUNTER") {
-                flightCounter = value;
             } else if (key == "INSTANCE_COUNTER") {
                 instanceCounter = value;
             } else if (key == "PASSENGER_COUNTER") {
@@ -64,7 +61,6 @@ namespace IdGenerator {
 
         file << "ADMIN_COUNTER:" << adminCounter << "\n";
         file << "AGENT_COUNTER:" << agentCounter << "\n";
-        file << "FLIGHT_COUNTER:" << flightCounter << "\n";
         file << "INSTANCE_COUNTER:" << instanceCounter << "\n";
         file << "PASSENGER_COUNTER:" << passengerCounter << "\n";
         file << "BOOKING_COUNTER:" << bookingCounter << "\n";
@@ -95,17 +91,6 @@ namespace IdGenerator {
         ss << "AGT-" 
            << std::setw(3) << std::setfill('0') << agentCounter;
            
-        return ss.str();
-    }
-
-    // Biến đếm tĩnh, chỉ tồn tại trong file này và dành riêng cho Flight
-    std::string generateFlightId() {
-        ++flightCounter;
-        
-        // Dùng stringstream hoặc std::format để tạo định dạng "FL-001"
-        // (Hoặc cách thủ công bằng std::to_string nếu bạn muốn)
-        std::stringstream ss;
-        ss << "FL-" << std::setw(3) << std::setfill('0') << flightCounter;
         return ss.str();
     }
 

@@ -64,6 +64,7 @@ bool BookingManager::saveDataToFiles(const std::string& bookingsFilePath) const 
 // <<< THAY ĐỔI: Cập nhật HashTable >>>
 Booking* BookingManager::createNewBooking( FlightManager& flightManager,
                                            const std::string& flightInstanceId,
+                                           const std::string& agentId,
                                            const std::string& passengerId,
                                            BookingClass bookingClass,
                                            int baseFare)
@@ -78,7 +79,7 @@ Booking* BookingManager::createNewBooking( FlightManager& flightManager,
     if (!instance->bookSeats(seatClassToBook, 1)) return nullptr; 
 
     std::string currentDate = utils::DateTime::formatLocal(utils::DateTime::nowUtc(), "%Y-%m-%d %H:%M:%S");
-    Booking* newBooking = new Booking(flightInstanceId, passengerId, currentDate, bookingClass, baseFare, BookingStatus::Issued);
+    Booking* newBooking = new Booking(flightInstanceId, agentId, passengerId, currentDate, bookingClass, baseFare, BookingStatus::Issued);
     
     // Thêm vào DynamicArray
     this->allBookings.push_back(newBooking);
