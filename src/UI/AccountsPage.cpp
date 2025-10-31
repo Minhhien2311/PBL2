@@ -2,6 +2,8 @@
 
 // <--- Sửa lỗi: Include các file cần thiết
 #include "core/AccountManager.h"
+#include "entities/Account.h"
+#include "entities/AccountAdmin.h"
 #include <QGridLayout>
 #include <QLabel>
 #include <QLineEdit>
@@ -118,27 +120,25 @@ AccountsPage::AccountsPage(AccountManager* accManager, QWidget* parent)
         if (ro) { // Nếu vừa chuyển sang chế độ SỬA
             btnUpdate_->setText("Lưu thay đổi");
         } else { // Nếu vừa bấm LƯU
-            // --- [CHỖ NỐI API] ---
-            // (Lưu ý: Bạn cần thêm hàm updateProfile vào AccountManager.h/.cpp)
-            // accountManager_->updateAgentProfile(
-            //     idEdit_->text().toStdString(),
-            //     fullnameEdit_->text().toStdString(),
-            //     phoneEdit_->text().toStdString(),
-            //     emailEdit_->text().toStdString()
-            // );
-            // --- [HẾT CHỖ NỐI API] ---
+            // Lưu thông tin đã cập nhật
+            accountManager_->updateAgentProfile(
+                idEdit_->text().toStdString(),
+                fullnameEdit_->text().toStdString(),
+                phoneEdit_->text().toStdString(),
+                emailEdit_->text().toStdString()
+            );
             
             btnUpdate_->setText("Cập nhật thông tin");
             QMessageBox::information(this, "Thành công", "Đã cập nhật thông tin.");
         }
     });
     
-    // (Chỗ nối API cho btnPwd)
+    // Nút "Đổi mật khẩu" không có chức năng theo yêu cầu
+    // (Chỗ nối API cho btnPwd - để trống)
 }
 
 void AccountsPage::loadAccountData()
 {
-    // --- [CHỖ NỐI API] ---
     Account* user = accountManager_->getCurrentUser();
     if (user) {
         idEdit_->setText(QString::fromStdString(user->getId()));
@@ -154,6 +154,5 @@ void AccountsPage::loadAccountData()
             roleEdit_->setText("Đại lý");
         }
     }
-    // --- [HẾT CHỖ NỐI API] ---
 }
 
