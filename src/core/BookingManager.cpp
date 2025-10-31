@@ -168,3 +168,14 @@ Booking* BookingManager::findBookingById(const std::string& bookingId) {
 const DynamicArray<Booking*>& BookingManager::getAllBookings() const {
     return this->allBookings;
 }
+
+// Lấy danh sách booking theo Agent ID
+DynamicArray<Booking*> BookingManager::getBookingsByAgentId(const std::string& agentId) const {
+    DynamicArray<Booking*> result;
+    for (int i = 0; i < allBookings.size(); ++i) {
+        if (allBookings[i] != nullptr && allBookings[i]->getAgentId() == agentId) {
+            result.push_back(allBookings[i]);
+        }
+    }
+    return result;
+}
