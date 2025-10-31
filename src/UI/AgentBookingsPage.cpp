@@ -271,7 +271,6 @@ void AgentBookingsPage::setupConnections()
 // Hàm này tải (hoặc làm mới) TOÀN BỘ vé của Agent
 void AgentBookingsPage::refreshTable()
 {
-    // --- [CHỖ NỐI API] ---
     model_->removeRows(0, model_->rowCount());
 
     // 1. Lấy ID của Agent đang đăng nhập
@@ -282,42 +281,34 @@ void AgentBookingsPage::refreshTable()
     }
     std::string currentAgentId = currentUser->getId();
 
-    // 2. Lấy TẤT CẢ booking từ manager
-    const DynamicArray<Booking*>& allBookings = bookingManager_->getAllBookings();
+    // 2. Lấy danh sách booking của Agent này
+    DynamicArray<Booking*> agentBookings = bookingManager_->getBookingsByAgentId(currentAgentId);
 
-    // 3. Lọc và hiển thị chỉ các booking của Agent này
-    // (Lưu ý: Core của bạn chưa có hàm getBookingsByAgentId, 
-    //  nên chúng ta phải lọc thủ công ở đây)
-    for (int i = 0; i < allBookings.size(); ++i) {
-        Booking* booking = allBookings[i];
+    // 3. Hiển thị các booking
+    for (int i = 0; i < agentBookings.size(); ++i) {
+        Booking* booking = agentBookings[i];
         
-        // --- Logic lọc (WIP) ---
-        // (Booking.h của bạn chưa có trường agentId,
-        //  chúng ta giả định passengerId chính là agentId hoặc 
-        //  bạn sẽ thêm trường agentId vào Booking.h)
-        //
-        // TẠM THỜI: Hiển thị tất cả
-        // if (booking && booking->getAgentId() == currentAgentId) { ... }
-        
-        if (booking) { // Tạm thời hiển thị tất cả
+        if (booking) {
             QList<QStandardItem *> rowItems;
             rowItems << new QStandardItem(QString::fromStdString(booking->getBookingId()));
             rowItems << new QStandardItem(QString::fromStdString(booking->getFlightInstanceId()));
             rowItems << new QStandardItem(QString::fromStdString(booking->getPassengerId()));
             rowItems << new QStandardItem(QString::fromStdString(booking->getBookingDate()));
 
-            // 5 Hạng vé (chưa triển khai -> để trống)
-            rowItems << new QStandardItem(QString("Hạng phổ thông"));   // hoặc "Phổ thông"
+            // Hạng vé
+            QString classStr = (booking->getClass() == BookingClass::Economy) 
+                              ? "Hạng phổ thông" : "Thương gia";
+            rowItems << new QStandardItem(classStr);
             rowItems << new QStandardItem(QString::number(booking->getBaseFare()));
 
-            // Cần sửa lỗi kiểu enum không thành string được
-
-            rowItems << new QStandardItem(QString("Đang giữ chỗ"));   // hoặc "Đang giữ chỗ"
+            // Trạng thái
+            QString statusStr = (booking->getStatus() == BookingStatus::Issued) 
+                               ? "Đang giữ chỗ" : "Đã hủy";
+            rowItems << new QStandardItem(statusStr);
 
             model_->appendRow(rowItems);
         }
     }
-    // --- [HẾT CHỖ NỐI API] ---
 }
 
 void AgentBookingsPage::onSearchClicked()

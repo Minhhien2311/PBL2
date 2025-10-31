@@ -216,9 +216,9 @@ void RoutesPage::setupUi()
 
 void RoutesPage::setupModel()
 {
-    model_ = new QStandardItemModel(0, 5, this);
+    model_ = new QStandardItemModel(0, 4, this);
     model_->setHorizontalHeaderLabels({
-        "ID tuyến (FlightId)", "Số hiệu (FlightNumber)", "Hãng hàng không", "Điểm đi (IATA)", "Điểm đến (IATA)"
+        "ID tuyến (FlightId)", "Hãng hàng không", "Điểm đi (IATA)", "Điểm đến (IATA)"
     });
     tableView_->setModel(model_);
 }
@@ -250,7 +250,6 @@ void RoutesPage::refreshTable()
         if (route) {
             QList<QStandardItem *> rowItems;
             rowItems << new QStandardItem(QString::fromStdString(route->getFlightId()))
-                   << new QStandardItem(QString::fromStdString(route->getFlightNumber()))
                    << new QStandardItem(QString::fromStdString(route->getAirline()))
                    << new QStandardItem(QString::fromStdString(route->getDepartureAirport()))
                    << new QStandardItem(QString::fromStdString(route->getArrivalAirport()));
