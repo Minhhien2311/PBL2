@@ -7,13 +7,14 @@ class QTableView;
 class QStandardItemModel;
 class QLabel;
 class AccountManager;
+class ReportManager;
 
 class DashboardPage : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit DashboardPage(AccountManager* accManager, QWidget *parent = nullptr);
+    explicit DashboardPage(AccountManager* accManager, ReportManager* reportManager, QWidget *parent = nullptr);
 
 public slots:
     void refreshData();
@@ -23,6 +24,7 @@ private:
     void setupModel();
 
     AccountManager* accountManager_;
+    ReportManager* reportManager_;
     
     QWidget* createStatCard(const QString& title, const QString& defaultValue, QLabel*& outValueLabel);
 
