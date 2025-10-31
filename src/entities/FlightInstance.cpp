@@ -1,13 +1,14 @@
 #include "entities/FlightInstance.h"
-#include "utils/GenID.h"          // Cần để gọi hàm tạo ID
-#include <iostream>                             // Cần cho hàm displayInfo
+#include "utils/DateTime.h"         // Cần để chuyển đổi ngày
+#include <iostream>                 // Cần cho hàm displayInfo
 
 /* --- Constructor ---
     Chỉ cần nhận vào thông tin gốc, sau đó tự động:
-    1. Sinh ID duy nhất.
+    1. Sinh ID duy nhất từ flightNumber-YYYYMMDD.
     2. Khởi tạo số ghế trống ban đầu bằng tổng số ghế.
 */
 FlightInstance::FlightInstance(const std::string& flightId,
+                               const std::string& flightNumber,
                                const std::string& departureDate,
                                const std::string& departureTime,
                                const std::string& arrivalDate,
@@ -16,8 +17,9 @@ FlightInstance::FlightInstance(const std::string& flightId,
                                int totalBusinessSeats,
                                int fareEconomy,
                                int fareBusiness)
-    : instanceId(IdGenerator::generateInstanceId()),
+    : instanceId(flightNumber + "-" + utils::DateTime::formatDateForId(departureDate)),
       flightId(flightId),
+      flightNumber(flightNumber),
       departureDate(departureDate), 
       departureTime(departureTime), 
       arrivalDate(arrivalDate),     
@@ -32,6 +34,7 @@ FlightInstance::FlightInstance(const std::string& flightId,
 // --- Getters ---
 const std::string& FlightInstance::getInstanceId() const { return instanceId; }
 const std::string& FlightInstance::getFlightId() const { return flightId; }
+const std::string& FlightInstance::getFlightNumber() const { return flightNumber; }
 const std::string& FlightInstance::getDepartureDate() const { return departureDate; }
 const std::string& FlightInstance::getDepartureTime() const { return departureTime; }
 const std::string& FlightInstance::getArrivalDate() const { return arrivalDate; }
@@ -120,6 +123,7 @@ void FlightInstance::displayInfo() const {
 std::string FlightInstance::toRecordLine() const {
     return this->instanceId + "|" +
            this->flightId + "|" +
+           this->flightNumber + "|" +
            this->departureDate + "|" + 
            this->departureTime + "|" + 
            this->arrivalDate + "|" +   
@@ -141,6 +145,10 @@ FlightInstance FlightInstance::fromRecordLine(const std::string& line) {
     end = line.find('|', start);
 
     std::string fId = line.substr(start, end - start);
+    start = end + 1;
+    end = line.find('|', start);
+
+    std::string flightNum = line.substr(start, end - start);
     start = end + 1;
     end = line.find('|', start);
 
@@ -183,7 +191,7 @@ FlightInstance FlightInstance::fromRecordLine(const std::string& line) {
     double fareBus = std::stod(line.substr(start, end - start));
 
     // Dùng constructor public đã thay đổi
-    FlightInstance instance(fId, depDate, depTime, arrDate, arrTime, ecoTotal, busTotal, fareEco, fareBus);
+    FlightInstance instance(fId, flightNum, depDate, depTime, arrDate, arrTime, ecoTotal, busTotal, fareEco, fareBus);
 
     // Ghi đè lại các giá trị
     instance.overrideIdForLoad(id);

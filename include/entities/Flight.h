@@ -20,16 +20,14 @@ public:
     // Không cho phép tạo đối tượng rỗng
     Flight() = delete;
 
-    // Constructor chính: Không cần truyền ID, sẽ tự động sinh ra.
-    explicit Flight(const std::string& number,
-                    const std::string& airline,
+    // Constructor chính: Tự động tạo ID từ airline-departure-arrival.
+    explicit Flight(const std::string& airline,
                     const std::string& departureIATA,
                     const std::string& arrivalIATA);
 
     // --- Getters ---
     // Trả về tham chiếu hằng để hiệu quả, tránh sao chép không cần thiết.
     const std::string& getFlightId()        const;
-    const std::string& getFlightNumber()    const;
     const std::string& getAirline()         const;
     const std::string& getDepartureAirport()const;
     const std::string& getArrivalAirport()  const;
