@@ -5,13 +5,13 @@
 
 /*
     Flight: Đại diện cho một tuyến bay (route) gốc, không thay đổi.
-    - Ví dụ: Tuyến bay "VN123" từ Hà Nội (HAN) đến TP.HCM (SGN).
+    - Ví dụ: Tuyến bay từ Hà Nội (HAN) đến TP.HCM (SGN) của Vietnam Airlines.
     - Không chứa thông tin về ngày/giờ, giá vé, hay số ghế.
+    - ID được tự động tạo từ: "<Airline>-<DepartureIATA>-<ArrivalIATA>"
  */
 class Flight {
 private:
-    std::string flightId;           // ID nội bộ duy nhất, được sinh tự động
-    std::string flightNumber;       // Mã tuyến bay công khai (VD: "VN123")
+    std::string flightId;           // ID nội bộ duy nhất, tạo từ airline-departure-arrival
     std::string airline;            // Tên hãng hàng không (VD: "Vietnam Airlines")
     std::string departureAirport;   // Sân bay đi (Mã IATA, VD: "HAN")
     std::string arrivalAirport;     // Sân bay đến (Mã IATA, VD: "SGN")
