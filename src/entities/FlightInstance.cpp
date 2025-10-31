@@ -4,7 +4,10 @@
 // Helper function to convert DD/MM/YYYY to YYYYMMDD
 static std::string convertDateToYYYYMMDD(const std::string& dateStr) {
     // Expecting format: DD/MM/YYYY
-    if (dateStr.length() < 10) return "00000000"; // Invalid date
+    if (dateStr.length() != 10) return "00000000"; // Invalid length
+    
+    // Validate separators at positions 2 and 5
+    if (dateStr[2] != '/' || dateStr[5] != '/') return "00000000"; // Invalid format
     
     std::string day = dateStr.substr(0, 2);
     std::string month = dateStr.substr(3, 2);
