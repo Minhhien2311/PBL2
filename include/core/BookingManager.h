@@ -35,6 +35,7 @@ public:
     // NGHIỆP VỤ Bán vé 
     Booking* createNewBooking( FlightManager& flightManager,
                                const std::string& flightInstanceId,
+                               const std::string& agentId,
                                const std::string& passengerId,
                                BookingClass bookingClass,
                                int baseFare);

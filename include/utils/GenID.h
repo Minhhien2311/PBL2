@@ -17,9 +17,6 @@ namespace IdGenerator {
     // Hàm tạo ID cho Agent, bắt đầu bằng "AGT-"
     std::string generateAgentId();
 
-    // Hàm tạo ID cho Flight, bắt đầu bằng "FL-"
-    std::string generateFlightId();
-
     // Hàm tạo ID cho FlightInstance, bắt đầu bằng "FI-"
     std::string generateInstanceId();
     
