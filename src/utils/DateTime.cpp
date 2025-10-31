@@ -101,4 +101,24 @@ std::string DateTime::formatHm(std::chrono::system_clock::time_point tp) {
     return formatLocal(tp, "%H:%M");
 }
 
+// ----- HÀM MỚI: formatDateForId -----
+std::string DateTime::formatDateForId(const std::string& ddmmyyyy) {
+    // Chuyển đổi từ "DD/MM/YYYY" sang "YYYYMMDD"
+    // Định dạng đầu vào: DD/MM/YYYY (10 ký tự)
+    if (ddmmyyyy.length() != 10) {
+        return ""; // Định dạng không hợp lệ
+    }
+    
+    // Validate the format has slashes in correct positions
+    if (ddmmyyyy[2] != '/' || ddmmyyyy[5] != '/') {
+        return ""; // Định dạng không hợp lệ
+    }
+    
+    std::string dd = ddmmyyyy.substr(0, 2);
+    std::string mm = ddmmyyyy.substr(3, 2);
+    std::string yyyy = ddmmyyyy.substr(6, 4);
+    
+    return yyyy + mm + dd;
+}
+
 } // namespace utils
