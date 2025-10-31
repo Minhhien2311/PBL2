@@ -1,18 +1,5 @@
-// .vscode/settings.json
 {
-    // --- C/C++ Extension Settings ---
-    "C_Cpp.default.compilerPath": "C:/mingw64/bin/g++.exe", // !! QUAN TRỌNG: Kiểm tra lại đường dẫn này! Có thể là c++.exe hoặc g++.exe !!
-    "C_Cpp.default.intelliSenseMode": "windows-gcc-x64",
-    "C_Cpp.default.cppStandard": "c++17", // Khớp với Makefile
-    "C_Cpp.default.includePath": [
-        "${workspaceFolder}/**" // Bao gồm tất cả thư mục con trong dự án
-        // Bạn KHÔNG cần liệt kê từng thư mục con như include/core, include/entities... nữa
-        // Nó sẽ tự tìm thấy cả lib/SFML-2.6.1/include
-    ],
-    // --- File Associations ---
     "files.associations": {
-        "*.h": "cpp",
-        "*.inl": "cpp",
         "array": "cpp",
         "atomic": "cpp",
         "bit": "cpp",
@@ -21,20 +8,26 @@
         "chrono": "cpp",
         "clocale": "cpp",
         "cmath": "cpp",
+        "codecvt": "cpp",
         "compare": "cpp",
         "concepts": "cpp",
+        "condition_variable": "cpp",
         "cstdarg": "cpp",
         "cstddef": "cpp",
         "cstdint": "cpp",
         "cstdio": "cpp",
         "cstdlib": "cpp",
+        "cstring": "cpp",
         "ctime": "cpp",
         "cwchar": "cpp",
         "cwctype": "cpp",
         "deque": "cpp",
+        "list": "cpp",
         "map": "cpp",
+        "set": "cpp",
         "string": "cpp",
         "unordered_map": "cpp",
+        "unordered_set": "cpp",
         "vector": "cpp",
         "exception": "cpp",
         "algorithm": "cpp",
@@ -53,34 +46,31 @@
         "utility": "cpp",
         "format": "cpp",
         "fstream": "cpp",
+        "future": "cpp",
         "initializer_list": "cpp",
         "iomanip": "cpp",
         "iosfwd": "cpp",
         "iostream": "cpp",
         "istream": "cpp",
         "limits": "cpp",
+        "mutex": "cpp",
         "new": "cpp",
         "numbers": "cpp",
         "ostream": "cpp",
-        "queue": "cpp",
-        "ranges": "cpp",
+        "semaphore": "cpp",
         "span": "cpp",
         "sstream": "cpp",
         "stdexcept": "cpp",
+        "stdfloat": "cpp",
+        "stop_token": "cpp",
         "streambuf": "cpp",
-        "text_encoding": "cpp",
+        "thread": "cpp",
         "typeinfo": "cpp",
-        "variant": "cpp",
-        "bitset": "cpp",
-        "codecvt": "cpp",
-        "cstring": "cpp",
-        "set": "cpp"
-    },
-    "C_Cpp.default.includePath": [
-        "C:/PBL2/lib/SFML-2.6.1/include"
-    ],
-    // --- Các cài đặt khác ---
-    "editor.formatOnSave": true,
-    "files.encoding": "utf8",
-    "files.eol": "\n"
-}
+        "variant": "cpp"
+    }
+} // {
+//   "cmake.configureOnOpen": true,
+//   "cmake.generator": "Ninja",
+//   "cmake.configurePreset": "core-ninja",
+//   "cmake.buildPreset": "core-ninja"
+// }

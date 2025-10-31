@@ -25,6 +25,7 @@ private:
     void buildBookingIdTable();
 
 public:
+    BookingManager();
     // Hàm khởi tạo 
     BookingManager(const std::string& bookingsFilePath, FlightRule* rule);
     

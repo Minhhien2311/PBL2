@@ -36,6 +36,7 @@ private:
     void loadAgentsFromFile(const std::string& filePath);
 
 public:
+    AccountManager() {}
     /*
     Hàm khởi tạo cho AccountManager.
     Tự động gọi các hàm load...FromFile để nạp dữ liệu.
