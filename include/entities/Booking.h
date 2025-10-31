@@ -19,6 +19,7 @@ private:
     // Định danh & Liên kết
     std::string bookingId;         // Khóa nội bộ duy nhất
     std::string flightInstanceId;  // Chuyến bay cụ thể
+    std::string agentId;          // ID của Agent tạo booking
     std::string passengerId;       // ID duy nhất của hành khác
 
     // Thông tin
@@ -36,6 +37,7 @@ public:
 
     // Constructor chính
     explicit Booking(const std::string& flightInstanceId,
+            const std::string& agentId,
             const std::string& passengerId,
             const std::string& bookingDate,
             BookingClass bookingClass,
@@ -44,6 +46,7 @@ public:
     // --- Getters ---
     const std::string& getBookingId() const;
     const std::string& getFlightInstanceId() const;
+    const std::string& getAgentId() const;
     const std::string& getPassengerId() const;
     const std::string& getBookingDate() const;
     BookingClass getClass() const;
