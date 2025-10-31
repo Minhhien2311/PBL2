@@ -10,8 +10,7 @@
  */
 class Flight {
 private:
-    std::string flightId;           // ID nội bộ duy nhất, được sinh tự động
-    std::string flightNumber;       // Mã tuyến bay công khai (VD: "VN123")
+    std::string flightId;           // ID duy nhất theo format: <Airline>-<DepartureIATA>-<ArrivalIATA>
     std::string airline;            // Tên hãng hàng không (VD: "Vietnam Airlines")
     std::string departureAirport;   // Sân bay đi (Mã IATA, VD: "HAN")
     std::string arrivalAirport;     // Sân bay đến (Mã IATA, VD: "SGN")
@@ -20,16 +19,14 @@ public:
     // Không cho phép tạo đối tượng rỗng
     Flight() = delete;
 
-    // Constructor chính: Không cần truyền ID, sẽ tự động sinh ra.
-    explicit Flight(const std::string& number,
-                    const std::string& airline,
+    // Constructor chính: ID sẽ được tạo từ airline-departureIATA-arrivalIATA
+    explicit Flight(const std::string& airline,
                     const std::string& departureIATA,
                     const std::string& arrivalIATA);
 
     // --- Getters ---
     // Trả về tham chiếu hằng để hiệu quả, tránh sao chép không cần thiết.
     const std::string& getFlightId()        const;
-    const std::string& getFlightNumber()    const;
     const std::string& getAirline()         const;
     const std::string& getDepartureAirport()const;
     const std::string& getArrivalAirport()  const;
