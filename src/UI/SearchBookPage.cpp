@@ -5,7 +5,10 @@
 #include "core/BookingManager.h"
 #include "core/AccountManager.h"
 #include "entities/FlightInstance.h"
+#include "entities/Flight.h"
+#include "entities/Account.h"
 #include "DSA/DynamicArray.h"
+#include "BookingDialog.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -246,12 +249,20 @@ void SearchBookPage::fillTable(const DynamicArray<FlightInstance*>& instances)
         FlightInstance* inst = instances[i];
         if (!inst) continue;
 
+        // Lấy thông tin hãng hàng không từ Flight
+        QString airline = "N/A";
+        Flight* flight = flightManager_->findFlightById(inst->getFlightId());
+        if (flight) {
+            airline = QString::fromStdString(flight->getAirline());
+        }
+
         QList<QStandardItem*> row;
         row << new QStandardItem(QString::fromStdString(inst->getInstanceId()))
             << new QStandardItem(QString::fromStdString(inst->getFlightId()))
             << new QStandardItem(QString::fromStdString(inst->getDepartureDate()))
             << new QStandardItem(QString::fromStdString(inst->getDepartureTime()))
             << new QStandardItem(QString::fromStdString(inst->getArrivalDate()))
+            << new QStandardItem(airline)
             << new QStandardItem(QString::number(inst->getFareEconomy()));
         model_->appendRow(row);
     }
@@ -261,28 +272,29 @@ void SearchBookPage::fillTable(const DynamicArray<FlightInstance*>& instances)
 // Tìm theo ID
 void SearchBookPage::onSearchById()
 {
-    // --- [CHỖ NỐI API] ---
-    // TODO: viết hàm trong FlightManager:
-    // DynamicArray<FlightInstance*> list = flightManager_->findInstancesById(id);
-    // fillTable(list);
     QString id = idSearchEdit_->text();
     if (id.isEmpty()) {
-        QMessageBox::information(this, "Thiếu dữ liệu", "Nhập ID chuyến cần tìm.");
+        QMessageBox::information(this, "Thiếu dữ liệu", "Nhập mã chuyến bay cần tìm.");
         return;
     }
 
-    QMessageBox::information(this, "WIP",
-        "Tìm theo ID chưa được nối với core. Tạm thời hiển thị tất cả để bạn test UI.");
-    fillTable(flightManager_->getAllInstances());
-    // --- [HẾT CHỖ NỐI API] ---
+    // Tìm instance theo ID (flight number)
+    FlightInstance* instance = flightManager_->findFlightInstanceById(id.toStdString());
+    
+    if (instance) {
+        DynamicArray<FlightInstance*> result;
+        result.push_back(instance);
+        fillTable(result);
+    } else {
+        model_->removeRows(0, model_->rowCount());
+        QMessageBox::information(this, "Không tìm thấy", 
+            QString("Không tìm thấy chuyến bay với mã: %1").arg(id));
+    }
 }
 
 // Tìm theo lộ trình
 void SearchBookPage::onSearchByRoute()
 {
-    // --- [CHỖ NỐI API] ---
-    // TODO: cần hàm trong FlightManager:
-    // flightManager_->findInstancesByRoute(from, to);
     std::string from = fromSearchEdit_->text().toStdString();
     std::string to   = toSearchEdit_->text().toStdString();
 
@@ -291,25 +303,52 @@ void SearchBookPage::onSearchByRoute()
         return;
     }
 
-    QMessageBox::information(this, "WIP",
-        "Tìm theo lộ trình chưa được nối core. Tạm thời hiển thị tất cả.");
-    fillTable(flightManager_->getAllInstances());
-    // --- [HẾT CHỖ NỐI API] ---
+    // Tìm Flight theo route
+    Flight* flight = flightManager_->findFlightByRoute(from, to);
+    
+    if (!flight) {
+        model_->removeRows(0, model_->rowCount());
+        QMessageBox::information(this, "Không tìm thấy", 
+            QString("Không tìm thấy tuyến bay từ %1 đến %2").arg(QString::fromStdString(from), QString::fromStdString(to)));
+        return;
+    }
+    
+    // Tìm tất cả instances của flight này
+    DynamicArray<FlightInstance*> instances = flightManager_->findInstancesByFlightId(flight->getFlightId());
+    
+    if (instances.size() == 0) {
+        model_->removeRows(0, model_->rowCount());
+        QMessageBox::information(this, "Không có chuyến bay", 
+            "Không có chuyến bay nào cho tuyến này.");
+    } else {
+        fillTable(instances);
+    }
 }
 
 // Tìm theo ngày
 void SearchBookPage::onSearchByDate()
 {
-    // --- [CHỖ NỐI API] ---
-    // TODO: cần hàm:
-    // flightManager_->findInstancesByDate(dateString);
     QString date = dateSearchEdit_->date().toString("dd/MM/yyyy");
+    std::string dateStr = date.toStdString();
 
-    QMessageBox::information(this, "WIP",
-        "Tìm theo ngày chưa được nối core. Tạm thời hiển thị tất cả.");
-    Q_UNUSED(date);
-    fillTable(flightManager_->getAllInstances());
-    // --- [HẾT CHỖ NỐI API] ---
+    // Lọc tất cả instances theo ngày
+    const DynamicArray<FlightInstance*>& allInstances = flightManager_->getAllInstances();
+    DynamicArray<FlightInstance*> filtered;
+    
+    for (int i = 0; i < allInstances.size(); ++i) {
+        FlightInstance* inst = allInstances[i];
+        if (inst && inst->getDepartureDate() == dateStr) {
+            filtered.push_back(inst);
+        }
+    }
+    
+    if (filtered.size() == 0) {
+        model_->removeRows(0, model_->rowCount());
+        QMessageBox::information(this, "Không có chuyến bay", 
+            QString("Không có chuyến bay nào vào ngày %1").arg(date));
+    } else {
+        fillTable(filtered);
+    }
 }
 
 // Tải lại tất cả
@@ -330,25 +369,24 @@ void SearchBookPage::onBookClicked()
 
     // Lấy instanceId từ cột 0
     QString instanceId = model_->itemFromIndex(selected.first().siblingAtColumn(0))->text();
-
-    // --- [CHỖ NỐI API] ---
-    // 1. Hỏi Passenger ID
-    bool okId;
-    QString passengerId = QInputDialog::getText(this, "Thông tin hành khách",
-        "Nhập CMND/CCCD (Passenger ID):", QLineEdit::Normal, "", &okId);
-    if (!okId || passengerId.isEmpty()) return;
-
-    // 2. Hỏi hạng vé
-    bool okClass;
-    QStringList classes = { "Phổ thông (Economy)", "Thương gia (Business)" };
-    QString classChoice = QInputDialog::getItem(this, "Chọn hạng vé",
-        "Hạng vé:", classes, 0, false, &okClass);
-    if (!okClass) return;
-
-    BookingClass bkClass = (classChoice == classes[0])
-                            ? BookingClass::Economy
-                            : BookingClass::Business;
-
+    
+    // Lấy thông tin chuyến bay
+    FlightInstance* instance = flightManager_->findFlightInstanceById(instanceId.toStdString());
+    if (!instance) {
+        QMessageBox::warning(this, "Lỗi", "Không tìm thấy chuyến bay.");
+        return;
+    }
+    
+    // Hiển thị dialog đặt vé
+    BookingDialog dialog(instance, this);
+    if (dialog.exec() != QDialog::Accepted) {
+        return; // User cancelled
+    }
+    
+    // Lấy thông tin từ dialog
+    QString passengerId = dialog.getPassengerId();
+    BookingClass bkClass = dialog.getSelectedClass();
+    
     // 3. Lấy ID của agent hiện tại
     Account* currentUser = accountManager_->getCurrentUser();
     if (!currentUser) {
@@ -357,31 +395,31 @@ void SearchBookPage::onBookClicked()
     }
     std::string currentAgentId = currentUser->getId();
     
-    // 4. *** CHỖ NỐI API THẬT ***
-    int fakeFare = 1500000; // tạm
+    // 4. Lấy giá vé từ FlightInstance
+    int fare = (bkClass == BookingClass::Economy) 
+               ? instance->getFareEconomy() 
+               : instance->getFareBusiness();
 
+    // 5. Tạo booking
     Booking* newBk = bookingManager_->createNewBooking(
         *flightManager_,
         instanceId.toStdString(),
-<<<<<<< HEAD
-        accountManager_->getCurrentUser()->getId(),
-=======
         currentAgentId,
->>>>>>> 1bf0690d5400cbc135025e79f5a69f9bb5b91863
         passengerId.toStdString(),
         bkClass,
-        fakeFare
+        fare
     );
 
     if (newBk) {
         QMessageBox::information(this, "Thành công",
-            QString("Đặt vé thành công. Mã đặt chỗ: %1")
-            .arg(QString::fromStdString(newBk->getBookingId())));
+            QString("Đặt vé thành công!\n\nMã đặt chỗ: %1\nHành khách: %2\nGiá vé: %3 VND")
+            .arg(QString::fromStdString(newBk->getBookingId()))
+            .arg(passengerId)
+            .arg(fare));
         // Sau khi đặt vé thì nên reload để cập nhật số ghế
         fillTable(flightManager_->getAllInstances());
     } else {
         QMessageBox::critical(this, "Thất bại",
-            "Không đặt được vé. Bạn tự nối thêm điều kiện (hết ghế, sai ID, ...).");
+            "Không đặt được vé. Có thể do hết ghế hoặc thông tin không hợp lệ.");
     }
-    // --- [HẾT CHỖ NỐI API] ---
 }
