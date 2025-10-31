@@ -16,8 +16,9 @@ enum class SeatClass {
  */
 class FlightInstance {
 private:
-    std::string instanceId;     // ID nội bộ duy nhất, được sinh tự động (VD: "FI-12345")
+    std::string instanceId;     // ID nội bộ duy nhất, tạo từ flightNumber-YYYYMMDD
     std::string flightId;       // Khóa ngoại, tham chiếu tới Flight gốc
+    std::string flightNumber;   // Mã tuyến bay công khai (VD: "VN123")
     
     std::string departureDate;  // Định dạng "DD/MM/YYYY"
     std::string departureTime;  // Định dạng "HH:MM"
