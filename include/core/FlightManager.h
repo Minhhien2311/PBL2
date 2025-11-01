@@ -51,6 +51,7 @@ public:
     Flight* findFlightById(const std::string& flightId);
     FlightInstance* findInstanceById(const std::string& instanceId);
     DynamicArray<FlightInstance*> findInstancesByFlightId(const std::string& flightId);
+    DynamicArray<Flight*> findFlightByRoute(const std::string& fromIATA, const std::string& toIATA);
 
     // Các hàm lưu 
     bool saveFlightsToFiles(const std::string& flightsFilePath) const;

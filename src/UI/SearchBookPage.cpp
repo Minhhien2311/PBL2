@@ -279,7 +279,7 @@ void SearchBookPage::onSearchById()
     }
 
     // Tìm instance theo ID (flight number)
-    FlightInstance* instance = flightManager_->findFlightInstanceById(id.toStdString());
+    FlightInstance* instance = flightManager_->findInstanceById(id.toStdString());
     
     if (instance) {
         DynamicArray<FlightInstance*> result;
@@ -304,24 +304,30 @@ void SearchBookPage::onSearchByRoute()
     }
 
     // Tìm Flight theo route
-    Flight* flight = flightManager_->findFlightByRoute(from, to);
-    
-    if (!flight) {
+    DynamicArray<Flight*> flights = flightManager_->findFlightByRoute(from, to);
+
+    if (flights.size() == 0) {
         model_->removeRows(0, model_->rowCount());
         QMessageBox::information(this, "Không tìm thấy", 
             QString("Không tìm thấy tuyến bay từ %1 đến %2").arg(QString::fromStdString(from), QString::fromStdString(to)));
         return;
     }
-    
-    // Tìm tất cả instances của flight này
-    DynamicArray<FlightInstance*> instances = flightManager_->findInstancesByFlightId(flight->getFlightId());
-    
-    if (instances.size() == 0) {
+
+    // Collect all instances for the found flights
+    DynamicArray<FlightInstance*> allInstancesForRoute;
+    for (int i = 0; i < flights.size(); ++i) {
+        Flight* flight = flights[i];
+        DynamicArray<FlightInstance*> instancesForFlight = flightManager_->findInstancesByFlightId(flight->getFlightId());
+        for (int j = 0; j < instancesForFlight.size(); ++j) {
+            allInstancesForRoute.push_back(instancesForFlight[j]);
+        }
+    }
+    if (allInstancesForRoute.size() == 0) {
         model_->removeRows(0, model_->rowCount());
         QMessageBox::information(this, "Không có chuyến bay", 
             "Không có chuyến bay nào cho tuyến này.");
     } else {
-        fillTable(instances);
+        fillTable(allInstancesForRoute);
     }
 }
 
@@ -371,7 +377,7 @@ void SearchBookPage::onBookClicked()
     QString instanceId = model_->itemFromIndex(selected.first().siblingAtColumn(0))->text();
     
     // Lấy thông tin chuyến bay
-    FlightInstance* instance = flightManager_->findFlightInstanceById(instanceId.toStdString());
+    FlightInstance* instance = flightManager_->findInstanceById(instanceId.toStdString());
     if (!instance) {
         QMessageBox::warning(this, "Lỗi", "Không tìm thấy chuyến bay.");
         return;
