@@ -144,6 +144,16 @@ DynamicArray<FlightInstance*> FlightManager::findInstancesByFlightId(const std::
     return results;
 }
 
+DynamicArray<Flight*> FlightManager::findFlightByRoute(const std::string& fromIATA, const std::string& toIATA) {
+    DynamicArray<Flight*> results;
+    for (size_t i = 0; i < allFlights.size(); ++i) {
+        if (allFlights[i]->getDepartureAirport() == fromIATA && allFlights[i]->getArrivalAirport() == toIATA) {
+            results.push_back(allFlights[i]);
+        }
+    }
+    return results;
+}
+
 // --- Chức năng Lưu trữ (Persistence) ---
 
 bool FlightManager::saveFlightsToFiles(const std::string& flightsFilePath) const {

@@ -92,7 +92,7 @@ void BookingDetailsDialog::setupUi()
     auto *flightLayout = new QVBoxLayout(flightGroup);
     
     // Lấy thông tin chuyến bay
-    FlightInstance* instance = flightManager_->findFlightInstanceById(booking_->getFlightInstanceId());
+    FlightInstance* instance = flightManager_->findInstanceById(booking_->getFlightInstanceId());
     if (instance) {
         Flight* flight = flightManager_->findFlightById(instance->getFlightId());
         
