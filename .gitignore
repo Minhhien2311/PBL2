@@ -50,4 +50,4 @@ Operating System generated files
 .Spotlight-V100
 .Trashes
 ehthumbs.db
-Thumbs.db
+Thumbs.db_codeql_build_dir/
