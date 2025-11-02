@@ -1,0 +1,2 @@
+001|admin|70bf25e562eb0f78|0|Minh Hien|0123456789|admin1@example.com
+002|admin001|70bf25e562eb0f78|0|Khanh Linh|0987654321|admin2@example.com

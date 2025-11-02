@@ -1,0 +1,2 @@
+/usr/bin/ar qc libutils.a CMakeFiles/utils.dir/src/utils/Helpers.cpp.o CMakeFiles/utils.dir/src/utils/Time.cpp.o CMakeFiles/utils.dir/src/utils/GenID.cpp.o
+/usr/bin/ranlib libutils.a

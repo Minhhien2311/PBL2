@@ -1,0 +1,3 @@
+# Seat maps for flight instances
+# Format: InstanceID,SeatID1,SeatID2,...
+FI-00001,A1,A2,B3,D5
