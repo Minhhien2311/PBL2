@@ -17,7 +17,7 @@ FlightInstance::FlightInstance(const std::string& flightId,
                                int totalBusinessSeats,
                                int fareEconomy,
                                int fareBusiness)
-    : instanceId(flightNumber + "-" + utils::DateTime::formatDateForId(departureDate)),
+    : instanceId(flightNumber),
       flightId(flightId),
       flightNumber(flightNumber),
       departureDate(departureDate), 
