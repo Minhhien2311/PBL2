@@ -1,8 +1,8 @@
-#include "C:/PBL2/include/interface/Login_Interface.h"
-#include "C:/PBL2/include/main_state.h" // Để thay đổi trạng thái
-#include "C:/PBL2/include/entities/Account.h"
-#include "C:/PBL2/include/entities/Flight.h"
-#include "C:/PBL2/include/core/AccountManager.h"
+#include "interface/Login_Interface.h"
+#include "main_state.h" // Để thay đổi trạng thái
+#include "entities/Account.h"
+#include "entities/Flight.h"
+#include "core/AccountManager.h"
 #include "ftxui/component/component.hpp"
 #include "ftxui/component/screen_interactive.hpp"
 #include <string>

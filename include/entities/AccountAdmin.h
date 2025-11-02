@@ -5,7 +5,7 @@
 // #include <vector>
 // #include "Account.h"
 // #include "AccountAgent.h"
-// #include "C:/PBL2/include/DSA/DynamicArray.h"
+// #include "DSA/DynamicArray.h"
 
 // /*
 //  * AccountAdmin: tài khoản dành riêng cho Admin
@@ -43,7 +43,7 @@
 #include <vector>
 #include "Account.h"
 #include "AccountAgent.h"
-#include "C:/PBL2/include/DSA/DynamicArray.h"
+#include "DSA/DynamicArray.h"
 
 class AccountAdmin : public Account {
 public:

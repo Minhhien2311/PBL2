@@ -1,8 +1,8 @@
-#include "C:/PBL2/include/core/MenuManager.h"
-#include "C:/PBL2/include/core/AccountManager.h"
-#include "C:/PBL2/include/core/FlightManager.h"
-#include "C:/PBL2/include/core/BookingManager.h"
-#include "C:/PBL2/include/entities/FlightRule.h"
+#include "core/MenuManager.h"
+#include "core/AccountManager.h"
+#include "core/FlightManager.h"
+#include "core/BookingManager.h"
+#include "entities/FlightRule.h"
 
 void app(){
     FlightRule* rule;

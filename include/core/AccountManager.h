@@ -1,9 +1,9 @@
 #ifndef ACCOUNT_MANAGER_H
 #define ACCOUNT_MANAGER_H
 
-#include "C:/PBL2/include/DSA/DynamicArray.h"      // CTDL để lưu trữ danh sách các tài khoản
-#include "C:/PBL2/include/entities/AccountAdmin.h" // Đối tượng Admin
-#include "C:/PBL2/include/entities/AccountAgent.h" // Đối tượng Agent
+#include "DSA/DynamicArray.h"      // CTDL để lưu trữ danh sách các tài khoản
+#include "entities/AccountAdmin.h" // Đối tượng Admin
+#include "entities/AccountAgent.h" // Đối tượng Agent
 #include <string>
 
 /*

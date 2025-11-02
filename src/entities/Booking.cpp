@@ -1,5 +1,5 @@
-#include "C:/PBL2/include/entities/Booking.h"
-#include "C:/PBL2/include/utils/GenID.h"
+#include "entities/Booking.h"
+#include "utils/GenID.h"
 #include <string> 
 
 //  Constructor

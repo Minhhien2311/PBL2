@@ -1,5 +1,5 @@
-#include "C:/PBL2/include/entities/Passenger.h"
-#include "C:/PBL2/include/utils/GenID.h"
+#include "entities/Passenger.h"
+#include "utils/GenID.h"
 
 Passenger::Passenger(const std::string& name,
                      const std::string& dob,

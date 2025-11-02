@@ -1,4 +1,4 @@
-#include "C:/PBL2/include/utils/GenID.h" // Đường dẫn tương đối đến file .h
+#include "utils/GenID.h" // Đường dẫn tương đối đến file .h
 #include <string>
 #include <sstream>   // Để xây dựng chuỗi có định dạng
 #include <iomanip>   // Để định dạng (setw, setfill)
