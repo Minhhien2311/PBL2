@@ -21,6 +21,7 @@ private:
     // Helper methods
     void loadConfiguration(const std::string& configFilePath);
     void createEmptySeatMap();
+    void cleanupSeatMap(); // Helper to cleanup allocated seat rows
 
 public:
     // Constructor takes a reference to the cache

@@ -138,6 +138,8 @@ private:
 // ------ II. Seat Selection Dialog -----------
 class SeatMapDialog {
 public:
+    static constexpr int MAX_DISPLAY_ROWS = 20; // Maximum rows to display in seat map
+    
     FlightManager& flight_manager;
     std::string instanceId;
     std::string selectedSeatId;
@@ -171,7 +173,6 @@ public:
             const auto& seatMap = seatManager->getActiveSeatMap();
             int totalRows = seatManager->getTotalRows();
             int totalCols = seatManager->getTotalCols();
-            int businessEndRow = seatManager->getBusinessClassEndRow();
 
             rows.push_back(text("SƠ ĐỒ GHẾ NGỒI") | bold | center);
             rows.push_back(separator());
@@ -187,7 +188,7 @@ public:
             rows.push_back(separator());
 
             // Display seats row by row
-            for (int row = 0; row < std::min(totalRows, 20); ++row) {
+            for (int row = 0; row < std::min(totalRows, MAX_DISPLAY_ROWS); ++row) {
                 Elements cols;
                 
                 // Row label

@@ -44,12 +44,17 @@ void SeatManager::loadConfiguration(const std::string& configFilePath) {
     file.close();
 }
 
-void SeatManager::createEmptySeatMap() {
-    // Clear existing map - properly delete all allocated rows
+void SeatManager::cleanupSeatMap() {
+    // Delete all allocated rows
     for (int i = 0; i < activeSeatMap.size(); ++i) {
         delete activeSeatMap[i];
     }
-    activeSeatMap.clear(); // Use clear instead of assignment
+    activeSeatMap.clear();
+}
+
+void SeatManager::createEmptySeatMap() {
+    // Clear existing map
+    cleanupSeatMap();
 
     // Create seat map based on configuration
     for (int row = 0; row < totalRows; ++row) {
@@ -173,11 +178,7 @@ void SeatManager::saveChanges() {
 }
 
 void SeatManager::unload() {
-    // Delete all allocated rows
-    for (int i = 0; i < activeSeatMap.size(); ++i) {
-        delete activeSeatMap[i];
-    }
-    activeSeatMap.clear(); // Use clear instead of assignment
+    cleanupSeatMap();
     activeFlightInstanceId = "";
     isDirty = false;
 }
