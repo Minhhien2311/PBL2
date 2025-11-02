@@ -7,6 +7,9 @@
 #include "DSA/HashTable.h"
 #include <string>
 
+// Forward declaration
+class SeatManager;
+
 class FlightManager {
 private:
     // Lưu trữ một mảng các con trỏ thay vì đối tượng
@@ -16,6 +19,10 @@ private:
     // Thêm bảng băm để tra cứu bằng ID
     HashTable<std::string, Flight*> flightIdTable;
     HashTable<std::string, FlightInstance*> instanceIdTable;
+
+    // Seat management
+    HashTable<std::string, std::string>* seatDataCache;
+    SeatManager* seatManager;
 
     // Hàm xây dựng bảng băm
     void buildFlightIdTable();
@@ -57,6 +64,9 @@ public:
     // Các hàm Getters 
     const DynamicArray<Flight*>& getAllFlights() const;       
     const DynamicArray<FlightInstance*>& getAllInstances() const;
+
+    // Seat manager getter
+    SeatManager* getSeatManager();
 };
 
 #endif // FLIGHT_MANAGER_H

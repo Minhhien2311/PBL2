@@ -1,19 +1,57 @@
-#include "core/FlightManager.h" 
+#include "core/FlightManager.h"
+#include "core/SeatManager.h"
 #include <fstream>
 #include <string>
+#include <sstream>
 
 // --- Constructor & Destructor ---
 
-FlightManager::FlightManager(const std::string& flightsFilePath, const std::string& instancesFilePath) {
+FlightManager::FlightManager(const std::string& flightsFilePath, const std::string& instancesFilePath) 
+    : seatDataCache(nullptr), seatManager(nullptr) {
     this->loadFlightsFromFile(flightsFilePath);
     this->loadInstancesFromFile(instancesFilePath);
 
     // Xây dựng bảng băm
     this->buildFlightIdTable();
     this->buildInstanceIdTable();
+
+    // Initialize seat data cache
+    seatDataCache = new HashTable<std::string, std::string>();
+
+    // Load seat maps from file into cache
+    std::ifstream seatMapFile(std::string(DATA_DIR) + "/seat_maps.txt");
+    if (seatMapFile.is_open()) {
+        std::string line;
+        while (std::getline(seatMapFile, line)) {
+            if (line.empty() || line[0] == '#') continue;
+
+            size_t pos = line.find(',');
+            if (pos != std::string::npos) {
+                std::string instanceId = line.substr(0, pos);
+                std::string bookedSeats = line.substr(pos + 1);
+                seatDataCache->insert(instanceId, bookedSeats);
+            }
+        }
+        seatMapFile.close();
+    }
+
+    // Initialize seat manager with cache
+    seatManager = new SeatManager(*seatDataCache);
 }
 
 FlightManager::~FlightManager() {
+    // Save seat changes before cleanup
+    if (seatManager != nullptr) {
+        seatManager->saveChanges();
+        delete seatManager;
+        seatManager = nullptr;
+    }
+
+    if (seatDataCache != nullptr) {
+        delete seatDataCache;
+        seatDataCache = nullptr;
+    }
+
     for (int i = 0; i < allFlights.size(); i++) {
         delete allFlights[i]; 
     }
@@ -170,4 +208,8 @@ const DynamicArray<Flight*>& FlightManager::getAllFlights() const{
 
 const DynamicArray<FlightInstance*>& FlightManager::getAllInstances() const{
     return this->allInstances;
+}
+
+SeatManager* FlightManager::getSeatManager() {
+    return seatManager;
 }

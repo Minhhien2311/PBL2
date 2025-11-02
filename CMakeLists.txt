@@ -32,6 +32,7 @@ target_sources(core PRIVATE
   src/core/BookingManager.cpp
   src/core/FlightManager.cpp
   src/core/ReportManager.cpp
+  src/core/SeatManager.cpp
 )
 
 # Khai báo đường dẫn header CHO TARGET (ai link core sẽ kế thừa include/)
@@ -68,6 +69,7 @@ target_sources(entities PRIVATE
   src/entities/FlightRule.cpp
   src/entities/Passenger.cpp
   src/entities/Promotion.cpp
+  src/entities/Seat.cpp
 )
 
 # entities phụ thuộc core, utils (PUBLIC để app/link khác kế thừa)
