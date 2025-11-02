@@ -40,19 +40,22 @@ void SeatManager::loadConfiguration(const std::string& configFilePath) {
 }
 
 void SeatManager::createEmptySeatMap() {
-    // Clear existing map
-    activeSeatMap = DynamicArray<DynamicArray<Seat>>();
+    // Clear existing map - properly delete all allocated rows
+    for (int i = 0; i < activeSeatMap.size(); ++i) {
+        delete activeSeatMap[i];
+    }
+    activeSeatMap = DynamicArray<DynamicArray<Seat>*>();
 
     // Create seat map based on configuration
     for (int row = 0; row < totalRows; ++row) {
-        DynamicArray<Seat> rowSeats;
+        DynamicArray<Seat>* rowSeats = new DynamicArray<Seat>();
         
         // Determine seat type based on row
         SeatType type = (row < businessClassEndRow) ? SeatType::BUSINESS : SeatType::ECONOMY;
 
         for (int col = 0; col < totalCols; ++col) {
             std::string seatId = Seat::coordinatesToId(row, col);
-            rowSeats.push_back(Seat(seatId, type));
+            rowSeats->push_back(Seat(seatId, type));
         }
         
         activeSeatMap.push_back(rowSeats);
@@ -86,7 +89,7 @@ void SeatManager::loadSeatMapFor(const std::string& instanceId) {
 
         // Validate coordinates
         if (row >= 0 && row < totalRows && col >= 0 && col < totalCols) {
-            activeSeatMap[row][col].book();
+            (*activeSeatMap[row])[col].book();
         }
     }
 }
@@ -102,12 +105,12 @@ bool SeatManager::bookSeat(const std::string& seatId) {
     }
 
     // Check if seat is available
-    if (!activeSeatMap[row][col].isAvailable()) {
+    if (!(*activeSeatMap[row])[col].isAvailable()) {
         return false;
     }
 
     // Book the seat
-    activeSeatMap[row][col].book();
+    (*activeSeatMap[row])[col].book();
     isDirty = true;
     return true;
 }
@@ -123,7 +126,7 @@ bool SeatManager::releaseSeat(const std::string& seatId) {
     }
 
     // Release the seat
-    activeSeatMap[row][col].release();
+    (*activeSeatMap[row])[col].release();
     isDirty = true;
     return true;
 }
@@ -137,11 +140,11 @@ void SeatManager::saveChanges() {
     std::string bookedSeats;
     for (int row = 0; row < totalRows; ++row) {
         for (int col = 0; col < totalCols; ++col) {
-            if (!activeSeatMap[row][col].isAvailable()) {
+            if (!(*activeSeatMap[row])[col].isAvailable()) {
                 if (!bookedSeats.empty()) {
                     bookedSeats += ",";
                 }
-                bookedSeats += activeSeatMap[row][col].getId();
+                bookedSeats += (*activeSeatMap[row])[col].getId();
             }
         }
     }
@@ -152,11 +155,12 @@ void SeatManager::saveChanges() {
     // Write entire cache to file
     std::ofstream file(std::string(DATA_DIR) + "/seat_maps.txt");
     if (file.is_open()) {
-        // We need to iterate through all entries in the cache
-        // Since HashTable doesn't provide an iterator, we'll write the current entry
-        // Note: A full implementation would need HashTable to support iteration
-        // For now, we'll just write the active instance
-        file << activeFlightInstanceId << "," << bookedSeats << "\n";
+        // Iterate through all entries in the cache using forEach
+        seatDataCache.forEach([&file](const std::string& key, const std::string& value) {
+            if (!value.empty()) {
+                file << key << "," << value << "\n";
+            }
+        });
         file.close();
     }
 
@@ -164,12 +168,16 @@ void SeatManager::saveChanges() {
 }
 
 void SeatManager::unload() {
-    activeSeatMap = DynamicArray<DynamicArray<Seat>>();
+    // Delete all allocated rows
+    for (int i = 0; i < activeSeatMap.size(); ++i) {
+        delete activeSeatMap[i];
+    }
+    activeSeatMap = DynamicArray<DynamicArray<Seat>*>();
     activeFlightInstanceId = "";
     isDirty = false;
 }
 
-const DynamicArray<DynamicArray<Seat>>& SeatManager::getActiveSeatMap() const {
+const DynamicArray<DynamicArray<Seat>*>& SeatManager::getActiveSeatMap() const {
     return activeSeatMap;
 }
 

@@ -9,7 +9,7 @@
 class SeatManager {
 private:
     std::string activeFlightInstanceId;
-    DynamicArray<DynamicArray<Seat>> activeSeatMap;
+    DynamicArray<DynamicArray<Seat>*> activeSeatMap;  // Use pointers to avoid copy issues
     bool isDirty;
     HashTable<std::string, std::string>& seatDataCache;
     
@@ -40,7 +40,7 @@ public:
     void unload();
 
     // Getters
-    const DynamicArray<DynamicArray<Seat>>& getActiveSeatMap() const;
+    const DynamicArray<DynamicArray<Seat>*>& getActiveSeatMap() const;
     std::string getActiveFlightInstanceId() const;
     int getTotalRows() const;
     int getTotalCols() const;

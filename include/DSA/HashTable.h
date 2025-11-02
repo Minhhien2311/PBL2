@@ -136,6 +136,18 @@ public:
     size_t getSize() const { return currentSize; }
     bool isEmpty() const { return currentSize == 0; }
 
+    // Helper for iteration - calls a function for each key-value pair
+    template<typename Func>
+    void forEach(Func func) const {
+        for (size_t i = 0; i < tableSize; ++i) {
+            Node* entry = table[i];
+            while (entry != nullptr) {
+                func(entry->key, entry->value);
+                entry = entry->next;
+            }
+        }
+    }
+
 };
 
 #endif
