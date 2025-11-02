@@ -25,6 +25,9 @@ private:
 public:
     // Constructor takes a reference to the cache
     SeatManager(HashTable<std::string, std::string>& cache);
+    
+    // Destructor
+    ~SeatManager();
 
     // Load seat map for a specific flight instance
     void loadSeatMapFor(const std::string& instanceId);

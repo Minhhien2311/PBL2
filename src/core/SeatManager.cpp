@@ -8,6 +8,11 @@ SeatManager::SeatManager(HashTable<std::string, std::string>& cache)
     loadConfiguration(std::string(DATA_DIR) + "/seat_config.txt");
 }
 
+SeatManager::~SeatManager() {
+    // Clean up allocated seat map
+    unload();
+}
+
 void SeatManager::loadConfiguration(const std::string& configFilePath) {
     std::ifstream file(configFilePath);
     if (!file.is_open()) {
@@ -44,7 +49,7 @@ void SeatManager::createEmptySeatMap() {
     for (int i = 0; i < activeSeatMap.size(); ++i) {
         delete activeSeatMap[i];
     }
-    activeSeatMap = DynamicArray<DynamicArray<Seat>*>();
+    activeSeatMap.clear(); // Use clear instead of assignment
 
     // Create seat map based on configuration
     for (int row = 0; row < totalRows; ++row) {
@@ -172,7 +177,7 @@ void SeatManager::unload() {
     for (int i = 0; i < activeSeatMap.size(); ++i) {
         delete activeSeatMap[i];
     }
-    activeSeatMap = DynamicArray<DynamicArray<Seat>*>();
+    activeSeatMap.clear(); // Use clear instead of assignment
     activeFlightInstanceId = "";
     isDirty = false;
 }
