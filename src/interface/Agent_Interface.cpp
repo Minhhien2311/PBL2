@@ -8,7 +8,9 @@
 #include "main_state.h"
 #include "core/BookingManager.h"
 #include "core/FlightManager.h"
+#include "core/SeatManager.h"
 #include "entities/Booking.h"
+#include "entities/Seat.h"
 #include "DSA/DynamicArray.h" 
 #include "ftxui/component/component.hpp"
 #include "ftxui/component/screen_interactive.hpp"
@@ -133,6 +135,119 @@ private:
     }
 };
 
+// ------ II. Seat Selection Dialog -----------
+class SeatMapDialog {
+public:
+    FlightManager& flight_manager;
+    std::string instanceId;
+    std::string selectedSeatId;
+    std::string message;
+    bool show_dialog = false;
+    Component container;
+    Component close_button;
+
+    SeatMapDialog(FlightManager& fm) : flight_manager(fm) {
+        close_button = Button("Đóng", [&] {
+            show_dialog = false;
+        });
+
+        auto seat_grid_renderer = Renderer([&] {
+            Elements rows;
+            
+            if (!show_dialog || instanceId.empty()) {
+                return vbox({text("Chưa có sơ đồ ghế được tải") | center});
+            }
+
+            SeatManager* seatManager = flight_manager.getSeatManager();
+            if (!seatManager) {
+                return vbox({text("Lỗi: SeatManager không khả dụng") | center});
+            }
+
+            // Load seat map for the instance
+            if (seatManager->getActiveFlightInstanceId() != instanceId) {
+                seatManager->loadSeatMapFor(instanceId);
+            }
+
+            const auto& seatMap = seatManager->getActiveSeatMap();
+            int totalRows = seatManager->getTotalRows();
+            int totalCols = seatManager->getTotalCols();
+            int businessEndRow = seatManager->getBusinessClassEndRow();
+
+            rows.push_back(text("SƠ ĐỒ GHẾ NGỒI") | bold | center);
+            rows.push_back(separator());
+            
+            // Legend
+            rows.push_back(hbox({
+                text("■ Đã đặt") | color(Color::Red),
+                text(" | "),
+                text("■ Phổ thông") | color(Color::Green),
+                text(" | "),
+                text("■ Thương gia") | color(Color::Blue)
+            }) | center);
+            rows.push_back(separator());
+
+            // Display seats row by row
+            for (int row = 0; row < std::min(totalRows, 20); ++row) {
+                Elements cols;
+                
+                // Row label
+                std::string rowLabel = Seat::coordinatesToId(row, 0);
+                rowLabel = rowLabel.substr(0, 1); // Just the letter
+                cols.push_back(text(rowLabel) | size(WIDTH, EQUAL, 3));
+
+                for (int col = 0; col < totalCols; ++col) {
+                    const Seat& seat = (*seatMap[row])[col];
+                    std::string seatLabel = std::to_string(col + 1);
+                    
+                    Element seatElement;
+                    if (!seat.isAvailable()) {
+                        seatElement = text(seatLabel) | bgcolor(Color::Red) | color(Color::White);
+                    } else if (seat.getType() == SeatType::BUSINESS) {
+                        seatElement = text(seatLabel) | bgcolor(Color::Blue) | color(Color::White);
+                    } else {
+                        seatElement = text(seatLabel) | bgcolor(Color::Green) | color(Color::White);
+                    }
+                    
+                    cols.push_back(seatElement | size(WIDTH, EQUAL, 4));
+                }
+                
+                rows.push_back(hbox(cols));
+            }
+
+            if (!message.empty()) {
+                rows.push_back(separator());
+                rows.push_back(text(message) | center | color(Color::Yellow));
+            }
+
+            return vbox(rows) | border | size(HEIGHT, LESS_THAN, 35);
+        });
+
+        container = Container::Vertical({
+            seat_grid_renderer,
+            close_button
+        });
+    }
+
+    void show(const std::string& flightInstanceId) {
+        instanceId = flightInstanceId;
+        show_dialog = true;
+        selectedSeatId = "";
+        message = "Sử dụng giao diện này để xem sơ đồ ghế";
+    }
+
+    Element Render() {
+        if (!show_dialog) {
+            return vbox({});
+        }
+        
+        return vbox({
+            container->Render(),
+            separator(),
+            close_button->Render() | center
+        }) | border | center;
+    }
+};
+
 // class AddBooking{
 //     public:
 //         // std::string bookingId;         // Khóa nội bộ duy nhất
@@ -208,8 +323,35 @@ void ShowAgentMenu(AccountManager& account_manager, BookingManager& booking_mana
 
     //Booking
     BookingList Booking_list(booking_manager);
-    // auto list_booking_screen = Renderer([] { return text("Giao diện Danh sách đặt vé") | center; });
-    auto add_booking_screen = Renderer([] { return text("Giao diện Đặt vé") | center; });
+    
+    // Seat Map Dialog
+    SeatMapDialog seat_dialog(flight_manager);
+    
+    // Add booking screen with seat selection
+    std::string instance_id_input = "";
+    auto add_booking_screen = Container::Vertical({
+        Renderer([&] {
+            return vbox({
+                text("ĐẶT VÉ MỚI") | bold | center,
+                separator(),
+                hbox({text("Mã chuyến bay: "), text(instance_id_input.empty() ? "(chưa nhập)" : instance_id_input) | color(Color::Cyan)}),
+                separator(),
+                text("Chức năng đặt vé đang được phát triển") | center | dim,
+            });
+        }),
+        Button("Xem sơ đồ ghế", [&] {
+            if (!instance_id_input.empty()) {
+                seat_dialog.show(instance_id_input);
+            } else {
+                // Try with a sample instance for demo
+                const auto& instances = flight_manager.getAllInstances();
+                if (instances.size() > 0) {
+                    seat_dialog.show(instances[0]->getInstanceId());
+                }
+            }
+        }) | center
+    });
+    
     auto cancel_booking_screen = Renderer([] { return text("Giao diện Hủy vé") | center; });
 
     //Passengers
@@ -397,7 +539,17 @@ auto right_pane_container = Container::Tab(
                 right_pane | flex,
         });
 
-        return window(text(user_name), layout);
+        auto main_window = window(text(user_name), layout);
+
+        // Overlay seat dialog if shown
+        if (seat_dialog.show_dialog) {
+            return dbox({
+                main_window,
+                seat_dialog.Render() | clear_under | center
+            });
+        }
+
+        return main_window;
     });
 
     selected_main = 2;// trạng thái ban đầu
