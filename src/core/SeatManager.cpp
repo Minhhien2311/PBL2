@@ -50,8 +50,8 @@ DynamicArray<Seat*>* SeatManager::parseSeatData(const std::string& data) {
     
     while (std::getline(ss, line)) {
         if (!line.empty()) {
-            Seat seatOnStack = Seat::fromRecordLine(line);
-            seatMap->push_back(new Seat(seatOnStack));
+            Seat* seat = new Seat(Seat::fromRecordLine(line));
+            seatMap->push_back(seat);
         }
     }
     

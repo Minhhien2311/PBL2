@@ -68,6 +68,9 @@ public:
 
     // Lấy SeatManager
     SeatManager* getSeatManager();
+
+    // Lưu tất cả dữ liệu (flights, instances, seats)
+    bool saveAllData();
 };
 
 #endif // FLIGHT_MANAGER_H

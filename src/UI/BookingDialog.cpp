@@ -17,6 +17,26 @@
 #include <QMessageBox>
 #include <QScrollArea>
 
+// Seat button style constants
+namespace {
+    const QString BUSINESS_AVAILABLE_STYLE = 
+        "QPushButton { background: #FFD700; color: #000; border: 2px solid #DAA520; border-radius: 5px; font-weight: bold; }"
+        "QPushButton:hover { background: #FFC700; }";
+    
+    const QString ECONOMY_AVAILABLE_STYLE = 
+        "QPushButton { background: #90EE90; color: #000; border: 2px solid #32CD32; border-radius: 5px; font-weight: bold; }"
+        "QPushButton:hover { background: #7FD87F; }";
+    
+    const QString BOOKED_STYLE = 
+        "QPushButton { background: #D3D3D3; color: #666; border: 2px solid #A9A9A9; border-radius: 5px; }";
+    
+    const QString LOCKED_STYLE = 
+        "QPushButton { background: #FF6B6B; color: #FFF; border: 2px solid #C92A2A; border-radius: 5px; }";
+    
+    const QString SELECTED_BORDER = "3px solid #FF0000";
+    const QString NORMAL_BORDER = "2px solid";
+}
+
 BookingDialog::BookingDialog(FlightInstance* flightInstance, FlightManager* flightManager, QWidget *parent)
     : QDialog(parent),
       flightInstance_(flightInstance),
@@ -312,33 +332,39 @@ void BookingDialog::renderSeatMap()
         if (seat->getStatus() == SeatStatus::Available) {
             isClickable = true;
             if (seat->getType() == SeatType::Business) {
-                btnStyle = "QPushButton { background: #FFD700; color: #000; border: 2px solid #DAA520; border-radius: 5px; font-weight: bold; }"
-                          "QPushButton:hover { background: #FFC700; }";
+                btnStyle = BUSINESS_AVAILABLE_STYLE;
             } else {
-                btnStyle = "QPushButton { background: #90EE90; color: #000; border: 2px solid #32CD32; border-radius: 5px; font-weight: bold; }"
-                          "QPushButton:hover { background: #7FD87F; }";
+                btnStyle = ECONOMY_AVAILABLE_STYLE;
             }
         } else if (seat->getStatus() == SeatStatus::Booked) {
-            btnStyle = "QPushButton { background: #D3D3D3; color: #666; border: 2px solid #A9A9A9; border-radius: 5px; }";
+            btnStyle = BOOKED_STYLE;
         } else {
-            btnStyle = "QPushButton { background: #FF6B6B; color: #FFF; border: 2px solid #C92A2A; border-radius: 5px; }";
+            btnStyle = LOCKED_STYLE;
         }
         
         seatBtn->setStyleSheet(btnStyle);
         seatBtn->setEnabled(isClickable);
+        seatBtn->setProperty("originalStyle", btnStyle);
+        seatBtn->setProperty("seatId", QString::fromStdString(seat->getId()));
         
         // Connect click event for available seats
         if (isClickable) {
-            QString seatId = QString::fromStdString(seat->getId());
-            connect(seatBtn, &QPushButton::clicked, this, [this, seatId, seatBtn]() {
+            connect(seatBtn, &QPushButton::clicked, this, [this, seatBtn]() {
+                QString seatId = seatBtn->property("seatId").toString();
+                
                 // Deselect previous seat
                 if (!selectedSeatId_.isEmpty()) {
                     // Find and restore previous button style
                     for (int i = 0; i < seatMapLayout_->count(); ++i) {
-                        QPushButton* btn = qobject_cast<QPushButton*>(seatMapLayout_->itemAt(i)->widget());
-                        if (btn && btn->text() == selectedSeatId_) {
-                            // Restore original color (you may need to track this better)
-                            btn->setStyleSheet(btn->styleSheet().replace("border: 3px solid #FF0000", "border: 2px solid"));
+                        QLayoutItem* layoutItem = seatMapLayout_->itemAt(i);
+                        if (!layoutItem) continue;
+                        
+                        QPushButton* btn = qobject_cast<QPushButton*>(layoutItem->widget());
+                        if (btn && btn->property("seatId").toString() == selectedSeatId_) {
+                            // Restore original style
+                            QString originalStyle = btn->property("originalStyle").toString();
+                            btn->setStyleSheet(originalStyle);
+                            break;
                         }
                     }
                 }
@@ -347,9 +373,10 @@ void BookingDialog::renderSeatMap()
                 selectedSeatId_ = seatId;
                 
                 // Highlight selected seat
-                QString currentStyle = seatBtn->styleSheet();
-                currentStyle.replace("border: 2px solid", "border: 3px solid #FF0000");
-                seatBtn->setStyleSheet(currentStyle);
+                QString originalStyle = seatBtn->property("originalStyle").toString();
+                QString selectedStyle = originalStyle;
+                selectedStyle.replace(NORMAL_BORDER, SELECTED_BORDER);
+                seatBtn->setStyleSheet(selectedStyle);
             });
         }
         

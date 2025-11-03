@@ -40,26 +40,10 @@ FlightManager::FlightManager(const std::string& flightsFilePath, const std::stri
 }
 
 FlightManager::~FlightManager() {
-    // Lưu thay đổi ghế trước khi hủy
+    // Save all data before destruction
+    saveAllData();
+    
     if (seatManager) {
-        seatManager->saveChanges();
-        
-        // Lưu cache ghế ra file
-        std::ofstream seatFile("data/seat_maps.txt");
-        if (seatFile.is_open()) {
-            // Lưu từng instance trong cache
-            for (int i = 0; i < allInstances.size(); ++i) {
-                if (allInstances[i]) {
-                    std::string instanceId = allInstances[i]->getInstanceId();
-                    std::string* seatData = seatDataCache->find(instanceId);
-                    if (seatData && !seatData->empty()) {
-                        seatFile << instanceId << "|" << *seatData << "\n";
-                    }
-                }
-            }
-            seatFile.close();
-        }
-        
         delete seatManager;
     }
     
@@ -240,4 +224,37 @@ const DynamicArray<FlightInstance*>& FlightManager::getAllInstances() const{
 
 SeatManager* FlightManager::getSeatManager() {
     return seatManager;
+}
+
+bool FlightManager::saveAllData() {
+    bool success = true;
+    
+    // Save seat changes
+    if (seatManager) {
+        seatManager->saveChanges();
+        
+        // Save seat cache to file
+        std::ofstream seatFile("data/seat_maps.txt");
+        if (seatFile.is_open()) {
+            // Save each instance in cache
+            for (int i = 0; i < allInstances.size(); ++i) {
+                if (allInstances[i]) {
+                    std::string instanceId = allInstances[i]->getInstanceId();
+                    std::string* seatData = seatDataCache->find(instanceId);
+                    if (seatData && !seatData->empty()) {
+                        seatFile << instanceId << "|" << *seatData << "\n";
+                    }
+                }
+            }
+            seatFile.close();
+        } else {
+            success = false;
+        }
+    }
+    
+    // Save flights and instances using existing methods
+    success = success && saveFlightsToFiles("data/flights.txt");
+    success = success && saveInstancesToFiles("data/flight_instances.txt");
+    
+    return success;
 }
