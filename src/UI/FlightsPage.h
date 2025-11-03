@@ -9,14 +9,16 @@ class QPushButton;
 class QTableView;
 class QStandardItemModel;
 class FlightManager; // Dùng FlightManager
-class QDateEdit; 
+class QDateEdit;
+class AirportManager;
+class AirportComboBox; 
 
 class FlightsPage : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit FlightsPage(FlightManager* flightManager, QWidget *parent = nullptr);
+    explicit FlightsPage(FlightManager* flightManager, AirportManager* airportManager, QWidget *parent = nullptr);
 
 private slots:
     void onSearchById();
@@ -32,12 +34,13 @@ private:
     void setupModel();
     void setupConnections();
 
-    FlightManager* flightManager_; 
+    FlightManager* flightManager_;
+    AirportManager* airportManager_;
 
     // --- UI Components ---
     QLineEdit* idSearchEdit_;
-    QLineEdit* fromSearchEdit_; 
-    QLineEdit* toSearchEdit_;   
+    AirportComboBox* fromSearchCombo_;
+    AirportComboBox* toSearchCombo_;
     QDateEdit* dateSearchEdit_; 
 
     QTableView* tableView_;

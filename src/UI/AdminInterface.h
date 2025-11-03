@@ -12,6 +12,7 @@ class AccountManager;
 class FlightManager; // <--- Sửa lỗi: Tên đúng (số ít)
 class BookingManager;
 class ReportManager;
+class AirportManager;
 
 class AdminInterface : public QWidget
 {
@@ -23,6 +24,7 @@ public:
                             FlightManager* flManager, // <--- Sửa lỗi: Tên đúng (số ít)
                             BookingManager* bkManager,
                             ReportManager* reportManager,
+                            AirportManager* airportManager,
                             QWidget* parent = nullptr);
 
 signals:
@@ -45,6 +47,7 @@ private:
     FlightManager* flightManager_; // <--- Sửa lỗi: Tên đúng (số ít)
     BookingManager* bookingManager_;
     ReportManager* reportManager_;
+    AirportManager* airportManager_;
 };
 
 #endif // ADMININTERFACE_H

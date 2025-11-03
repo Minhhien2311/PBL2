@@ -11,6 +11,8 @@ class QPushButton;
 class FlightManager;
 class BookingManager;
 class AccountManager;
+class AirportManager;
+class AirportComboBox;
 template <typename T> class DynamicArray;
 class FlightInstance;
 
@@ -24,6 +26,7 @@ public:
     explicit SearchBookPage(FlightManager* flManager,
                             BookingManager* bkManager,
                             AccountManager* accManager,
+                            AirportManager* airportManager,
                             QWidget *parent = nullptr);
 
 private slots:
@@ -48,12 +51,13 @@ private:
     FlightManager*   flightManager_;
     BookingManager*  bookingManager_;
     AccountManager*  accountManager_;
+    AirportManager*  airportManager_;
 
     // --- ô tìm kiếm ---
-    QLineEdit*  idSearchEdit_;     // tìm theo instanceId
-    QLineEdit*  fromSearchEdit_;   // điểm đi
-    QLineEdit*  toSearchEdit_;     // điểm đến
-    QDateEdit*  dateSearchEdit_;   // ngày khởi hành
+    QLineEdit*  idSearchEdit_;           // tìm theo instanceId
+    AirportComboBox*  fromSearchCombo_;  // điểm đi
+    AirportComboBox*  toSearchCombo_;    // điểm đến
+    QDateEdit*  dateSearchEdit_;         // ngày khởi hành
 
     // --- nút tìm kiếm ---
     QPushButton* searchByIdBtn_;
