@@ -2,13 +2,17 @@
 #include <cctype>
 #include <stdexcept>
 
-// === Triển khai lớp Seat (Đã đơn giản hóa) ===
+// === Triển khai lớp Seat ===
 
-Seat::Seat(const std::string& seatId, SeatStatus seatStatus)
-    : id(seatId), status(seatStatus) {}
+Seat::Seat(const std::string& seatId, SeatType seatType, SeatStatus seatStatus)
+    : id(seatId), type(seatType), status(seatStatus) {}
 
 const std::string& Seat::getId() const {
     return id;
+}
+
+SeatType Seat::getType() const {
+    return type;
 }
 
 SeatStatus Seat::getStatus() const {
@@ -24,7 +28,7 @@ void Seat::bookSeat() {
 }
 
 void Seat::releaseSeat() {
-    status = SeatStatus::Free;
+    status = SeatStatus::Available;
 }
 
 void Seat::setStatus(SeatStatus newStatus) {

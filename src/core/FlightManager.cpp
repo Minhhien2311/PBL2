@@ -1,4 +1,5 @@
 #include "core/FlightManager.h"
+#include "core/SeatManager.h"
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -6,7 +7,11 @@
 // --- Constructor & Destructor ---
 
 FlightManager::FlightManager(const std::string& flightsFilePath, const std::string& instancesFilePath) 
-    : flightsFilePath_(flightsFilePath), instancesFilePath_(instancesFilePath) {
+    : flightsFilePath_(flightsFilePath), instancesFilePath_(instancesFilePath), seatManager_(nullptr) {
+    
+    // Initialize SeatManager at startup
+    seatManager_ = new SeatManager("data/seat_maps.txt", "data/seat_config.txt");
+    
     this->loadFlightsFromFile(flightsFilePath);
     this->loadInstancesFromFile(instancesFilePath);
 
@@ -18,6 +23,9 @@ FlightManager::FlightManager(const std::string& flightsFilePath, const std::stri
 FlightManager::~FlightManager() {
     // Save all data before destruction
     saveAllData();
+    
+    // Cleanup SeatManager
+    delete seatManager_;
    
     for (int i = 0; i < allFlights.size(); i++) {
         delete allFlights[i]; 
@@ -104,18 +112,17 @@ bool FlightManager::createNewInstance(const std::string& flightId,
                                       const std::string& departureTime,
                                       const std::string& arrivalDate,
                                       const std::string& arrivalTime,
-                                      int totalEconomySeats,
-                                      int totalBusinessSeats,
+                                      int totalCapacity,
                                       int fareEconomy,
                                       int fareBusiness) {
     // Kiểm tra Flight gốc bằng HashTable
     if (findFlightById(flightId) == nullptr) return false; 
-    if (totalEconomySeats <= 0 || totalBusinessSeats <= 0 || fareEconomy <= 0.0 || fareBusiness <= 0.0) return false;
+    if (totalCapacity <= 0 || fareEconomy <= 0.0 || fareBusiness <= 0.0) return false;
     if (flightId.empty() || flightNumber.empty() || departureDate.empty() || departureTime.empty() || arrivalDate.empty() || arrivalTime.empty()) return false;
 
     FlightInstance* newInstance = new FlightInstance(
         flightId, flightNumber, departureDate, departureTime, arrivalDate, arrivalTime, 
-        totalEconomySeats, totalBusinessSeats, fareEconomy, fareBusiness
+        totalCapacity, fareEconomy, fareBusiness
     );
     this->allInstances.push_back(newInstance);
     
@@ -275,4 +282,8 @@ bool FlightManager::deleteInstance(const std::string& instanceId) {
         }
     }
     return false;
+}
+
+SeatManager* FlightManager::getSeatManager() const {
+    return seatManager_;
 }
