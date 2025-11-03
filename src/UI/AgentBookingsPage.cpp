@@ -4,10 +4,12 @@
 #include "core/BookingManager.h"
 #include "core/FlightManager.h"
 #include "core/AccountManager.h"
+#include "core/AirportManager.h"
 #include "entities/Booking.h"
 #include "entities/Account.h"
 #include "DSA/DynamicArray.h" // Cần để nhận kết quả
 #include "BookingDetailsDialog.h" // Dialog xem chi tiết
+#include "AirportComboBox.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -27,11 +29,13 @@
 AgentBookingsPage::AgentBookingsPage(BookingManager* bkManager,
                                      FlightManager* flManager,
                                      AccountManager* accManager,
+                                     AirportManager* airportManager,
                                      QWidget *parent)
     : QWidget(parent),
       bookingManager_(bkManager),
       flightManager_(flManager),
-      accountManager_(accManager)
+      accountManager_(accManager),
+      airportManager_(airportManager)
 {
     Q_ASSERT(bookingManager_ != nullptr);
     Q_ASSERT(flightManager_ != nullptr);
@@ -107,7 +111,6 @@ void AgentBookingsPage::setupUi()
     }
 
     // (0,1) Điểm xuất phát
-    QLineEdit *fromEdit = nullptr;
     {
         QWidget *box = new QWidget;
         box->setFixedWidth(fieldWidth);
@@ -115,16 +118,14 @@ void AgentBookingsPage::setupUi()
         v->setContentsMargins(0,0,0,0);
         v->setSpacing(4);
 
-        fromEdit = new QLineEdit;
-        fromEdit->setPlaceholderText("Nhập điểm đi");
+        fromSearchCombo_ = new AirportComboBox(airportManager_);
 
-        v->addWidget(fromEdit);
+        v->addWidget(fromSearchCombo_);
 
         searchGrid->addWidget(box, 0, 1);
     }
 
     // (0,2) Điểm đến
-    QLineEdit *toEdit = nullptr;
     {
         QWidget *box = new QWidget;
         box->setFixedWidth(fieldWidth);
@@ -132,10 +133,9 @@ void AgentBookingsPage::setupUi()
         v->setContentsMargins(0,0,0,0);
         v->setSpacing(4);
 
-        toEdit = new QLineEdit;
-        toEdit->setPlaceholderText("Nhập điểm đến");
+        toSearchCombo_ = new AirportComboBox(airportManager_);
 
-        v->addWidget(toEdit);
+        v->addWidget(toSearchCombo_);
 
         searchGrid->addWidget(box, 0, 2);
     }

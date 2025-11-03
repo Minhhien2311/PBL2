@@ -4,11 +4,13 @@
 #include "core/FlightManager.h"
 #include "core/BookingManager.h"
 #include "core/AccountManager.h"
+#include "core/AirportManager.h"
 #include "entities/FlightInstance.h"
 #include "entities/Flight.h"
 #include "entities/Account.h"
 #include "DSA/DynamicArray.h"
 #include "BookingDialog.h"
+#include "AirportComboBox.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -27,11 +29,13 @@
 SearchBookPage::SearchBookPage(FlightManager* flManager,
                                BookingManager* bkManager,
                                AccountManager* accManager,
+                               AirportManager* airportManager,
                                QWidget* parent)
     : QWidget(parent),
       flightManager_(flManager),
       bookingManager_(bkManager),
-      accountManager_(accManager)
+      accountManager_(accManager),
+      airportManager_(airportManager)
 {
     Q_ASSERT(flightManager_ != nullptr);
     Q_ASSERT(bookingManager_ != nullptr);
@@ -107,14 +111,14 @@ void SearchBookPage::setupUi()
         routeHL->setContentsMargins(0,0,0,0);
         routeHL->setSpacing(6);
 
-        fromSearchEdit_ = new QLineEdit;
-        fromSearchEdit_->setPlaceholderText("Nhập điểm đi");
-        toSearchEdit_ = new QLineEdit;
-        toSearchEdit_->setPlaceholderText("Nhập điểm đến");
+        fromSearchCombo_ = new AirportComboBox(airportManager_);
+        toSearchCombo_ = new AirportComboBox(airportManager_);
 
-        routeHL->addWidget(fromSearchEdit_);
-        routeHL->addWidget(new QLabel("–"));
-        routeHL->addWidget(toSearchEdit_);
+        routeHL->addWidget(new QLabel("Từ:"));
+        routeHL->addWidget(fromSearchCombo_, 1);
+        routeHL->addWidget(new QLabel("→"));
+        routeHL->addWidget(new QLabel("Đến:"));
+        routeHL->addWidget(toSearchCombo_, 1);
 
         searchByRouteBtn_ = new QPushButton("Tìm theo lộ trình bay");
         searchByRouteBtn_->setProperty("class", "SearchBtn");
@@ -295,21 +299,21 @@ void SearchBookPage::onSearchById()
 // Tìm theo lộ trình
 void SearchBookPage::onSearchByRoute()
 {
-    std::string from = fromSearchEdit_->text().toStdString();
-    std::string to   = toSearchEdit_->text().toStdString();
+    std::string fromIATA = fromSearchCombo_->getSelectedIATA();
+    std::string toIATA = toSearchCombo_->getSelectedIATA();
 
-    if (from.empty() || to.empty()) {
-        QMessageBox::information(this, "Thiếu dữ liệu", "Nhập đủ điểm đi và điểm đến.");
+    if (fromIATA.empty() || toIATA.empty()) {
+        QMessageBox::information(this, "Thiếu dữ liệu", "Vui lòng chọn điểm đi và điểm đến.");
         return;
     }
 
     // Tìm Flight theo route
-    DynamicArray<Flight*> flights = flightManager_->findFlightByRoute(from, to);
+    DynamicArray<Flight*> flights = flightManager_->findFlightByRoute(fromIATA, toIATA);
 
     if (flights.size() == 0) {
         model_->removeRows(0, model_->rowCount());
         QMessageBox::information(this, "Không tìm thấy", 
-            QString("Không tìm thấy tuyến bay từ %1 đến %2").arg(QString::fromStdString(from), QString::fromStdString(to)));
+            QString("Không tìm thấy tuyến bay từ %1 đến %2").arg(QString::fromStdString(fromIATA), QString::fromStdString(toIATA)));
         return;
     }
 
