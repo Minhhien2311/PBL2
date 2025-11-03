@@ -16,6 +16,10 @@ private:
     // Thêm bảng băm để tra cứu bằng ID
     HashTable<std::string, Flight*> flightIdTable;
     HashTable<std::string, FlightInstance*> instanceIdTable;
+    
+    // Lưu đường dẫn file để dùng trong saveAllData() và destructor
+    std::string flightsFilePath_;
+    std::string instancesFilePath_;
 
     // Hàm xây dựng bảng băm
     void buildFlightIdTable();
@@ -46,6 +50,13 @@ public:
                            int totalBusinessSeats,
                            int fareEconomy,
                            int fareBusiness);
+    
+    // Các hàm Update và Delete
+    bool updateFlight(const std::string& flightId, const std::string& newAirline, 
+                      const std::string& newDeparture, const std::string& newDestination);
+    bool deleteFlight(const std::string& flightId);
+    bool updateInstance(const std::string& instanceId, const FlightInstance& updatedInstance);
+    bool deleteInstance(const std::string& instanceId);
 
     // Các hàm tìm kiếm 
     Flight* findFlightById(const std::string& flightId);

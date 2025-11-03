@@ -1,4 +1,4 @@
-#include "core/seatManager.h"
+#include "core/SeatManager.h"
 #include "entities/flightInstance.h"
 #include <iostream>
 #include <cmath>

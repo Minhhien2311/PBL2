@@ -42,6 +42,18 @@ void Booking::setStatus(BookingStatus newStatus) {
     this->status = newStatus;
 }
 
+void Booking::setPassengerId(const std::string& newPassengerId) {
+    this->passengerId = newPassengerId;
+}
+
+void Booking::setClass(BookingClass newClass) {
+    this->bookingClass = newClass;
+}
+
+void Booking::setSeatId(const std::string& newSeatId) {
+    this->seatID = newSeatId;
+}
+
 // --- Đọc/Ghi file ---
 
 std::string Booking::toRecordLine() const {

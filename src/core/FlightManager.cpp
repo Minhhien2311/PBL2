@@ -5,7 +5,8 @@
 
 // --- Constructor & Destructor ---
 
-FlightManager::FlightManager(const std::string& flightsFilePath, const std::string& instancesFilePath) {
+FlightManager::FlightManager(const std::string& flightsFilePath, const std::string& instancesFilePath) 
+    : flightsFilePath_(flightsFilePath), instancesFilePath_(instancesFilePath) {
     this->loadFlightsFromFile(flightsFilePath);
     this->loadInstancesFromFile(instancesFilePath);
 
@@ -187,4 +188,91 @@ const DynamicArray<Flight*>& FlightManager::getAllFlights() const{
 
 const DynamicArray<FlightInstance*>& FlightManager::getAllInstances() const{
     return this->allInstances;
+}
+
+// --- Save All Data ---
+bool FlightManager::saveAllData() {
+    bool flightsSaved = saveFlightsToFiles(flightsFilePath_);
+    bool instancesSaved = saveInstancesToFiles(instancesFilePath_);
+    return flightsSaved && instancesSaved;
+}
+
+// --- Update and Delete Functions ---
+
+bool FlightManager::updateFlight(const std::string& flightId, 
+                                  const std::string& newAirline,
+                                  const std::string& newDeparture, 
+                                  const std::string& newDestination) {
+    Flight* flight = findFlightById(flightId);
+    if (!flight) return false;
+    
+    // Since Flight doesn't have setters, we create a new Flight and replace it
+    Flight* newFlight = new Flight(newAirline, newDeparture, newDestination);
+    
+    // Find and replace in the array
+    for (int i = 0; i < allFlights.size(); i++) {
+        if (allFlights[i]->getFlightId() == flightId) {
+            // Remove old from hash table
+            flightIdTable.remove(flightId);
+            
+            // Delete old flight and replace with new
+            delete allFlights[i];
+            allFlights[i] = newFlight;
+            
+            // Add new to hash table
+            flightIdTable.insert(newFlight->getFlightId(), newFlight);
+            
+            saveFlightsToFiles(flightsFilePath_);
+            return true;
+        }
+    }
+    
+    delete newFlight; // Clean up if not used
+    return false;
+}
+
+bool FlightManager::deleteFlight(const std::string& flightId) {
+    for (int i = 0; i < allFlights.size(); i++) {
+        if (allFlights[i]->getFlightId() == flightId) {
+            // Remove from hash table
+            flightIdTable.remove(flightId);
+            
+            // Delete and remove from array
+            delete allFlights[i];
+            allFlights.removeAt(i);
+            
+            saveFlightsToFiles(flightsFilePath_);
+            return true;
+        }
+    }
+    return false;
+}
+
+bool FlightManager::updateInstance(const std::string& instanceId, 
+                                     const FlightInstance& updatedInstance) {
+    FlightInstance* instance = findInstanceById(instanceId);
+    if (!instance) return false;
+    
+    // Update the instance by copying data
+    *instance = updatedInstance;
+    
+    saveInstancesToFiles(instancesFilePath_);
+    return true;
+}
+
+bool FlightManager::deleteInstance(const std::string& instanceId) {
+    for (int i = 0; i < allInstances.size(); i++) {
+        if (allInstances[i]->getInstanceId() == instanceId) {
+            // Remove from hash table
+            instanceIdTable.remove(instanceId);
+            
+            // Delete and remove from array
+            delete allInstances[i];
+            allInstances.removeAt(i);
+            
+            saveInstancesToFiles(instancesFilePath_);
+            return true;
+        }
+    }
+    return false;
 }

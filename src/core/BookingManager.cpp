@@ -12,7 +12,7 @@ class SeatManager; // Khai báo tiền định
 
 // --- Constructor  ---
 BookingManager::BookingManager(const std::string& bookingsFilePath, FlightRule* rule) 
-    : currentRule(rule) 
+    : currentRule(rule), bookingsFilePath_(bookingsFilePath) 
 { 
     this->loadBookingsFromFile(bookingsFilePath);
 
@@ -22,6 +22,9 @@ BookingManager::BookingManager(const std::string& bookingsFilePath, FlightRule* 
 
 // --- Destructor  ---
 BookingManager::~BookingManager() {
+    // Auto-save data before destruction
+    saveDataToFiles(bookingsFilePath_);
+    
     for (int i = 0; i < allBookings.size(); i++) {
         delete allBookings[i];
     }
@@ -96,8 +99,8 @@ Booking* BookingManager::createNewBooking( FlightManager& flightManager,
     // (Bỏ qua logic cũ `instance->bookSeats(...)` vì SeatManager đã xử lý)
     std::string currentDate = utils::DateTime::formatLocal(utils::DateTime::nowUtc(), "%Y-%m-%d %H:%M:%S");
     
-    // Sử dụng seatId đã lấy được ở trên
-    Booking* newBooking = new Booking(flightInstanceId, agentId, passengerId, seatManager.getSelectedSeat()->getId(), currentDate, bookingClass, baseFare, BookingStatus::Issued);
+    // Sử dụng seatId đã lấu được ở dòng 86 (KHÔNG gọi getSelectedSeat() vì đã bị reset)
+    Booking* newBooking = new Booking(flightInstanceId, agentId, passengerId, seatId, currentDate, bookingClass, baseFare, BookingStatus::Issued);
 
     // Thêm vào DynamicArray và HashTable
     this->allBookings.push_back(newBooking);
@@ -184,4 +187,29 @@ DynamicArray<Booking*> BookingManager::getBookingsByAgentId(const std::string& a
         }
     }
     return result;
+}
+
+// --- NGHIỆP VỤ 3: CẬP NHẬT BOOKING ---
+bool BookingManager::updateBooking(const std::string& bookingId,
+                                     const std::string& newPassengerId,
+                                     BookingClass newClass,
+                                     const std::string& newSeatId) {
+    // Tìm booking theo ID
+    Booking* booking = findBookingById(bookingId);
+    if (!booking) {
+        return false; // Không tìm thấy booking
+    }
+    
+    // Cập nhật các trường
+    if (!newPassengerId.empty()) {
+        booking->setPassengerId(newPassengerId);
+    }
+    booking->setClass(newClass);
+    if (!newSeatId.empty()) {
+        booking->setSeatId(newSeatId);
+    }
+    
+    // Lưu thay đổi vào file
+    saveDataToFiles(bookingsFilePath_);
+    return true;
 }
