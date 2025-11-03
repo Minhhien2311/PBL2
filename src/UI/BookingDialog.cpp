@@ -310,7 +310,7 @@ void BookingDialog::renderSeatMap()
         if (!seat) continue;
 
         int row, col;
-        Seat::idToCoordinates(seat->getId(), row, col);
+        std::tie(row, col) = seat->getCoordinates();
         
         // Add row header if new row
         if (row != currentRow) {

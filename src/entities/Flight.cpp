@@ -4,60 +4,10 @@
 #include <string>
 #include <string_view>
 
-// Code lại map
-inline std::string airlineCode(std::string_view name) {
-    // normalize: lowercase + gọn khoảng trắng
-    std::string key(name);
-    std::transform(key.begin(), key.end(), key.begin(),
-                   [](unsigned char c){ return std::tolower(c); });
-    auto trim = [](std::string& s){
-        auto ns = [](unsigned char c){ return !std::isspace(c); };
-        s.erase(s.begin(), std::find_if(s.begin(), s.end(), ns));
-        s.erase(std::find_if(s.rbegin(), s.rend(), ns).base(), s.end());
-    };
-    trim(key);
-    // thay nhiều khoảng trắng bằng 1
-    {
-        std::string t; t.reserve(key.size());
-        bool sp=false;
-        for (unsigned char c: key){
-            bool issp = std::isspace(c);
-            if (issp){ if(!sp) t.push_back(' '); }
-            else t.push_back(c);
-            sp = issp;
-        }
-        key.swap(t);
-    }
-
-    struct M { const char* needle; const char* code; };
-    static const M map[] = {
-        {"vietjet air","VJ"}, {"vietjet","VJ"}, {"vj","VJ"},
-        {"bamboo airways","QH"}, {"bamboo","QH"}, {"qh","QH"},
-        {"vietnam airlines","VN"}, {"vietnam airline","VN"}, {"vn","VN"},
-        {"pacific airlines","BL"}, {"jetstar pacific","BL"}, {"pacific","BL"}, {"bl","BL"},
-        {"vietravel airlines","VU"}, {"vietravel","VU"}, {"vu","VU"},
-    };
-    for (auto& m : map)
-        if (key == m.needle || key.find(m.needle) != std::string::npos)
-            return m.code;
-
-    // Fallback: ghép chữ cái đầu các từ (tối đa 3)
-    std::string code; code.reserve(3);
-    bool nw = true;
-    for (unsigned char c : std::string(name)) {
-        if (std::isalpha(c)) {
-            if (nw) { code.push_back(std::toupper(c)); if (code.size() >= 3) break; nw = false; }
-        } else nw = std::isspace(c);
-    }
-    if (code.empty()) code = "XX";
-    return code;
-}
-
-
 Flight::Flight(const std::string& airline,
                const std::string& departureIATA,
                const std::string& arrivalIATA)
-    : flightId(airlineCode(airline) + "-" + departureIATA + "-" + arrivalIATA),
+    : flightId(departureIATA + "-" + arrivalIATA),
       airline(airline), 
       departureAirport(departureIATA), 
       arrivalAirport(arrivalIATA)

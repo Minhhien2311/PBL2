@@ -413,7 +413,8 @@ void SearchBookPage::onBookClicked()
         currentAgentId,
         passengerId.toStdString(),
         bkClass,
-        fare
+        fare,
+        *flightManager_->getSeatManager()
     );
 
     if (newBk) {

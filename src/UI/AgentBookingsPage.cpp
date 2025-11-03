@@ -415,7 +415,7 @@ void AgentBookingsPage::onCancelBookingClicked()
     // --- [CHỖ NỐI API] ---
     // 4. Gọi API hủy vé
     // (Hàm này cần FlightManager&, chúng ta đã truyền vào)
-    bool success = bookingManager_->cancelBooking(*flightManager_, bookingId.toStdString());
+    bool success = bookingManager_->cancelBooking(*flightManager_, *flightManager_->getSeatManager(), bookingId.toStdString());
 
     // 5. Xử lý kết quả
     if (success) {
