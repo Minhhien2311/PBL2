@@ -2,65 +2,50 @@
 #define SEAT_H
 
 #include <string>
+#include <vector>
+#include <utility> // Cho std::pair
 
-// Trạng thái ghế
+// Trạng thái của ghế
 enum class SeatStatus {
-    Available,  // Ghế trống
-    Booked,     // Ghế đã đặt
-    Locked      // Ghế bị khóa (bảo trì, v.v.)
-};
-
-// Loại ghế
-enum class SeatType {
-    Economy,    // Hạng phổ thông
-    Business    // Hạng thương gia
+    Free,
+    Booked
 };
 
 /**
- * @brief Đại diện cho một ghế ngồi trên chuyến bay
+ * @class Seat
+ * @brief Đại diện cho một ghế đơn lẻ trong một chuyến bay. (Đã đơn giản hóa)
  * 
- * ID ghế có dạng: "1A", "12B", "5C", v.v.
- * - Số: hàng ghế (row)
- * - Chữ: cột ghế (A, B, C, D, E, F)
+ * Lớp này chỉ chứa thông tin cơ bản về một ghế: ID và trạng thái (đã đặt/còn trống).
  */
 class Seat {
 private:
-    std::string id;          // ID ghế (ví dụ: "1A", "12F")
-    SeatStatus status;       // Trạng thái hiện tại
-    SeatType type;           // Loại ghế (Economy/Business)
+    std::string id;
+    SeatStatus status;
 
 public:
-    // Constructor mặc định
-    Seat();
-    
-    // Constructor với tham số
-    Seat(const std::string& id, SeatStatus status, SeatType type);
+    // Constructor đã được đơn giản hóa
+    Seat(const std::string& seatId, SeatStatus seatStatus = SeatStatus::Free);
 
-    // --- Getters ---
+    // Getters
     const std::string& getId() const;
     SeatStatus getStatus() const;
-    SeatType getType() const;
+    bool isBooked() const;
 
-    // --- Setters ---
+    // Setters - Các thao tác cơ bản trên ghế
+    void bookSeat();
+    void releaseSeat();
     void setStatus(SeatStatus newStatus);
-    void setType(SeatType newType);
 
-    // --- Chuyển đổi tọa độ ---
-    // Chuyển ID ghế thành tọa độ (row, col)
-    // Ví dụ: "1A" -> (1, 0), "12F" -> (12, 5)
-    static void idToCoordinates(const std::string& seatId, int& row, int& col);
-    
-    // Chuyển tọa độ thành ID ghế
-    // Ví dụ: (1, 0) -> "1A", (12, 5) -> "12F"
-    static std::string coordinatesToId(int row, int col);
+    /**
+     * @brief Chuyển đổi ID ghế sang tọa độ mảng (hàng, cột).
+     * @return std::pair<int, int> Tọa độ. Trả về {-1, -1} nếu ID không hợp lệ.
+     */
+    std::pair<int, int> getCoordinates() const;
 
-    // --- Đọc/Ghi file ---
-    // Chuyển đổi đối tượng thành dòng string để lưu vào file
-    // Format: id|status|type
-    std::string toRecordLine() const;
-    
-    // Tạo đối tượng Seat từ dòng string
-    static Seat fromRecordLine(const std::string& line);
+    /**
+     * @brief Hàm static để chuyển đổi tọa độ thành ID.
+     */
+    static std::string coordinatesToId(const std::pair<int, int>& coords);
 };
 
 #endif // SEAT_H

@@ -5,7 +5,6 @@
 #include "entities/Flight.h"            // Đối tượng tuyến bay gốc
 #include "entities/FlightInstance.h"    // Đối tượng chuyến bay cụ thể
 #include "DSA/HashTable.h"
-#include "core/SeatManager.h"           // Quản lý ghế
 #include <string>
 
 class FlightManager {
@@ -17,10 +16,6 @@ private:
     // Thêm bảng băm để tra cứu bằng ID
     HashTable<std::string, Flight*> flightIdTable;
     HashTable<std::string, FlightInstance*> instanceIdTable;
-
-    // Quản lý ghế
-    SeatManager* seatManager;
-    HashTable<std::string, std::string>* seatDataCache;
 
     // Hàm xây dựng bảng băm
     void buildFlightIdTable();
@@ -66,10 +61,7 @@ public:
     const DynamicArray<Flight*>& getAllFlights() const;       
     const DynamicArray<FlightInstance*>& getAllInstances() const;
 
-    // Lấy SeatManager
-    SeatManager* getSeatManager();
-
-    // Lưu tất cả dữ liệu (flights, instances, seats)
+    // Lưu tất cả dữ liệu (flights, instances)
     bool saveAllData();
 };
 

@@ -1,195 +1,230 @@
-#include "core/SeatManager.h"
+#include "core/seatManager.h"
+#include "entities/flightInstance.h"
+#include <iostream>
+#include <cmath>
+#include <fstream>
 #include <sstream>
+#include <map>
 
-// --- Constructor & Destructor ---
+SeatManager::SeatManager() : flightInstanceId(""), selectedSeat(nullptr) {}
 
-SeatManager::SeatManager(HashTable<std::string, std::string>& cache)
-    : seatDataCache(cache), activeSeatMap(nullptr), activeInstanceId(""), isDirty(false) {
-}
+// THAY ĐỔI LỚN: Logic khởi tạo phù hợp với DynamicArray của bạn
+void SeatManager::initializeSeatMap(int rows, int cols) {
+    // 1. Gọi clear() để reset seatMap về size = 0
+    seatMap.clear();
 
-SeatManager::~SeatManager() {
-    unload();
-}
-
-// --- Hàm helper private ---
-
-DynamicArray<Seat*>* SeatManager::generateDefaultSeatMap(FlightInstance* instance) {
-    if (!instance) return nullptr;
-
-    auto* seatMap = new DynamicArray<Seat*>();
-    
-    int businessRows = (instance->getBusinessTotal() + DEFAULT_SEAT_COLS - 1) / DEFAULT_SEAT_COLS;
-    int economyRows = (instance->getEconomyTotal() + DEFAULT_SEAT_COLS - 1) / DEFAULT_SEAT_COLS;
-
-    // Tạo ghế Business (hàng 1 đến businessRows)
-    for (int row = 1; row <= businessRows; ++row) {
-        for (int col = 0; col < DEFAULT_SEAT_COLS; ++col) {
-            std::string seatId = Seat::coordinatesToId(row, col);
-            Seat* seat = new Seat(seatId, SeatStatus::Available, SeatType::Business);
-            seatMap->push_back(seat);
-        }
-    }
-
-    // Tạo ghế Economy (hàng businessRows+1 đến businessRows+economyRows)
-    for (int row = businessRows + 1; row <= businessRows + economyRows; ++row) {
-        for (int col = 0; col < DEFAULT_SEAT_COLS; ++col) {
-            std::string seatId = Seat::coordinatesToId(row, col);
-            Seat* seat = new Seat(seatId, SeatStatus::Available, SeatType::Economy);
-            seatMap->push_back(seat);
-        }
-    }
-
-    return seatMap;
-}
-
-DynamicArray<Seat*>* SeatManager::parseSeatData(const std::string& data) {
-    auto* seatMap = new DynamicArray<Seat*>();
-    
-    std::stringstream ss(data);
-    std::string line;
-    
-    while (std::getline(ss, line)) {
-        if (!line.empty()) {
-            Seat* seat = new Seat(Seat::fromRecordLine(line));
-            seatMap->push_back(seat);
-        }
-    }
-    
-    return seatMap;
-}
-
-std::string SeatManager::serializeSeatMap(DynamicArray<Seat*>* seatMap) {
-    if (!seatMap) return "";
-    
-    std::string result;
-    for (int i = 0; i < seatMap->size(); ++i) {
-        if ((*seatMap)[i]) {
-            result += (*seatMap)[i]->toRecordLine();
-            if (i < seatMap->size() - 1) {
-                result += "\n";
-            }
-        }
-    }
-    
-    return result;
-}
-
-// --- Chức năng chính ---
-
-bool SeatManager::loadSeatMapFor(FlightInstance* instance) {
-    if (!instance) return false;
-
-    // Nếu đang load instance khác, unload trước
-    if (activeSeatMap && activeInstanceId != instance->getInstanceId()) {
-        unload();
-    }
-
-    // Nếu đã load instance này rồi, không cần load lại
-    if (activeSeatMap && activeInstanceId == instance->getInstanceId()) {
-        return true;
-    }
-
-    // Lưu instance ID
-    activeInstanceId = instance->getInstanceId();
-
-    // Kiểm tra cache
-    std::string* cachedData = seatDataCache.find(activeInstanceId);
-    
-    if (cachedData && !cachedData->empty()) {
-        // Parse từ cache
-        activeSeatMap = parseSeatData(*cachedData);
-    } else {
-        // Tạo sơ đồ mặc định
-        activeSeatMap = generateDefaultSeatMap(instance);
+    // 2. Vì không có resize, chúng ta phải dùng vòng lặp và push_back
+    for (int r = 0; r < rows; ++r) {
+        // Tạo một mảng động cho hàng hiện tại, với dung lượng ban đầu là `cols`
+        DynamicArray<Seat> rowArray(cols); 
         
-        // Lưu vào cache
-        std::string serialized = serializeSeatMap(activeSeatMap);
-        seatDataCache.insert(activeInstanceId, serialized);
+        // Lấp đầy hàng này bằng các đối tượng Seat
+        for (int c = 0; c < cols; ++c) {
+            std::string id = Seat::coordinatesToId({r, c});
+            rowArray.push_back(Seat(id)); // Kích thước của rowArray tăng dần
+        }
+        
+        // Thêm hàng đã hoàn chỉnh vào seatMap
+        seatMap.push_back(rowArray); // Kích thước của seatMap tăng dần
     }
-
-    isDirty = false;
-    return activeSeatMap != nullptr;
 }
 
-bool SeatManager::bookSeat(const std::string& seatId) {
-    if (!activeSeatMap) return false;
+// Hàm loadForFlight không cần thay đổi logic tính toán, chỉ cần initializeSeatMap hoạt động đúng
+bool SeatManager::loadForFlight(const FlightInstance& flight) {
+    release();
 
-    // Tìm ghế trong sơ đồ
-    for (int i = 0; i < activeSeatMap->size(); ++i) {
-        Seat* seat = (*activeSeatMap)[i];
-        if (seat && seat->getId() == seatId) {
-            // Chỉ đặt được ghế Available
-            if (seat->getStatus() == SeatStatus::Available) {
-                seat->setStatus(SeatStatus::Booked);
-                isDirty = true;
-                return true;
+    this->flightInstanceId = flight.getInstanceId();
+    if (this->flightInstanceId.empty()) { /* lỗi */ return false; }
+
+    int totalCapacity = flight.getTotalCapacity();
+    if (totalCapacity <= 0) { /* lỗi */ return false; }
+
+    int rows = DEFAULT_ROWS;
+    int cols = static_cast<int>(std::ceil(static_cast<double>(totalCapacity) / rows));
+
+    // Hàm này giờ sẽ hoạt động đúng với DynamicArray của bạn
+    initializeSeatMap(rows, cols); 
+    std::cout << "Đã khởi tạo seatMap " << rows << "x" << cols 
+              << " cho chuyến bay " << this->flightInstanceId << std::endl;
+
+    return loadBookedSeatsFromFile();
+}
+
+void SeatManager::release() {
+    this->flightInstanceId = "";
+    this->seatMap.clear();
+    this->selectedSeat = nullptr; // Rất quan trọng: reset lựa chọn khi đổi chuyến bay
+}
+
+// === CÁC HÀM MỚI CHO QUY TRÌNH CHỌN GHẾ ===
+bool SeatManager::selectSeat(const std::string& seatId) {
+    // Không thể chọn nếu chưa load chuyến bay
+    if (flightInstanceId.empty()) {
+        std::cerr << "Lỗi: Chưa có chuyến bay nào được tải." << std::endl;
+        return false;
+    }
+
+    // Tìm tọa độ của ghế
+    auto coords = Seat(seatId).getCoordinates();
+    if (coords.first == -1) {
+        std::cerr << "Lỗi: ID ghế '" << seatId << "' không hợp lệ." << std::endl;
+        return false;
+    }
+
+    auto [row, col] = coords;
+
+    // Kiểm tra xem tọa độ có hợp lệ không
+    if (row >= seatMap.size() || col >= seatMap[row].size()) {
+        std::cerr << "Lỗi: Ghế '" << seatId << "' không tồn tại trên chuyến bay này." << std::endl;
+        return false;
+    }
+
+    // Kiểm tra xem ghế có còn trống không
+    if (seatMap[row][col].isBooked()) {
+        std::cerr << "Lỗi: Ghế '" << seatId << "' đã có người đặt." << std::endl;
+        return false;
+    }
+
+    // Tất cả đều ổn, lưu con trỏ tới ghế này
+    selectedSeat = &seatMap[row][col];
+    std::cout << "Đã chọn thành công ghế: " << selectedSeat->getId() << std::endl;
+    return true;
+}
+
+void SeatManager::cancelSelection() {
+    if (selectedSeat) {
+        std::cout << "Đã hủy lựa chọn ghế: " << selectedSeat->getId() << std::endl;
+        selectedSeat = nullptr;
+    }
+}
+
+const Seat* SeatManager::getSelectedSeat() const {
+    return selectedSeat;
+}
+
+bool SeatManager::confirmSelection() {
+    if (!selectedSeat) {
+        std::cerr << "Lỗi: Chưa có ghế nào được chọn để xác nhận." << std::endl;
+        return false;
+    }
+
+    // 1. Đổi trạng thái của ghế mà con trỏ đang trỏ tới
+    selectedSeat->bookSeat();
+    std::cout << "Đang xác nhận và lưu ghế: " << selectedSeat->getId() << std::endl;
+
+    // 2. Lưu tất cả thay đổi vào file
+    bool success = saveAllFlightsStatusToFile();
+
+    // 3. Reset con trỏ sau khi hoàn tất
+    if (success) {
+        selectedSeat = nullptr;
+    } else {
+        // Nếu lưu file thất bại, trả lại trạng thái cũ để người dùng thử lại
+        selectedSeat->releaseSeat(); 
+        std::cerr << "Lỗi: Không thể lưu thay đổi vào file. Vui lòng thử lại." << std::endl;
+    }
+    
+    return success;
+}
+
+// CẬP NHẬT TRỰC TIẾP GHẾ VÀO FILE
+bool SeatManager::updateAndSaveChanges(const std::string& seatId, SeatStatus newStatus) {
+    if (flightInstanceId.empty()) { /* lỗi */ return false; }
+
+    auto coords = Seat(seatId).getCoordinates();
+    if (coords.first == -1) { /* lỗi */ return false; }
+
+    auto [row, col] = coords;
+
+    // THAY ĐỔI: Sử dụng hàm size()
+    if (row >= seatMap.size() || col >= seatMap[row].size()) {
+        std::cerr << "Lỗi: Tọa độ ghế nằm ngoài sơ đồ." << std::endl;
+        return false;
+    }
+    
+    seatMap[row][col].setStatus(newStatus);
+    std::cout << "Đã cập nhật ghế " << seatId << " trong bộ nhớ." << std::endl;
+
+    return saveAllFlightsStatusToFile();
+}
+
+const DynamicArray<DynamicArray<Seat>>& SeatManager::getSeatMap() const {
+    return seatMap;
+}
+
+const std::string& SeatManager::getCurrentFlightId() const {
+    return flightInstanceId;
+}
+
+bool SeatManager::loadBookedSeatsFromFile() {
+    std::ifstream file(seatStatusFilePath);
+    if (!file.is_open()) { /* ... thông báo ... */ return true; }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        std::stringstream ss(line);
+        std::string currentFid;
+        std::getline(ss, currentFid, '|');
+
+        if (currentFid == this->flightInstanceId) {
+            std::string bookedSeatsStr;
+            std::getline(ss, bookedSeatsStr);
+
+            std::stringstream seatsStream(bookedSeatsStr);
+            std::string seatId;
+            while(std::getline(seatsStream, seatId, ',')) {
+                auto coords = Seat(seatId).getCoordinates();
+                if (coords.first != -1) {
+                    // THAY ĐỔI: Sử dụng getSize()
+                    if (coords.first < seatMap.size() && coords.second < seatMap[coords.first].size()) {
+                         seatMap[coords.first][coords.second].bookSeat();
+                    }
+                }
             }
-            return false;
+            file.close();
+            std::cout << "Đã tải thành công trạng thái ghế..." << std::endl;
+            return true;
         }
     }
-    
-    return false;
+    file.close();
+    std::cout << "Thông báo: Không tìm thấy dữ liệu..." << std::endl;
+    return true;
 }
 
-bool SeatManager::releaseSeat(const std::string& seatId) {
-    if (!activeSeatMap) return false;
+bool SeatManager::saveAllFlightsStatusToFile() {
+    std::map<std::string, std::string> allFlightsData;
+    std::ifstream inFile(seatStatusFilePath);
+    if (inFile.is_open()) { /* ... đọc file vào map ... */ }
+    inFile.close();
 
-    // Tìm ghế trong sơ đồ
-    for (int i = 0; i < activeSeatMap->size(); ++i) {
-        Seat* seat = (*activeSeatMap)[i];
-        if (seat && seat->getId() == seatId) {
-            // Chỉ hủy được ghế Booked
-            if (seat->getStatus() == SeatStatus::Booked) {
-                seat->setStatus(SeatStatus::Available);
-                isDirty = true;
-                return true;
+    std::stringstream currentFlightLine;
+    currentFlightLine << this->flightInstanceId << "|";
+    std::string bookedSeatsStr;
+
+    // THAY ĐỔI: Sử dụng vòng lặp for với chỉ số thay cho for-each
+    for (int r = 0; r < seatMap.size(); ++r) {
+        for (int c = 0; c < seatMap[r].size(); ++c) {
+            const Seat& seat = seatMap[r][c]; // Lấy tham chiếu đến ghế để đọc
+            if (seat.isBooked()) {
+                if (!bookedSeatsStr.empty()) {
+                    bookedSeatsStr += ",";
+                }
+                bookedSeatsStr += seat.getId();
             }
-            return false;
         }
     }
+
+    currentFlightLine << bookedSeatsStr;
+    allFlightsData[this->flightInstanceId] = currentFlightLine.str();
+
+    std::ofstream outFile(seatStatusFilePath);
+    if (!outFile.is_open()) { /* ... lỗi ... */ return false; }
     
-    return false;
-}
-
-void SeatManager::saveChanges() {
-    if (!isDirty || !activeSeatMap || activeInstanceId.empty()) {
-        return;
+    for (const auto& pair : allFlightsData) {
+        outFile << pair.second << "\n";
     }
-
-    // Serialize và lưu vào cache
-    std::string serialized = serializeSeatMap(activeSeatMap);
-    seatDataCache.insert(activeInstanceId, serialized);
     
-    isDirty = false;
-}
-
-void SeatManager::unload() {
-    // Save trước khi unload nếu có thay đổi
-    saveChanges();
-
-    // Giải phóng bộ nhớ
-    if (activeSeatMap) {
-        for (int i = 0; i < activeSeatMap->size(); ++i) {
-            delete (*activeSeatMap)[i];
-        }
-        delete activeSeatMap;
-        activeSeatMap = nullptr;
-    }
-
-    activeInstanceId = "";
-    isDirty = false;
-}
-
-// --- Getters ---
-
-DynamicArray<Seat*>* SeatManager::getActiveSeatMap() const {
-    return activeSeatMap;
-}
-
-bool SeatManager::isLoaded() const {
-    return activeSeatMap != nullptr;
-}
-
-int SeatManager::getSeatColumns() const {
-    return DEFAULT_SEAT_COLS;
+    outFile.close();
+    std::cout << "Đã lưu thành công trạng thái mới..." << std::endl;
+    return true;
 }

@@ -6,6 +6,7 @@
 Booking::Booking(const std::string& flightInstanceId,
                  const std::string& agentId,
                  const std::string& passengerId,
+                 const std::string& seatID,
                  const std::string& bookingDate,
                  BookingClass bookingClass,
                  int baseFare,
@@ -14,6 +15,7 @@ Booking::Booking(const std::string& flightInstanceId,
       flightInstanceId(flightInstanceId),
       agentId(agentId),
       passengerId(passengerId),
+      seatID(seatID),
       bookingDate(bookingDate),
       bookingClass(bookingClass),
       baseFare(baseFare < 0 ? 0 : baseFare),
@@ -24,6 +26,7 @@ const std::string& Booking::getBookingId()      const { return bookingId; }
 const std::string& Booking::getFlightInstanceId() const { return flightInstanceId; }
 const std::string& Booking::getAgentId()        const { return agentId; }
 const std::string& Booking::getPassengerId()    const { return passengerId; }
+const std::string& Booking::getSeatID()        const { return seatID; }
 const std::string& Booking::getBookingDate()    const { return bookingDate; }
 BookingClass       Booking::getClass()          const { return bookingClass; }
 int                Booking::getBaseFare()       const { return baseFare; }
@@ -49,6 +52,7 @@ std::string Booking::toRecordLine() const {
            this->flightInstanceId + "|" +
            this->agentId + "|" +
            this->passengerId + "|" +
+           this->seatID + "|" +
            this->bookingDate + "|" +
            classStr + "|" +
            std::to_string(this->baseFare) + "|" +
@@ -74,7 +78,11 @@ Booking Booking::fromRecordLine(const std::string& line) {
     std::string passengerId = line.substr(start, end - start);
     start = end + 1;
     end = line.find('|', start);
-    
+
+    std::string seatID = line.substr(start, end - start);
+    start = end + 1;
+    end = line.find('|', start);
+
     std::string bookingDate = line.substr(start, end - start);
     start = end + 1;
     end = line.find('|', start);
@@ -92,7 +100,7 @@ Booking Booking::fromRecordLine(const std::string& line) {
     BookingStatus status = static_cast<BookingStatus>(statusInt);
 
     // Tạo đối tượng với đầy đủ thông tin
-    Booking booking(instanceId, agentId, passengerId, bookingDate, bClass, baseFare, status);
+    Booking booking(instanceId, agentId, passengerId, seatID, bookingDate, bClass, baseFare, status);
     
     // Ghi đè ID
     booking.overrideIdForLoad(id);

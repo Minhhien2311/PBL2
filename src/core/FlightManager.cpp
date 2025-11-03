@@ -1,5 +1,4 @@
-#include "core/FlightManager.h" 
-#include "core/SeatManager.h"
+#include "core/FlightManager.h"
 #include <fstream>
 #include <string>
 #include <sstream>
@@ -13,44 +12,12 @@ FlightManager::FlightManager(const std::string& flightsFilePath, const std::stri
     // Xây dựng bảng băm
     this->buildFlightIdTable();
     this->buildInstanceIdTable();
-
-    // Khởi tạo cache ghế và SeatManager
-    seatDataCache = new HashTable<std::string, std::string>();
-    
-    // Load dữ liệu ghế từ file (nếu có)
-    std::ifstream seatFile("data/seat_maps.txt");
-    if (seatFile.is_open()) {
-        std::string line;
-        while (std::getline(seatFile, line)) {
-            if (line.empty()) continue;
-            
-            // Format: instanceId|seatData
-            size_t pos = line.find('|');
-            if (pos != std::string::npos) {
-                std::string instanceId = line.substr(0, pos);
-                std::string seatData = line.substr(pos + 1);
-                seatDataCache->insert(instanceId, seatData);
-            }
-        }
-        seatFile.close();
-    }
-    
-    // Tạo SeatManager
-    seatManager = new SeatManager(*seatDataCache);
 }
 
 FlightManager::~FlightManager() {
     // Save all data before destruction
     saveAllData();
-    
-    if (seatManager) {
-        delete seatManager;
-    }
-    
-    if (seatDataCache) {
-        delete seatDataCache;
-    }
-    
+   
     for (int i = 0; i < allFlights.size(); i++) {
         delete allFlights[i]; 
     }
@@ -220,41 +187,4 @@ const DynamicArray<Flight*>& FlightManager::getAllFlights() const{
 
 const DynamicArray<FlightInstance*>& FlightManager::getAllInstances() const{
     return this->allInstances;
-}
-
-SeatManager* FlightManager::getSeatManager() {
-    return seatManager;
-}
-
-bool FlightManager::saveAllData() {
-    bool success = true;
-    
-    // Save seat changes
-    if (seatManager) {
-        seatManager->saveChanges();
-        
-        // Save seat cache to file
-        std::ofstream seatFile("data/seat_maps.txt");
-        if (seatFile.is_open()) {
-            // Save each instance in cache
-            for (int i = 0; i < allInstances.size(); ++i) {
-                if (allInstances[i]) {
-                    std::string instanceId = allInstances[i]->getInstanceId();
-                    std::string* seatData = seatDataCache->find(instanceId);
-                    if (seatData && !seatData->empty()) {
-                        seatFile << instanceId << "|" << *seatData << "\n";
-                    }
-                }
-            }
-            seatFile.close();
-        } else {
-            success = false;
-        }
-    }
-    
-    // Save flights and instances using existing methods
-    success = success && saveFlightsToFiles("data/flights.txt");
-    success = success && saveInstancesToFiles("data/flight_instances.txt");
-    
-    return success;
 }
