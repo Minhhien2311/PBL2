@@ -11,6 +11,7 @@
 #include "core/FlightManager.h"
 #include "core/BookingManager.h"
 #include "core/ReportManager.h"
+#include "core/AirportManager.h"
 
 #include <QLabel>
 #include <QVBoxLayout>
@@ -25,12 +26,14 @@ AgentInterface::AgentInterface(AccountManager* accManager,
                                FlightManager* flManager,
                                BookingManager* bkManager,
                                ReportManager* reportManager,
+                               AirportManager* airportManager,
                                QWidget *parent) 
     : QWidget(parent),
       accountManager_(accManager),
       flightManager_(flManager),
       bookingManager_(bkManager),
-      reportManager_(reportManager)
+      reportManager_(reportManager),
+      airportManager_(airportManager)
 {
     // Đảm bảo manager không null
     Q_ASSERT(accountManager_ != nullptr);
@@ -101,10 +104,12 @@ void AgentInterface::setupUi()
     stack_->addWidget(new DashboardPage(accountManager_, reportManager_, this));
 
     // 0. Trang Tìm & Đặt vé
-    stack_->addWidget(new SearchBookPage(flightManager_, bookingManager_, accountManager_, this));
+    stack_->addWidget(new SearchBookPage(flightManager_, bookingManager_, 
+                                         accountManager_, airportManager_, this));
     
     // 1. Trang Quản lý Đặt chỗ
-    stack_->addWidget(new AgentBookingsPage(bookingManager_, flightManager_, accountManager_, this));
+    stack_->addWidget(new AgentBookingsPage(bookingManager_, flightManager_, 
+                                            accountManager_, airportManager_, this));
     
     // 2. Tái sử dụng Trang Tài khoản
     stack_->addWidget(new AccountsPage(accountManager_, this)); 

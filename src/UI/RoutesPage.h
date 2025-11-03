@@ -9,6 +9,8 @@ class QPushButton;
 class QTableView;
 class QStandardItemModel;
 class FlightManager; // <--- Sửa lỗi: Tên đúng (số ít)
+class AirportManager;
+class AirportComboBox;
 
 class RoutesPage : public QWidget
 {
@@ -16,7 +18,7 @@ class RoutesPage : public QWidget
 
 public:
     // <--- Sửa lỗi: Sửa tên tham số cho rõ ràng
-    explicit RoutesPage(FlightManager* flightManager, QWidget *parent = nullptr);
+    explicit RoutesPage(FlightManager* flightManager, AirportManager* airportManager, QWidget *parent = nullptr);
 
 private slots:
     // (Các slot giữ nguyên)
@@ -34,13 +36,14 @@ private:
     void setupConnections();
 
     // <--- Sửa lỗi: Sửa tên biến thành viên cho nhất quán
-    FlightManager* flightManager_; 
+    FlightManager* flightManager_;
+    AirportManager* airportManager_;
 
     // --- UI Components ---
     QLineEdit* idSearchEdit_;
     QLineEdit* airlineSearchEdit_;
-    QLineEdit* fromSearchEdit_; 
-    QLineEdit* toSearchEdit_;   
+    AirportComboBox* fromSearchCombo_;
+    AirportComboBox* toSearchCombo_;   
 
     QTableView* tableView_;
     QStandardItemModel* model_;
