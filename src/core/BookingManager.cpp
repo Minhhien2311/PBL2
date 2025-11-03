@@ -188,3 +188,28 @@ DynamicArray<Booking*> BookingManager::getBookingsByAgentId(const std::string& a
     }
     return result;
 }
+
+// --- NGHIỆP VỤ 3: CẬP NHẬT BOOKING ---
+bool BookingManager::updateBooking(const std::string& bookingId,
+                                     const std::string& newPassengerId,
+                                     BookingClass newClass,
+                                     const std::string& newSeatId) {
+    // Tìm booking theo ID
+    Booking* booking = findBookingById(bookingId);
+    if (!booking) {
+        return false; // Không tìm thấy booking
+    }
+    
+    // Cập nhật các trường
+    if (!newPassengerId.empty()) {
+        booking->setPassengerId(newPassengerId);
+    }
+    booking->setClass(newClass);
+    if (!newSeatId.empty()) {
+        booking->setSeatId(newSeatId);
+    }
+    
+    // Lưu thay đổi vào file
+    saveDataToFiles(bookingsFilePath_);
+    return true;
+}

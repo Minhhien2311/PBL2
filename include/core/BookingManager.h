@@ -46,6 +46,12 @@ public:
 
     // NGHIỆP VỤ Hủy vé
     bool cancelBooking(FlightManager& flightManager, SeatManager& seatManager, const std::string& bookingId);
+    
+    // NGHIỆP VỤ Cập nhật vé
+    bool updateBooking(const std::string& bookingId, 
+                       const std::string& newPassengerId,
+                       BookingClass newClass, 
+                       const std::string& newSeatId);
 
     // --- Tìm kiếm  ---
     Booking* findBookingById(const std::string& bookingId);

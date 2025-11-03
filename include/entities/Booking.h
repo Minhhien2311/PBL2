@@ -59,6 +59,9 @@ public:
     // --- Setters ---
     void setBaseFare(int value);
     void setStatus(BookingStatus newStatus);
+    void setPassengerId(const std::string& newPassengerId);
+    void setClass(BookingClass newClass);
+    void setSeatId(const std::string& newSeatId);
 
     // --- Đọc/Ghi file ---
     std::string toRecordLine() const;
