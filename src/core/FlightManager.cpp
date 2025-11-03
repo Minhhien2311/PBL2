@@ -5,7 +5,8 @@
 
 // --- Constructor & Destructor ---
 
-FlightManager::FlightManager(const std::string& flightsFilePath, const std::string& instancesFilePath) {
+FlightManager::FlightManager(const std::string& flightsFilePath, const std::string& instancesFilePath) 
+    : flightsFilePath_(flightsFilePath), instancesFilePath_(instancesFilePath) {
     this->loadFlightsFromFile(flightsFilePath);
     this->loadInstancesFromFile(instancesFilePath);
 
@@ -187,4 +188,11 @@ const DynamicArray<Flight*>& FlightManager::getAllFlights() const{
 
 const DynamicArray<FlightInstance*>& FlightManager::getAllInstances() const{
     return this->allInstances;
+}
+
+// --- Save All Data ---
+bool FlightManager::saveAllData() {
+    bool flightsSaved = saveFlightsToFiles(flightsFilePath_);
+    bool instancesSaved = saveInstancesToFiles(instancesFilePath_);
+    return flightsSaved && instancesSaved;
 }

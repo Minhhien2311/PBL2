@@ -16,6 +16,10 @@ private:
     // Thêm bảng băm để tra cứu bằng ID
     HashTable<std::string, Flight*> flightIdTable;
     HashTable<std::string, FlightInstance*> instanceIdTable;
+    
+    // Lưu đường dẫn file để dùng trong saveAllData() và destructor
+    std::string flightsFilePath_;
+    std::string instancesFilePath_;
 
     // Hàm xây dựng bảng băm
     void buildFlightIdTable();
