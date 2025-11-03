@@ -50,6 +50,13 @@ public:
                            int totalBusinessSeats,
                            int fareEconomy,
                            int fareBusiness);
+    
+    // Các hàm Update và Delete
+    bool updateFlight(const std::string& flightId, const std::string& newAirline, 
+                      const std::string& newDeparture, const std::string& newDestination);
+    bool deleteFlight(const std::string& flightId);
+    bool updateInstance(const std::string& instanceId, const FlightInstance& updatedInstance);
+    bool deleteInstance(const std::string& instanceId);
 
     // Các hàm tìm kiếm 
     Flight* findFlightById(const std::string& flightId);
