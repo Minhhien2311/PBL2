@@ -25,6 +25,10 @@ private:
     // Con trỏ lưu trữ thông tin của người dùng *hiện tại* đang đăng nhập.
     // Sẽ là nullptr nếu chưa ai đăng nhập.
     Account* currentUser;
+    
+    // Lưu đường dẫn file để dùng trong các hàm update
+    std::string adminFilePath_;
+    std::string agentFilePath_;
 
     // --- Các hàm trợ giúp nội bộ ---
 
