@@ -246,7 +246,7 @@ bool FlightManager::deleteFlight(const std::string& flightId) {
             
             // Delete and remove from array
             delete allFlights[i];
-            allFlights.removeAt(i);
+            allFlights.erase(i);
             
             saveFlightsToFiles(flightsFilePath_);
             return true;
@@ -275,7 +275,7 @@ bool FlightManager::deleteInstance(const std::string& instanceId) {
             
             // Delete and remove from array
             delete allInstances[i];
-            allInstances.removeAt(i);
+            allInstances.erase(i);
             
             saveInstancesToFiles(instancesFilePath_);
             return true;

@@ -1,4 +1,4 @@
-#include "entities/seat.h" // Cập nhật đường dẫn nếu cần
+#include "entities/Seat.h"
 #include <cctype>
 #include <stdexcept>
 

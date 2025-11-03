@@ -133,15 +133,14 @@ bool BookingManager::cancelBooking(FlightManager& flightManager, SeatManager& se
     if (!seatIdToRelease.empty()) {
         if (instance != nullptr) { // Chỉ load SeatManager khi instance còn tồn tại
             // Tải đúng chuyến bay vào SeatManager
-            seatManager.loadForFlight(*instance);
+            seatManager.loadSeatMapFor(instance);
             
             // Yêu cầu SeatManager giải phóng ghế và lưu lại file seat_status.txt
-            seatManager.updateAndSaveChanges(seatIdToRelease, SeatStatus::Free);
+            seatManager.releaseSeat(seatIdToRelease);
             
             std::cout << "Đã hoàn trả ghế " << seatIdToRelease << " cho chuyến bay " << instance->getInstanceId() << std::endl;
         }
     }
-    // (Bỏ qua logic `instance->releaseSeats(...)` cũ)
 
 
     // Phần kiểm tra thời gian hủy vé so với giờ bay vẫn giữ nguyên
