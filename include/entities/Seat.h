@@ -5,10 +5,17 @@
 #include <vector>
 #include <utility> // Cho std::pair
 
+// Loại ghế
+enum class SeatType {
+    Economy,
+    Business
+};
+
 // Trạng thái của ghế
 enum class SeatStatus {
-    Free,
-    Booked
+    Available,
+    Booked,
+    Locked
 };
 
 /**
@@ -20,14 +27,16 @@ enum class SeatStatus {
 class Seat {
 private:
     std::string id;
+    SeatType type;
     SeatStatus status;
 
 public:
-    // Constructor đã được đơn giản hóa
-    Seat(const std::string& seatId, SeatStatus seatStatus = SeatStatus::Free);
+    // Constructor with type support
+    Seat(const std::string& seatId, SeatType seatType = SeatType::Economy, SeatStatus seatStatus = SeatStatus::Available);
 
     // Getters
     const std::string& getId() const;
+    SeatType getType() const;
     SeatStatus getStatus() const;
     bool isBooked() const;
 
