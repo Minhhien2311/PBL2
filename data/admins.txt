@@ -1,2 +1,2 @@
-ADM-001|admin001|70bf25e562eb0f78|Pham Minh Hien|0237267382|admin001@gmail.com
-ADM-002|admin002|70bf25e562eb0f78|Pham Minh Hien|0237267382|admin002@gmail.com
+ADM-001|admin001|70bf25e562eb0f78|0|Pham Minh Hien|0237267382|admin001@gmail.com
+ADM-002|admin002|70bf25e562eb0f78|0|Nguyen Do Khanh Linh|0912345678|admin002@gmail.com
