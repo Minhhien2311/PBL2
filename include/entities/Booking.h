@@ -21,6 +21,7 @@ private:
     std::string flightInstanceId;  // Chuyến bay cụ thể
     std::string agentId;          // ID của Agent tạo booking
     std::string passengerId;       // ID duy nhất của hành khác
+    std::string seatID;          // ID ghế được đặt
 
     // Thông tin
     std::string bookingDate;       // Ngày giờ tạo
@@ -39,6 +40,7 @@ public:
     explicit Booking(const std::string& flightInstanceId,
             const std::string& agentId,
             const std::string& passengerId,
+            const std::string& seatID,
             const std::string& bookingDate,
             BookingClass bookingClass,
             int baseFare, BookingStatus status = BookingStatus::Issued); 
@@ -48,6 +50,7 @@ public:
     const std::string& getFlightInstanceId() const;
     const std::string& getAgentId() const;
     const std::string& getPassengerId() const;
+    const std::string& getSeatID() const;
     const std::string& getBookingDate() const;
     BookingClass getClass() const;
     int getBaseFare() const;

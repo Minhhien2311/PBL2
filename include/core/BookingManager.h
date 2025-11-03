@@ -10,6 +10,7 @@ class FlightRule;
 #include "DSA/HashTable.h"
 #include <string>
 #include <chrono> 
+#include "core/SeatManager.h"
 
 // Chịu trách nhiệm cho nghiệp vụ Bán vé và Hủy vé (bao gồm kiểm tra logic)
 class BookingManager {
@@ -38,10 +39,11 @@ public:
                                const std::string& agentId,
                                const std::string& passengerId,
                                BookingClass bookingClass,
-                               int baseFare);
+                               int baseFare,
+                               SeatManager& seatManager);
 
     // NGHIỆP VỤ Hủy vé
-    bool cancelBooking(FlightManager& flightManager, const std::string& bookingId);
+    bool cancelBooking(FlightManager& flightManager, SeatManager& seatManager, const std::string& bookingId);
 
     // --- Tìm kiếm  ---
     Booking* findBookingById(const std::string& bookingId);

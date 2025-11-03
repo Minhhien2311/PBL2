@@ -1,4 +1,5 @@
 #include "entities/FlightInstance.h"
+#include "utils/GenID.h"
 #include "utils/DateTime.h"         // Cần để chuyển đổi ngày
 #include <iostream>                 // Cần cho hàm displayInfo
 
@@ -23,7 +24,7 @@ FlightInstance::FlightInstance(const std::string& flightId,
                                int totalBusinessSeats,
                                int fareEconomy,
                                int fareBusiness)
-    : instanceId(flightNumber),
+    : instanceId(IdGenerator::generateInstanceId()),
       flightId(flightId),
       flightNumber(flightNumber),
       departureDate(departureDate), 
@@ -35,9 +36,7 @@ FlightInstance::FlightInstance(const std::string& flightId,
       businessTotal(totalBusinessSeats),
       businessAvailable(totalBusinessSeats),
       fareEconomy(fareEconomy),
-      fareBusiness(fareBusiness),
-      businessSeatsCount(totalBusinessSeats),
-      economySeatsCount(totalEconomySeats) {}
+      fareBusiness(fareBusiness) {}
 
 // --- Getters ---
 const std::string& FlightInstance::getInstanceId() const { return instanceId; }
@@ -63,9 +62,6 @@ int FlightInstance::getBusinessAvailable() const { return businessAvailable; }
     
 double FlightInstance::getFareEconomy() const { return fareEconomy; }
 double FlightInstance::getFareBusiness() const { return fareBusiness; }
-
-int FlightInstance::getBusinessSeatsCount() const { return businessSeatsCount; }
-int FlightInstance::getEconomySeatsCount() const { return economySeatsCount; }
 
 // --- Hàm nghiệp vụ ---
 // Logic trung tâm để xử lý việc đặt vé một cách an toàn.
@@ -144,9 +140,7 @@ std::string FlightInstance::toRecordLine() const {
            std::to_string(this->businessTotal) + "|" +
            std::to_string(this->businessAvailable) + "|" +
            std::to_string(this->fareEconomy) + "|" +
-           std::to_string(this->fareBusiness) + "|" +
-           std::to_string(this->businessSeatsCount) + "|" +
-           std::to_string(this->economySeatsCount);
+           std::to_string(this->fareBusiness);
 }
 
 FlightInstance FlightInstance::fromRecordLine(const std::string& line) {
@@ -161,7 +155,7 @@ FlightInstance FlightInstance::fromRecordLine(const std::string& line) {
     start = end + 1;
     end = line.find('|', start);
 
-    std::string flightNum = line.substr(start, end - start);
+    std::string flightNumber = line.substr(start, end - start);
     start = end + 1;
     end = line.find('|', start);
 
@@ -199,50 +193,20 @@ FlightInstance FlightInstance::fromRecordLine(const std::string& line) {
 
     double fareEco = std::stod(line.substr(start, end - start));
     start = end + 1;
-    
-    // Check if we have the new fields (businessSeatsCount and economySeatsCount)
-    std::string remaining = line.substr(start);
-    double fareBus;
-    int businessSeats = DEFAULT_BUSINESS_SEATS;
-    int economySeats = DEFAULT_ECONOMY_SEATS;
-    
-    // Find next delimiter
-    end = remaining.find('|');
-    if (end == std::string::npos) {
-        // Old format: only fareBusiness
-        fareBus = std::stod(remaining);
-        // Use total seats as defaults
-        businessSeats = busTotal;
-        economySeats = ecoTotal;
-    } else {
-        // New format: fareBusiness | businessSeatsCount | economySeatsCount
-        fareBus = std::stod(remaining.substr(0, end));
-        
-        size_t start2 = end + 1;
-        end = remaining.find('|', start2);
-        if (end != std::string::npos) {
-            businessSeats = std::stoi(remaining.substr(start2, end - start2));
-            economySeats = std::stoi(remaining.substr(end + 1));
-        } else {
-            // Fallback if only one more field
-            businessSeats = busTotal;
-            economySeats = ecoTotal;
-        }
-    }
+    end = line.length();
+
+    double fareBus = std::stod(line.substr(start, end - start));
 
     // Dùng constructor public đã thay đổi
-    FlightInstance instance(fId, flightNum, depDate, depTime, arrDate, arrTime, ecoTotal, busTotal, fareEco, fareBus);
+    FlightInstance instance(id, flightNumber, depDate, depTime, arrDate, arrTime, ecoTotal, busTotal, fareEco, fareBus);
 
     // Ghi đè lại các giá trị
     instance.overrideIdForLoad(id);
     instance.economyAvailable = ecoAvail;   
-    instance.businessAvailable = busAvail;
-    instance.businessSeatsCount = businessSeats;
-    instance.economySeatsCount = economySeats;
+    instance.businessAvailable = busAvail; 
 
     return instance;
 }
-
 // --- Helper cho việc nạp dữ liệu ---
 
 void FlightInstance::overrideIdForLoad(const std::string& existingId) {
