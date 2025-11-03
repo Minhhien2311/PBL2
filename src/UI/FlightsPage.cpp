@@ -2,6 +2,7 @@
 
 // <--- Sửa lỗi: Include manager và các thư viện cần thiết
 #include "core/FlightManager.h"
+#include "core/SeatManager.h"
 #include "entities/FlightInstance.h" // Cần để đọc dữ liệu
 #include <string>
 
@@ -249,11 +250,22 @@ void FlightsPage::refreshTable()
 
     // 1. Gọi API/Core để lấy tất cả *Chuyến bay* (FlightInstance)
     const DynamicArray<FlightInstance*>& instances = flightManager_->getAllInstances();
+    SeatManager* seatManager = flightManager_->getSeatManager();
     
     // 2. Nạp dữ liệu mới
     for (int i = 0; i < instances.size(); ++i) {
         FlightInstance* inst = instances[i];
         if (inst) {
+            // Load seat map for this instance to get availability
+            seatManager->loadSeatMapFor(inst);
+            int ecoAvail = seatManager->getAvailableSeats(SeatClass::Economy);
+            int busAvail = seatManager->getAvailableSeats(SeatClass::Business);
+            
+            // Calculate totals (20% business, 80% economy)
+            int totalCap = inst->getTotalCapacity();
+            int busTotal = totalCap / 5;  // 20%
+            int ecoTotal = totalCap - busTotal;
+            
             QList<QStandardItem *> rowItems;
             rowItems << new QStandardItem(QString::fromStdString(inst->getInstanceId()))
                    << new QStandardItem(QString::fromStdString(inst->getFlightId()))
@@ -262,8 +274,8 @@ void FlightsPage::refreshTable()
                    << new QStandardItem(QString::fromStdString(inst->getDepartureTime()))
                    << new QStandardItem(QString::fromStdString(inst->getArrivalDate()))
                    << new QStandardItem(QString::fromStdString(inst->getArrivalTime()))
-                   << new QStandardItem(QString("%1/%2").arg(inst->getEconomyAvailable()).arg(inst->getEconomyTotal())) // Sửa lỗi: Đổi tên hàm
-                   << new QStandardItem(QString("%1/%2").arg(inst->getBusinessAvailable()).arg(inst->getBusinessTotal())); // Sửa lỗi: Đổi tên hàm
+                   << new QStandardItem(QString("%1/%2").arg(ecoAvail).arg(ecoTotal))
+                   << new QStandardItem(QString("%1/%2").arg(busAvail).arg(busTotal));
             model_->appendRow(rowItems);
         }
     }
