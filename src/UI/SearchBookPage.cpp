@@ -384,7 +384,7 @@ void SearchBookPage::onBookClicked()
     }
     
     // Hiển thị dialog đặt vé
-    BookingDialog dialog(instance, this);
+    BookingDialog dialog(instance, flightManager_, this);
     if (dialog.exec() != QDialog::Accepted) {
         return; // User cancelled
     }

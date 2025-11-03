@@ -1,6 +1,8 @@
 #include "core/FlightManager.h" 
+#include "core/SeatManager.h"
 #include <fstream>
 #include <string>
+#include <sstream>
 
 // --- Constructor & Destructor ---
 
@@ -11,9 +13,60 @@ FlightManager::FlightManager(const std::string& flightsFilePath, const std::stri
     // Xây dựng bảng băm
     this->buildFlightIdTable();
     this->buildInstanceIdTable();
+
+    // Khởi tạo cache ghế và SeatManager
+    seatDataCache = new HashTable<std::string, std::string>();
+    
+    // Load dữ liệu ghế từ file (nếu có)
+    std::ifstream seatFile("data/seat_maps.txt");
+    if (seatFile.is_open()) {
+        std::string line;
+        while (std::getline(seatFile, line)) {
+            if (line.empty()) continue;
+            
+            // Format: instanceId|seatData
+            size_t pos = line.find('|');
+            if (pos != std::string::npos) {
+                std::string instanceId = line.substr(0, pos);
+                std::string seatData = line.substr(pos + 1);
+                seatDataCache->insert(instanceId, seatData);
+            }
+        }
+        seatFile.close();
+    }
+    
+    // Tạo SeatManager
+    seatManager = new SeatManager(*seatDataCache);
 }
 
 FlightManager::~FlightManager() {
+    // Lưu thay đổi ghế trước khi hủy
+    if (seatManager) {
+        seatManager->saveChanges();
+        
+        // Lưu cache ghế ra file
+        std::ofstream seatFile("data/seat_maps.txt");
+        if (seatFile.is_open()) {
+            // Lưu từng instance trong cache
+            for (int i = 0; i < allInstances.size(); ++i) {
+                if (allInstances[i]) {
+                    std::string instanceId = allInstances[i]->getInstanceId();
+                    std::string* seatData = seatDataCache->find(instanceId);
+                    if (seatData && !seatData->empty()) {
+                        seatFile << instanceId << "|" << *seatData << "\n";
+                    }
+                }
+            }
+            seatFile.close();
+        }
+        
+        delete seatManager;
+    }
+    
+    if (seatDataCache) {
+        delete seatDataCache;
+    }
+    
     for (int i = 0; i < allFlights.size(); i++) {
         delete allFlights[i]; 
     }
@@ -183,4 +236,8 @@ const DynamicArray<Flight*>& FlightManager::getAllFlights() const{
 
 const DynamicArray<FlightInstance*>& FlightManager::getAllInstances() const{
     return this->allInstances;
+}
+
+SeatManager* FlightManager::getSeatManager() {
+    return seatManager;
 }

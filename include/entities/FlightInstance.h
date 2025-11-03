@@ -36,6 +36,10 @@ private:
     int fareEconomy;
     int fareBusiness;
 
+    // --- Số lượng ghế (cho SeatManager) ---
+    int businessSeatsCount;
+    int economySeatsCount;
+
 public:
     // Không cho phép tạo đối tượng rỗng
     FlightInstance() = delete;
@@ -73,6 +77,10 @@ public:
     
     double getFareEconomy() const;
     double getFareBusiness() const;
+
+    // Getters cho số lượng ghế (dùng cho SeatManager)
+    int getBusinessSeatsCount() const;
+    int getEconomySeatsCount() const;
 
     // --- Hàm nghiệp vụ ---
     // Giảm số ghế trống khi có người đặt vé. Trả về true nếu thành công.
