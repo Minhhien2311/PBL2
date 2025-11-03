@@ -19,6 +19,8 @@ private:
     FlightRule* currentRule; // Giữ nguyên
 
     HashTable<std::string, Booking*> bookingIdTable;
+    
+    std::string bookingsFilePath_; // Lưu đường dẫn file để dùng trong destructor
 
     // --- Hàm trợ giúp nội bộ ---
     void loadBookingsFromFile(const std::string& filePath);
