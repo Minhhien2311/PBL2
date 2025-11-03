@@ -1,8 +1,10 @@
 #include "RoutesPage.h"
 
 // <--- Sửa lỗi: Include manager và các thư viện cần thiết
-#include "core/FlightManager.h" 
+#include "core/FlightManager.h"
+#include "core/AirportManager.h"
 #include "entities/Flight.h" // Cần để đọc dữ liệu
+#include "AirportComboBox.h"
 #include <string>
 
 #include <QVBoxLayout>
@@ -33,9 +35,10 @@ QWidget* createSearchGroup_Routes(const QString& title, QLineEdit*& edit, QPushB
 }
 
 // <--- Sửa lỗi: Logic constructor (Lỗi 2)
-RoutesPage::RoutesPage(FlightManager* flightManager, QWidget *parent)
+RoutesPage::RoutesPage(FlightManager* flightManager, AirportManager* airportManager, QWidget *parent)
     : QWidget(parent),
-      flightManager_(flightManager) // Lưu con trỏ
+      flightManager_(flightManager),
+      airportManager_(airportManager)
 {
     Q_ASSERT(flightManager_ != nullptr); // Đảm bảo manager hợp lệ
     
@@ -127,14 +130,14 @@ void RoutesPage::setupUi()
         routeHL->setContentsMargins(0,0,0,0);
         routeHL->setSpacing(6);
 
-        fromSearchEdit_ = new QLineEdit;
-        fromSearchEdit_->setPlaceholderText("Điểm xuất phát");
-        toSearchEdit_ = new QLineEdit;
-        toSearchEdit_->setPlaceholderText("Điểm đến");
+        fromSearchCombo_ = new AirportComboBox(airportManager_);
+        toSearchCombo_ = new AirportComboBox(airportManager_);
 
-        routeHL->addWidget(fromSearchEdit_);
-        routeHL->addWidget(new QLabel("–"));
-        routeHL->addWidget(toSearchEdit_);
+        routeHL->addWidget(new QLabel("Từ:"));
+        routeHL->addWidget(fromSearchCombo_, 1);
+        routeHL->addWidget(new QLabel("→"));
+        routeHL->addWidget(new QLabel("Đến:"));
+        routeHL->addWidget(toSearchCombo_, 1);
 
         searchByRouteBtn_ = new QPushButton("Tìm theo lộ trình bay");
         searchByRouteBtn_->setProperty("class", "SearchBtn");
@@ -321,7 +324,15 @@ void RoutesPage::onSearchByAirline()
 }
 void RoutesPage::onSearchByRoute()
 {
+    std::string fromIATA = fromSearchCombo_->getSelectedIATA();
+    std::string toIATA = toSearchCombo_->getSelectedIATA();
+
+    if (fromIATA.empty() || toIATA.empty()) {
+        QMessageBox::information(this, "Thiếu dữ liệu", "Vui lòng chọn điểm đi và điểm đến.");
+        return;
+    }
+
     QMessageBox::information(this, "WIP", QString("Tìm kiếm theo Lộ trình: %1 - %2")
-                                                .arg(fromSearchEdit_->text())
-                                                .arg(toSearchEdit_->text()));
+                                                .arg(QString::fromStdString(fromIATA))
+                                                .arg(QString::fromStdString(toIATA)));
 }

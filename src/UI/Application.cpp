@@ -10,6 +10,7 @@
 #include "core/FlightManager.h"
 #include "core/BookingManager.h"
 #include "core/ReportManager.h"
+#include "core/AirportManager.h"
 
 #include <QStackedWidget>
 
@@ -18,12 +19,14 @@ Application::Application(AccountManager* accManager,
                          FlightManager* flManager, 
                          BookingManager* bkManager,
                          ReportManager* reportManager,
+                         AirportManager* airportManager,
                          QWidget *parent)
     : QMainWindow(parent), 
       accountManager_(accManager), 
       flightManager_(flManager),    // <--- Sửa lỗi: Tên nhất quán (số ít)
       bookingManager_(bkManager),
-      reportManager_(reportManager)
+      reportManager_(reportManager),
+      airportManager_(airportManager)
 {
     setWindowTitle("Hệ thống Quản lý Bán vé máy bay");
     resize(1100, 700); 
@@ -45,10 +48,13 @@ void Application::setupUi()
                                          flightManager_, 
                                          bookingManager_,
                                          reportManager_,
+                                         airportManager_,
                                          this);
     
     // <--- Sửa lỗi: Truyền cả 4 manager cho AgentInterface
-    agentInterface_ = new AgentInterface(accountManager_, flightManager_, bookingManager_, reportManager_, this);
+    agentInterface_ = new AgentInterface(accountManager_, flightManager_, 
+                                         bookingManager_, reportManager_,
+                                         airportManager_, this);
 
     // Khởi tạo QStackedWidget
     stack_ = new QStackedWidget(this);

@@ -12,6 +12,7 @@ class AccountManager;
 class FlightManager;  // <--- Sửa lỗi: Tên nhất quán (số ít)
 class BookingManager;
 class ReportManager;
+class AirportManager;
 
 class Application : public QMainWindow
 {
@@ -23,6 +24,7 @@ public:
                          FlightManager* flManager, 
                          BookingManager* bkManager,
                          ReportManager* reportManager,
+                         AirportManager* airportManager,
                          QWidget *parent = nullptr); 
     ~Application();
 
@@ -46,6 +48,7 @@ private:
     FlightManager* flightManager_;   // <--- Sửa lỗi: Tên nhất quán (số ít)
     BookingManager* bookingManager_;
     ReportManager* reportManager_;
+    AirportManager* airportManager_;
 };
 
 #endif // APPLICATION_H

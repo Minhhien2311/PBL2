@@ -12,6 +12,7 @@ class AccountManager;
 class FlightManager; // <--- CẬP NHẬT
 class BookingManager;
 class ReportManager;
+class AirportManager;
 
 // (Khai báo sớm các trang con MỚI)
 class SearchBookPage;
@@ -28,6 +29,7 @@ public:
                             FlightManager* flManager,
                             BookingManager* bkManager,
                             ReportManager* reportManager,
+                            AirportManager* airportManager,
                             QWidget *parent = nullptr);
 
 signals:
@@ -48,6 +50,7 @@ private:
     FlightManager* flightManager_; // <--- CẬP NHẬT
     BookingManager* bookingManager_;
     ReportManager* reportManager_;
+    AirportManager* airportManager_;
 };
 
 #endif // AGENTINTERFACE_H
