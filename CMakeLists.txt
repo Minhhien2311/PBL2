@@ -49,10 +49,7 @@ target_include_directories(pbl2 PRIVATE
 )
 
 # ===== Link Qt =====
-target_link_libraries(pbl2 PRIVATE 
-Qt6::Widgets
-mingw32
-)
+target_link_libraries(pbl2 PRIVATE Qt6::Widgets)
 
 # ===== Đầu ra exe: build/PBL2.exe =====
 set_target_properties(pbl2 PROPERTIES
