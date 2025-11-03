@@ -31,12 +31,19 @@ file(GLOB_RECURSE CORE_SOURCES    "src/core/*.cpp")
 file(GLOB_RECURSE ENTITY_SOURCES  "src/entities/*.cpp")
 file(GLOB_RECURSE UTILS_SOURCES   "src/utils/*.cpp")
 
+# Ensure new files are included
+set(ADDITIONAL_SOURCES
+    "src/entities/Seat.cpp"
+    "src/core/SeatManager.cpp"
+)
+
 # ===== Executable chính (WIN32 để không mở console) =====
 add_executable(pbl2 WIN32
     ${UI_SOURCES}
     ${CORE_SOURCES}
     ${ENTITY_SOURCES}
     ${UTILS_SOURCES}
+    ${ADDITIONAL_SOURCES}
 )
 
 # ===== Include paths (headers ở include/...) =====

@@ -1,4 +1,4 @@
-instanceId|flightId|flightNumber|departureDate|departureTime|arrivalDate|arrivalTime|totalEconomySeats|totalBusinessSeats|fareEconomy|fareBusiness
+instanceId|flightId|flightNumber|departureDate|departureTime|arrivalDate|arrivalTime|totalEconomySeats|totalBusinessSeats|fareEconomy|fareBusiness|businessSeatsCount|economySeatsCount
 FI-00001|VU_SGN_PXU|VU7320|15/11/2025|05:10|15/11/2025|06:08|120|8|1869000|3629000
 FI-00002|VJ_HAN_PQC|VJ0359|30/11/2025|20:50|30/11/2025|23:38|150|8|1542000|2881000
 FI-00003|VJ_HAN_DAD|VJ8342|09/12/2025|12:10|09/12/2025|14:59|120|8|1188000|2171000
