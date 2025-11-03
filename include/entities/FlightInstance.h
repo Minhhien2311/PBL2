@@ -3,17 +3,10 @@
 
 #include <string>
 
-// Dùng enum để định nghĩa rõ các hạng ghế, giúp các hàm nghiệp vụ an toàn hơn.
-enum class SeatClass {
-    Economy,
-    Business
-};
-
 /*
     FlightInstance: Đại diện cho MỘT LẦN BAY CỤ THỂ của một Flight.
-    - Đối tượng này tự quản lý số ghế trống để đảm bảo dữ liệu luôn nhất quán.
     - Ví dụ: Chuyến bay VN123 vào lúc 08:00 ngày 12/10/2025.
- */
+*/
 class FlightInstance {
 private:
     std::string instanceId;     // ID nội bộ duy nhất, tạo từ flightNumber-YYYYMMDD
