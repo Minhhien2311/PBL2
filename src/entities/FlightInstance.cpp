@@ -3,12 +3,6 @@
 #include "utils/DateTime.h"         // Cần để chuyển đổi ngày
 #include <iostream>                 // Cần cho hàm displayInfo
 
-// Default values for backward compatibility
-namespace {
-    constexpr int DEFAULT_BUSINESS_SEATS = 0;
-    constexpr int DEFAULT_ECONOMY_SEATS = 0;
-}
-
 /* --- Constructor ---
     Chỉ cần nhận vào thông tin gốc và totalCapacity.
 */

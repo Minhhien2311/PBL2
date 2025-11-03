@@ -125,7 +125,7 @@ bool SeatManager::confirmSelection() {
     if (!selectedSeat_) return false;
     
     std::string seatId = selectedSeat_->getId();
-    selectedSeat_ = nullptr;  // ✅ IMPORTANT: Reset before returning
+    selectedSeat_ = nullptr;  // IMPORTANT: Reset before returning
     
     return bookSeat(seatId);
 }
