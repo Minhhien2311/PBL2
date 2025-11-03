@@ -2,6 +2,12 @@
 #include "utils/DateTime.h"         // Cần để chuyển đổi ngày
 #include <iostream>                 // Cần cho hàm displayInfo
 
+// Default values for backward compatibility
+namespace {
+    constexpr int DEFAULT_BUSINESS_SEATS = 0;
+    constexpr int DEFAULT_ECONOMY_SEATS = 0;
+}
+
 /* --- Constructor ---
     Chỉ cần nhận vào thông tin gốc, sau đó tự động:
     1. Sinh ID duy nhất từ flightNumber-YYYYMMDD.
@@ -197,8 +203,8 @@ FlightInstance FlightInstance::fromRecordLine(const std::string& line) {
     // Check if we have the new fields (businessSeatsCount and economySeatsCount)
     std::string remaining = line.substr(start);
     double fareBus;
-    int businessSeats = 0;
-    int economySeats = 0;
+    int businessSeats = DEFAULT_BUSINESS_SEATS;
+    int economySeats = DEFAULT_ECONOMY_SEATS;
     
     // Find next delimiter
     end = remaining.find('|');
