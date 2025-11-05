@@ -3,12 +3,9 @@
 
 #include "DynamicArray.h"
 
-/**
- * @brief Map đơn giản sử dụng DynamicArray với tìm kiếm tuyến tính
- * @details CTDL tự viết, không dùng std::map
- *          Sử dụng DynamicArray để lưu trữ các cặp key-value
- *          Tìm kiếm: Linear search O(n)
- */
+//  Map đơn giản sử dụng DynamicArray với tìm kiếm tuyến tính
+//  Sử dụng DynamicArray để lưu trữ các cặp key-value
+//  Tìm kiếm: Linear search O(n)
 template<typename Key, typename Value>
 class SimpleMap {
 private:
@@ -31,11 +28,7 @@ public:
     // Destructor
     ~SimpleMap() = default;
     
-    /**
-     * @brief Thêm hoặc cập nhật cặp key-value
-     * @param key Khóa cần thêm/cập nhật
-     * @param value Giá trị tương ứng
-     */
+    // Thêm hoặc cập nhật cặp key-value
     void insert(const Key& key, const Value& value) {
         // Tìm xem key đã tồn tại chưa
         for (int i = 0; i < entries_.size(); ++i) {
@@ -49,12 +42,8 @@ public:
         // Key chưa tồn tại, thêm Entry mới
         entries_.push_back(Entry(key, value));
     }
-    
-    /**
-     * @brief Tìm kiếm value theo key (non-const)
-     * @param key Khóa cần tìm
-     * @return Con trỏ đến value nếu tìm thấy, nullptr nếu không tìm thấy
-     */
+
+    // Tìm kiếm value theo key (non-const)
     Value* find(const Key& key) {
         for (int i = 0; i < entries_.size(); ++i) {
             if (entries_[i].key == key) {
@@ -63,12 +52,8 @@ public:
         }
         return nullptr;
     }
-    
-    /**
-     * @brief Tìm kiếm value theo key (const)
-     * @param key Khóa cần tìm
-     * @return Con trỏ hằng đến value nếu tìm thấy, nullptr nếu không tìm thấy
-     */
+
+    // Tìm kiếm value theo key (const)
     const Value* find(const Key& key) const {
         for (int i = 0; i < entries_.size(); ++i) {
             if (entries_[i].key == key) {
@@ -77,12 +62,8 @@ public:
         }
         return nullptr;
     }
-    
-    /**
-     * @brief Xóa một cặp key-value
-     * @param key Khóa cần xóa
-     * @return true nếu xóa thành công, false nếu không tìm thấy
-     */
+
+    // Xóa một cặp key-value
     bool remove(const Key& key) {
         for (int i = 0; i < entries_.size(); ++i) {
             if (entries_[i].key == key) {
@@ -92,20 +73,13 @@ public:
         }
         return false;
     }
-    
-    /**
-     * @brief Kiểm tra xem key có tồn tại không
-     * @param key Khóa cần kiểm tra
-     * @return true nếu key tồn tại, false nếu không
-     */
+
+    // Kiểm tra xem key có tồn tại không
     bool contains(const Key& key) const {
         return find(key) != nullptr;
     }
-    
-    /**
-     * @brief Lấy danh sách tất cả các key
-     * @return DynamicArray chứa tất cả các key
-     */
+
+    // Lấy danh sách tất cả các key
     DynamicArray<Key> getKeys() const {
         DynamicArray<Key> keys;
         for (int i = 0; i < entries_.size(); ++i) {
@@ -113,35 +87,24 @@ public:
         }
         return keys;
     }
-    
-    /**
-     * @brief Lấy số lượng phần tử trong map
-     * @return Số lượng cặp key-value
-     */
+
+    // Lấy số lượng phần tử trong map
     int size() const {
         return entries_.size();
     }
     
-    /**
-     * @brief Kiểm tra map có rỗng không
-     * @return true nếu rỗng, false nếu không
-     */
+    // Kiểm tra map có rỗng không
     bool empty() const {
         return entries_.empty();
     }
     
-    /**
-     * @brief Xóa tất cả phần tử
-     */
+    // Xóa tất cả phần tử
     void clear() {
         entries_.clear();
     }
     
-    /**
-     * @brief Toán tử [] để truy cập/thêm mới phần tử
-     * @param key Khóa cần truy cập
-     * @return Tham chiếu đến value (tạo mới nếu chưa tồn tại)
-     */
+    // Toán tử [] để truy cập/thêm mới phần tử
+    // Nhập key cần truy cập, tham chiếu đến value (tạo mới nếu chưa tồn tại)
     Value& operator[](const Key& key) {
         // Tìm xem key đã tồn tại chưa
         for (int i = 0; i < entries_.size(); ++i) {
@@ -156,4 +119,4 @@ public:
     }
 };
 
-#endif // SIMPLEMAP_H
+#endif

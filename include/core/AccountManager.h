@@ -22,8 +22,7 @@ private:
     // Mảng động chứa các con trỏ trỏ tới đối tượng AccountAgent
     DynamicArray<AccountAgent*> allAgents;
     
-    // Con trỏ lưu trữ thông tin của người dùng *hiện tại* đang đăng nhập.
-    // Sẽ là nullptr nếu chưa ai đăng nhập.
+    // Con trỏ lưu trữ thông tin của người dùng *hiện tại* đang đăng nhập. Sẽ là nullptr nếu chưa ai đăng nhập.
     Account* currentUser;
     
     // Lưu đường dẫn file để dùng trong các hàm update
@@ -46,12 +45,8 @@ public:
     Tự động gọi các hàm load...FromFile để nạp dữ liệu.
      */
     AccountManager(const std::string& adminsFilePath, const std::string& agentsFilePath);
-    
-    /*
-    Hàm hủy mặc định.
-    (Lưu ý: DynamicArray<T*> đã được code để tự động 'delete' các con trỏ
-    khi nó bị hủy, nên ở đây không cần làm gì thêm).
-     */
+  
+    // DynamicArray<T*> đã được code để tự động 'delete' các con trỏ khi nó bị hủy, nên ở đây không cần làm gì thêm).
     ~AccountManager() = default;
 
     /*
@@ -66,59 +61,35 @@ public:
     // Đăng xuất người dùng hiện tại, gán 'currentUser' về nullptr.
     void logout();
 
-    /*
-    Lấy thông tin của người dùng đang đăng nhập.
-    Con trỏ trỏ tới đối tượng Account (có thể là Admin hoặc Agent).
-    Trả về nullptr nếu chưa đăng nhập.
-     */
+    // Lấy thông tin của người dùng đang đăng nhập. Con trỏ trỏ tới đối tượng Account (có thể là Admin hoặc Agent).
+    // Trả về nullptr nếu chưa đăng nhập.
     Account* getCurrentUser() const;
 
-    /*
-    Kiểm tra xem đã có ai đăng nhập hay chưa.
-    true nếu 'currentUser' khác nullptr, ngược lại là false.
-     */
+    // Kiểm tra xem đã có ai đăng nhập hay chưa.
+    // true nếu 'currentUser' khác nullptr, ngược lại là false.
     bool isLoggedIn() const;
 
-    /*
-    Tìm kiếm một Agent bằng ID (ví dụ: "AGT-001").
-    Nhập agentId ID của agent cần tìm.
-    Con trỏ trỏ tới AccountAgent nếu tìm thấy, ngược lại là nullptr.
-     */
+    // Tìm kiếm một Agent bằng ID (ví dụ: "AGT-001").
+    // Nhập agentId ID của agent cần tìm.
+    // Con trỏ trỏ tới AccountAgent nếu tìm thấy, ngược lại là nullptr.
     AccountAgent* findAgentById(const std::string& agentId);
     
-    /*
-    Lấy toàn bộ danh sách Agent (dùng cho Admin).
-    Tham chiếu (const) đến mảng động chứa các con trỏ AccountAgent.
-     */
+    // Lấy toàn bộ danh sách Agent (dùng cho Admin).
+    // Tham chiếu (const) đến mảng động chứa các con trỏ AccountAgent.
     const DynamicArray<AccountAgent*>& getAllAgents() const;
 
-    /*
-    Tạo một tài khoản Agent mới.
-    Tự động kiểm tra trùng lặp username trước khi tạo.
-    username Tên đăng nhập (phải là duy nhất).
-    password Mật khẩu thô (sẽ được hash).
-    true nếu tạo thành công, false nếu dữ liệu không hợp lệ hoặc username đã tồn tại.
-     */
+    // Tạo một tài khoản Agent mới. Tự động kiểm tra trùng lặp username trước khi tạo.
+    // username phải là duy nhất, password sẽ được hash, true nếu tạo thành công, false nếu dữ liệu không hợp lệ hoặc username đã tồn tại.
     bool createNewAgent(const std::string& username,
                         const std::string& password,
                         const std::string& fullName,
                         const std::string& phone,
                         const std::string& email);
-    
-    /*
-    Kích hoạt hoặc vô hiệu hóa một tài khoản Agent.
-    agentId ID của Agent cần thay đổi.
-    isActive Trạng thái mới (true = kích hoạt, false = vô hiệu hóa).
-    true nếu tìm thấy Agent và cập nhật thành công.
-     */
+
+    // Kích hoạt hoặc vô hiệu hóa một tài khoản Agent, true nếu tìm thấy Agent và cập nhật thành công.
     bool setAgentStatus(const std::string& agentId, bool isActive);
 
-    /*
-    Lưu tất cả thay đổi (danh sách Admin, Agent) về lại file.
-    adminsFilePath Đường dẫn file admins.
-    agentsFilePath Đường dẫn file agents.
-    true nếu lưu cả 2 file thành công.
-     */
+    // Lưu tất cả thay đổi (danh sách Admin, Agent) về lại file.
     bool saveDataToFiles(const std::string& adminsFilePath, const std::string& agentsFilePath) const;
 
     // Hàm bổ sung nếu có thể

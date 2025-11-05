@@ -74,9 +74,3 @@ AccountAdmin AccountAdmin::fromRecordLine(const std::string& line) {
 
     return admin;
 }
-
-// --- Triển khai hàm ảo ---
-// Hiển thị thông tin của Admin và số lượng agent đang quản lý
-void AccountAdmin::displayInfo() const {
-    return;
-}

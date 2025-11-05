@@ -86,11 +86,9 @@ void FlightManager::buildInstanceIdTable() {
 
 // <<< THAY ĐỔI: Cập nhật HashTable >>>
 // Note: 'number' parameter kept for backward compatibility but not used
-bool FlightManager::createNewFlight(const std::string& number,
-                                     const std::string& airline,
+bool FlightManager::createNewFlight( const std::string& airline,
                                      const std::string& departureIATA,
                                      const std::string& arrivalIATA) {
-    (void)number; // Suppress unused parameter warning
     if (airline.empty() || departureIATA.empty() || arrivalIATA.empty()) return false;
     
     // Kiểm tra trùng lặp bằng ID mới (airline-departure-arrival)

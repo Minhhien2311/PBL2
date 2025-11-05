@@ -7,7 +7,7 @@
 #include "DSA/HashTable.h"
 #include <string>
 
-class SeatManager;  // Forward declaration
+class SeatManager;
 
 class FlightManager {
 private:
@@ -23,7 +23,7 @@ private:
     std::string flightsFilePath_;
     std::string instancesFilePath_;
 
-    // SeatManager instance
+    // SeatManager để quản lý sơ đồ chỗ ngồi
     SeatManager* seatManager_;
 
     // Hàm xây dựng bảng băm
@@ -36,15 +36,14 @@ private:
 public:
     FlightManager();
     FlightManager(const std::string& flightsFilePath, const std::string& instancesFilePath);
-    ~FlightManager(); // xóa default, viết lại hàm hủy
+    ~FlightManager();
 
-    // createNewFlight (number parameter kept for backward compatibility but not used)
-    bool createNewFlight(const std::string& number,
-                         const std::string& airline,
+    // --- Các hàm tạo mới ---
+    bool createNewFlight(const std::string& airline,
                          const std::string& departureIATA,
                          const std::string& arrivalIATA);
 
-    // Đã đổi tham số để bao gồm flightNumber và totalCapacity
+    // Tạo mới chuyến bay cụ thể dựa trên
     bool createNewInstance(const std::string& flightId,
                            const std::string& flightNumber,
                            const std::string& departureDate,  
@@ -55,30 +54,29 @@ public:
                            int fareEconomy,
                            int fareBusiness);
     
-    // Các hàm Update và Delete
+    // --- Các hàm Update và Delete ---
     bool updateFlight(const std::string& flightId, const std::string& newAirline, 
                       const std::string& newDeparture, const std::string& newDestination);
     bool deleteFlight(const std::string& flightId);
     bool updateInstance(const std::string& instanceId, const FlightInstance& updatedInstance);
     bool deleteInstance(const std::string& instanceId);
 
-    // Các hàm tìm kiếm 
+    // --- Các hàm tìm kiếm ---
     Flight* findFlightById(const std::string& flightId);
     FlightInstance* findInstanceById(const std::string& instanceId);
     DynamicArray<FlightInstance*> findInstancesByFlightId(const std::string& flightId);
     DynamicArray<Flight*> findFlightByRoute(const std::string& fromIATA, const std::string& toIATA);
 
-    // Các hàm lưu 
+    // --- Các hàm lưu ---
     bool saveFlightsToFiles(const std::string& flightsFilePath) const;
     bool saveInstancesToFiles(const std::string& instancesFilePath) const;
-
-    // Các hàm Getters 
-    const DynamicArray<Flight*>& getAllFlights() const;       
-    const DynamicArray<FlightInstance*>& getAllInstances() const;
-    SeatManager* getSeatManager() const;
-
     // Lưu tất cả dữ liệu (flights, instances)
     bool saveAllData();
+
+    // --- Các hàm Getters ---
+    const DynamicArray<Flight*>& getAllFlights() const;
+    const DynamicArray<FlightInstance*>& getAllInstances() const;
+    SeatManager* getSeatManager() const;
 };
 
-#endif // FLIGHT_MANAGER_H
+#endif

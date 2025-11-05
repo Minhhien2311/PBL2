@@ -14,7 +14,7 @@ class FlightInstance;
 
 class SeatManager {
 private:
-    // === State Management ===
+    // Dữ liệu chính
     std::string currentInstanceId_;
     DynamicArray<Seat*> activeSeatMap_;
     Seat* selectedSeat_;
@@ -22,39 +22,39 @@ private:
     int seatRows_;
     int seatCols_;
     
-    // === File Paths ===
+    // Đường dẫn file
     std::string seatStatusFilePath_;
     std::string seatConfigFilePath_;
     
-    // === Helpers ===
+    // Hàm trợ giúp nội bộ
     void clearCurrentMap();
     void loadConfiguration();
     std::string seatIdToString(int row, int col) const;
     SeatType determineSeatType(int row) const;
     
 public:
-    // Constructor - Initialize at app startup
+    // Constructor và Destructor
     explicit SeatManager(const std::string& seatStatusPath = "data/seat_maps.txt",
                          const std::string& seatConfigPath = "data/seat_config.txt");
     
     ~SeatManager();
     
-    // === Core Functions ===
+    // -- Chức năng chính --
     bool loadForFlight(const std::string& instanceId);
     bool loadSeatMapFor(FlightInstance* instance);
     
-    // Seat operations
+    // --- Chức năng thao tác ghế ---
     bool selectSeat(const std::string& seatId);
     void cancelSelection();
     bool confirmSelection();
     bool bookSeat(const std::string& seatId);
     bool releaseSeat(const std::string& seatId);
     
-    // Save/Load
+    // --- Chức năng lưu ---
     bool saveChanges();
     bool updateAndSaveChanges();
     
-    // === Getters ===
+    // --- Getters ---
     DynamicArray<Seat*>* getActiveSeatMap();
     const DynamicArray<Seat*>& getAllSeats() const;
     Seat* getSelectedSeat() const;
@@ -64,4 +64,4 @@ public:
     int getAvailableSeats(SeatClass seatClass) const;
 };
 
-#endif // SEATMANAGER_H
+#endif

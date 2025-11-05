@@ -3,12 +3,10 @@
 
 #include <string>
 
-/*
-    Flight: Đại diện cho một tuyến bay (route) gốc, không thay đổi.
-    - Ví dụ: Tuyến bay từ Hà Nội (HAN) đến TP.HCM (SGN) của Vietnam Airlines.
-    - Không chứa thông tin về ngày/giờ, giá vé, hay số ghế.
-    - ID được tự động tạo từ: "<Airline>-<DepartureIATA>-<ArrivalIATA>"
- */
+// Flight: Đại diện cho một tuyến bay (route) gốc, không thay đổi.
+// Ví dụ: Tuyến bay từ Hà Nội (HAN) đến TP.HCM (SGN) của Vietnam Airlines.
+// Không chứa thông tin về ngày/giờ, giá vé, hay số ghế.
+// ID được tự động tạo từ: "<DepartureIATA>-<ArrivalIATA>-<Airline>"
 class Flight {
 private:
     std::string flightId;           // ID nội bộ duy nhất, tạo từ airline-departure-arrival
@@ -20,7 +18,7 @@ public:
     // Không cho phép tạo đối tượng rỗng
     Flight() = delete;
 
-    // Constructor chính: Tự động tạo ID từ airline-departure-arrival.
+    // Constructor: Tự động tạo ID từ departure-arrival-airline.
     explicit Flight(const std::string& airline,
                     const std::string& departureIATA,
                     const std::string& arrivalIATA);
@@ -32,7 +30,7 @@ public:
     const std::string& getDepartureAirport()const;
     const std::string& getArrivalAirport()  const;
 
-    // --- Đọc/Ghi file cấu hình ---
+    // --- Đọc/Ghi file ---
     // Chuyển đổi đối tượng thành 1 dòng string để lưu vào file.
     std::string toRecordLine() const;
     
@@ -42,10 +40,6 @@ public:
     // --- Helper cho việc nạp dữ liệu ---
     // Chỉ dùng cho hàm fromRecordLine để ghi đè ID tự sinh bằng ID đã lưu.
     void overrideIdForLoad(const std::string& existingId);
-
-    // --- Hàm tiện ích ---
-    // Cung cấp một chuỗi tóm tắt thông tin chuyến bay để hiển thị nhanh.
-    std::string getFlightInfo() const;
 };
 
 #endif // FLIGHT_H

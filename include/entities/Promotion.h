@@ -9,7 +9,7 @@ class Promotion {
 private:
     std::string code;
     std::string description;
-    std::string discountType; // "FIXED" or "PERCENTAGE"
+    std::string discountType;   // "FIXED" or "PERCENTAGE"
     double discountValue;
     std::string startDate;
     std::string endDate;
@@ -19,8 +19,8 @@ public:
     Promotion(const std::string& code, const std::string& desc,
               const std::string& type, double value, const std::string& start,
               const std::string& end, bool active);
-    
-    // Getter methods
+
+    // --- Getters ---
     std::string getCode() const;
     std::string getDescription() const;
     std::string getDiscountType() const;
@@ -28,12 +28,12 @@ public:
     std::string getStartDate() const;
     std::string getEndDate() const;
     bool getIsActive() const;
-    
-    // Setter methods
+
+    // --- Setters ---
     void setIsActive(bool active);
     void setEndDate(const std::string& endDate);
-    
-    // Các hàm nghiệp vụ
+
+    // --- Các hàm nghiệp vụ ---
     bool isExpired() const;
     
     static std::vector<Promotion> loadAllPromotions();
@@ -41,4 +41,4 @@ public:
     static bool validatePromotionCode(const std::string& code);
 };
 
-#endif // PROMOTION_H
+#endif
