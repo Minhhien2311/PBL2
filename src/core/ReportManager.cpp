@@ -5,10 +5,7 @@
 #include "core/BookingManager.h"
 #include "entities/AccountAgent.h"
 #include "entities/Booking.h"
-<<<<<<< HEAD
-=======
 #include "utils/DateTime.h"
->>>>>>> 35cb79dcedacc14b6b9c456b2b871c6a81cd4b30
 
 
 // Constructor: Gán các tham chiếu
@@ -65,11 +62,7 @@ DynamicArray<AgentReport*>* ReportManager::generateFullAgentReport() const {
 
         // for (int j = 0; j < bookings.size(); ++j) {
         //     Booking* booking = bookings[j];
-<<<<<<< HEAD
-        //     if (!booking) continue; // Bỏ qua nếu con trỏ booking không hợp lệ
-=======
         //     if (!booking) continue;
->>>>>>> 35cb79dcedacc14b6b9c456b2b871c6a81cd4b30
 
         //     // Kiểm tra xem booking có thuộc agent này không
         //     if (booking->getAgentId() == agent->getId()) {
@@ -88,10 +81,6 @@ DynamicArray<AgentReport*>* ReportManager::generateFullAgentReport() const {
 
         reportList->push_back(agentReport);
     }
-<<<<<<< HEAD
-    
-    return reportList;
-=======
 
     return reportList;
 }
@@ -184,5 +173,4 @@ int ReportManager::getDailyCancellations(const std::string& agentId) const {
 int ReportManager::getDailyTicketChanges(const std::string& agentId) const {
     // Chưa có tính năng đổi vé, luôn trả về 0
     return 0;
->>>>>>> 35cb79dcedacc14b6b9c456b2b871c6a81cd4b30
 }
