@@ -1,38 +1,5 @@
 #pragma once
 
-<<<<<<< HEAD
-// --- Khai báo xuôi (Forward Declarations) ---
-// Chúng ta chỉ dùng tham chiếu tới các Manager, nên không cần include file .h đầy đủ
-class AccountManager;
-class BookingManager;
-
-// --- Include các file cần thiết ---
-#include "DSA/DynamicArray.h" // Cần cho DynamicArray
-#include "entities/Booking.h" // Cần cho BookingStatus
-#include <string>
-
-/*
- * Struct đơn giản để chứa kết quả báo cáo cho mỗi Agent.
- * Dữ liệu này được tạo ra bởi ReportManager.
- */
-struct AgentReport {
-    std::string agentId;
-    std::string agentName;
-    int    totalBookings = 0; // Tổng số booking đã tạo
-    int    issuedTickets = 0; // Số booking đã phát hành (thành công)
-    int    cancelledTickets = 0; // Số booking đã hủy
-    double totalRevenue = 0.0;   // Tổng doanh thu từ các vé đã phát hành
-};
-
-/*
- * ReportManager: Lớp chịu trách nhiệm tính toán và thống kê
- * dữ liệu từ các manager khác.
- * Lớp này KHÔNG SỞ HỮU dữ liệu, nó chỉ ĐỌC dữ liệu.
- */
-class ReportManager {
-private:
-    // Giữ tham chiếu (references) đến các manager chính
-=======
 class AccountManager;
 class BookingManager;
 
@@ -55,27 +22,16 @@ struct AgentReport {
 class ReportManager {
 private:
     // Giữ tham chiếu đến các manager chính
->>>>>>> 35cb79dcedacc14b6b9c456b2b871c6a81cd4b30
     AccountManager& accountManager_;
     BookingManager& bookingManager_;
 
 public:
-<<<<<<< HEAD
-    // Constructor: Nhận các manager qua tham chiếu (Dependency Injection)
-    ReportManager(AccountManager& am, BookingManager& bm);
-
-    // Destructor mặc định là đủ
-    ~ReportManager() = default;
-
-
-=======
     // Constructor: Nhận các manager qua tham chiếu
     ReportManager(AccountManager& am, BookingManager& bm);
 
     // Destructor mặc định
     ~ReportManager() = default;
 
->>>>>>> 35cb79dcedacc14b6b9c456b2b871c6a81cd4b30
     // --- Thống kê Tổng quan (cho Admin) ---
 
     // Tính tổng doanh thu từ tất cả các booking đã 'Issued'
@@ -92,13 +48,6 @@ public:
     
     // Tạo một báo cáo doanh thu chi tiết cho từng agent.
     // Trả về một con trỏ tới DynamicArray mới. 
-<<<<<<< HEAD
-    // QUAN TRỌNG: Người gọi có trách nhiệm 'delete' đối tượng mảng này
-    // và tất cả các con trỏ AgentReport* bên trong nó sau khi sử dụng xong.
-    DynamicArray<AgentReport*>* generateFullAgentReport() const;
-};
-
-=======
     // QUAN TRỌNG: Người gọi có trách nhiệm 'delete' đối tượng mảng này và tất cả các con trỏ AgentReport* bên trong nó sau khi sử dụng xong.
     DynamicArray<AgentReport*>* generateFullAgentReport() const;
 
@@ -117,4 +66,3 @@ public:
     // Hiện tại trả về 0 vì chưa có tính năng đổi vé
     int getDailyTicketChanges(const std::string& agentId) const;
 };
->>>>>>> 35cb79dcedacc14b6b9c456b2b871c6a81cd4b30

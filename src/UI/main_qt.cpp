@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
     Application w(&accountManager, &flightManager, &bookingManager, 
                   &reportManager, &airportManager);
 
-    w.show();      
+    w.show();    
     return app.exec();
 }
 
