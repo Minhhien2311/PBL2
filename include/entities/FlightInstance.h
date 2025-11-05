@@ -3,10 +3,8 @@
 
 #include <string>
 
-/*
-    FlightInstance: Đại diện cho MỘT LẦN BAY CỤ THỂ của một Flight.
-    - Ví dụ: Chuyến bay VN123 vào lúc 08:00 ngày 12/10/2025.
-*/
+// FlightInstance: Đại diện cho MỘT LẦN BAY CỤ THỂ của một Flight.
+// Ví dụ: Chuyến bay VN123 vào lúc 08:00 ngày 12/10/2025.
 class FlightInstance {
 private:
     std::string instanceId;     // ID nội bộ duy nhất, tạo từ flightNumber-YYYYMMDD
@@ -19,7 +17,7 @@ private:
     std::string arrivalTime;    // Định dạng "HH:MM"
 
     // --- Capacity info ---
-    int totalCapacity;          // Tổng số ghế (chỉ dùng để tính layout)
+    int totalCapacity;          // Tổng số ghế
 
     // --- Giá vé ---
     int fareEconomy;
@@ -29,7 +27,7 @@ public:
     // Không cho phép tạo đối tượng rỗng
     FlightInstance() = delete;
 
-    // Constructor chính: chỉ cần totalCapacity thay vì economy/business riêng
+    // Constructor
     explicit FlightInstance(const std::string& flightId,
                             const std::string& flightNumber,
                             const std::string& departureDate,
@@ -48,19 +46,14 @@ public:
     const std::string& getDepartureTime() const;
     const std::string& getArrivalDate() const;
     const std::string& getArrivalTime() const;
-
-    // Only total capacity getter needed
     int getTotalCapacity() const;
     
     double getFareEconomy() const;
     double getFareBusiness() const;
 
-    // --- Setters cho các thông tin có thể thay đổi (giá vé) ---
+    // --- Setters cho các thông tin có thể thay đổi ---
     void setFareEconomy(double fare);
     void setFareBusiness(double fare);
-
-    // --- Hàm tiện ích ---
-    void displayInfo() const;           // Hiển thị thông tin chi tiết
 
     // --- Đọc/Ghi file cấu hình ---
     // Chuyển đổi đối tượng thành 1 dòng string để lưu vào file.

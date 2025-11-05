@@ -57,8 +57,6 @@ public:
 
     static AccountAdmin fromRecordLine(const std::string& line);
     std::string toRecordLine() const;
-    
-    void displayInfo() const override;
 };
 
 #endif

@@ -65,8 +65,3 @@ Flight Flight::fromRecordLine(const std::string& line) {
 void Flight::overrideIdForLoad(const std::string& existingId) {
     this->flightId = existingId;
 }
-
-// Tiện ích nhẹ (không dính I/O hoặc DB)
-std::string Flight::getFlightInfo() const {
-    return this->airline + " " + this->departureAirport + " -> " + this->arrivalAirport;
-}

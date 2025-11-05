@@ -50,12 +50,6 @@ void FlightInstance::setFareBusiness(double fare) {
     this->fareBusiness = fare;
 }
 
-// --- Hàm tiện ích ---
-void FlightInstance::displayInfo() const {
-    // Deploy sau nha
-    return;
-}
-
 // --- Đọc/Ghi file cấu hình ---
 
 // Chuyển đổi đối tượng thành một dòng string, ngăn cách bởi dấu '|'.

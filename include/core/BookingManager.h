@@ -1,7 +1,6 @@
 #ifndef BOOKING_MANAGER_H
 #define BOOKING_MANAGER_H
 
-// Khai báo tiền định (forward declaration)
 class FlightManager; 
 class FlightRule;
 
@@ -16,7 +15,7 @@ class FlightRule;
 class BookingManager {
 private:
     DynamicArray<Booking*> allBookings;
-    FlightRule* currentRule; // Giữ nguyên
+    FlightRule* currentRule;
 
     HashTable<std::string, Booking*> bookingIdTable;
     
@@ -28,14 +27,14 @@ private:
     void buildBookingIdTable();
 
 public:
+    // Constructor
     BookingManager();
-    // Hàm khởi tạo 
     BookingManager(const std::string& bookingsFilePath, FlightRule* rule);
-    
-    // Hàm hủy 
+
+    // Destructor
     ~BookingManager();
 
-    // NGHIỆP VỤ Bán vé 
+    // NGHIỆP VỤ ĐẶT VÉ 
     Booking* createNewBooking( FlightManager& flightManager,
                                const std::string& flightInstanceId,
                                const std::string& agentId,
@@ -44,7 +43,7 @@ public:
                                int baseFare,
                                SeatManager& seatManager);
 
-    // NGHIỆP VỤ Hủy vé
+    // NGHIỆP VỤ HỦY VÉ
     bool cancelBooking(FlightManager& flightManager, SeatManager& seatManager, const std::string& bookingId);
     
     // NGHIỆP VỤ Cập nhật vé
@@ -61,6 +60,9 @@ public:
 
     // Lấy danh sách booking theo Agent ID
     DynamicArray<Booking*> getBookingsByAgentId(const std::string& agentId) const;
+    
+    // Lấy danh sách booking theo Flight Instance ID (sẽ triển khai sau nếu cần)
+    // DynamicArray<Booking*> getBookingsByFlightInstanceId(const std::string& instanceId) const;
 
     // --- Lưu trữ  ---
     bool saveDataToFiles(const std::string& bookingsFilePath) const; 

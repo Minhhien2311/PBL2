@@ -17,14 +17,14 @@ enum BookingStatus {
 class Booking {
 private:
     // Định danh & Liên kết
-    std::string bookingId;         // Khóa nội bộ duy nhất
-    std::string flightInstanceId;  // Chuyến bay cụ thể
-    std::string agentId;          // ID của Agent tạo booking
-    std::string passengerId;       // ID duy nhất của hành khác
-    std::string seatID;          // ID ghế được đặt
+    std::string bookingId;          // Khóa nội bộ duy nhất
+    std::string flightInstanceId;   // Chuyến bay cụ thể
+    std::string agentId;            // ID của Agent tạo booking
+    std::string passengerId;        // ID duy nhất của hành khác
+    std::string seatID;             // ID ghế được đặt
 
     // Thông tin
-    std::string bookingDate;       // Ngày giờ tạo
+    std::string bookingDate;        // Ngày giờ tạo
     BookingClass bookingClass;
 
     // Chi tiết giá vé  
@@ -36,7 +36,7 @@ private:
 public:
     Booking() = default;
 
-    // Constructor chính
+    // Constructor
     explicit Booking(const std::string& flightInstanceId,
             const std::string& agentId,
             const std::string& passengerId,
