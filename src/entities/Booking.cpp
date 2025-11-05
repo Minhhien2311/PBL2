@@ -1,17 +1,21 @@
-#include "C:/PBL2/include/entities/Booking.h"
-#include "C:/PBL2/include/utils/GenID.h"
+#include "entities/Booking.h"
+#include "utils/GenID.h"
 #include <string> 
 
 //  Constructor
 Booking::Booking(const std::string& flightInstanceId,
+                 const std::string& agentId,
                  const std::string& passengerId,
+                 const std::string& seatID,
                  const std::string& bookingDate,
                  BookingClass bookingClass,
                  int baseFare,
                 BookingStatus status)
     : bookingId(IdGenerator::generateBookingId()),
       flightInstanceId(flightInstanceId),
+      agentId(agentId),
       passengerId(passengerId),
+      seatID(seatID),
       bookingDate(bookingDate),
       bookingClass(bookingClass),
       baseFare(baseFare < 0 ? 0 : baseFare),
@@ -20,7 +24,9 @@ Booking::Booking(const std::string& flightInstanceId,
 //  Getters
 const std::string& Booking::getBookingId()      const { return bookingId; }
 const std::string& Booking::getFlightInstanceId() const { return flightInstanceId; }
+const std::string& Booking::getAgentId()        const { return agentId; }
 const std::string& Booking::getPassengerId()    const { return passengerId; }
+const std::string& Booking::getSeatID()        const { return seatID; }
 const std::string& Booking::getBookingDate()    const { return bookingDate; }
 BookingClass       Booking::getClass()          const { return bookingClass; }
 int                Booking::getBaseFare()       const { return baseFare; }
@@ -36,6 +42,18 @@ void Booking::setStatus(BookingStatus newStatus) {
     this->status = newStatus;
 }
 
+void Booking::setPassengerId(const std::string& newPassengerId) {
+    this->passengerId = newPassengerId;
+}
+
+void Booking::setClass(BookingClass newClass) {
+    this->bookingClass = newClass;
+}
+
+void Booking::setSeatId(const std::string& newSeatId) {
+    this->seatID = newSeatId;
+}
+
 // --- Đọc/Ghi file ---
 
 std::string Booking::toRecordLine() const {
@@ -44,7 +62,9 @@ std::string Booking::toRecordLine() const {
 
     return this->bookingId + "|" +
            this->flightInstanceId + "|" +
+           this->agentId + "|" +
            this->passengerId + "|" +
+           this->seatID + "|" +
            this->bookingDate + "|" +
            classStr + "|" +
            std::to_string(this->baseFare) + "|" +
@@ -63,10 +83,18 @@ Booking Booking::fromRecordLine(const std::string& line) {
     start = end + 1;
     end = line.find('|', start);
 
+    std::string agentId = line.substr(start, end - start);
+    start = end + 1;
+    end = line.find('|', start);
+
     std::string passengerId = line.substr(start, end - start);
     start = end + 1;
     end = line.find('|', start);
-    
+
+    std::string seatID = line.substr(start, end - start);
+    start = end + 1;
+    end = line.find('|', start);
+
     std::string bookingDate = line.substr(start, end - start);
     start = end + 1;
     end = line.find('|', start);
@@ -84,7 +112,7 @@ Booking Booking::fromRecordLine(const std::string& line) {
     BookingStatus status = static_cast<BookingStatus>(statusInt);
 
     // Tạo đối tượng với đầy đủ thông tin
-    Booking booking(instanceId, passengerId, bookingDate, bClass, baseFare, status);
+    Booking booking(instanceId, agentId, passengerId, seatID, bookingDate, bClass, baseFare, status);
     
     // Ghi đè ID
     booking.overrideIdForLoad(id);

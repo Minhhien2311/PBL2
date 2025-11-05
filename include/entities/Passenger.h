@@ -10,11 +10,11 @@ enum class Gender {
 
 class Passenger {
 private:
-    std::string id;            // Mã định danh
-    std::string fullName;      // Họ tên đầy đủ
-    std::string dateOfBirth;   // Khuyến nghị: "yyyy-mm-dd"
-    Gender      gender;        // Giới tính (enum class)
-    std::string phoneNumber;   // Số điện thoại liên hệ
+    std::string id;             // Mã định danh
+    std::string fullName;       // Họ tên đầy đủ
+    std::string dateOfBirth;    // Khuyến nghị: "yyyy-mm-dd"
+    Gender      gender;         // Giới tính (enum class)
+    std::string phoneNumber;    // Số điện thoại liên hệ
 
     std::string passportNumber; // Số hộ chiếu (nếu là nội địa có thể để trống/CCCD)
     std::string nationality;    // Quốc tịch
@@ -23,7 +23,8 @@ public:
     // Không cho phép tạo đối tượng rỗng.
     Passenger() = delete;
 
-    Passenger(const std::string& name,
+    Passenger(const std::string& id,
+              const std::string& name,
               const std::string& dob,
               Gender gender,
               const std::string& phone,
@@ -33,7 +34,7 @@ public:
     // Destructor mặc định là đủ dùng vì lớp không quản lý tài nguyên động.
     ~Passenger() = default;
 
-    // Getters (trả const ref cho string để tránh copy) 
+    // --- Getters ---
     const std::string& getId()            const;
     const std::string& getFullName()      const;
     const std::string& getDateOfBirth()   const;
@@ -48,8 +49,6 @@ public:
     void setPhoneNumber(const std::string& phone);
     void setPassportNumber(const std::string& passport);
     void setNationality(const std::string& nation);
-
-    void overrideIdForLoad(const std::string& existingId);
     
     // --- Đọc/Ghi file ---
     // Chuyển đổi đối tượng thành 1 dòng string để lưu vào file.

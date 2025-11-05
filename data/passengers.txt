@@ -1,4 +1,5 @@
-1|Le Van C|1985-03-12|c.le@email.com|0901111111|789 Pine St|C12345678|Vietnamese|VN001
-2|Pham Thi D|1992-07-25|d.pham@email.com|0902222222|321 Cedar St|D87654321|Vietnamese|VN002
-3|Tran Van E|2018-11-05|e.tran@email.com|0903333333|654 Maple St|E11223344|Vietnamese|
-4|Nguyen Thi F|1978-01-30|f.nguyen@email.com|0904444444|987 Birch St|F44332211|Vietnamese|VN003
+001|Nguyen Van A|1990-05-15|0|0901234567|N1234567|Vietnamese
+002|Tran Thi B|1992-08-20|1|0902345678|N2345678|Vietnamese
+003|Le Van C|1985-03-10|0|0903456789|N3456789|Vietnamese
+004|Pham Thi D|1995-11-25|1|0904567890|N4567890|Vietnamese
+005|Hoang Van E|1988-07-18|0|0905678901|N5678901|Vietnamese

@@ -1,6 +1,6 @@
-#include "C:/PBL2/include/entities/AccountAdmin.h"
-#include "C:/PBL2/include/utils/GenID.h"
-#include "C:/PBL2/include/DSA/DynamicArray.h"
+#include "entities/AccountAdmin.h"
+#include "utils/GenID.h"
+#include "DSA/DynamicArray.h"
 #include <iostream>
 #include <algorithm>
 
@@ -73,10 +73,4 @@ AccountAdmin AccountAdmin::fromRecordLine(const std::string& line) {
     admin.overridePasswordHashForLoad(passwordHash);
 
     return admin;
-}
-
-// --- Triển khai hàm ảo ---
-// Hiển thị thông tin của Admin và số lượng agent đang quản lý
-void AccountAdmin::displayInfo() const {
-    return;
 }

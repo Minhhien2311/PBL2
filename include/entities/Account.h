@@ -24,7 +24,7 @@ private:
     static bool verifyPassword(const std::string& plain, const std::string& hash);
 
 public:
-    const std::string& getPasswordHash() const;//debug
+    const std::string& getPasswordHash() const;
     // Không cho phép tạo đối tượng Account rỗng
     Account() = delete;
 
@@ -44,7 +44,7 @@ public:
     const std::string& getPhone()     const;
     const std::string& getEmail()     const;
 
-    // Destructor ảo: Bắt buộc phải có cho lớp cơ sở có hàm ảo
+    // Destructor ảo cho lớp cơ sở có hàm ảo
     virtual ~Account() = default;
 
     // --- Setters ---
@@ -59,11 +59,6 @@ public:
     // Chỉ dùng cho việc nạp dữ liệu từ file.
     void overrideIdForLoad(const std::string& existingId);
     void overridePasswordHashForLoad(const std::string& existingHash);
-
-    // --- Hàm ảo thuần túy ---
-    // Biến lớp Account thành lớp trừu tượng.
-    // Các lớp con (Admin, Agent) BẮT BUỘC phải định nghĩa lại hàm này.
-    virtual void displayInfo() const = 0;
 };
 
-#endif // ACCOUNT_H
+#endif

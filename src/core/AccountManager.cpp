@@ -1,11 +1,12 @@
-#include "C:/PBL2/include/core/AccountManager.h"
+#include "core/AccountManager.h"
 #include <fstream>
 #include <string>
 
 // --- Constructor & Destructor ---
 
 // Constructor: Khởi tạo currentUser là nullptr và nạp dữ liệu từ file.
-AccountManager::AccountManager(const std::string& adminsFilePath, const std::string& agentsFilePath) {
+AccountManager::AccountManager(const std::string& adminsFilePath, const std::string& agentsFilePath) 
+    : adminFilePath_(adminsFilePath), agentFilePath_(agentsFilePath) {
     this->currentUser = nullptr;
     this->loadAdminsFromFile(adminsFilePath);
     this->loadAgentsFromFile(agentsFilePath);
@@ -161,4 +162,28 @@ bool AccountManager::saveDataToFiles(const std::string& adminsFilePath, const st
     agentFile.close();
 
     return true;
+}
+
+// --- Hàm bổ sung ---
+
+void AccountManager::updateAgentProfile(const std::string& agentId, std::string newName, std::string newPhone, std::string newEmail) {
+    AccountAgent* agent = findAgentById(agentId);
+    if (agent) {
+        agent->setFullName(newName);
+        agent->setPhone(newPhone);
+        agent->setEmail(newEmail);
+        
+        // Tự động lưu thay đổi vào file (dùng member variables)
+        saveDataToFiles(adminFilePath_, agentFilePath_);
+    }
+}
+
+void AccountManager::changeAgentPassword(const std::string& agentId, std::string newPassword) {
+    AccountAgent* agent = findAgentById(agentId);
+    if (agent) {
+        agent->changePassword(newPassword);
+        
+        // Tự động lưu thay đổi vào file (dùng member variables)
+        saveDataToFiles(adminFilePath_, agentFilePath_);
+    }
 }
