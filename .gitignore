@@ -51,3 +51,5 @@ Operating System generated files
 .Trashes
 ehthumbs.db
 Thumbs.db
+*.backup
+*.bak

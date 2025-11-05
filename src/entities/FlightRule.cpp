@@ -1,4 +1,4 @@
-#include "C:/PBL2/include/entities/FlightRule.h"
+#include "entities/FlightRule.h"
 #include <string>
 #include <stdexcept>
 

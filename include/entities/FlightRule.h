@@ -3,11 +3,9 @@
 
 #include <string>
 
-/*
-    Đối tượng chứa bộ luật chung.
-    - Chỉ có một đối tượng này được tạo khi chương trình khởi động, đọc từ file.
-    - Admin có thể thay đổi các quy tắc này trong lúc chạy và lưu lại.
- */
+// Đối tượng chứa bộ luật chung.
+// Chỉ có một đối tượng này được tạo khi chương trình khởi động, đọc từ file.
+// Admin có thể thay đổi các quy tắc này trong lúc chạy và lưu lại.
 class FlightRule {
 private:
     // --- Công tắc tổng quyết định tính năng có được BẬT hay không ---
@@ -20,15 +18,15 @@ public:
     // Không cho phép tạo đối tượng rỗng, phải có đầy đủ quy tắc.
     FlightRule() = delete;
 
-    // Constructor chính: Khởi tạo bộ luật từ dữ liệu (ví dụ: đọc từ file).
+    // Constructor: Khởi tạo bộ luật từ dữ liệu
     explicit FlightRule(bool allowCancel,
                         int cancelCutoffHours);
 
-    // --- Getters: Dùng để đọc các quy tắc hiện hành ---
+    // --- Getters ---
     bool   isCancelAllowed() const;
     int    getCancelCutoffHours() const;
 
-    // --- Setters: Dùng cho Admin để thay đổi quy tắc và lưu lại ---
+    // --- Setters ---
     void setCancelAllowed(bool allowed);
     void setCancelCutoffHours(int hours);
 

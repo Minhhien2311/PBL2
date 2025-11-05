@@ -1,5 +1,5 @@
 #include <iostream>
-#include "C:/PBL2/include/entities/Promotion.h"
+#include "entities/Promotion.h"
 
 Promotion::Promotion(const std::string& code, const std::string& desc,
                      const std::string& type, double value, const std::string& start,

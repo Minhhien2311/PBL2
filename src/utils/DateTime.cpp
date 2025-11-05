@@ -1,5 +1,5 @@
 // Time.cpp — định nghĩa hàm cho utils::Time
-#include "utils/Time.h"
+#include "utils/DateTime.h"
 #include <sstream>   // std::ostringstream
 #include <iomanip>   // std::put_time
 
@@ -33,22 +33,22 @@ inline std::tm safe_gmtime(std::time_t t) {
 } // namespace
 
 // ----- nowUtc -----
-std::chrono::system_clock::time_point Time::nowUtc() {
+std::chrono::system_clock::time_point DateTime::nowUtc() {
     return std::chrono::system_clock::now();
 }
 
 // ----- toLocalTm / toUtcTm -----
-std::tm Time::toLocalTm(std::chrono::system_clock::time_point tp) {
+std::tm DateTime::toLocalTm(std::chrono::system_clock::time_point tp) {
     std::time_t t = std::chrono::system_clock::to_time_t(tp);
     return safe_localtime(t);
 }
-std::tm Time::toUtcTm(std::chrono::system_clock::time_point tp) {
+std::tm DateTime::toUtcTm(std::chrono::system_clock::time_point tp) {
     std::time_t t = std::chrono::system_clock::to_time_t(tp);
     return safe_gmtime(t);
 }
 
 // ----- formatLocal / formatUtc -----
-std::string Time::formatLocal(std::chrono::system_clock::time_point tp,
+std::string DateTime::formatLocal(std::chrono::system_clock::time_point tp,
                               const char* fmt) {
     std::tm tm = toLocalTm(tp);
     std::ostringstream oss;
@@ -56,7 +56,7 @@ std::string Time::formatLocal(std::chrono::system_clock::time_point tp,
     return oss.str();
 }
 
-std::string Time::formatUtc(std::chrono::system_clock::time_point tp,
+std::string DateTime::formatUtc(std::chrono::system_clock::time_point tp,
                             const char* fmt) {
     std::tm tm = toUtcTm(tp);
     std::ostringstream oss;
@@ -65,16 +65,16 @@ std::string Time::formatUtc(std::chrono::system_clock::time_point tp,
 }
 
 // ----- epoch <-> time_point -----
-std::time_t Time::toUnix(std::chrono::system_clock::time_point tp) {
+std::time_t DateTime::toUnix(std::chrono::system_clock::time_point tp) {
     return std::chrono::system_clock::to_time_t(tp);
 }
-std::chrono::system_clock::time_point Time::fromUnix(std::time_t sec) {
+std::chrono::system_clock::time_point DateTime::fromUnix(std::time_t sec) {
     return std::chrono::system_clock::from_time_t(sec);
 }
 
 // ----- HÀM MỚI: fromDmYHm -----
 std::chrono::system_clock::time_point 
-Time::fromDmYHm(const std::string& date, const std::string& time) {
+DateTime::fromDmYHm(const std::string& date, const std::string& time) {
     std::tm tm = {};
     std::string dateTimeStr = date + " " + time;
     std::stringstream ss(dateTimeStr);
@@ -90,15 +90,13 @@ Time::fromDmYHm(const std::string& date, const std::string& time) {
 }
 
 // ----- HÀM MỚI: formatDmY -----
-std::string Time::formatDmY(std::chrono::system_clock::time_point tp) {
+std::string DateTime::formatDmY(std::chrono::system_clock::time_point tp) {
     // Dùng lại hàm formatLocal đã có với định dạng mới
     return formatLocal(tp, "%d/%m/%Y");
 }
 
 // ----- HÀM MỚI: formatHm -----
-std::string Time::formatHm(std::chrono::system_clock::time_point tp) {
+std::string DateTime::formatHm(std::chrono::system_clock::time_point tp) {
     // Dùng lại hàm formatLocal đã có với định dạng mới
     return formatLocal(tp, "%H:%M");
 }
-
-} // namespace utils

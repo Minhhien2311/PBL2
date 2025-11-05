@@ -1,0 +1,29 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "core-ninja",
+      "displayName": "Core (Ninja, no Qt)",
+      "generator": "Ninja",
+      "binaryDir": "build/core-ninja",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "qt-mingw",
+      "displayName": "Qt 6.9.3 + MinGW 13.1 (C:\\Qt)",
+      "generator": "Ninja",
+      "binaryDir": "build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_PREFIX_PATH": "C:/Qt/6.9.3/mingw_64"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "core-ninja", "configurePreset": "core-ninja" },
+    { "name": "qt-mingw",  "configurePreset": "qt-mingw" }
+  ]
+}
