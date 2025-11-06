@@ -35,6 +35,7 @@ file(GLOB_RECURSE UTILS_SOURCES   "src/utils/*.cpp")
 set(ADDITIONAL_SOURCES
     "src/entities/Seat.cpp"
     "src/core/SeatManager.cpp"
+    "src/UI/Application.cpp"
 )
 
 # ===== Executable chính (WIN32 để không mở console) =====
