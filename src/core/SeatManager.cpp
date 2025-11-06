@@ -5,6 +5,9 @@
 #include <iostream>
 #include <vector>
 
+#include <algorithm>
+
+
 SeatManager::SeatManager(const std::string& seatStatusPath,
                          const std::string& seatConfigPath)
     : seatStatusFilePath_(seatStatusPath),
@@ -21,6 +24,23 @@ SeatManager::~SeatManager() {
     clearCurrentMap();
 }
 
+// void SeatManager::loadConfiguration() {
+//     std::ifstream file(seatConfigFilePath_);
+//     if (!file.is_open()) {
+//         std::cerr << "Warning: Cannot open " << seatConfigFilePath_ << ". Using defaults.\n";
+//         seatCols_ = 6;
+//         return;
+//     }
+    
+//     std::string line;
+//     while (std::getline(file, line)) {
+//         if (line.find("SEAT_LAYOUT_COLS=") == 0) {
+//             seatCols_ = std::stoi(line.substr(17));
+//         }
+//     }
+//     file.close();
+// }
+
 void SeatManager::loadConfiguration() {
     std::ifstream file(seatConfigFilePath_);
     if (!file.is_open()) {
@@ -28,15 +48,23 @@ void SeatManager::loadConfiguration() {
         seatCols_ = 6;
         return;
     }
-    
+
     std::string line;
     while (std::getline(file, line)) {
+        std::cout << "[DEBUG] Raw line: [" << line << "]" << std::endl;
+
         if (line.find("SEAT_LAYOUT_COLS=") == 0) {
-            seatCols_ = std::stoi(line.substr(17));
+            std::string value = line.substr(17);
+            std::cout << "[DEBUG] Extracted value: [" << value << "]" << std::endl;
+            int seatCols = std::stoi(value);
+            std::cout << "[DEBUG] seatCols = " << seatCols << std::endl;
         }
     }
+
+
     file.close();
 }
+
 
 bool SeatManager::loadForFlight(const std::string& instanceId) {
     clearCurrentMap();
