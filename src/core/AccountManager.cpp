@@ -187,3 +187,35 @@ void AccountManager::changeAgentPassword(const std::string& agentId, std::string
         saveDataToFiles(adminFilePath_, agentFilePath_);
     }
 }
+
+bool AccountManager::changePassword(const std::string& userId,
+                                    const std::string& oldPasswordPlain,
+                                    const std::string& newPasswordPlain)
+{
+    // Tìm trong admins
+    for (size_t i = 0; i < allAdmins.size(); ++i) {
+        AccountAdmin* a = allAdmins[i];
+        if (a && a->getId() == userId) {
+            // Kiểm tra mật khẩu hiện tại
+            if (!a->authenticate(oldPasswordPlain)) return false;
+            // Thay mật khẩu (Account::changePassword sẽ hash)
+            a->changePassword(newPasswordPlain);
+            // Ghi lại file (hàm saveDataToFiles đã tồn tại trong class)
+            saveDataToFiles("data/admins.txt", "data/agents.txt");
+            return true;
+        }
+    }
+
+    // Tìm trong agents
+    for (size_t i = 0; i < allAgents.size(); ++i) {
+        AccountAgent* ag = allAgents[i];
+        if (ag && ag->getId() == userId) {
+            if (!ag->authenticate(oldPasswordPlain)) return false;
+            ag->changePassword(newPasswordPlain);
+            saveDataToFiles("data/admins.txt", "data/agents.txt");
+            return true;
+        }
+    }
+
+    return false; // không tìm thấy user
+}
