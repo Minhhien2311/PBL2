@@ -1,6 +1,7 @@
 #ifndef ACCOUNT_MANAGER_H
 #define ACCOUNT_MANAGER_H
 
+#include <QObject>                  // Qt base class for signal/slot support
 #include <vector>                   // STL để lưu trữ danh sách các tài khoản
 #include "entities/AccountAdmin.h" // Đối tượng Admin
 #include "entities/AccountAgent.h" // Đối tượng Agent
@@ -15,7 +16,8 @@
     4. Cung cấp các hàm để tìm kiếm, tạo mới, và thay đổi trạng thái tài khoản.
     5. Lưu lại toàn bộ danh sách tài khoản vào file khi cần.
  */
-class AccountManager {
+class AccountManager : public QObject {
+    Q_OBJECT
 private:
     // Vector chứa các con trỏ trỏ tới đối tượng AccountAdmin
     std::vector<AccountAdmin*> allAdmins;
@@ -101,6 +103,13 @@ public:
     bool changePassword(const std::string& userId,
                         const std::string& oldPasswordPlain,
                         const std::string& newPasswordPlain);
+
+signals:
+    // Phát tín hiệu khi người dùng đăng nhập thành công
+    void userLoggedIn(Account* user);
+    
+    // Phát tín hiệu khi người dùng đăng xuất
+    void userLoggedOut();
 };
 
 #endif

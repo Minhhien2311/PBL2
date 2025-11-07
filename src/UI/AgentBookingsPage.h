@@ -27,6 +27,9 @@ public:
                                AirportManager* airportManager,
                                QWidget *parent = nullptr);
 
+public slots:
+    void refreshPage();  // New method to refresh when page shown or user changed
+
 private slots:
     void onSearchClicked(); // Tìm/Làm mới
     void onCancelBookingClicked(); // Hủy vé
