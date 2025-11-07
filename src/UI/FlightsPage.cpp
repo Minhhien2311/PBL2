@@ -252,7 +252,7 @@ void FlightsPage::refreshTable()
     model_->removeRows(0, model_->rowCount());
 
     // 1. Gọi API/Core để lấy tất cả *Chuyến bay* (FlightInstance)
-    const DynamicArray<FlightInstance*>& instances = flightManager_->getAllInstances();
+    const std::vector<FlightInstance*>& instances = flightManager_->getAllInstances();
     SeatManager* seatManager = flightManager_->getSeatManager();
     
     // 2. Nạp dữ liệu mới

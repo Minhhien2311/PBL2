@@ -46,7 +46,7 @@ public:
      */
     AccountManager(const std::string& adminsFilePath, const std::string& agentsFilePath);
   
-    // DynamicArray<T*> đã được code để tự động 'delete' các con trỏ khi nó bị hủy, nên ở đây không cần làm gì thêm).
+    // std::vector<T*> requires manual cleanup in destructor if needed
     ~AccountManager() = default;
 
     /*

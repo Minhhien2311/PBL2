@@ -245,7 +245,7 @@ void RoutesPage::refreshTable()
     model_->removeRows(0, model_->rowCount());
 
     // 1. Gọi API/Core để lấy tất cả *Tuyến bay* (Flight)
-    const DynamicArray<Flight*>& routes = flightManager_->getAllFlights();
+    const std::vector<Flight*>& routes = flightManager_->getAllFlights();
     
     // 2. Nạp dữ liệu mới
     for (int i = 0; i < routes.size(); ++i) {

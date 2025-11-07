@@ -3,7 +3,6 @@
 #include "core/FlightManager.h"
 #include "core/SeatManager.h"
 #include "entities/Seat.h"
-#include "DSA/DynamicArray.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -286,7 +285,7 @@ void BookingDialog::renderSeatMap()
         return;
     }
 
-    DynamicArray<Seat*>* seatMap = seatManager->getActiveSeatMap();
+    std::vector<Seat*>* seatMap = seatManager->getActiveSeatMap();
     if (!seatMap) {
         return;
     }
