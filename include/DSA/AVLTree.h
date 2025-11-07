@@ -296,9 +296,9 @@ public:
     
     // Xóa cặp key-value
     bool remove(const Key& key) {
-        if (!find(key)) return false;
+        int oldSize = size_;
         root_ = removeNode(root_, key);
-        return true;
+        return size_ < oldSize;
     }
     
     // Tìm kiếm value theo key
