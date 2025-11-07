@@ -103,8 +103,8 @@ AccountAgent* AccountManager::findAgentById(const std::string& agentId) {
     return nullptr; // Không tìm thấy
 }
 
-// LƯU Ý: Kiểu trả về của hàm này trong file .h cũng phải được sửa thành DynamicArray<AccountAgent*>
-const DynamicArray<AccountAgent*>& AccountManager::getAllAgents() const {
+// LƯU Ý: Kiểu trả về của hàm này trong file .h cũng phải được sửa thành std::vector<AccountAgent*>
+const std::vector<AccountAgent*>& AccountManager::getAllAgents() const {
     return this->allAgents;
 }
 

@@ -277,8 +277,8 @@ int ReportManager::getTotalTicketsSold() const {
     return countBookingsByStatus(BookingStatus::Issued);
 }
 
-DynamicArray<AgentReport*>* ReportManager::generateFullAgentReport() const {
-    auto* reports = new DynamicArray<AgentReport*>();
+std::vector<AgentReport*>* ReportManager::generateFullAgentReport() const {
+    auto* reports = new std::vector<AgentReport*>();
     const auto& agents = accountManager_.getAllAgents();
     const auto& bookings = bookingManager_.getAllBookings();
 
@@ -433,9 +433,9 @@ double ReportManager::getRevenueInRange(const std::string& agentId,
 }
 
 // --- Báo cáo theo agent và khoảng ngày (Admin view) ---
-DynamicArray<AgentReport*>* ReportManager::generateAgentReportInRange(const std::string& startDate,
+std::vector<AgentReport*>* ReportManager::generateAgentReportInRange(const std::string& startDate,
                                                                       const std::string& endDate) const {
-    auto* reports = new DynamicArray<AgentReport*>();
+    auto* reports = new std::vector<AgentReport*>();
     const auto& agents = accountManager_.getAllAgents();
     const auto& bookings = bookingManager_.getAllBookings();
 
@@ -470,9 +470,8 @@ DynamicArray<AgentReport*>* ReportManager::generateAgentReportInRange(const std:
 }
 
 // --- Báo cáo theo tháng (Agent view) ---
-DynamicArray<int>* ReportManager::getMonthlyTicketsByAgent(const std::string& agentId, int year) const {
-    auto* monthly = new DynamicArray<int>(12);
-    for (int i = 0; i < 12; ++i) (*monthly)[i] = 0;
+std::vector<int>* ReportManager::getMonthlyTicketsByAgent(const std::string& agentId, int year) const {
+    auto* monthly = new std::vector<int>(12, 0);
 
     const auto& bookings = bookingManager_.getAllBookings();
     std::string yearStr = std::to_string(year);

@@ -61,10 +61,10 @@ std::string AirportManager::getDisplayName(const std::string& iataCode) const
     return display ? *display : "";
 }
 
-DynamicArray<std::string> AirportManager::getAllDisplayNames() const
+std::vector<std::string> AirportManager::getAllDisplayNames() const
 {
     // Lấy tất cả keys (display names)
-    DynamicArray<std::string> names = displayToIATA_.getKeys();
+    std::vector<std::string> names = displayToIATA_.getKeys();
     
     // Sắp xếp alphabet bằng Bubble Sort
     for (int i = 0; i < names.size() - 1; ++i) {
@@ -84,7 +84,7 @@ void AirportManager::loadAirportsFromFlights(FlightManager* flightManager)
 {
     if (!flightManager) return;
     
-    const DynamicArray<Flight*>& flights = flightManager->getAllFlights();
+    const std::vector<Flight*>& flights = flightManager->getAllFlights();
     
     for (int i = 0; i < flights.size(); ++i) {
         Flight* flight = flights[i];

@@ -1,7 +1,7 @@
 #ifndef FLIGHT_MANAGER_H
 #define FLIGHT_MANAGER_H
 
-#include "DSA/DynamicArray.h"           // CTDL nền tảng để lưu trữ
+#include <vector>                        // STL để lưu trữ
 #include "entities/Flight.h"            // Đối tượng tuyến bay gốc
 #include "entities/FlightInstance.h"    // Đối tượng chuyến bay cụ thể
 #include "DSA/HashTable.h"
@@ -11,9 +11,9 @@ class SeatManager;
 
 class FlightManager {
 private:
-    // Lưu trữ một mảng các con trỏ thay vì đối tượng
-    DynamicArray<Flight*> allFlights;         
-    DynamicArray<FlightInstance*> allInstances;
+    // Lưu trữ một vector các con trỏ thay vì đối tượng
+    std::vector<Flight*> allFlights;         
+    std::vector<FlightInstance*> allInstances;
 
     // Thêm bảng băm để tra cứu bằng ID
     HashTable<std::string, Flight*> flightIdTable;
@@ -64,8 +64,8 @@ public:
     // --- Các hàm tìm kiếm ---
     Flight* findFlightById(const std::string& flightId);
     FlightInstance* findInstanceById(const std::string& instanceId);
-    DynamicArray<FlightInstance*> findInstancesByFlightId(const std::string& flightId);
-    DynamicArray<Flight*> findFlightByRoute(const std::string& fromIATA, const std::string& toIATA);
+    std::vector<FlightInstance*> findInstancesByFlightId(const std::string& flightId);
+    std::vector<Flight*> findFlightByRoute(const std::string& fromIATA, const std::string& toIATA);
 
     // --- Các hàm lưu ---
     bool saveFlightsToFiles(const std::string& flightsFilePath) const;
@@ -74,8 +74,8 @@ public:
     bool saveAllData();
 
     // --- Các hàm Getters ---
-    const DynamicArray<Flight*>& getAllFlights() const;
-    const DynamicArray<FlightInstance*>& getAllInstances() const;
+    const std::vector<Flight*>& getAllFlights() const;
+    const std::vector<FlightInstance*>& getAllInstances() const;
     SeatManager* getSeatManager() const;
 };
 

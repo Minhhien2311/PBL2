@@ -4,7 +4,7 @@
 class FlightManager; 
 class FlightRule;
 
-#include "DSA/DynamicArray.h"
+#include <vector>
 #include "entities/Booking.h"
 #include "DSA/HashTable.h"
 #include <string>
@@ -14,7 +14,7 @@ class FlightRule;
 // Chịu trách nhiệm cho nghiệp vụ Bán vé và Hủy vé (bao gồm kiểm tra logic)
 class BookingManager {
 private:
-    DynamicArray<Booking*> allBookings;
+    std::vector<Booking*> allBookings;
     FlightRule* currentRule;
 
     HashTable<std::string, Booking*> bookingIdTable;
@@ -56,13 +56,13 @@ public:
     Booking* findBookingById(const std::string& bookingId);
     
     // --- Lấy dữ liệu  ---
-    const DynamicArray<Booking*>& getAllBookings() const;
+    const std::vector<Booking*>& getAllBookings() const;
 
     // Lấy danh sách booking theo Agent ID
-    DynamicArray<Booking*> getBookingsByAgentId(const std::string& agentId) const;
+    std::vector<Booking*> getBookingsByAgentId(const std::string& agentId) const;
     
     // Lấy danh sách booking theo Flight Instance ID (sẽ triển khai sau nếu cần)
-    // DynamicArray<Booking*> getBookingsByFlightInstanceId(const std::string& instanceId) const;
+    // std::vector<Booking*> getBookingsByFlightInstanceId(const std::string& instanceId) const;
 
     // --- Lưu trữ  ---
     bool saveDataToFiles(const std::string& bookingsFilePath) const; 
