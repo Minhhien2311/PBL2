@@ -1,0 +1,10 @@
+HAN_SGN|VietJet Air|HAN|SGN
+HAN_DAD|VietJet Air|HAN|DAD
+HAN_SGN|Bamboo Airways|HAN|SGN
+SGN_DAD|Bamboo Airways|SGN|DAD
+HAN_SGN|Vietnam Airlines|HAN|SGN
+SGN_DAD|Vietnam Airlines|SGN|DAD
+HAN_SGN|Pacific Airlines|HAN|SGN
+SGN_HAN|Pacific Airlines|SGN|HAN
+HAN_SGN|Vietravel Airlines|HAN|SGN
+SGN_HAN|Vietravel Airlines|SGN|HAN
