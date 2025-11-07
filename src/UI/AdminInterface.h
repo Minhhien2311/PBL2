@@ -3,13 +3,12 @@
 
 #include <QWidget>
 
-// Khai báo sớm
-class QListWidget;
 class QStackedWidget;
 class QPushButton;
 class QFrame;
+class QLabel;
 class AccountManager;
-class FlightManager; // <--- Sửa lỗi: Tên đúng (số ít)
+class FlightManager;
 class BookingManager;
 class ReportManager;
 class AirportManager;
@@ -19,9 +18,8 @@ class AdminInterface : public QWidget
     Q_OBJECT 
 
 public:
-    // <--- Sửa lỗi: Constructor phải khớp với file .cpp và Application.cpp
     explicit AdminInterface(AccountManager* accManager,
-                            FlightManager* flManager, // <--- Sửa lỗi: Tên đúng (số ít)
+                            FlightManager* flManager,
                             BookingManager* bkManager,
                             ReportManager* reportManager,
                             AirportManager* airportManager,
@@ -31,24 +29,27 @@ signals:
     void logoutClicked(); 
 
 private:
-    void setupUi();
     void setupConnections();
 
     // Sidebar
     QFrame* sidebar_;
-    QListWidget* nav_;
+
+    // Buttons cho các mục sidebar
+    QPushButton* btnDashboard_;
+    QPushButton* btnRoutes_;
+    QPushButton* btnFlights_;
+    QPushButton* btnAccounts_;
     QPushButton* logoutBtn_;
 
-    // Router
+    // Stack chứa các trang
     QStackedWidget* stack_;
 
     // Con trỏ tới các Manager (không sở hữu)
     AccountManager* accountManager_;
-    FlightManager* flightManager_; // <--- Sửa lỗi: Tên đúng (số ít)
+    FlightManager* flightManager_;
     BookingManager* bookingManager_;
     ReportManager* reportManager_;
     AirportManager* airportManager_;
 };
 
 #endif // ADMININTERFACE_H
-

@@ -1,33 +1,31 @@
 #include "AdminInterface.h"
 
-// Include các trang con của Admin
 #include "DashboardPage.h"
 #include "AccountsPage.h"
-#include "RoutesPage.h"  // <--- Sửa lỗi: Bỏ comment
-#include "FlightsPage.h" // <--- Sửa lỗi: Bỏ comment
+#include "RoutesPage.h"
+#include "FlightsPage.h"
 
-// Include các manager (để dùng khi tạo trang con)
 #include "core/AccountManager.h"
 #include "core/FlightManager.h"
 #include "core/BookingManager.h"
 #include "core/ReportManager.h"
 #include "core/AirportManager.h"
 
+// Include Qt cần thiết
+#include <QStackedWidget>
+#include <QPushButton>
 #include <QLabel>
+#include <QFrame>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QListWidget>
-#include <QPushButton>
-#include <QStackedWidget>
-#include <QFrame>
+#include <QDebug>
 
-// <--- Sửa lỗi: Xung đột Constructor (Lỗi 1)
 AdminInterface::AdminInterface(AccountManager* accManager,
                                FlightManager* flManager,
                                BookingManager* bkManager,
                                ReportManager* reportManager,
                                AirportManager* airportManager,
-                               QWidget* parent) 
+                               QWidget* parent)
     : QWidget(parent),
       accountManager_(accManager),
       flightManager_(flManager),
@@ -35,98 +33,141 @@ AdminInterface::AdminInterface(AccountManager* accManager,
       reportManager_(reportManager),
       airportManager_(airportManager)
 {
-    // Bố cục chính là QHBoxLayout (Sidebar + Stack)
+    // Layout chính: sidebar + stack
     auto *root = new QHBoxLayout(this);
-    root->setContentsMargins(0,0,0,0);
+    root->setContentsMargins(0, 0, 0, 0);
     root->setSpacing(0);
 
-    // --- Sidebar (Dựa trên code và ảnh của bạn) ---
+    // Sidebar
     sidebar_ = new QFrame(this);
-    sidebar_->setObjectName("Sidebar");
     sidebar_->setFixedWidth(220);
-    
+    sidebar_->setStyleSheet("background-color: #2c3e50;");
+
     auto *sideLay = new QVBoxLayout(sidebar_);
-    sideLay->setContentsMargins(16,20,16,16);
+    sideLay->setContentsMargins(16, 20, 16, 16);
     sideLay->setSpacing(8);
 
-    auto mkSection = [](const QString& s){
-        auto *l=new QLabel(s); 
-        l->setStyleSheet("color:#BFD4FF;font-weight:600;margin:4px 0; background: transparent;"); 
-        return l;
-    };
-
     // Thông tin user
-    auto *userIcon = new QLabel(this); 
-    userIcon->setText("👤"); 
-    userIcon->setStyleSheet("font-size: 32px; color: white; background: transparent;");
+    auto *userIcon = new QLabel("👤", sidebar_);
     userIcon->setAlignment(Qt::AlignCenter);
-    
-    auto *userName = new QLabel("Xin chào, Admin", this);
-    userName->setStyleSheet("color: white; font-weight: 600; background: transparent;");
+    userIcon->setStyleSheet("font-size: 32px; color: white; background: transparent;");
+
+    auto *userName = new QLabel("Xin chào, Admin", sidebar_);
     userName->setAlignment(Qt::AlignCenter);
-    
+    userName->setStyleSheet("color: white; font-weight: 600; background: transparent;");
+
     sideLay->addWidget(userIcon);
     sideLay->addWidget(userName);
     sideLay->addSpacing(15);
-    
-    // --- Sửa lỗi: Cập nhật Sidebar theo file bạn gửi
-    nav_ = new QListWidget(sidebar_);
-      // Cấu hình nhỏ để item được chọn sáng hơn // ==============
-    // nav_->setFrameShape(QFrame::NoFrame);
-    // nav_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    // nav_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    // nav_->setSelectionMode(QAbstractItemView::SingleSelection);
-    // nav_->setStyleSheet(R"(
-    //    QListWidget { background: transparent; color: #FFFFFF; }
-    //    QListWidget::item { padding: 10px 8px; }
-    //    QListWidget::item:selected { background: #6f99c6; color: white; }
-    // )");
-    
-    sideLay->addWidget(mkSection("QUẢN LÝ"));
-    nav_->addItem("Trang tổng quan");       // Index 0
-    nav_->addItem("Quản lý tuyến bay");    // Index 1
-    nav_->addItem("Quản lý chuyến bay");   // Index 2
-    
-    sideLay->addWidget(mkSection("TÀI KHOẢN"));
-    nav_->addItem("Quản lý tài khoản");     // Index 3
 
-    sideLay->addWidget(nav_);
-    sideLay->addStretch(); 
+    // --- Sidebar menu ---
+    auto *menuWidget = new QWidget(sidebar_);
+    auto *menuLayout = new QVBoxLayout(menuWidget);
+    menuLayout->setContentsMargins(0,0,0,0);
+    menuLayout->setSpacing(2);
 
+    // Header QUẢN LÝ (không hover, không click)
+    auto *header1 = new QLabel("QUẢN LÝ", sidebar_);
+    header1->setStyleSheet("color: #6f99c6; font-weight: bold; background: transparent;");
+    menuLayout->addWidget(header1);
+
+    // Các nút QUẢN LÝ
+    QString btnStyle = R"(
+        QPushButton {
+            color: white;
+            background: transparent;
+            border: none;
+            text-align: left;
+            padding: 8px;
+        }
+        QPushButton:hover {
+            background-color: #6f99c6;
+            border-radius: 6px;
+        }
+        QPushButton:checked {
+            background-color: #6f99c6;
+        }
+    )";
+
+    btnDashboard_ = new QPushButton("Trang tổng quan");
+    btnRoutes_    = new QPushButton("Quản lý tuyến bay");
+    btnFlights_   = new QPushButton("Quản lý chuyến bay");
+
+    btnDashboard_->setStyleSheet(btnStyle);
+    btnRoutes_->setStyleSheet(btnStyle);
+    btnFlights_->setStyleSheet(btnStyle);
+
+    btnDashboard_->setCheckable(true);
+    btnRoutes_->setCheckable(true);
+    btnFlights_->setCheckable(true);
+
+    menuLayout->addWidget(btnDashboard_);
+    menuLayout->addWidget(btnRoutes_);
+    menuLayout->addWidget(btnFlights_);
+
+    // Header TÀI KHOẢN (không hover, không click)
+    auto *header2 = new QLabel("TÀI KHOẢN", sidebar_);
+    header2->setStyleSheet("color: #6f99c6; font-weight: bold; background: transparent;");
+    menuLayout->addWidget(header2);
+
+    btnAccounts_ = new QPushButton("Quản lý tài khoản");
+    btnAccounts_->setStyleSheet(btnStyle);
+    btnAccounts_->setCheckable(true);
+    menuLayout->addWidget(btnAccounts_);
+
+    menuLayout->addStretch();
+    menuWidget->setLayout(menuLayout);
+    sideLay->addWidget(menuWidget);
+
+    // Logout
     logoutBtn_ = new QPushButton("Đăng xuất", sidebar_);
+    logoutBtn_->setStyleSheet(R"(
+        QPushButton {
+            color: white;
+            background: transparent;
+            border: 1px solid #6f99c6;
+            border-radius: 6px;
+            padding: 6px;
+        }
+        QPushButton:hover {
+            background-color: #6f99c6;
+            color: white;
+        }
+    )");
     sideLay->addWidget(logoutBtn_);
 
-    // --- Stack (Nội dung chính) ---
-    stack_ = new QStackedWidget(this);
-    
-    // <--- Sửa lỗi: Cập nhật StackWidget theo Sidebar
-    stack_->addWidget(new DashboardPage(accountManager_, reportManager_, this));   // Index 0
-    
-    // Truyền FlightManager cho cả RoutesPage (vì nó quản lý tuyến)
-    stack_->addWidget(new RoutesPage(flightManager_, airportManager_, this)); // Index 1
-    
-    // Truyền FlightManager cho FlightsPage (vì nó quản lý chuyến)
-    stack_->addWidget(new FlightsPage(flightManager_, airportManager_, this)); // Index 2
-    
-    // Truyền AccountManager cho AccountsPage
-    stack_->addWidget(new AccountsPage(accountManager_, this));    // Index 3
-
-    nav_->setCurrentRow(0);
-    stack_->setCurrentIndex(0);
-
-    // --- Gắn vào layout chính ---
     root->addWidget(sidebar_);
-    root->addWidget(stack_, 1); // 1 = co giãn
 
-    // --- Kết nối Signal/Slot ---
+    // Stack chứa các trang
+    stack_ = new QStackedWidget(this);
+    stack_->addWidget(new DashboardPage(accountManager_, reportManager_, this)); // 0
+    stack_->addWidget(new RoutesPage(flightManager_, airportManager_, this));   // 1
+    stack_->addWidget(new FlightsPage(flightManager_, airportManager_, this));  // 2
+    stack_->addWidget(new AccountsPage(accountManager_, this));                 // 3
+
+    root->addWidget(stack_, 1);
+
     setupConnections();
+
+    // Chọn mặc định
+    stack_->setCurrentIndex(0);
+    btnDashboard_->setChecked(true);
 }
 
 void AdminInterface::setupConnections()
 {
-    // Kết nối sidebar nav với stack
-    connect(nav_, &QListWidget::currentRowChanged, stack_, &QStackedWidget::setCurrentIndex);
-    
-    // Nút đăng xuất sẽ phát tín hiệu 'logoutClicked'
+    auto switchPage = [this](QPushButton* btn, int index){
+        stack_->setCurrentIndex(index);
+        btnDashboard_->setChecked(btn == btnDashboard_);
+        btnRoutes_->setChecked(btn == btnRoutes_);
+        btnFlights_->setChecked(btn == btnFlights_);
+        btnAccounts_->setChecked(btn == btnAccounts_);
+    };
+
+    connect(btnDashboard_, &QPushButton::clicked, [=](){ switchPage(btnDashboard_,0); });
+    connect(btnRoutes_,    &QPushButton::clicked, [=](){ switchPage(btnRoutes_,1); });
+    connect(btnFlights_,   &QPushButton::clicked, [=](){ switchPage(btnFlights_,2); });
+    connect(btnAccounts_,  &QPushButton::clicked, [=](){ switchPage(btnAccounts_,3); });
+
     connect(logoutBtn_, &QPushButton::clicked, this, &AdminInterface::logoutClicked);
 }
