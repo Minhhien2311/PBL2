@@ -144,7 +144,7 @@ AdminInterface::AdminInterface(AccountManager* accManager,
     stack_->addWidget(new RoutesPage(flightManager_, airportManager_, this));   //1
     stack_->addWidget(new FlightsPage(flightManager_, airportManager_, this));  //2
     stack_->addWidget(new AccountsPage(accountManager_, this));                 //3
-    stack_->addWidget(new AdminReportPage(accountManager_, bookingManager_, reportManager_, this)); //4
+    stack_->addWidget(new AdminReportPage(accountManager_, bookingManager_, reportManager_, this)); // 4 
 
     root->addWidget(stack_,1);
 
