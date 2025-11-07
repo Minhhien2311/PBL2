@@ -4,6 +4,7 @@
 #include "AccountsPage.h"
 #include "RoutesPage.h"
 #include "FlightsPage.h"
+#include "AdminReportPage.h"   // <-- Thêm
 
 #include "core/AccountManager.h"
 #include "core/FlightManager.h"
@@ -11,7 +12,7 @@
 #include "core/ReportManager.h"
 #include "core/AirportManager.h"
 
-// Include Qt cần thiết
+// Include Qt
 #include <QStackedWidget>
 #include <QPushButton>
 #include <QLabel>
@@ -33,7 +34,6 @@ AdminInterface::AdminInterface(AccountManager* accManager,
       reportManager_(reportManager),
       airportManager_(airportManager)
 {
-    // Layout chính: sidebar + stack
     auto *root = new QHBoxLayout(this);
     root->setContentsMargins(0, 0, 0, 0);
     root->setSpacing(0);
@@ -51,7 +51,6 @@ AdminInterface::AdminInterface(AccountManager* accManager,
     auto *userIcon = new QLabel("👤", sidebar_);
     userIcon->setAlignment(Qt::AlignCenter);
     userIcon->setStyleSheet("font-size: 32px; color: white; background: transparent;");
-
     auto *userName = new QLabel("Xin chào, Admin", sidebar_);
     userName->setAlignment(Qt::AlignCenter);
     userName->setStyleSheet("color: white; font-weight: 600; background: transparent;");
@@ -60,18 +59,16 @@ AdminInterface::AdminInterface(AccountManager* accManager,
     sideLay->addWidget(userName);
     sideLay->addSpacing(15);
 
-    // --- Sidebar menu ---
+    // Menu sidebar
     auto *menuWidget = new QWidget(sidebar_);
     auto *menuLayout = new QVBoxLayout(menuWidget);
     menuLayout->setContentsMargins(0,0,0,0);
     menuLayout->setSpacing(2);
 
-    // Header QUẢN LÝ (không hover, không click)
     auto *header1 = new QLabel("QUẢN LÝ", sidebar_);
     header1->setStyleSheet("color: #6f99c6; font-weight: bold; background: transparent;");
     menuLayout->addWidget(header1);
 
-    // Các nút QUẢN LÝ
     QString btnStyle = R"(
         QPushButton {
             color: white;
@@ -92,20 +89,13 @@ AdminInterface::AdminInterface(AccountManager* accManager,
     btnDashboard_ = new QPushButton("Trang tổng quan");
     btnRoutes_    = new QPushButton("Quản lý tuyến bay");
     btnFlights_   = new QPushButton("Quản lý chuyến bay");
-
-    btnDashboard_->setStyleSheet(btnStyle);
-    btnRoutes_->setStyleSheet(btnStyle);
-    btnFlights_->setStyleSheet(btnStyle);
-
-    btnDashboard_->setCheckable(true);
-    btnRoutes_->setCheckable(true);
-    btnFlights_->setCheckable(true);
-
+    btnDashboard_->setStyleSheet(btnStyle); btnRoutes_->setStyleSheet(btnStyle); btnFlights_->setStyleSheet(btnStyle);
+    btnDashboard_->setCheckable(true); btnRoutes_->setCheckable(true); btnFlights_->setCheckable(true);
     menuLayout->addWidget(btnDashboard_);
     menuLayout->addWidget(btnRoutes_);
     menuLayout->addWidget(btnFlights_);
 
-    // Header TÀI KHOẢN (không hover, không click)
+    // Header TÀI KHOẢN
     auto *header2 = new QLabel("TÀI KHOẢN", sidebar_);
     header2->setStyleSheet("color: #6f99c6; font-weight: bold; background: transparent;");
     menuLayout->addWidget(header2);
@@ -114,6 +104,16 @@ AdminInterface::AdminInterface(AccountManager* accManager,
     btnAccounts_->setStyleSheet(btnStyle);
     btnAccounts_->setCheckable(true);
     menuLayout->addWidget(btnAccounts_);
+
+    // --- Thêm Thống kê ---
+    auto *header3 = new QLabel("THỐNG KÊ", sidebar_);
+    header3->setStyleSheet("color: #6f99c6; font-weight: bold; background: transparent;");
+    menuLayout->addWidget(header3);
+
+    btnReport_ = new QPushButton("Báo cáo tổng hợp");
+    btnReport_->setStyleSheet(btnStyle);
+    btnReport_->setCheckable(true);
+    menuLayout->addWidget(btnReport_);
 
     menuLayout->addStretch();
     menuWidget->setLayout(menuLayout);
@@ -138,18 +138,18 @@ AdminInterface::AdminInterface(AccountManager* accManager,
 
     root->addWidget(sidebar_);
 
-    // Stack chứa các trang
+    // Stack
     stack_ = new QStackedWidget(this);
-    stack_->addWidget(new DashboardPage(accountManager_, reportManager_, this)); // 0
-    stack_->addWidget(new RoutesPage(flightManager_, airportManager_, this));   // 1
-    stack_->addWidget(new FlightsPage(flightManager_, airportManager_, this));  // 2
-    stack_->addWidget(new AccountsPage(accountManager_, this));                 // 3
+    stack_->addWidget(new DashboardPage(accountManager_, reportManager_, this)); //0
+    stack_->addWidget(new RoutesPage(flightManager_, airportManager_, this));   //1
+    stack_->addWidget(new FlightsPage(flightManager_, airportManager_, this));  //2
+    stack_->addWidget(new AccountsPage(accountManager_, this));                 //3
+    stack_->addWidget(new AdminReportPage(accountManager_, bookingManager_, reportManager_, this)); //4
 
-    root->addWidget(stack_, 1);
+    root->addWidget(stack_,1);
 
     setupConnections();
 
-    // Chọn mặc định
     stack_->setCurrentIndex(0);
     btnDashboard_->setChecked(true);
 }
@@ -158,16 +158,18 @@ void AdminInterface::setupConnections()
 {
     auto switchPage = [this](QPushButton* btn, int index){
         stack_->setCurrentIndex(index);
-        btnDashboard_->setChecked(btn == btnDashboard_);
-        btnRoutes_->setChecked(btn == btnRoutes_);
-        btnFlights_->setChecked(btn == btnFlights_);
-        btnAccounts_->setChecked(btn == btnAccounts_);
+        btnDashboard_->setChecked(btn==btnDashboard_);
+        btnRoutes_->setChecked(btn==btnRoutes_);
+        btnFlights_->setChecked(btn==btnFlights_);
+        btnAccounts_->setChecked(btn==btnAccounts_);
+        btnReport_->setChecked(btn==btnReport_);
     };
 
     connect(btnDashboard_, &QPushButton::clicked, [=](){ switchPage(btnDashboard_,0); });
-    connect(btnRoutes_,    &QPushButton::clicked, [=](){ switchPage(btnRoutes_,1); });
-    connect(btnFlights_,   &QPushButton::clicked, [=](){ switchPage(btnFlights_,2); });
-    connect(btnAccounts_,  &QPushButton::clicked, [=](){ switchPage(btnAccounts_,3); });
+    connect(btnRoutes_, &QPushButton::clicked, [=](){ switchPage(btnRoutes_,1); });
+    connect(btnFlights_, &QPushButton::clicked, [=](){ switchPage(btnFlights_,2); });
+    connect(btnAccounts_, &QPushButton::clicked, [=](){ switchPage(btnAccounts_,3); });
+    connect(btnReport_, &QPushButton::clicked, [=](){ switchPage(btnReport_,4); });
 
     connect(logoutBtn_, &QPushButton::clicked, this, &AdminInterface::logoutClicked);
 }
