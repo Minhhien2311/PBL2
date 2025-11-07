@@ -25,7 +25,12 @@
 #include <QInputDialog>
 #include <QCalendarWidget>
 #include <QComboBox>
-#include <QSpinBox>
+#include <QIntValidator>
+
+// Constants
+namespace {
+    constexpr int MAX_FLIGHT_PRICE = 99999999;  // Maximum flight price value for validation (business constraint)
+}
 
 SearchBookPage::SearchBookPage(FlightManager* flManager,
                                BookingManager* bkManager,
@@ -77,66 +82,84 @@ void SearchBookPage::setupUi()
     title->setProperty("class", "PageTitle");
     topLayout->addWidget(title);
 
-    // Search filters - ALL IN ONE ROW
-    QHBoxLayout* filterLayout = new QHBoxLayout();
-    filterLayout->setSpacing(10);
+    // === FILTER BAR LAYOUT ===
 
-    // From
-    filterLayout->addWidget(new QLabel("Từ:"));
+    // Row 1: Labels (above inputs)
+    QHBoxLayout* labelLayout = new QHBoxLayout();
+    labelLayout->setSpacing(15);
+    labelLayout->addWidget(new QLabel("Từ"));
+    labelLayout->addWidget(new QLabel("Đến"));
+    labelLayout->addWidget(new QLabel("Ngày khởi hành"));
+    labelLayout->addWidget(new QLabel("Hãng hàng không"));
+    labelLayout->addWidget(new QLabel("Khoảng giá"));
+    labelLayout->addStretch();
+    topLayout->addLayout(labelLayout);
+
+    // Row 2: Inputs + Search button (all inline, same row)
+    QHBoxLayout* inputLayout = new QHBoxLayout();
+    inputLayout->setSpacing(15);
+
+    // From dropdown
     fromSearchCombo_ = new AirportComboBox(airportManager_, this);
-    filterLayout->addWidget(fromSearchCombo_);
+    inputLayout->addWidget(fromSearchCombo_);
 
-    // To
-    filterLayout->addWidget(new QLabel("Đến:"));
+    // To dropdown
     toSearchCombo_ = new AirportComboBox(airportManager_, this);
-    filterLayout->addWidget(toSearchCombo_);
+    inputLayout->addWidget(toSearchCombo_);
 
-    // Date
-    filterLayout->addWidget(new QLabel("Ngày khởi hành:"));
+    // Date picker with placeholder
     dateSearchEdit_ = new QDateEdit(this);
     dateSearchEdit_->setCalendarPopup(true);
     dateSearchEdit_->setDisplayFormat("dd/MM/yyyy");
-    dateSearchEdit_->setSpecialValueText("-- Tất cả --");
-    dateSearchEdit_->setDate(QDate::currentDate());
-    dateSearchEdit_->clearMinimumDate();
-    dateSearchEdit_->clearMaximumDate();
-    filterLayout->addWidget(dateSearchEdit_);
+    dateSearchEdit_->setSpecialValueText("Tùy chọn");
+    dateSearchEdit_->clear();  // Clear initial date to show placeholder
+    inputLayout->addWidget(dateSearchEdit_);
 
-    // Airline
-    filterLayout->addWidget(new QLabel("Hãng HK:"));
+    // Airline dropdown with placeholder
     airlineFilterCombo_ = new QComboBox(this);
-    airlineFilterCombo_->addItem("-- Tất cả --", "");
+    airlineFilterCombo_->addItem("Tùy chọn", "");  // Default placeholder
     airlineFilterCombo_->addItem("VietJet Air", "VietJet Air");
     airlineFilterCombo_->addItem("Vietnam Airlines", "Vietnam Airlines");
     airlineFilterCombo_->addItem("Bamboo Airways", "Bamboo Airways");
     airlineFilterCombo_->addItem("Vietravel Airlines", "Vietravel Airlines");
-    filterLayout->addWidget(airlineFilterCombo_);
+    inputLayout->addWidget(airlineFilterCombo_);
 
-    // Price range
-    filterLayout->addWidget(new QLabel("Khoảng giá:"));
-    priceMinSpinBox_ = new QSpinBox(this);
-    priceMinSpinBox_->setRange(0, 10000000);
-    priceMinSpinBox_->setSingleStep(100000);
-    priceMinSpinBox_->setSuffix(" VND");
-    priceMinSpinBox_->setValue(0);
-    filterLayout->addWidget(priceMinSpinBox_);
+    // Price range - QLineEdit (plain text, no spin buttons)
+    priceMinEdit_ = new QLineEdit(this);
+    priceMinEdit_->setPlaceholderText("Tùy chọn");
+    priceMinEdit_->setValidator(new QIntValidator(0, MAX_FLIGHT_PRICE, this));
+    priceMinEdit_->setMaximumWidth(120);
+    inputLayout->addWidget(priceMinEdit_);
 
-    filterLayout->addWidget(new QLabel("—"));
+    inputLayout->addWidget(new QLabel("—"));  // Dash separator
 
-    priceMaxSpinBox_ = new QSpinBox(this);
-    priceMaxSpinBox_->setRange(0, 10000000);
-    priceMaxSpinBox_->setValue(10000000);
-    priceMaxSpinBox_->setSingleStep(100000);
-    priceMaxSpinBox_->setSuffix(" VND");
-    filterLayout->addWidget(priceMaxSpinBox_);
+    priceMaxEdit_ = new QLineEdit(this);
+    priceMaxEdit_->setPlaceholderText("Tùy chọn");
+    priceMaxEdit_->setValidator(new QIntValidator(0, MAX_FLIGHT_PRICE, this));
+    priceMaxEdit_->setMaximumWidth(120);
+    inputLayout->addWidget(priceMaxEdit_);
 
-    topLayout->addLayout(filterLayout);
+    // Search button - inline, same row, smaller size
+    QPushButton* searchBtn = new QPushButton("Tìm kiếm", this);  // Not uppercase
+    searchBtn->setFixedHeight(fromSearchCombo_->sizeHint().height());  // Match input height
+    searchBtn->setStyleSheet(
+        "QPushButton {"
+        "  background-color: #4472C4;"
+        "  color: white;"
+        "  font-size: 11pt;"
+        "  padding: 5px 20px;"
+        "  border-radius: 3px;"
+        "}"
+        "QPushButton:hover {"
+        "  background-color: #365a9e;"
+        "}"
+    );
+    inputLayout->addWidget(searchBtn);
 
-    // Single search button - full width
-    QPushButton* searchBtn = new QPushButton("🔍 TÌM KIẾM CHUYẾN BAY", this);
-    searchBtn->setStyleSheet("QPushButton { background-color: #4472C4; color: white; font-size: 12pt; padding: 10px; }");
-    topLayout->addWidget(searchBtn);
+    inputLayout->addStretch();
+    topLayout->addLayout(inputLayout);
 
+    // Connect search button
     connect(searchBtn, &QPushButton::clicked, this, &SearchBookPage::onSearchClicked);
 
     mainLayout->addWidget(topBar);
@@ -151,6 +174,11 @@ void SearchBookPage::setupUi()
     tblTitle->setProperty("class", "SectionTitle");
     thLayout->addWidget(tblTitle);
     thLayout->addStretch();
+
+    // Add status label
+    statusLabel_ = new QLabel("", this);
+    statusLabel_->setStyleSheet("color: #123B7A; font-size: 12px;");
+    thLayout->addWidget(statusLabel_);
 
     mainLayout->addWidget(tableHeader);
 
@@ -261,34 +289,47 @@ void SearchBookPage::onSearchClicked()
         return;
     }
     
-    // Optional filters
-    QDate selectedDate = dateSearchEdit_->date();
-    // Check if a valid date was selected (not the special "all dates" value)
-    if (selectedDate.isValid() && !selectedDate.isNull()) {
-        criteria.date = selectedDate.toString("dd/MM/yyyy").toStdString();
+    // Date (optional)
+    if (dateSearchEdit_->date().isValid() && 
+        dateSearchEdit_->specialValueText() != dateSearchEdit_->text()) {
+        criteria.date = dateSearchEdit_->date().toString("dd/MM/yyyy").toStdString();
     }
     
+    // Airline (optional)
     if (airlineFilterCombo_->currentIndex() > 0) {
         criteria.airline = airlineFilterCombo_->currentData().toString().toStdString();
     }
     
-    if (priceMinSpinBox_->value() > 0 || priceMaxSpinBox_->value() < 10000000) {
-        criteria.minPrice = priceMinSpinBox_->value();
-        criteria.maxPrice = priceMaxSpinBox_->value();
-        criteria.useAVLForPrice = false;  // Linear for now
+    // Price range from QLineEdit (optional)
+    QString minText = priceMinEdit_->text().trimmed();
+    QString maxText = priceMaxEdit_->text().trimmed();
+    
+    if (!minText.isEmpty()) {
+        bool ok;
+        int minPrice = minText.toInt(&ok);
+        if (ok && minPrice >= 0) {  // Allow 0 for free/promotional flights
+            criteria.minPrice = minPrice;
+        }
     }
     
-    // Search
-    std::vector<FlightInstance*> results = flightManager_->searchFlights(criteria);
-    
-    // Display
-    if (results.empty()) {
-        model_->removeRows(0, model_->rowCount());
-        QMessageBox::information(this, "Không có kết quả",
-            "Không tìm thấy chuyến bay phù hợp với tiêu chí tìm kiếm.");
-    } else {
-        fillTable(results);
+    if (!maxText.isEmpty()) {
+        bool ok;
+        int maxPrice = maxText.toInt(&ok);
+        if (ok && maxPrice >= 0) {  // Allow 0 for consistency
+            criteria.maxPrice = maxPrice;
+        }
     }
+    
+    // Search with criteria
+    auto results = flightManager_->searchFlights(criteria);
+    
+    // Display results
+    fillTable(results);
+    
+    // Update status
+    statusLabel_->setText(
+        QString("Tìm thấy %1 chuyến bay").arg(results.size())
+    );
 }
 
 // ================ ĐẶT VÉ ================
