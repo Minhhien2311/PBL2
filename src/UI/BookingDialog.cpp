@@ -2,8 +2,10 @@
 #include "entities/FlightInstance.h"
 #include "core/FlightManager.h"
 #include "core/BookingManager.h"
+#include "core/AccountManager.h"
 #include "core/SeatManager.h"
 #include "entities/Seat.h"
+#include "entities/Account.h"
 #include "utils/DateTime.h"
 
 #include <QVBoxLayout>
@@ -18,6 +20,7 @@
 #include <QMessageBox>
 #include <QScrollArea>
 #include <QDateTime>
+#include <QRegularExpression>
 
 // Seat button style constants
 namespace {
@@ -42,11 +45,13 @@ namespace {
 BookingDialog::BookingDialog(FlightInstance* flightInstance, 
                              FlightManager* flightManager,
                              BookingManager* bookingManager,
+                             AccountManager* accountManager,
                              QWidget *parent)
     : QDialog(parent),
       flightInstance_(flightInstance),
       flightManager_(flightManager),
       bookingManager_(bookingManager),
+      accountManager_(accountManager),
       seatMapContainer_(nullptr),
       seatMapLayout_(nullptr),
       selectedSeatId_("")
@@ -54,6 +59,7 @@ BookingDialog::BookingDialog(FlightInstance* flightInstance,
     Q_ASSERT(flightInstance_ != nullptr);
     Q_ASSERT(flightManager_ != nullptr);
     Q_ASSERT(bookingManager_ != nullptr);
+    Q_ASSERT(accountManager_ != nullptr);
     
     setWindowTitle("Đặt vé máy bay");
     setMinimumWidth(700);
@@ -230,6 +236,16 @@ void BookingDialog::setupUi()
             return;
         }
         
+        // Validate passenger ID format (9 or 12 digits for Vietnam ID/CCCD)
+        QString passengerId = passengerIdEdit_->text().trimmed();
+        QRegularExpression idRegex(R"(^\d{9}$|^\d{12}$)");
+        if (!idRegex.match(passengerId).hasMatch()) {
+            QMessageBox::warning(this, "Định dạng không hợp lệ", 
+                "CMND/CCCD phải là 9 hoặc 12 chữ số.");
+            passengerIdEdit_->setFocus();
+            return;
+        }
+        
         // Validate seat selection
         if (selectedSeatId_.isEmpty()) {
             QMessageBox::warning(this, "Thiếu thông tin", "Vui lòng chọn ghế ngồi.");
@@ -250,6 +266,15 @@ void BookingDialog::setupUi()
             return;
         }
         
+        // Get current user (agent) ID safely
+        Account* currentUser = accountManager_->getCurrentUser();
+        if (!currentUser) {
+            seatManager->releaseSeat(selectedSeatId_.toStdString()); // Rollback
+            QMessageBox::critical(this, "Lỗi", "Không xác định được người dùng.");
+            return;
+        }
+        std::string agentId = currentUser->getId();
+        
         // Get current booking class
         BookingClass bookingClass = static_cast<BookingClass>(classComboBox_->currentData().toInt());
         
@@ -258,16 +283,16 @@ void BookingDialog::setupUi()
                        ? flightInstance_->getFareEconomy() 
                        : flightInstance_->getFareBusiness();
         
-        // Get current date and time
-        QString currentDateTime = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss");
+        // Get current date and time in correct format
+        QString currentDateTime = QDateTime::currentDateTime().toString("dd/MM/yyyy HH:mm:ss");
         
         // Create new booking
         Booking* newBooking = new Booking(
             flightInstance_->getInstanceId(),
-            "AGENT001", // Default agent ID - should be passed from logged in user
+            agentId, // Fixed: use real agent ID
             passengerIdEdit_->text().trimmed().toStdString(),
             selectedSeatId_.toStdString(),
-            currentDateTime.toStdString(),
+            currentDateTime.toStdString(), // Fixed: correct date format
             bookingClass,
             baseFare,
             BookingStatus::Issued
@@ -284,7 +309,12 @@ void BookingDialog::setupUi()
         }
         
         // THIRD: Save seat changes to file
-        seatManager->saveChanges();
+        if (!seatManager->saveChanges()) {
+            QMessageBox::warning(this, "Cảnh báo",
+                "Đặt vé thành công nhưng không cập nhật được sơ đồ ghế. "
+                "Tình trạng ghế có thể không được cập nhật ngay trong hệ thống.");
+            // Don't rollback booking - it's already saved
+        }
         
         // Show success message with booking ID
         QMessageBox::information(this, "Thành công",
