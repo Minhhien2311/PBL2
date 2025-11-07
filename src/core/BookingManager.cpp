@@ -212,3 +212,36 @@ bool BookingManager::updateBooking(const std::string& bookingId,
     saveDataToFiles(bookingsFilePath_);
     return true;
 }
+
+// --- LƯU BOOKING NGAY LẬP TỨC VÀO FILE ---
+bool BookingManager::saveBookingToFile(Booking* booking) {
+    if (!booking) {
+        std::cerr << "Lỗi: Booking không hợp lệ" << std::endl;
+        return false;
+    }
+    
+    // Check if booking ID already exists in memory
+    if (bookingIdTable.find(booking->getBookingId()) != nullptr) {
+        std::cerr << "Lỗi: Booking ID đã tồn tại: " << booking->getBookingId() << std::endl;
+        return false;
+    }
+    
+    // Mở file ở chế độ append để không ghi đè dữ liệu cũ
+    std::ofstream file(bookingsFilePath_, std::ios::app);
+    if (!file.is_open()) {
+        std::cerr << "Không thể mở file bookings để ghi: " << bookingsFilePath_ << std::endl;
+        return false;
+    }
+    
+    // Ghi booking vào file
+    file << booking->toRecordLine() << std::endl;
+    file.flush();
+    file.close();
+    
+    // Thêm vào cấu trúc dữ liệu trong bộ nhớ
+    allBookings.push_back(booking);
+    bookingIdTable.insert(booking->getBookingId(), booking);
+    
+    std::cout << "Đã lưu booking " << booking->getBookingId() << " vào file" << std::endl;
+    return true;
+}
