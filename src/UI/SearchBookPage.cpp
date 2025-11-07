@@ -371,3 +371,22 @@ void SearchBookPage::onBookClicked()
     }
     // else: User cancelled - no action needed
 }
+
+/**
+ * @brief Refresh page when shown or when user changes
+ */
+void SearchBookPage::refreshPage() {
+    // Clear all search filters
+    fromSearchCombo_->setCurrentIndex(0);
+    toSearchCombo_->setCurrentIndex(0);
+    dateSearchEdit_->clear();
+    airlineFilterCombo_->setCurrentIndex(0);
+    priceMinEdit_->clear();
+    priceMaxEdit_->clear();
+    
+    // Clear search results
+    model_->removeRows(0, model_->rowCount());
+    
+    // Clear status label
+    statusLabel_->setText("");
+}
