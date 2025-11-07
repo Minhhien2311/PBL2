@@ -2,7 +2,7 @@
 #define AIRPORTMANAGER_H
 
 #include "DSA/SimpleMap.h"
-#include "DSA/DynamicArray.h"
+#include <vector>
 #include <string>
 
 class FlightManager;
@@ -33,7 +33,7 @@ public:
     std::string getDisplayName(const std::string& iataCode) const;
 
     // Lấy danh sách tất cả tên hiển thị (đã sắp xếp alphabet)
-    DynamicArray<std::string> getAllDisplayNames() const;
+    std::vector<std::string> getAllDisplayNames() const;
 
     // Load thêm sân bay từ FlightManager, quét tất cả chuyến bay, tự động thêm sân bay chưa có
     void loadAirportsFromFlights(FlightManager* flightManager);

@@ -4,11 +4,11 @@
 #include <iostream>
 
 // Sắp xếp FlightInstance theo giờ đến (arrivalTime) từ sớm tới trễ
-DynamicArray<FlightInstance*> Sorting::sortByArrivalTime(const DynamicArray<FlightInstance*>& flights) {
-    // Tạo mảng kết quả
-    DynamicArray<FlightInstance*> result;
+std::vector<FlightInstance*> Sorting::sortByArrivalTime(const std::vector<FlightInstance*>& flights) {
+    // Tạo vector kết quả
+    std::vector<FlightInstance*> result;
     
-    // Copy tất cả các phần tử vào mảng kết quả
+    // Copy tất cả các phần tử vào vector kết quả
     for (int i = 0; i < flights.size(); i++) {
         result.push_back(flights[i]);
     }
@@ -22,11 +22,11 @@ DynamicArray<FlightInstance*> Sorting::sortByArrivalTime(const DynamicArray<Flig
 }
 
 // Sắp xếp FlightInstance theo giá vé Economy từ thấp tới cao
-DynamicArray<FlightInstance*> Sorting::sortByPrice(const DynamicArray<FlightInstance*>& flights) {
-    // Tạo mảng kết quả
-    DynamicArray<FlightInstance*> result;
+std::vector<FlightInstance*> Sorting::sortByPrice(const std::vector<FlightInstance*>& flights) {
+    // Tạo vector kết quả
+    std::vector<FlightInstance*> result;
     
-    // Copy tất cả các phần tử vào mảng kết quả
+    // Copy tất cả các phần tử vào vector kết quả
     for (int i = 0; i < flights.size(); i++) {
         result.push_back(flights[i]);
     }
@@ -103,7 +103,7 @@ int Sorting::timeToMinutes(const std::string& time) {
 // ============= QUICK SORT CHO THỜI GIAN =============
 
 // Hàm Quick Sort đệ quy cho sắp xếp theo thời gian
-void Sorting::quickSortByTime(DynamicArray<FlightInstance*>& arr, int low, int high) {
+void Sorting::quickSortByTime(std::vector<FlightInstance*>& arr, int low, int high) {
     if (low < high) {
         // Tìm pivot index
         int pi = partitionByTime(arr, low, high);
@@ -115,7 +115,7 @@ void Sorting::quickSortByTime(DynamicArray<FlightInstance*>& arr, int low, int h
 }
 
 // Hàm partition cho Quick Sort theo thời gian
-int Sorting::partitionByTime(DynamicArray<FlightInstance*>& arr, int low, int high) {
+int Sorting::partitionByTime(std::vector<FlightInstance*>& arr, int low, int high) {
     // Chọn phần tử cuối làm pivot
     FlightInstance* pivot = arr[high];
     int i = low - 1; // Index của phần tử nhỏ hơn
@@ -145,7 +145,7 @@ int Sorting::partitionByTime(DynamicArray<FlightInstance*>& arr, int low, int hi
 // ============= QUICK SORT CHO GIÁ VÉ =============
 
 // Hàm Quick Sort đệ quy cho sắp xếp theo giá
-void Sorting::quickSortByPrice(DynamicArray<FlightInstance*>& arr, int low, int high) {
+void Sorting::quickSortByPrice(std::vector<FlightInstance*>& arr, int low, int high) {
     if (low < high) {
         // Tìm pivot index
         int pi = partitionByPrice(arr, low, high);
@@ -157,7 +157,7 @@ void Sorting::quickSortByPrice(DynamicArray<FlightInstance*>& arr, int low, int 
 }
 
 // Hàm partition cho Quick Sort theo giá
-int Sorting::partitionByPrice(DynamicArray<FlightInstance*>& arr, int low, int high) {
+int Sorting::partitionByPrice(std::vector<FlightInstance*>& arr, int low, int high) {
     // Chọn phần tử cuối làm pivot
     FlightInstance* pivot = arr[high];
     int i = low - 1; // Index của phần tử nhỏ hơn

@@ -144,8 +144,8 @@ FlightInstance* FlightManager::findInstanceById(const std::string& instanceId) {
 }
 
 // (findInstancesByFlightId không đổi vì cần tìm nhiều, vẫn phải lặp)
-DynamicArray<FlightInstance*> FlightManager::findInstancesByFlightId(const std::string& flightId) {
-    DynamicArray<FlightInstance*> results;
+std::vector<FlightInstance*> FlightManager::findInstancesByFlightId(const std::string& flightId) {
+    std::vector<FlightInstance*> results;
     for (size_t i = 0; i < allInstances.size(); ++i) {
         if (allInstances[i]->getFlightId() == flightId) {
             results.push_back(allInstances[i]);
@@ -154,8 +154,8 @@ DynamicArray<FlightInstance*> FlightManager::findInstancesByFlightId(const std::
     return results;
 }
 
-DynamicArray<Flight*> FlightManager::findFlightByRoute(const std::string& fromIATA, const std::string& toIATA) {
-    DynamicArray<Flight*> results;
+std::vector<Flight*> FlightManager::findFlightByRoute(const std::string& fromIATA, const std::string& toIATA) {
+    std::vector<Flight*> results;
     for (size_t i = 0; i < allFlights.size(); ++i) {
         if (allFlights[i]->getDepartureAirport() == fromIATA && allFlights[i]->getArrivalAirport() == toIATA) {
             results.push_back(allFlights[i]);
@@ -187,11 +187,11 @@ bool FlightManager::saveInstancesToFiles(const std::string& instancesFilePath) c
 }
 
 // --- Getters ---
-const DynamicArray<Flight*>& FlightManager::getAllFlights() const{
+const std::vector<Flight*>& FlightManager::getAllFlights() const{
     return this->allFlights;
 }     
 
-const DynamicArray<FlightInstance*>& FlightManager::getAllInstances() const{
+const std::vector<FlightInstance*>& FlightManager::getAllInstances() const{
     return this->allInstances;
 }
 
