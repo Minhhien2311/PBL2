@@ -113,60 +113,89 @@ Booking* BookingManager::createNewBooking( FlightManager& flightManager,
 // CẬP NHẬT: Thêm tham số SeatManager
 bool BookingManager::cancelBooking(FlightManager& flightManager, SeatManager& seatManager, const std::string& bookingId) {
     
-    // BƯỚC 1 & 2: Tìm booking và kiểm tra luật (giữ nguyên)
+    // Step 1: Find and validate booking
     Booking* booking = findBookingById(bookingId);
     if (booking == nullptr || booking->getStatus() != BookingStatus::Issued) {
         return false; 
     }
+    
+    // Step 2: Check cancellation rules
     if (currentRule == nullptr || !currentRule->isCancelAllowed()) {
         return false; 
     }
-
-    // BƯỚC 3: KIỂM TRA THỜI GIAN & HOÀN TRẢ GHẾ
+    
+    // Step 3: Get flight instance
     FlightInstance* instance = flightManager.findInstanceById(booking->getFlightInstanceId());
     
-    // THAY ĐỔI: Dù chuyến bay còn hay không, chúng ta vẫn cố gắng hoàn trả ghế
-    
-    // Lấy ID ghế cần giải phóng từ booking
-    std::string seatIdToRelease = booking->getSeatID(); // Giả sử đã có hàm này
-
-    if (!seatIdToRelease.empty()) {
-        if (instance != nullptr) { // Chỉ load SeatManager khi instance còn tồn tại
-            // Tải đúng chuyến bay vào SeatManager
-            seatManager.loadSeatMapFor(instance);
-            
-            // Yêu cầu SeatManager giải phóng ghế và lưu lại file seat_status.txt
-            seatManager.releaseSeat(seatIdToRelease);
-            
-            std::cout << "Đã hoàn trả ghế " << seatIdToRelease << " cho chuyến bay " << instance->getInstanceId() << std::endl;
-        }
-    }
-
-
-    // Phần kiểm tra thời gian hủy vé so với giờ bay vẫn giữ nguyên
+    // Step 4: CHECK TIME CONSTRAINT FIRST (before releasing seat)
     if (instance != nullptr) {
-        // ... (toàn bộ logic so sánh thời gian giữ nguyên) ...
-        auto departureTime = utils::DateTime::fromDmYHm(instance->getDepartureDate(), instance->getDepartureTime());
+        auto departureTime = utils::DateTime::fromDmYHm(
+            instance->getDepartureDate(), 
+            instance->getDepartureTime()
+        );
         auto now = utils::DateTime::nowUtc();
-        auto duration = std::chrono::duration_cast<std::chrono::hours>(departureTime - now);
+        auto duration = std::chrono::duration_cast<std::chrono::hours>(
+            departureTime - now
+        );
+        
         if (!currentRule->isCancellable(duration.count())) {
-            // LƯU Ý: Nếu hủy không thành công vì quá sát giờ, ghế đã hoàn trả ở trên
-            // cần được book lại. Đây là một giao dịch phức tạp (transaction).
-            // Tạm thời chấp nhận ghế được hoàn trả ngay cả khi việc hủy bị từ chối ở đây.
-            return false;
+            std::cerr << "Cannot cancel: Too close to departure time" << std::endl;
+            return false;  // Fail early - no seat changes made yet
         }
     }
-
-    // BƯỚC 4: Đổi trạng thái booking
+    
+    // Step 5: NOW release seat (time check passed)
+    std::string seatIdToRelease = booking->getSeatID();
+    bool seatReleased = false;
+    
+    if (!seatIdToRelease.empty() && instance != nullptr) {
+        if (seatManager.loadSeatMapFor(instance)) {
+            if (seatManager.releaseSeat(seatIdToRelease)) {
+                // SAVE SEAT CHANGES IMMEDIATELY
+                if (seatManager.saveChanges()) {
+                    seatReleased = true;
+                    std::cout << "Released and saved seat " << seatIdToRelease << std::endl;
+                } else {
+                    std::cerr << "ERROR: Failed to save seat changes!" << std::endl;
+                    return false;  // Fail if can't save
+                }
+            }
+        }
+    }
+    
+    // Step 6: Update booking status
     booking->setStatus(BookingStatus::Cancelled);
     
-    return true; // Hủy thành công
+    // Step 7: SAVE BOOKING CHANGES IMMEDIATELY
+    if (!saveDataToFiles(bookingsFilePath_)) {
+        std::cerr << "ERROR: Failed to save booking status!" << std::endl;
+        
+        // ROLLBACK: Re-book the seat if it was released
+        if (seatReleased && instance != nullptr) {
+            seatManager.loadSeatMapFor(instance);
+            seatManager.bookSeat(seatIdToRelease);
+            seatManager.saveChanges();
+            std::cerr << "Rolled back seat release" << std::endl;
+        }
+        
+        booking->setStatus(BookingStatus::Issued);
+        return false;
+    }
+    
+    std::cout << "Successfully cancelled booking " << bookingId << std::endl;
+    return true;
 }
 
 // --- CÁC HÀM TÌM KIẾM  ---
 
 // <<< THAY ĐỔI: Dùng HashTable >>>
 Booking* BookingManager::findBookingById(const std::string& bookingId) {
+    Booking** bookingPtrPtr = bookingIdTable.find(bookingId);
+    return (bookingPtrPtr != nullptr) ? *bookingPtrPtr : nullptr;
+}
+
+// Const version of findBookingById for const methods
+Booking* BookingManager::findBookingById(const std::string& bookingId) const {
     Booking** bookingPtrPtr = bookingIdTable.find(bookingId);
     return (bookingPtrPtr != nullptr) ? *bookingPtrPtr : nullptr;
 }
@@ -244,4 +273,62 @@ bool BookingManager::saveBookingToFile(Booking* booking) {
     
     std::cout << "Đã lưu booking " << booking->getBookingId() << " vào file" << std::endl;
     return true;
+}
+
+// --- HELPER METHODS FOR UI ---
+
+// Check if booking can be cancelled (considering time constraints)
+bool BookingManager::canCancelBooking(const std::string& bookingId, 
+                                     FlightManager& flightManager) const {
+    Booking* booking = findBookingById(bookingId);
+    if (!booking || booking->getStatus() != BookingStatus::Issued) {
+        return false;
+    }
+    
+    if (!currentRule || !currentRule->isCancelAllowed()) {
+        return false;
+    }
+    
+    FlightInstance* instance = flightManager.findInstanceById(
+        booking->getFlightInstanceId()
+    );
+    if (!instance) return false;
+    
+    auto departureTime = utils::DateTime::fromDmYHm(
+        instance->getDepartureDate(), 
+        instance->getDepartureTime()
+    );
+    auto now = utils::DateTime::nowUtc();
+    auto duration = std::chrono::duration_cast<std::chrono::hours>(
+        departureTime - now
+    );
+    
+    return currentRule->isCancellable(duration.count());
+}
+
+// Get cancellation deadline for a booking
+std::string BookingManager::getCancellationDeadline(
+    const std::string& bookingId,
+    FlightManager& flightManager) const 
+{
+    Booking* booking = findBookingById(bookingId);
+    if (!booking) return "N/A";
+    
+    FlightInstance* instance = flightManager.findInstanceById(
+        booking->getFlightInstanceId()
+    );
+    if (!instance) return "N/A";
+    
+    if (!currentRule) return "N/A";
+    
+    // Get departure time
+    auto departureTime = utils::DateTime::fromDmYHm(
+        instance->getDepartureDate(), 
+        instance->getDepartureTime()
+    );
+    
+    // Subtract minimum cancellation hours
+    auto deadline = departureTime - std::chrono::hours(currentRule->getCancelCutoffHours());
+    
+    return utils::DateTime::formatLocal(deadline, "%d/%m/%Y %H:%M");
 }

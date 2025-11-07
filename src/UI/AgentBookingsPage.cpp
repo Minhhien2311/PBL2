@@ -389,42 +389,70 @@ void AgentBookingsPage::onCancelBookingClicked()
         return;
     }
     
-    // Lấy Booking ID (cột 0) và Trạng thái (cột 4)
+    // Lấy Booking ID (cột 0) và Trạng thái (cột 6)
     QModelIndex idIndex = selected.first().siblingAtColumn(0);
-    QModelIndex statusIndex = selected.first().siblingAtColumn(4);
+    QModelIndex statusIndex = selected.first().siblingAtColumn(6);  // Status column
     
     QString bookingId = model_->data(idIndex).toString();
     QString status = model_->data(statusIndex).toString();
 
     // 2. Kiểm tra xem đã hủy chưa
-    if (status == "Cancelled") {
+    if (status == "Đã hủy") {
         QMessageBox::warning(this, "Lỗi", "Vé này đã được hủy từ trước.");
         return;
     }
 
-    // 3. Xác nhận
+    // 3. Check if can cancel (time constraint)
+    if (!bookingManager_->canCancelBooking(bookingId.toStdString(), 
+                                          *flightManager_)) {
+        QString deadline = QString::fromStdString(
+            bookingManager_->getCancellationDeadline(bookingId.toStdString(), 
+                                                    *flightManager_)
+        );
+        
+        QMessageBox::warning(this, "Không thể hủy", 
+            QString("Không thể hủy vé này.\n\n"
+                   "Lý do: Đã quá hạn hủy vé.\n"
+                   "Hạn hủy: %1\n\n"
+                   "Vui lòng liên hệ bộ phận hỗ trợ.").arg(deadline));
+        return;
+    }
+
+    // 4. Xác nhận
     auto reply = QMessageBox::question(this, "Xác nhận hủy vé", 
-        QString("Bạn có chắc chắn muốn hủy vé %1?").arg(bookingId), 
+        QString("Bạn có chắc chắn muốn hủy vé %1?\n\n"
+               "⚠️ Lưu ý:\n"
+               "- Ghế sẽ được trả lại hệ thống\n"
+               "- Trạng thái đặt chỗ sẽ chuyển sang 'Đã hủy'\n"
+               "- Hành động này KHÔNG THỂ hoàn tác").arg(bookingId), 
         QMessageBox::Yes | QMessageBox::No);
 
     if (reply == QMessageBox::No) {
         return;
     }
     
-    // --- [CHỖ NỐI API] ---
-    // 4. Gọi API hủy vé
-    // (Hàm này cần FlightManager&, chúng ta đã truyền vào)
-    bool success = bookingManager_->cancelBooking(*flightManager_, *flightManager_->getSeatManager(), bookingId.toStdString());
+    // 5. Gọi API hủy vé
+    bool success = bookingManager_->cancelBooking(*flightManager_, 
+                                                  *flightManager_->getSeatManager(), 
+                                                  bookingId.toStdString());
 
-    // 5. Xử lý kết quả
+    // 6. Xử lý kết quả
     if (success) {
-        QMessageBox::information(this, "Thành công", "Đã hủy vé thành công.");
+        QMessageBox::information(this, "Thành công", 
+            QString("Đã hủy vé thành công!\n\n"
+                   "Mã đặt chỗ: %1\n"
+                   "Ghế đã được trả lại hệ thống.\n"
+                   "Trạng thái đã được cập nhật.").arg(bookingId));
         refreshTable(); // Tải lại bảng
     } else {
         QMessageBox::critical(this, "Thất bại", 
-            "Hủy vé thất bại. (Có thể đã quá sát giờ bay, hoặc vé không tồn tại)");
+            "Hủy vé thất bại.\n\n"
+            "Có thể do:\n"
+            "- Quá sát giờ bay\n"
+            "- Lỗi lưu dữ liệu\n"
+            "- Vé không tồn tại\n\n"
+            "Vui lòng thử lại hoặc liên hệ hỗ trợ.");
     }
-    // --- [HẾT CHỖ NỐI API] ---
 }
 
 void AgentBookingsPage::onViewDetailsClicked()

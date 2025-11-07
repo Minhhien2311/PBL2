@@ -46,6 +46,14 @@ public:
     // NGHIỆP VỤ HỦY VÉ
     bool cancelBooking(FlightManager& flightManager, SeatManager& seatManager, const std::string& bookingId);
     
+    // Check if booking can be cancelled (considering time constraints)
+    bool canCancelBooking(const std::string& bookingId, 
+                         FlightManager& flightManager) const;
+    
+    // Get cancellation deadline for a booking
+    std::string getCancellationDeadline(const std::string& bookingId,
+                                       FlightManager& flightManager) const;
+    
     // NGHIỆP VỤ Cập nhật vé
     bool updateBooking(const std::string& bookingId, 
                        const std::string& newPassengerId,
@@ -54,6 +62,7 @@ public:
 
     // --- Tìm kiếm  ---
     Booking* findBookingById(const std::string& bookingId);
+    Booking* findBookingById(const std::string& bookingId) const;
     
     // --- Lấy dữ liệu  ---
     const std::vector<Booking*>& getAllBookings() const;
