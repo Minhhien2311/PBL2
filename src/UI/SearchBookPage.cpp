@@ -29,7 +29,7 @@
 
 // Constants
 namespace {
-    constexpr int MAX_PRICE_LIMIT = 99999999;  // Maximum price value for validation
+    constexpr int MAX_FLIGHT_PRICE = 99999999;  // Maximum flight price value for validation (business constraint)
 }
 
 SearchBookPage::SearchBookPage(FlightManager* flManager,
@@ -127,7 +127,7 @@ void SearchBookPage::setupUi()
     // Price range - QLineEdit (plain text, no spin buttons)
     priceMinEdit_ = new QLineEdit(this);
     priceMinEdit_->setPlaceholderText("Tùy chọn");
-    priceMinEdit_->setValidator(new QIntValidator(0, MAX_PRICE_LIMIT, this));
+    priceMinEdit_->setValidator(new QIntValidator(0, MAX_FLIGHT_PRICE, this));
     priceMinEdit_->setMaximumWidth(120);
     inputLayout->addWidget(priceMinEdit_);
 
@@ -135,7 +135,7 @@ void SearchBookPage::setupUi()
 
     priceMaxEdit_ = new QLineEdit(this);
     priceMaxEdit_->setPlaceholderText("Tùy chọn");
-    priceMaxEdit_->setValidator(new QIntValidator(0, MAX_PRICE_LIMIT, this));
+    priceMaxEdit_->setValidator(new QIntValidator(0, MAX_FLIGHT_PRICE, this));
     priceMaxEdit_->setMaximumWidth(120);
     inputLayout->addWidget(priceMaxEdit_);
 
@@ -307,7 +307,7 @@ void SearchBookPage::onSearchClicked()
     if (!minText.isEmpty()) {
         bool ok;
         int minPrice = minText.toInt(&ok);
-        if (ok && minPrice > 0) {
+        if (ok && minPrice >= 0) {  // Allow 0 for free/promotional flights
             criteria.minPrice = minPrice;
         }
     }
@@ -315,7 +315,7 @@ void SearchBookPage::onSearchClicked()
     if (!maxText.isEmpty()) {
         bool ok;
         int maxPrice = maxText.toInt(&ok);
-        if (ok && maxPrice > 0) {
+        if (ok && maxPrice >= 0) {  // Allow 0 for consistency
             criteria.maxPrice = maxPrice;
         }
     }
