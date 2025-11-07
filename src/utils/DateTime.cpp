@@ -100,3 +100,4 @@ std::string DateTime::formatHm(std::chrono::system_clock::time_point tp) {
     // Dùng lại hàm formatLocal đã có với định dạng mới
     return formatLocal(tp, "%H:%M");
 }
+}

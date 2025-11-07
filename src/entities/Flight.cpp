@@ -7,7 +7,7 @@
 Flight::Flight(const std::string& airline,
                const std::string& departureIATA,
                const std::string& arrivalIATA)
-    : flightId(departureIATA + "-" + arrivalIATA),
+    : flightId(departureIATA + "-" + arrivalIATA + "-" + airline),
       airline(airline), 
       departureAirport(departureIATA), 
       arrivalAirport(arrivalIATA)

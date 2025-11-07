@@ -3,13 +3,13 @@
 
 #include <QMainWindow>
 
-// Khai báo sớm (Forward declare)
+// Khai báo sớm
 class QStackedWidget;
 class LoginPage;
 class AdminInterface;
 class AgentInterface;
 class AccountManager; 
-class FlightManager;  // <--- Sửa lỗi: Tên nhất quán (số ít)
+class FlightManager;
 class BookingManager;
 class ReportManager;
 class AirportManager;
@@ -45,7 +45,7 @@ private:
 
     // Con trỏ tới các Manager (không sở hữu, chỉ tham chiếu)
     AccountManager* accountManager_; 
-    FlightManager* flightManager_;   // <--- Sửa lỗi: Tên nhất quán (số ít)
+    FlightManager* flightManager_;
     BookingManager* bookingManager_;
     ReportManager* reportManager_;
     AirportManager* airportManager_;
