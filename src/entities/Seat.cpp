@@ -2,6 +2,8 @@
 #include <cctype>
 #include <stdexcept>
 
+#include <iostream>
+
 // === Triển khai lớp Seat ===
 
 Seat::Seat(const std::string& seatId, SeatType seatType, SeatStatus seatStatus)
@@ -35,6 +37,22 @@ void Seat::setStatus(SeatStatus newStatus) {
     status = newStatus;
 }
 
+// std::pair<int, int> Seat::getCoordinates() const {
+//     if (id.empty() || !std::isalpha(id[0])) {
+//         return {-1, -1}; // ID không hợp lệ
+//     }
+
+//     int row = std::toupper(id[0]) - 'A';
+    
+//     try {
+//         int col = std::stoi(id.substr(1)) - 1;
+//         if (col < 0) return {-1, -1};
+//         return {row, col};
+//     } catch (const std::exception&) {
+//         return {-1, -1}; // Lỗi chuyển đổi
+//     }
+// }
+
 std::pair<int, int> Seat::getCoordinates() const {
     if (id.empty() || !std::isalpha(id[0])) {
         return {-1, -1}; // ID không hợp lệ
@@ -43,13 +61,19 @@ std::pair<int, int> Seat::getCoordinates() const {
     int row = std::toupper(id[0]) - 'A';
     
     try {
-        int col = std::stoi(id.substr(1)) - 1;
+        std::string numPart = id.substr(1);
+        std::cerr << "[DEBUG] Parsing seat id: " << id << " → number part: [" << numPart << "]\n";
+        int col = std::stoi(numPart) - 1;
         if (col < 0) return {-1, -1};
         return {row, col};
-    } catch (const std::exception&) {
-        return {-1, -1}; // Lỗi chuyển đổi
+    } catch (const std::exception& e) {
+        std::cerr << "[ERROR] stoi failed for seat id: " << id 
+                  << " — reason: " << e.what() << std::endl;
+        return {-1, -1}; 
     }
 }
+
+
 
 std::string Seat::coordinatesToId(const std::pair<int, int>& coords) {
     char rowChar = 'A' + coords.first;

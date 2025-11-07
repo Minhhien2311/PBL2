@@ -95,6 +95,12 @@ public:
     // Hàm bổ sung nếu có thể
     void updateAgentProfile(const std::string& agentId, std::string newName, std::string newPhone, std::string newEmail);
     void changeAgentPassword(const std::string& agentId, std::string newPassword);
+
+    // Đổi mật khẩu cho bất kỳ user (Admin hoặc Agent).
+    // Trả về true nếu mật khẩu cũ hợp lệ và mật khẩu được cập nhật + ghi file thành công.
+    bool changePassword(const std::string& userId,
+                        const std::string& oldPasswordPlain,
+                        const std::string& newPasswordPlain);
 };
 
 #endif

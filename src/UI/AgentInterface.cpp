@@ -83,6 +83,16 @@ void AgentInterface::setupUi()
     
     // --- Navigation (Sidebar của Agent) ---
     nav_ = new QListWidget(sidebar_);
+      //============ thêm ===============
+    // nav_->setFrameShape(QFrame::NoFrame);
+    // nav_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    // nav_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    // nav_->setSelectionMode(QAbstractItemView::SingleSelection);
+    // nav_->setStyleSheet(R"(
+    //     QListWidget { background: transparent; color: #FFFFFF; }
+    //     QListWidget::item { padding: 10px 8px; }
+    //     QListWidget::item:selected { background: #6f99c6; color: white; }
+    // )");
     
     // sideLay->addWidget(mkSection("NGHIỆP VỤ"));
     nav_->addItem("Tổng quan");
