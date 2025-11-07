@@ -28,14 +28,27 @@ FlightManager::~FlightManager() {
     // Cleanup SeatManager
     delete seatManager_;
     
-    // Cleanup routeIndex_
+    // Cleanup routeIndex_ - need to iterate through hash table and delete RouteData
+    // Since we don't have an iterator, we'll track which RouteData we've deleted
+    std::vector<RouteData*> deletedRoutes;
     for (Flight* flight : allFlights) {
         if (!flight) continue;
         std::string routeKey = flight->getDepartureAirport() + "_" + 
                               flight->getArrivalAirport();
         RouteData** dataPtr = routeIndex_.find(routeKey);
         if (dataPtr && *dataPtr) {
-            delete *dataPtr;
+            // Check if we haven't already deleted this RouteData
+            bool alreadyDeleted = false;
+            for (RouteData* rd : deletedRoutes) {
+                if (rd == *dataPtr) {
+                    alreadyDeleted = true;
+                    break;
+                }
+            }
+            if (!alreadyDeleted) {
+                deletedRoutes.push_back(*dataPtr);
+                delete *dataPtr;
+            }
         }
     }
    
@@ -323,14 +336,29 @@ void FlightManager::buildRouteIndex() {
         }
     }
     
-    // Sort each route by datetime
+    // Sort each route by datetime - iterate through unique routes
+    // Track which routes we've already sorted to avoid duplicates
+    std::vector<std::string> sortedRoutes;
     for (Flight* flight : allFlights) {
         if (!flight) continue;
         std::string routeKey = flight->getDepartureAirport() + "_" + 
                               flight->getArrivalAirport();
-        RouteData** dataPtr = routeIndex_.find(routeKey);
-        if (dataPtr && *dataPtr) {
-            sortInstancesByDateTime((*dataPtr)->allInstances);
+        
+        // Check if we've already sorted this route
+        bool alreadySorted = false;
+        for (const std::string& sorted : sortedRoutes) {
+            if (sorted == routeKey) {
+                alreadySorted = true;
+                break;
+            }
+        }
+        
+        if (!alreadySorted) {
+            RouteData** dataPtr = routeIndex_.find(routeKey);
+            if (dataPtr && *dataPtr) {
+                sortInstancesByDateTime((*dataPtr)->allInstances);
+                sortedRoutes.push_back(routeKey);
+            }
         }
     }
 }
@@ -357,37 +385,74 @@ void FlightManager::sortInstancesByDateTime(std::vector<FlightInstance*>& instan
 }
 
 int FlightManager::compareDates(const std::string& date1, const std::string& date2) {
-    // Parse DD/MM/YYYY
-    int d1 = std::stoi(date1.substr(0, 2));
-    int m1 = std::stoi(date1.substr(3, 2));
-    int y1 = std::stoi(date1.substr(6, 4));
+    // Validate format: DD/MM/YYYY (10 characters with slashes at positions 2 and 5)
+    if (date1.length() != 10 || date2.length() != 10 ||
+        date1[2] != '/' || date1[5] != '/' ||
+        date2[2] != '/' || date2[5] != '/') {
+        return 0; // Invalid format, treat as equal
+    }
     
-    int d2 = std::stoi(date2.substr(0, 2));
-    int m2 = std::stoi(date2.substr(3, 2));
-    int y2 = std::stoi(date2.substr(6, 4));
-    
-    int val1 = y1 * 10000 + m1 * 100 + d1;
-    int val2 = y2 * 10000 + m2 * 100 + d2;
-    
-    if (val1 < val2) return -1;
-    if (val1 > val2) return 1;
-    return 0;
+    try {
+        // Parse DD/MM/YYYY
+        int d1 = std::stoi(date1.substr(0, 2));
+        int m1 = std::stoi(date1.substr(3, 2));
+        int y1 = std::stoi(date1.substr(6, 4));
+        
+        int d2 = std::stoi(date2.substr(0, 2));
+        int m2 = std::stoi(date2.substr(3, 2));
+        int y2 = std::stoi(date2.substr(6, 4));
+        
+        // Validate ranges
+        if (d1 < 1 || d1 > 31 || m1 < 1 || m1 > 12 ||
+            d2 < 1 || d2 > 31 || m2 < 1 || m2 > 12) {
+            return 0; // Invalid date, treat as equal
+        }
+        
+        int val1 = y1 * 10000 + m1 * 100 + d1;
+        int val2 = y2 * 10000 + m2 * 100 + d2;
+        
+        if (val1 < val2) return -1;
+        if (val1 > val2) return 1;
+        return 0;
+    } catch (const std::invalid_argument&) {
+        return 0; // Parse error, treat as equal
+    } catch (const std::out_of_range&) {
+        return 0; // Parse error, treat as equal
+    }
 }
 
 int FlightManager::compareTimes(const std::string& time1, const std::string& time2) {
-    // Parse HH:MM
-    int h1 = std::stoi(time1.substr(0, 2));
-    int min1 = std::stoi(time1.substr(3, 2));
+    // Validate format: HH:MM (5 characters with colon at position 2)
+    if (time1.length() != 5 || time2.length() != 5 ||
+        time1[2] != ':' || time2[2] != ':') {
+        return 0; // Invalid format, treat as equal
+    }
     
-    int h2 = std::stoi(time2.substr(0, 2));
-    int min2 = std::stoi(time2.substr(3, 2));
-    
-    int val1 = h1 * 60 + min1;
-    int val2 = h2 * 60 + min2;
-    
-    if (val1 < val2) return -1;
-    if (val1 > val2) return 1;
-    return 0;
+    try {
+        // Parse HH:MM
+        int h1 = std::stoi(time1.substr(0, 2));
+        int min1 = std::stoi(time1.substr(3, 2));
+        
+        int h2 = std::stoi(time2.substr(0, 2));
+        int min2 = std::stoi(time2.substr(3, 2));
+        
+        // Validate ranges
+        if (h1 < 0 || h1 > 23 || min1 < 0 || min1 > 59 ||
+            h2 < 0 || h2 > 23 || min2 < 0 || min2 > 59) {
+            return 0; // Invalid time, treat as equal
+        }
+        
+        int val1 = h1 * 60 + min1;
+        int val2 = h2 * 60 + min2;
+        
+        if (val1 < val2) return -1;
+        if (val1 > val2) return 1;
+        return 0;
+    } catch (const std::invalid_argument&) {
+        return 0; // Parse error, treat as equal
+    } catch (const std::out_of_range&) {
+        return 0; // Parse error, treat as equal
+    }
 }
 
 std::vector<FlightInstance*> FlightManager::getFlightsByRoute(

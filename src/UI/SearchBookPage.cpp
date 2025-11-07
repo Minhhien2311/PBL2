@@ -263,7 +263,8 @@ void SearchBookPage::onSearchClicked()
     
     // Optional filters
     QDate selectedDate = dateSearchEdit_->date();
-    if (selectedDate.isValid() && selectedDate != QDate::currentDate().addDays(-36525)) {
+    // Check if a valid date was selected (not the special "all dates" value)
+    if (selectedDate.isValid() && !selectedDate.isNull()) {
         criteria.date = selectedDate.toString("dd/MM/yyyy").toStdString();
     }
     
