@@ -203,6 +203,7 @@ void BookingDialog::setupUi()
     // === FIXED BUTTONS AT BOTTOM ===
     auto *buttonLayout = new QHBoxLayout();
     buttonLayout->setContentsMargins(20, 10, 20, 20);
+    buttonLayout->setSpacing(12);
     buttonLayout->addStretch();
     
     auto *confirmButton = new QPushButton("Xác nhận đặt vé", this);
