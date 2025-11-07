@@ -238,7 +238,7 @@ void BookingDialog::setupUi()
         
         // Validate passenger ID format (9 or 12 digits for Vietnam ID/CCCD)
         QString passengerId = passengerIdEdit_->text().trimmed();
-        QRegularExpression idRegex("^\\d{9}$|^\\d{12}$");
+        QRegularExpression idRegex(R"(^\d{9}$|^\d{12}$)");
         if (!idRegex.match(passengerId).hasMatch()) {
             QMessageBox::warning(this, "Định dạng không hợp lệ", 
                 "CMND/CCCD phải là 9 hoặc 12 chữ số.");
@@ -311,7 +311,8 @@ void BookingDialog::setupUi()
         // THIRD: Save seat changes to file
         if (!seatManager->saveChanges()) {
             QMessageBox::warning(this, "Cảnh báo",
-                "Đặt vé thành công nhưng không cập nhật được sơ đồ ghế.");
+                "Đặt vé thành công nhưng không cập nhật được sơ đồ ghế. "
+                "Tình trạng ghế có thể không được cập nhật ngay trong hệ thống.");
             // Don't rollback booking - it's already saved
         }
         
