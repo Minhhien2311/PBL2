@@ -39,6 +39,7 @@ private:
     QPushButton* btnRoutes_;
     QPushButton* btnFlights_;
     QPushButton* btnAccounts_;
+    QPushButton* btnReport_;
     QPushButton* logoutBtn_;
 
     // Stack chứa các trang

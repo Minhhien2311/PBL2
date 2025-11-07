@@ -48,6 +48,7 @@ private:
     QPushButton* btnSearchBook_;
     QPushButton* btnBookings_;
     QPushButton* btnAccounts_;
+    QPushButton* btnReport_;
 
     // --- Managers (không sở hữu) ---
     AccountManager* accountManager_;

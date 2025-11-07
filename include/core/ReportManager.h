@@ -1,68 +1,115 @@
+// #pragma once
+
+// class AccountManager;
+// class BookingManager;
+
+// #include "DSA/DynamicArray.h"   // Cần cho DynamicArray
+// #include "entities/Booking.h"   // Cần cho BookingStatus
+// #include <string>
+
+// //  * Struct đơn giản để chứa kết quả báo cáo cho mỗi Agent. Dữ liệu này được tạo ra bởi ReportManager.
+// struct AgentReport {
+//     std::string agentId;
+//     std::string agentName;
+//     int    totalBookings = 0;       // Tổng số booking đã tạo
+//     int    issuedTickets = 0;       // Số booking đã phát hành (thành công)
+//     int    cancelledTickets = 0;    // Số booking đã hủy
+//     double totalRevenue = 0.0;      // Tổng doanh thu từ các vé đã phát hành
+// };
+
+// //  Lớp chịu trách nhiệm tính toán và thống kê dữ liệu từ các manager khác.
+// //  Lớp này KHÔNG SỞ HỮU dữ liệu, nó chỉ ĐỌC dữ liệu.
+// class ReportManager {
+// private:
+//     AccountManager& accountManager_;
+//     BookingManager& bookingManager_;
+
+// public:
+//     ReportManager(AccountManager& am, BookingManager& bm);
+//     ~ReportManager() = default;
+
+//     // --- Thống kê Tổng quan (cho Admin) ---
+//     double getTotalRevenueAllAgents() const;
+//     int getTotalTicketsSold() const;
+//     int countBookingsByStatus(BookingStatus status) const;
+//     DynamicArray<AgentReport*>* generateFullAgentReport() const;
+
+//     // --- Thống kê theo ngày cho Agent cụ thể ---
+//     double getDailyRevenue(const std::string& agentId) const;
+//     int getDailyTicketsSold(const std::string& agentId) const;
+//     int getDailyCancellations(const std::string& agentId) const;
+//     int getDailyTicketChanges(const std::string& agentId) const;
+
+//     // --- Thống kê theo khoảng thời gian ---
+//     // Trả về tổng số vé đã bán trong khoảng từ ngàyStart -> ngàyEnd (YYYY-MM-DD)
+//     int getTicketsSoldInRange(const std::string& startDate, const std::string& endDate) const;
+
+//     // Trả về số vé theo loại hạng (Thương gia / Phổ thông) trong khoảng thời gian
+//     int getTicketsSoldByClassInRange(const std::string& startDate, const std::string& endDate, BookingClass bookingClass) const;
+
+//     // Báo cáo doanh thu theo từng agent trong khoảng thời gian
+//     DynamicArray<AgentReport*>* generateAgentReportInRange(const std::string& startDate, const std::string& endDate) const;
+
+//     // Báo cáo doanh thu của 1 agent theo từng tháng trong năm (Agent view)
+//     DynamicArray<int>* getMonthlyTicketsByAgent(const std::string& agentId, int year) const;
+// };
+
 #pragma once
+
+#include "DSA/DynamicArray.h"
+#include "entities/Booking.h"
+#include <string>
 
 class AccountManager;
 class BookingManager;
 
-#include "DSA/DynamicArray.h"   // Cần cho DynamicArray
-#include "entities/Booking.h"   // Cần cho BookingStatus
-#include <string>
-
-//  * Struct đơn giản để chứa kết quả báo cáo cho mỗi Agent. Dữ liệu này được tạo ra bởi ReportManager.
+// Struct kết quả báo cáo cho từng Agent
 struct AgentReport {
     std::string agentId;
     std::string agentName;
-    int    totalBookings = 0;       // Tổng số booking đã tạo
-    int    issuedTickets = 0;       // Số booking đã phát hành (thành công)
-    int    cancelledTickets = 0;    // Số booking đã hủy
-    double totalRevenue = 0.0;      // Tổng doanh thu từ các vé đã phát hành
+    int totalBookings = 0;
+    int issuedTickets = 0;
+    int cancelledTickets = 0;
+    double totalRevenue = 0.0;
 };
 
-//  Lớp chịu trách nhiệm tính toán và thống kê dữ liệu từ các manager khác.
-//  Lớp này KHÔNG SỞ HỮU dữ liệu, nó chỉ ĐỌC dữ liệu.
+// Lớp thống kê dữ liệu từ các Manager
 class ReportManager {
 private:
-    // Giữ tham chiếu đến các manager chính
     AccountManager& accountManager_;
     BookingManager& bookingManager_;
 
 public:
-    // Constructor: Nhận các manager qua tham chiếu
     ReportManager(AccountManager& am, BookingManager& bm);
-
-    // Destructor mặc định
     ~ReportManager() = default;
 
-    // --- Thống kê Tổng quan (cho Admin) ---
-
-    // Tính tổng doanh thu từ tất cả các booking đã 'Issued'
+    // --- Tổng quan (Admin) ---
     double getTotalRevenueAllAgents() const;
-    
-    // Tính tổng số booking đã bán (trạng thái Issued)
     int getTotalTicketsSold() const;
-
-    // Đếm số lượng booking theo một trạng thái cụ thể
     int countBookingsByStatus(BookingStatus status) const;
-
-
-    // --- Thống kê theo Agent (cho Admin) ---
-    
-    // Tạo một báo cáo doanh thu chi tiết cho từng agent.
-    // Trả về một con trỏ tới DynamicArray mới. 
-    // QUAN TRỌNG: Người gọi có trách nhiệm 'delete' đối tượng mảng này và tất cả các con trỏ AgentReport* bên trong nó sau khi sử dụng xong.
     DynamicArray<AgentReport*>* generateFullAgentReport() const;
 
-    // --- Thống kê theo ngày cho Agent cụ thể ---
-    
-    // Lấy tổng doanh thu trong ngày của một agent cụ thể
+    // --- Thống kê theo ngày cho Agent ---
     double getDailyRevenue(const std::string& agentId) const;
-    
-    // Lấy số vé đã bán trong ngày của một agent cụ thể
     int getDailyTicketsSold(const std::string& agentId) const;
-    
-    // Lấy số vé đã hủy trong ngày của một agent cụ thể
     int getDailyCancellations(const std::string& agentId) const;
-    
-    // Lấy số vé đã đổi trong ngày của một agent cụ thể
-    // Hiện tại trả về 0 vì chưa có tính năng đổi vé
-    int getDailyTicketChanges(const std::string& agentId) const;
+
+    // --- Thống kê theo khoảng ngày ---
+    int getTicketsSoldInRange(const std::string& startDate, const std::string& endDate) const;
+    double getRevenueInRange(const std::string& startDate, const std::string& endDate) const;
+
+    // --- Thống kê theo agent và khoảng ngày ---
+    int getTicketsSoldInRange(const std::string& agentId,
+                              const std::string& startDate,
+                              const std::string& endDate) const;
+
+    double getRevenueInRange(const std::string& agentId,
+                             const std::string& startDate,
+                             const std::string& endDate) const;
+
+    DynamicArray<AgentReport*>* generateAgentReportInRange(const std::string& startDate,
+                                                           const std::string& endDate) const;
+
+    // --- Báo cáo theo tháng (Agent view) ---
+    DynamicArray<int>* getMonthlyTicketsByAgent(const std::string& agentId, int year) const;
 };

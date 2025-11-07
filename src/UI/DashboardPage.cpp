@@ -204,7 +204,7 @@ void DashboardPage::refreshData()
     int dailySales = reportManager_->getDailyTicketsSold(agentId);
     double dailyRevenue = reportManager_->getDailyRevenue(agentId);
     int dailyCancellations = reportManager_->getDailyCancellations(agentId);
-    int dailyChanges = reportManager_->getDailyTicketChanges(agentId);
+//     int dailyChanges = reportManager_->getDailyTicketChanges(agentId);
     
     // Cập nhật các label
     salesCountLabel_->setText(QString::number(dailySales));
@@ -220,7 +220,7 @@ void DashboardPage::refreshData()
     salesTotalLabel_->setText(revenueStr);
     
     cancelCountLabel_->setText(QString::number(dailyCancellations));
-    doVeLabel_->setText(QString::number(dailyChanges));
+//     doVeLabel_->setText(QString::number(dailyChanges));
 
     // Giả lập cập nhật Bảng (xóa dữ liệu cũ, thêm dữ liệu mới):
     flightsModel_->removeRows(0, flightsModel_->rowCount());
