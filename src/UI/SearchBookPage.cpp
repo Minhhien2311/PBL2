@@ -24,6 +24,8 @@
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QCalendarWidget>
+#include <QComboBox>
+#include <QSpinBox>
 
 SearchBookPage::SearchBookPage(FlightManager* flManager,
                                BookingManager* bkManager,
@@ -52,7 +54,7 @@ void SearchBookPage::setupUi()
         "QWidget { background: #F2F6FD; }"
         "QLabel.PageTitle { color:#123B7A; font-weight:700; font-size:17px; }"
         "QLabel.SectionTitle { color:#123B7A; font-weight:700; font-size:17px; }"
-        "QLineEdit, QDateEdit { background:white; border:1px solid #608bc1; "
+        "QLineEdit, QDateEdit, QComboBox, QSpinBox { background:white; border:1px solid #608bc1; "
             "border-radius:4px; height:26px; padding-left:6px; }"
         "QPushButton.SearchBtn { background:#4478BD; color:white; border-radius:6px; "
             "height:24px; font-weight:600; }"
@@ -75,80 +77,68 @@ void SearchBookPage::setupUi()
     title->setProperty("class", "PageTitle");
     topLayout->addWidget(title);
 
-    // Hàng tìm kiếm giống FlightsPage: 3 box
-    QHBoxLayout *searchRow = new QHBoxLayout;
-    searchRow->setSpacing(18);
+    // Search filters - ALL IN ONE ROW
+    QHBoxLayout* filterLayout = new QHBoxLayout();
+    filterLayout->setSpacing(10);
 
-    // Box 1: Tìm theo ID chuyến bay
-    {
-        QWidget *box = new QWidget;
-        QVBoxLayout *v = new QVBoxLayout(box);
-        v->setContentsMargins(0,0,0,0);
-        v->setSpacing(5);
+    // From
+    filterLayout->addWidget(new QLabel("Từ:"));
+    fromSearchCombo_ = new AirportComboBox(airportManager_, this);
+    filterLayout->addWidget(fromSearchCombo_);
 
-        idSearchEdit_ = new QLineEdit;
-        idSearchEdit_->setPlaceholderText("Nhập mã chuyến bay (VN123)");
-        searchByIdBtn_ = new QPushButton("Tìm theo mã chuyến bay");
-        searchByIdBtn_->setProperty("class", "SearchBtn");
+    // To
+    filterLayout->addWidget(new QLabel("Đến:"));
+    toSearchCombo_ = new AirportComboBox(airportManager_, this);
+    filterLayout->addWidget(toSearchCombo_);
 
-        v->addWidget(idSearchEdit_);
-        v->addWidget(searchByIdBtn_);
+    // Date
+    filterLayout->addWidget(new QLabel("Ngày khởi hành:"));
+    dateSearchEdit_ = new QDateEdit(this);
+    dateSearchEdit_->setCalendarPopup(true);
+    dateSearchEdit_->setDisplayFormat("dd/MM/yyyy");
+    dateSearchEdit_->setSpecialValueText("-- Tất cả --");
+    dateSearchEdit_->setDate(QDate::currentDate());
+    dateSearchEdit_->clearMinimumDate();
+    dateSearchEdit_->clearMaximumDate();
+    filterLayout->addWidget(dateSearchEdit_);
 
-        box->setMinimumWidth(200);
-        searchRow->addWidget(box);
-    }
+    // Airline
+    filterLayout->addWidget(new QLabel("Hãng HK:"));
+    airlineFilterCombo_ = new QComboBox(this);
+    airlineFilterCombo_->addItem("-- Tất cả --", "");
+    airlineFilterCombo_->addItem("VietJet Air", "VietJet Air");
+    airlineFilterCombo_->addItem("Vietnam Airlines", "Vietnam Airlines");
+    airlineFilterCombo_->addItem("Bamboo Airways", "Bamboo Airways");
+    airlineFilterCombo_->addItem("Vietravel Airlines", "Vietravel Airlines");
+    filterLayout->addWidget(airlineFilterCombo_);
 
-    // Box 2: Lộ trình (từ – đến)
-    {
-        QWidget *box = new QWidget;
-        QVBoxLayout *v = new QVBoxLayout(box);
-        v->setContentsMargins(0,0,0,0);
-        v->setSpacing(5);
+    // Price range
+    filterLayout->addWidget(new QLabel("Khoảng giá:"));
+    priceMinSpinBox_ = new QSpinBox(this);
+    priceMinSpinBox_->setRange(0, 10000000);
+    priceMinSpinBox_->setSingleStep(100000);
+    priceMinSpinBox_->setSuffix(" VND");
+    priceMinSpinBox_->setValue(0);
+    filterLayout->addWidget(priceMinSpinBox_);
 
-        QWidget *routeRow = new QWidget;
-        QHBoxLayout *routeHL = new QHBoxLayout(routeRow);
-        routeHL->setContentsMargins(0,0,0,0);
-        routeHL->setSpacing(6);
+    filterLayout->addWidget(new QLabel("—"));
 
-        fromSearchCombo_ = new AirportComboBox(airportManager_);
-        toSearchCombo_ = new AirportComboBox(airportManager_);
+    priceMaxSpinBox_ = new QSpinBox(this);
+    priceMaxSpinBox_->setRange(0, 10000000);
+    priceMaxSpinBox_->setValue(10000000);
+    priceMaxSpinBox_->setSingleStep(100000);
+    priceMaxSpinBox_->setSuffix(" VND");
+    filterLayout->addWidget(priceMaxSpinBox_);
 
-        routeHL->addWidget(new QLabel("Từ:"));
-        routeHL->addWidget(fromSearchCombo_, 1);
-        routeHL->addWidget(new QLabel("→"));
-        routeHL->addWidget(new QLabel("Đến:"));
-        routeHL->addWidget(toSearchCombo_, 1);
+    topLayout->addLayout(filterLayout);
 
-        searchByRouteBtn_ = new QPushButton("Tìm theo lộ trình bay");
-        searchByRouteBtn_->setProperty("class", "SearchBtn");
+    // Single search button - full width
+    QPushButton* searchBtn = new QPushButton("🔍 TÌM KIẾM CHUYẾN BAY", this);
+    searchBtn->setStyleSheet("QPushButton { background-color: #4472C4; color: white; font-size: 12pt; padding: 10px; }");
+    topLayout->addWidget(searchBtn);
 
-        v->addWidget(routeRow);
-        v->addWidget(searchByRouteBtn_);
+    connect(searchBtn, &QPushButton::clicked, this, &SearchBookPage::onSearchClicked);
 
-        searchRow->addWidget(box, 1);
-    }
-
-    // Box 3: Ngày khởi hành
-    {
-        QWidget *box = new QWidget;
-        QVBoxLayout *v = new QVBoxLayout(box);
-        v->setContentsMargins(0,0,0,0);
-        v->setSpacing(5);
-
-        dateSearchEdit_ = new QDateEdit(QDate::currentDate(), this);
-        dateSearchEdit_->setCalendarPopup(true);
-        dateSearchEdit_->setDisplayFormat("dd/MM/yyyy");
-
-        searchByDateBtn_ = new QPushButton("Tìm theo ngày khởi hành");
-        searchByDateBtn_->setProperty("class", "SearchBtn");
-
-        v->addWidget(dateSearchEdit_);
-        v->addWidget(searchByDateBtn_);
-
-        searchRow->addWidget(box);
-    }
-
-    topLayout->addLayout(searchRow);
     mainLayout->addWidget(topBar);
 
     // ================== TIÊU ĐỀ BẢNG ==================
@@ -161,11 +151,6 @@ void SearchBookPage::setupUi()
     tblTitle->setProperty("class", "SectionTitle");
     thLayout->addWidget(tblTitle);
     thLayout->addStretch();
-
-    // nút tải lại để agent test nhanh
-    refreshBtn_ = new QPushButton("Tải lại tất cả");
-    refreshBtn_->setProperty("class", "SearchBtn");
-    thLayout->addWidget(refreshBtn_);
 
     mainLayout->addWidget(tableHeader);
 
@@ -231,14 +216,6 @@ void SearchBookPage::setupModel()
 
 void SearchBookPage::setupConnections()
 {
-    // 3 nút tìm kiếm
-    connect(searchByIdBtn_,   &QPushButton::clicked, this, &SearchBookPage::onSearchById);
-    connect(searchByRouteBtn_,&QPushButton::clicked, this, &SearchBookPage::onSearchByRoute);
-    connect(searchByDateBtn_, &QPushButton::clicked, this, &SearchBookPage::onSearchByDate);
-
-    // tải lại
-    connect(refreshBtn_, &QPushButton::clicked, this, &SearchBookPage::onRefreshAll);
-
     // đặt vé
     connect(bookButton_, &QPushButton::clicked, this, &SearchBookPage::onBookClicked);
 }
@@ -272,98 +249,46 @@ void SearchBookPage::fillTable(const std::vector<FlightInstance*>& instances)
 }
 
 // ================ SLOT TÌM KIẾM ================
-// Tìm theo ID
-void SearchBookPage::onSearchById()
+// Unified search method
+void SearchBookPage::onSearchClicked()
 {
-    QString id = idSearchEdit_->text();
-    if (id.isEmpty()) {
-        QMessageBox::information(this, "Thiếu dữ liệu", "Nhập mã chuyến bay cần tìm.");
+    FlightManager::SearchCriteria criteria;
+    criteria.fromIATA = fromSearchCombo_->getSelectedIATA();
+    criteria.toIATA = toSearchCombo_->getSelectedIATA();
+    
+    if (criteria.fromIATA.empty() || criteria.toIATA.empty()) {
+        QMessageBox::warning(this, "Lỗi", "Vui lòng chọn điểm đi và điểm đến");
         return;
     }
-
-    // Tìm instance theo ID (flight number)
-    FlightInstance* instance = flightManager_->findInstanceById(id.toStdString());
     
-    if (instance) {
-        std::vector<FlightInstance*> result;
-        result.push_back(instance);
-        fillTable(result);
-    } else {
-        model_->removeRows(0, model_->rowCount());
-        QMessageBox::information(this, "Không tìm thấy", 
-            QString("Không tìm thấy chuyến bay với mã: %1").arg(id));
-    }
-}
-
-// Tìm theo lộ trình
-void SearchBookPage::onSearchByRoute()
-{
-    std::string fromIATA = fromSearchCombo_->getSelectedIATA();
-    std::string toIATA = toSearchCombo_->getSelectedIATA();
-
-    if (fromIATA.empty() || toIATA.empty()) {
-        QMessageBox::information(this, "Thiếu dữ liệu", "Vui lòng chọn điểm đi và điểm đến.");
-        return;
-    }
-
-    // Tìm Flight theo route
-    std::vector<Flight*> flights = flightManager_->findFlightByRoute(fromIATA, toIATA);
-
-    if (flights.size() == 0) {
-        model_->removeRows(0, model_->rowCount());
-        QMessageBox::information(this, "Không tìm thấy", 
-            QString("Không tìm thấy tuyến bay từ %1 đến %2").arg(QString::fromStdString(fromIATA), QString::fromStdString(toIATA)));
-        return;
-    }
-
-    // Collect all instances for the found flights
-    std::vector<FlightInstance*> allInstancesForRoute;
-    for (int i = 0; i < flights.size(); ++i) {
-        Flight* flight = flights[i];
-        std::vector<FlightInstance*> instancesForFlight = flightManager_->findInstancesByFlightId(flight->getFlightId());
-        for (int j = 0; j < instancesForFlight.size(); ++j) {
-            allInstancesForRoute.push_back(instancesForFlight[j]);
-        }
-    }
-    if (allInstancesForRoute.size() == 0) {
-        model_->removeRows(0, model_->rowCount());
-        QMessageBox::information(this, "Không có chuyến bay", 
-            "Không có chuyến bay nào cho tuyến này.");
-    } else {
-        fillTable(allInstancesForRoute);
-    }
-}
-
-// Tìm theo ngày
-void SearchBookPage::onSearchByDate()
-{
-    QString date = dateSearchEdit_->date().toString("dd/MM/yyyy");
-    std::string dateStr = date.toStdString();
-
-    // Lọc tất cả instances theo ngày
-    const std::vector<FlightInstance*>& allInstances = flightManager_->getAllInstances();
-    std::vector<FlightInstance*> filtered;
-    
-    for (int i = 0; i < allInstances.size(); ++i) {
-        FlightInstance* inst = allInstances[i];
-        if (inst && inst->getDepartureDate() == dateStr) {
-            filtered.push_back(inst);
-        }
+    // Optional filters
+    QDate selectedDate = dateSearchEdit_->date();
+    // Check if a valid date was selected (not the special "all dates" value)
+    if (selectedDate.isValid() && !selectedDate.isNull()) {
+        criteria.date = selectedDate.toString("dd/MM/yyyy").toStdString();
     }
     
-    if (filtered.size() == 0) {
-        model_->removeRows(0, model_->rowCount());
-        QMessageBox::information(this, "Không có chuyến bay", 
-            QString("Không có chuyến bay nào vào ngày %1").arg(date));
-    } else {
-        fillTable(filtered);
+    if (airlineFilterCombo_->currentIndex() > 0) {
+        criteria.airline = airlineFilterCombo_->currentData().toString().toStdString();
     }
-}
-
-// Tải lại tất cả
-void SearchBookPage::onRefreshAll()
-{
-    fillTable(flightManager_->getAllInstances());
+    
+    if (priceMinSpinBox_->value() > 0 || priceMaxSpinBox_->value() < 10000000) {
+        criteria.minPrice = priceMinSpinBox_->value();
+        criteria.maxPrice = priceMaxSpinBox_->value();
+        criteria.useAVLForPrice = false;  // Linear for now
+    }
+    
+    // Search
+    std::vector<FlightInstance*> results = flightManager_->searchFlights(criteria);
+    
+    // Display
+    if (results.empty()) {
+        model_->removeRows(0, model_->rowCount());
+        QMessageBox::information(this, "Không có kết quả",
+            "Không tìm thấy chuyến bay phù hợp với tiêu chí tìm kiếm.");
+    } else {
+        fillTable(results);
+    }
 }
 
 // ================ ĐẶT VÉ ================
