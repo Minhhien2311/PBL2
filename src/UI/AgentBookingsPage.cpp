@@ -7,7 +7,6 @@
 #include "core/AirportManager.h"
 #include "entities/Booking.h"
 #include "entities/Account.h"
-#include "DSA/DynamicArray.h" // Cần để nhận kết quả
 #include "BookingDetailsDialog.h" // Dialog xem chi tiết
 #include "AirportComboBox.h"
 
@@ -284,7 +283,7 @@ void AgentBookingsPage::refreshTable()
     std::string currentAgentId = currentUser->getId();
 
     // 2. Lấy danh sách booking của Agent này
-    DynamicArray<Booking*> agentBookings = bookingManager_->getBookingsByAgentId(currentAgentId);
+    std::vector<Booking*> agentBookings = bookingManager_->getBookingsByAgentId(currentAgentId);
 
     // 3. Hiển thị các booking
     for (int i = 0; i < agentBookings.size(); ++i) {
@@ -334,7 +333,7 @@ void AgentBookingsPage::onSearchClicked()
     std::string currentAgentId = currentUser->getId();
     
     // 2. Lấy toàn bộ booking của Agent
-    DynamicArray<Booking*> agentBookings = bookingManager_->getBookingsByAgentId(currentAgentId);
+    std::vector<Booking*> agentBookings = bookingManager_->getBookingsByAgentId(currentAgentId);
     
     // 3. Lọc theo điều kiện tìm kiếm
     model_->removeRows(0, model_->rowCount());
