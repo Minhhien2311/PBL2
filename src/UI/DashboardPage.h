@@ -18,6 +18,7 @@ public:
 
 public slots:
     void refreshData();
+    void refreshPage();  // New method to refresh when page shown or user changed
 
 private:
     void setupUi();

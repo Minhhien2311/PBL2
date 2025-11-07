@@ -482,3 +482,17 @@ void AgentBookingsPage::onViewDetailsClicked()
     BookingDetailsDialog dialog(booking, flightManager_, accountManager_, this);
     dialog.exec();
 }
+
+/**
+ * @brief Refresh page when shown or when user changes
+ */
+void AgentBookingsPage::refreshPage() {
+    // Clear search fields
+    bookingIdSearchEdit_->clear();
+    fromSearchCombo_->setCurrentIndex(0);
+    toSearchCombo_->setCurrentIndex(0);
+    dateSearchEdit_->setDate(QDate::currentDate());
+    
+    // Reload table with current user's bookings
+    refreshTable();
+}

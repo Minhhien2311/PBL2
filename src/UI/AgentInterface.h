@@ -38,6 +38,10 @@ private:
     void setupUi();
     void setupConnections();
 
+private slots:
+    void onUserChanged();      // Handle user login/logout
+    void onPageChanged(int index);  // Handle page switching
+
     // --- UI Components ---
     QFrame* sidebar_;
     QStackedWidget* stack_;
@@ -49,6 +53,11 @@ private:
     QPushButton* btnBookings_;
     QPushButton* btnAccounts_;
     QPushButton* btnReport_;
+
+    // --- Page references for refreshing ---
+    DashboardPage* dashboardPage_;
+    SearchBookPage* searchBookPage_;
+    AgentBookingsPage* agentBookingsPage_;
 
     // --- Managers (không sở hữu) ---
     AccountManager* accountManager_;
