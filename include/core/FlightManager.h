@@ -26,6 +26,25 @@ private:
     // SeatManager để quản lý sơ đồ chỗ ngồi
     SeatManager* seatManager_;
 
+    // Route index for fast lookup
+    struct RouteData {
+        std::string routeKey;
+        std::vector<FlightInstance*> allInstances;  // sorted by datetime
+        
+        RouteData(const std::string& key) : routeKey(key) {}
+        
+        void addInstance(FlightInstance* instance) {
+            allInstances.push_back(instance);
+        }
+    };
+    
+    HashTable<std::string, RouteData*> routeIndex_;
+    
+    void buildRouteIndex();
+    void sortInstancesByDateTime(std::vector<FlightInstance*>& instances);
+    static int compareDates(const std::string& date1, const std::string& date2);
+    static int compareTimes(const std::string& time1, const std::string& time2);
+
     // Hàm xây dựng bảng băm
     void buildFlightIdTable();
     void buildInstanceIdTable();
@@ -62,10 +81,10 @@ public:
     bool deleteInstance(const std::string& instanceId);
 
     // --- Các hàm tìm kiếm ---
-    Flight* findFlightById(const std::string& flightId);
-    FlightInstance* findInstanceById(const std::string& instanceId);
-    std::vector<FlightInstance*> findInstancesByFlightId(const std::string& flightId);
-    std::vector<Flight*> findFlightByRoute(const std::string& fromIATA, const std::string& toIATA);
+    Flight* findFlightById(const std::string& flightId) const;
+    FlightInstance* findInstanceById(const std::string& instanceId) const;
+    std::vector<FlightInstance*> findInstancesByFlightId(const std::string& flightId) const;
+    std::vector<Flight*> findFlightByRoute(const std::string& fromIATA, const std::string& toIATA) const;
 
     // --- Các hàm lưu ---
     bool saveFlightsToFiles(const std::string& flightsFilePath) const;
@@ -77,6 +96,52 @@ public:
     const std::vector<Flight*>& getAllFlights() const;
     const std::vector<FlightInstance*>& getAllInstances() const;
     SeatManager* getSeatManager() const;
+    
+    // --- Search and Filter Methods ---
+    // Search criteria
+    struct SearchCriteria {
+        std::string fromIATA;      // Required
+        std::string toIATA;        // Required
+        std::string date;          // Optional: "" = all dates
+        std::string airline;       // Optional: "" = all airlines
+        int minPrice = 0;          // Optional: 0 = no min
+        int maxPrice = 0;          // Optional: 0 = no max
+        bool useAVLForPrice = false;  // false = linear, true = AVL
+    };
+    
+    // Get all flights by route (sorted by datetime)
+    std::vector<FlightInstance*> getFlightsByRoute(
+        const std::string& fromIATA,
+        const std::string& toIATA
+    ) const;
+    
+    // Filters (apply to vector)
+    std::vector<FlightInstance*> filterByDate(
+        const std::vector<FlightInstance*>& flights,
+        const std::string& date
+    ) const;
+    
+    std::vector<FlightInstance*> filterByAirline(
+        const std::vector<FlightInstance*>& flights,
+        const std::string& airline
+    ) const;
+    
+    std::vector<FlightInstance*> filterByPriceRange(
+        const std::vector<FlightInstance*>& flights,
+        int minPrice,
+        int maxPrice
+    ) const;
+    
+    std::vector<FlightInstance*> filterByPriceRangeAVL(
+        const std::vector<FlightInstance*>& flights,
+        int minPrice,
+        int maxPrice
+    ) const;
+    
+    // Combined search with all filters
+    std::vector<FlightInstance*> searchFlights(
+        const SearchCriteria& criteria
+    ) const;
 };
 
 #endif
