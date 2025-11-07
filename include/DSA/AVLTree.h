@@ -19,12 +19,12 @@ private:
         Node* right;
         int height;
         
-        Node(const Key& k, const Value& v)
+        explicit Node(const Key& k, const Value& v)
             : key(k), value(v), left(nullptr), right(nullptr), height(1) {}
     };
     
     Node* root_;
-    int size_;
+    size_t size_;
     
     // Lấy chiều cao của node
     int getHeight(Node* node) const {
@@ -173,8 +173,12 @@ private:
                     temp = node;
                     node = nullptr;
                 } else {
-                    // Node có 1 con
-                    *node = *temp;
+                    // Node có 1 con - copy explicitly to avoid shallow copy issues
+                    node->key = temp->key;
+                    node->value = temp->value;
+                    node->left = temp->left;
+                    node->right = temp->right;
+                    node->height = temp->height;
                 }
                 
                 delete temp;
@@ -296,7 +300,7 @@ public:
     
     // Xóa cặp key-value
     bool remove(const Key& key) {
-        int oldSize = size_;
+        size_t oldSize = size_;
         root_ = removeNode(root_, key);
         return size_ < oldSize;
     }
@@ -334,7 +338,7 @@ public:
     }
     
     // Lấy số lượng phần tử trong cây
-    int size() const {
+    size_t size() const {
         return size_;
     }
     
