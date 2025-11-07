@@ -1,10 +1,13 @@
 #include "AdminInterface.h"
-
 #include "DashboardPage.h"
 #include "AccountsPage.h"
 #include "RoutesPage.h"
 #include "FlightsPage.h"
-#include "AdminReportPage.h"
+#include "AdminTicketsReportPage.h"  // Mới
+#include "AdminRevenueReportPage.h"  // Mới
+#include "FlightRulesPage.h"         // Tạo mới - placeholder
+#include "PromotionsPage.h"          // Tạo mới - placeholder
+#include "AgentListPage.h"           // Tạo mới - placeholder
 
 #include "core/AccountManager.h"
 #include "core/FlightManager.h"
@@ -12,14 +15,12 @@
 #include "core/ReportManager.h"
 #include "core/AirportManager.h"
 
-// Include Qt
 #include <QStackedWidget>
 #include <QPushButton>
 #include <QLabel>
 #include <QFrame>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
-#include <QDebug>
 
 AdminInterface::AdminInterface(AccountManager* accManager,
                                FlightManager* flManager,
@@ -40,7 +41,7 @@ AdminInterface::AdminInterface(AccountManager* accManager,
 
     // Sidebar
     sidebar_ = new QFrame(this);
-    sidebar_->setFixedWidth(220);
+    sidebar_->setFixedWidth(250);  // Tăng chiều rộng một chút
     sidebar_->setStyleSheet("background-color: #133e87;");
 
     auto *sideLay = new QVBoxLayout(sidebar_);
@@ -65,10 +66,6 @@ AdminInterface::AdminInterface(AccountManager* accManager,
     menuLayout->setContentsMargins(0,0,0,0);
     menuLayout->setSpacing(2);
 
-    auto *header1 = new QLabel("QUẢN LÝ", sidebar_);
-    header1->setStyleSheet("color: #6f99c6; font-weight: bold; background: transparent;");
-    menuLayout->addWidget(header1);
-
     QString btnStyle = R"(
         QPushButton {
             color: white;
@@ -86,34 +83,68 @@ AdminInterface::AdminInterface(AccountManager* accManager,
         }
     )";
 
-    btnDashboard_ = new QPushButton("Trang tổng quan");
+    // --- QUẢN LÝ ---
+    auto *header1 = new QLabel("QUẢN LÝ", sidebar_);
+    header1->setStyleSheet("color: #6f99c6; font-weight: bold; background: transparent; margin-top: 10px;");
+    menuLayout->addWidget(header1);
+
+    btnDashboard_ = new QPushButton("Tổng quan");
     btnRoutes_    = new QPushButton("Quản lý tuyến bay");
     btnFlights_   = new QPushButton("Quản lý chuyến bay");
-    btnDashboard_->setStyleSheet(btnStyle); btnRoutes_->setStyleSheet(btnStyle); btnFlights_->setStyleSheet(btnStyle);
-    btnDashboard_->setCheckable(true); btnRoutes_->setCheckable(true); btnFlights_->setCheckable(true);
+    btnFlightRules_ = new QPushButton("Quản lý luật bay");
+    btnPromotions_ = new QPushButton("Quản lý khuyến mãi");
+    
+    btnDashboard_->setStyleSheet(btnStyle); 
+    btnRoutes_->setStyleSheet(btnStyle); 
+    btnFlights_->setStyleSheet(btnStyle);
+    btnFlightRules_->setStyleSheet(btnStyle);
+    btnPromotions_->setStyleSheet(btnStyle);
+    
+    btnDashboard_->setCheckable(true); 
+    btnRoutes_->setCheckable(true); 
+    btnFlights_->setCheckable(true);
+    btnFlightRules_->setCheckable(true);
+    btnPromotions_->setCheckable(true);
+    
     menuLayout->addWidget(btnDashboard_);
     menuLayout->addWidget(btnRoutes_);
     menuLayout->addWidget(btnFlights_);
+    menuLayout->addWidget(btnFlightRules_);
+    menuLayout->addWidget(btnPromotions_);
 
-    // --- Thêm Thống kê ---
-    auto *header3 = new QLabel("THỐNG KÊ", sidebar_);
-    header3->setStyleSheet("color: #6f99c6; font-weight: bold; background: transparent;");
-    menuLayout->addWidget(header3);
-
-    btnReport_ = new QPushButton("Báo cáo tổng hợp");
-    btnReport_->setStyleSheet(btnStyle);
-    btnReport_->setCheckable(true);
-    menuLayout->addWidget(btnReport_);
-
-    // Header TÀI KHOẢN
-    auto *header2 = new QLabel("TÀI KHOẢN", sidebar_);
-    header2->setStyleSheet("color: #6f99c6; font-weight: bold; background: transparent;");
+    // --- THỐNG KÊ ---
+    auto *header2 = new QLabel("THỐNG KÊ", sidebar_);
+    header2->setStyleSheet("color: #6f99c6; font-weight: bold; background: transparent; margin-top: 10px;");
     menuLayout->addWidget(header2);
 
+    btnTicketsReport_ = new QPushButton("Vé đã bán");
+    btnRevenueReport_ = new QPushButton("Doanh thu");
+    
+    btnTicketsReport_->setStyleSheet(btnStyle);
+    btnRevenueReport_->setStyleSheet(btnStyle);
+    
+    btnTicketsReport_->setCheckable(true);
+    btnRevenueReport_->setCheckable(true);
+    
+    menuLayout->addWidget(btnTicketsReport_);
+    menuLayout->addWidget(btnRevenueReport_);
+
+    // --- TÀI KHOẢN ---
+    auto *header3 = new QLabel("TÀI KHOẢN", sidebar_);
+    header3->setStyleSheet("color: #6f99c6; font-weight: bold; background: transparent; margin-top: 10px;");
+    menuLayout->addWidget(header3);
+
     btnAccounts_ = new QPushButton("Quản lý tài khoản");
+    btnAgentList_ = new QPushButton("Danh sách đại lý");
+    
     btnAccounts_->setStyleSheet(btnStyle);
+    btnAgentList_->setStyleSheet(btnStyle);
+    
     btnAccounts_->setCheckable(true);
+    btnAgentList_->setCheckable(true);
+    
     menuLayout->addWidget(btnAccounts_);
+    menuLayout->addWidget(btnAgentList_);
 
     menuLayout->addStretch();
     menuWidget->setLayout(menuLayout);
@@ -127,7 +158,8 @@ AdminInterface::AdminInterface(AccountManager* accManager,
             background: transparent;
             border: 1px solid #6f99c6;
             border-radius: 6px;
-            padding: 6px;
+            padding: 8px;
+            margin-top: 10px;
         }
         QPushButton:hover {
             background-color: #6f99c6;
@@ -138,15 +170,19 @@ AdminInterface::AdminInterface(AccountManager* accManager,
 
     root->addWidget(sidebar_);
 
-    // Stack
+    // Stack - Thêm các trang mới
     stack_ = new QStackedWidget(this);
-    stack_->addWidget(new DashboardPage(accountManager_, reportManager_, this)); //0
-    stack_->addWidget(new RoutesPage(flightManager_, airportManager_, this));   //1
-    stack_->addWidget(new FlightsPage(flightManager_, airportManager_, this));  //2
-    stack_->addWidget(new AccountsPage(accountManager_, this));                 //3
-    stack_->addWidget(new AdminReportPage(accountManager_, bookingManager_, reportManager_, this)); // 4 
+    stack_->addWidget(new DashboardPage(accountManager_, reportManager_, this)); // 0
+    stack_->addWidget(new RoutesPage(flightManager_, airportManager_, this));   // 1
+    stack_->addWidget(new FlightsPage(flightManager_, airportManager_, this));  // 2
+    stack_->addWidget(new FlightRulesPage(flightManager_, this));               // 3 - placeholder
+    stack_->addWidget(new PromotionsPage(this));                                // 4 - placeholder
+    stack_->addWidget(new AdminTicketsReportPage(accountManager_, bookingManager_, reportManager_, this)); // 5
+    stack_->addWidget(new AdminRevenueReportPage(accountManager_, bookingManager_, reportManager_, this)); // 6
+    stack_->addWidget(new AccountsPage(accountManager_, this));                 // 7
+    stack_->addWidget(new AgentListPage(accountManager_, this));                // 8 - placeholder
 
-    root->addWidget(stack_,1);
+    root->addWidget(stack_, 1);
 
     setupConnections();
 
@@ -158,18 +194,30 @@ void AdminInterface::setupConnections()
 {
     auto switchPage = [this](QPushButton* btn, int index){
         stack_->setCurrentIndex(index);
-        btnDashboard_->setChecked(btn==btnDashboard_);
-        btnRoutes_->setChecked(btn==btnRoutes_);
-        btnFlights_->setChecked(btn==btnFlights_);
-        btnAccounts_->setChecked(btn==btnAccounts_);
-        btnReport_->setChecked(btn==btnReport_);
+        // Bỏ check tất cả các nút
+        btnDashboard_->setChecked(false);
+        btnRoutes_->setChecked(false);
+        btnFlights_->setChecked(false);
+        btnFlightRules_->setChecked(false);
+        btnPromotions_->setChecked(false);
+        btnTicketsReport_->setChecked(false);
+        btnRevenueReport_->setChecked(false);
+        btnAccounts_->setChecked(false);
+        btnAgentList_->setChecked(false);
+        
+        // Check nút được chọn
+        btn->setChecked(true);
     };
 
-    connect(btnDashboard_, &QPushButton::clicked, [=](){ switchPage(btnDashboard_,0); });
-    connect(btnRoutes_, &QPushButton::clicked, [=](){ switchPage(btnRoutes_,1); });
-    connect(btnFlights_, &QPushButton::clicked, [=](){ switchPage(btnFlights_,2); });
-    connect(btnAccounts_, &QPushButton::clicked, [=](){ switchPage(btnAccounts_,3); });
-    connect(btnReport_, &QPushButton::clicked, [=](){ switchPage(btnReport_,4); });
+    connect(btnDashboard_, &QPushButton::clicked, [=](){ switchPage(btnDashboard_, 0); });
+    connect(btnRoutes_, &QPushButton::clicked, [=](){ switchPage(btnRoutes_, 1); });
+    connect(btnFlights_, &QPushButton::clicked, [=](){ switchPage(btnFlights_, 2); });
+    connect(btnFlightRules_, &QPushButton::clicked, [=](){ switchPage(btnFlightRules_, 3); });
+    connect(btnPromotions_, &QPushButton::clicked, [=](){ switchPage(btnPromotions_, 4); });
+    connect(btnTicketsReport_, &QPushButton::clicked, [=](){ switchPage(btnTicketsReport_, 5); });
+    connect(btnRevenueReport_, &QPushButton::clicked, [=](){ switchPage(btnRevenueReport_, 6); });
+    connect(btnAccounts_, &QPushButton::clicked, [=](){ switchPage(btnAccounts_, 7); });
+    connect(btnAgentList_, &QPushButton::clicked, [=](){ switchPage(btnAgentList_, 8); });
 
     connect(logoutBtn_, &QPushButton::clicked, this, &AdminInterface::logoutClicked);
 }

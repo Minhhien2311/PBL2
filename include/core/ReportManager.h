@@ -1,13 +1,14 @@
-#pragma once
+#ifndef REPORT_MANAGER_H
+#define REPORT_MANAGER_H
 
+#include <string>
 #include <vector>
 #include "entities/Booking.h"
-#include <string>
 
 class AccountManager;
 class BookingManager;
+class AccountAgent;
 
-// Struct kết quả báo cáo cho từng Agent
 struct AgentReport {
     std::string agentId;
     std::string agentName;
@@ -17,43 +18,57 @@ struct AgentReport {
     double totalRevenue = 0.0;
 };
 
-// Lớp thống kê dữ liệu từ các Manager
 class ReportManager {
 private:
     AccountManager& accountManager_;
     BookingManager& bookingManager_;
+    
+    // Hàm chuyển đổi an toàn
+    int safeStoi(const std::string& str, int defaultValue = 0) const;
+    // Hàm chuyển đổi định dạng ngày từ dd/mm/yyyy sang yyyy-mm-dd để so sánh
+    std::string convertDateFormat(const std::string& date) const;
+    // Hàm trích xuất phần ngày từ chuỗi datetime
+    std::string extractDatePart(const std::string& datetime) const;
+    // Hàm so sánh ngày
+    bool isDateInRange(const std::string& bookingDate, const std::string& startDate, const std::string& endDate) const;
 
 public:
     ReportManager(AccountManager& am, BookingManager& bm);
-    ~ReportManager() = default;
-
+    
     // --- Tổng quan (Admin) ---
     double getTotalRevenueAllAgents() const;
-    int getTotalTicketsSold() const;
     int countBookingsByStatus(BookingStatus status) const;
+    int getTotalTicketsSold() const;
     std::vector<AgentReport*>* generateFullAgentReport() const;
-
+    
     // --- Thống kê theo ngày cho Agent ---
     double getDailyRevenue(const std::string& agentId) const;
     int getDailyTicketsSold(const std::string& agentId) const;
     int getDailyCancellations(const std::string& agentId) const;
-
+    
     // --- Thống kê theo khoảng ngày ---
     int getTicketsSoldInRange(const std::string& startDate, const std::string& endDate) const;
     double getRevenueInRange(const std::string& startDate, const std::string& endDate) const;
-
+    
     // --- Thống kê theo agent và khoảng ngày ---
-    int getTicketsSoldInRange(const std::string& agentId,
-                              const std::string& startDate,
-                              const std::string& endDate) const;
-
-    double getRevenueInRange(const std::string& agentId,
-                             const std::string& startDate,
-                             const std::string& endDate) const;
-
-    std::vector<AgentReport*>* generateAgentReportInRange(const std::string& startDate,
-                                                           const std::string& endDate) const;
-
+    int getTicketsSoldInRange(const std::string& agentId, const std::string& startDate, const std::string& endDate) const;
+    double getRevenueInRange(const std::string& agentId, const std::string& startDate, const std::string& endDate) const;
+    
+    // --- Báo cáo theo agent và khoảng ngày (Admin view) ---
+    std::vector<AgentReport*>* generateAgentReportInRange(const std::string& startDate, const std::string& endDate) const;
+    
     // --- Báo cáo theo tháng (Agent view) ---
     std::vector<int>* getMonthlyTicketsByAgent(const std::string& agentId, int year) const;
+    
+    // --- Các hàm mới cho thống kê doanh thu ---
+    double getTodayRevenue() const;
+    double getThisWeekRevenue() const;
+    double getThisMonthRevenue() const;
+    std::vector<double> getMonthlyRevenue(int year) const;
+    
+    // --- Thống kê theo loại vé ---
+    int getBusinessTicketsInRange(const std::string& startDate, const std::string& endDate) const;
+    int getEconomyTicketsInRange(const std::string& startDate, const std::string& endDate) const;
 };
+
+#endif // REPORT_MANAGER_H
