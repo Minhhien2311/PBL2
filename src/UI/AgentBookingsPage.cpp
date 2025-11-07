@@ -390,6 +390,8 @@ void AgentBookingsPage::onCancelBookingClicked()
     }
     
     // Lấy Booking ID (cột 0) và Trạng thái (cột 6)
+    // Note: Column indices match setupModel() header order:
+    // 0=Mã Đặt chỗ, 1=Mã Chuyến, 2=Mã hành khách, 3=Ngày đặt, 4=Hạng vé, 5=Giá vé, 6=Trạng thái
     QModelIndex idIndex = selected.first().siblingAtColumn(0);
     QModelIndex statusIndex = selected.first().siblingAtColumn(6);  // Status column
     

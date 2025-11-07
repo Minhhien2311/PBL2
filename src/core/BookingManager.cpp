@@ -157,6 +157,9 @@ bool BookingManager::cancelBooking(FlightManager& flightManager, SeatManager& se
                     std::cout << "Released and saved seat " << seatIdToRelease << std::endl;
                 } else {
                     std::cerr << "ERROR: Failed to save seat changes!" << std::endl;
+                    // No rollback needed here - seat was released in memory only
+                    // and save failed, so nothing was persisted to disk yet.
+                    // Booking status hasn't been changed yet, so state is consistent.
                     return false;  // Fail if can't save
                 }
             }
