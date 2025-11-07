@@ -31,6 +31,9 @@ public:
                             AirportManager* airportManager,
                             QWidget *parent = nullptr);
 
+public slots:
+    void refreshPage();  // New method to clear filters and results
+
 private slots:
     // Unified search
     void onSearchClicked();

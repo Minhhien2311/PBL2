@@ -62,6 +62,7 @@ bool AccountManager::login(const std::string& username, const std::string& passw
         if (allAdmins[i]->getUsername() == username && allAdmins[i]->authenticate(password)) {
             // allAdmins[i] đã là một con trỏ, gán trực tiếp
             this->currentUser = allAdmins[i];
+            emit userLoggedIn(this->currentUser);  // Phát tín hiệu đăng nhập thành công
             return true;
         }
     }
@@ -71,6 +72,7 @@ bool AccountManager::login(const std::string& username, const std::string& passw
         if (allAgents[i]->getUsername() == username && allAgents[i]->authenticate(password)) {
             // allAgents[i] đã là một con trỏ, gán trực tiếp
             this->currentUser = allAgents[i];
+            emit userLoggedIn(this->currentUser);  // Phát tín hiệu đăng nhập thành công
             return true;
         }
     }
@@ -81,6 +83,7 @@ bool AccountManager::login(const std::string& username, const std::string& passw
 
 void AccountManager::logout() {
     this->currentUser = nullptr;
+    emit userLoggedOut();  // Phát tín hiệu đăng xuất
 }
 
 Account* AccountManager::getCurrentUser() const {

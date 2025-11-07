@@ -158,9 +158,15 @@ AgentInterface::AgentInterface(AccountManager* accManager,
 
     // --- Stack ---
     stack_ = new QStackedWidget(this);
-    stack_->addWidget(new DashboardPage(accountManager_, reportManager_, this)); // 0
-    stack_->addWidget(new SearchBookPage(flightManager_, bookingManager_, accountManager_, airportManager_, this)); // 1
-    stack_->addWidget(new AgentBookingsPage(bookingManager_, flightManager_, accountManager_, airportManager_, this)); // 2
+    
+    // Create pages and store references for refreshing
+    dashboardPage_ = new DashboardPage(accountManager_, reportManager_, this);
+    searchBookPage_ = new SearchBookPage(flightManager_, bookingManager_, accountManager_, airportManager_, this);
+    agentBookingsPage_ = new AgentBookingsPage(bookingManager_, flightManager_, accountManager_, airportManager_, this);
+    
+    stack_->addWidget(dashboardPage_); // 0
+    stack_->addWidget(searchBookPage_); // 1
+    stack_->addWidget(agentBookingsPage_); // 2
     stack_->addWidget(new AccountsPage(accountManager_, this)); // 3
     // stack_->addWidget(new AgentReportPage(accountManager_->getCurrentUser()->getId(), reportManager_, this)); //4
 
@@ -192,6 +198,45 @@ void AgentInterface::setupConnections()
     connect(btnReport_, &QPushButton::clicked, [=](){ switchPage(btnReport_,4); });
 
     connect(logoutBtn_, &QPushButton::clicked, this, &AgentInterface::logoutClicked);
+    
+    // Connect AccountManager signals to refresh pages when user changes
+    connect(accountManager_, &AccountManager::userLoggedIn, this, &AgentInterface::onUserChanged);
+    connect(accountManager_, &AccountManager::userLoggedOut, this, &AgentInterface::onUserChanged);
+    
+    // Connect stack currentChanged signal to refresh page when switching
+    connect(stack_, &QStackedWidget::currentChanged, this, &AgentInterface::onPageChanged);
+}
+
+/**
+ * @brief Handle user login/logout - refresh all pages
+ */
+void AgentInterface::onUserChanged() {
+    // Refresh all pages when user changes
+    if (dashboardPage_) {
+        dashboardPage_->refreshPage();
+    }
+    if (agentBookingsPage_) {
+        agentBookingsPage_->refreshPage();
+    }
+    if (searchBookPage_) {
+        searchBookPage_->refreshPage();
+    }
+}
+
+/**
+ * @brief Handle page switching - refresh current page
+ */
+void AgentInterface::onPageChanged(int index) {
+    // Get current page and refresh it
+    QWidget* currentPage = stack_->widget(index);
+    
+    if (currentPage == dashboardPage_) {
+        dashboardPage_->refreshPage();
+    } else if (currentPage == agentBookingsPage_) {
+        agentBookingsPage_->refreshPage();
+    } else if (currentPage == searchBookPage_) {
+        searchBookPage_->refreshPage();
+    }
 }
 
 // #include "AgentInterface.h"

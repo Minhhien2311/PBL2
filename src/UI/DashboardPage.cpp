@@ -328,3 +328,11 @@ void DashboardPage::refreshData()
     
     // --- [HẾT CHỖ NỐI API] ---
 }
+
+/**
+ * @brief Refresh page when shown or when user changes
+ */
+void DashboardPage::refreshPage() {
+    // Call existing refreshData() to reload stats for current user
+    refreshData();
+}
