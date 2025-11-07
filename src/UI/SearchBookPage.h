@@ -10,7 +10,7 @@ class QTableView;
 class QStandardItemModel;
 class QPushButton;
 class QComboBox;
-class QSpinBox;
+class QLabel;
 class FlightManager;
 class BookingManager;
 class AccountManager;
@@ -56,8 +56,9 @@ private:
     AirportComboBox*  toSearchCombo_;    // điểm đến
     QDateEdit*  dateSearchEdit_;         // ngày khởi hành
     QComboBox* airlineFilterCombo_;      // hãng hàng không
-    QSpinBox* priceMinSpinBox_;          // giá tối thiểu
-    QSpinBox* priceMaxSpinBox_;          // giá tối đa
+    QLineEdit* priceMinEdit_;            // giá tối thiểu
+    QLineEdit* priceMaxEdit_;            // giá tối đa
+    QLabel* statusLabel_;                // status label for search results
 
     // --- bảng ---
     QTableView*          tableView_;
