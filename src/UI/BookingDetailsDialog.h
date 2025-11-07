@@ -8,9 +8,7 @@ class Booking;
 class FlightManager;
 class AccountManager;
 
-/**
- * @brief Dialog hiển thị chi tiết đầy đủ của một booking
- */
+// Dialog hiển thị chi tiết đầy đủ của một booking
 class BookingDetailsDialog : public QDialog
 {
     Q_OBJECT
