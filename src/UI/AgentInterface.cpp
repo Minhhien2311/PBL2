@@ -49,7 +49,7 @@ AgentInterface::AgentInterface(AccountManager* accManager,
     // Sidebar
     sidebar_ = new QFrame(this);
     sidebar_->setFixedWidth(220);
-    sidebar_->setStyleSheet("background-color: #2c3e50;");
+    sidebar_->setStyleSheet("background-color: #133e87;");
 
     auto *sideLay = new QVBoxLayout(sidebar_);
     sideLay->setContentsMargins(16,20,16,16);

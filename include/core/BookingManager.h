@@ -65,7 +65,10 @@ public:
     // std::vector<Booking*> getBookingsByFlightInstanceId(const std::string& instanceId) const;
 
     // --- Lưu trữ  ---
-    bool saveDataToFiles(const std::string& bookingsFilePath) const; 
+    bool saveDataToFiles(const std::string& bookingsFilePath) const;
+    
+    // Lưu một booking riêng lẻ ngay lập tức vào file
+    bool saveBookingToFile(Booking* booking);
 };
 
 #endif
