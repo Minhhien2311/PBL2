@@ -2,6 +2,7 @@
 #define SEARCHBOOKPAGE_H
 
 #include <QWidget>
+#include <vector>
 
 class QLineEdit;
 class QDateEdit;
@@ -13,7 +14,6 @@ class BookingManager;
 class AccountManager;
 class AirportManager;
 class AirportComboBox;
-template <typename T> class DynamicArray;
 class FlightInstance;
 
 /**
@@ -45,7 +45,7 @@ private:
     void setupConnections();
 
     // nạp dữ liệu vào bảng
-    void fillTable(const DynamicArray<FlightInstance*>& instances);
+    void fillTable(const std::vector<FlightInstance*>& instances);
 
     // --- managers ---
     FlightManager*   flightManager_;

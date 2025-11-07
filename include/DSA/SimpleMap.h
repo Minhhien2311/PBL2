@@ -1,10 +1,10 @@
 #ifndef SIMPLEMAP_H
 #define SIMPLEMAP_H
 
-#include "DynamicArray.h"
+#include <vector>
 
-//  Map đơn giản sử dụng DynamicArray với tìm kiếm tuyến tính
-//  Sử dụng DynamicArray để lưu trữ các cặp key-value
+//  Map đơn giản sử dụng std::vector với tìm kiếm tuyến tính
+//  Sử dụng std::vector để lưu trữ các cặp key-value
 //  Tìm kiếm: Linear search O(n)
 template<typename Key, typename Value>
 class SimpleMap {
@@ -18,8 +18,8 @@ private:
         Entry(const Key& k, const Value& v) : key(k), value(v) {}
     };
     
-    // Mảng động chứa các Entry
-    DynamicArray<Entry> entries_;
+    // Vector chứa các Entry
+    std::vector<Entry> entries_;
 
 public:
     // Constructor
@@ -67,7 +67,7 @@ public:
     bool remove(const Key& key) {
         for (int i = 0; i < entries_.size(); ++i) {
             if (entries_[i].key == key) {
-                entries_.erase(i);
+                entries_.erase(entries_.begin() + i);
                 return true;
             }
         }
@@ -80,8 +80,8 @@ public:
     }
 
     // Lấy danh sách tất cả các key
-    DynamicArray<Key> getKeys() const {
-        DynamicArray<Key> keys;
+    std::vector<Key> getKeys() const {
+        std::vector<Key> keys;
         for (int i = 0; i < entries_.size(); ++i) {
             keys.push_back(entries_[i].key);
         }

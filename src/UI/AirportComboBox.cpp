@@ -1,6 +1,5 @@
 #include "AirportComboBox.h"
 #include "core/AirportManager.h"
-#include "DSA/DynamicArray.h"
 #include <QString>
 
 AirportComboBox::AirportComboBox(AirportManager* airportManager, QWidget* parent)
@@ -47,7 +46,7 @@ void AirportComboBox::refreshAirports()
     if (!airportManager_) return;
     
     // Thêm tất cả sân bay (đã được sắp xếp alphabet trong AirportManager)
-    DynamicArray<std::string> displayNames = airportManager_->getAllDisplayNames();
+    std::vector<std::string> displayNames = airportManager_->getAllDisplayNames();
     for (int i = 0; i < displayNames.size(); ++i) {
         addItem(QString::fromStdString(displayNames[i]));
     }

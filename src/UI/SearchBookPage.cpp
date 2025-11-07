@@ -8,7 +8,6 @@
 #include "entities/FlightInstance.h"
 #include "entities/Flight.h"
 #include "entities/Account.h"
-#include "DSA/DynamicArray.h"
 #include "BookingDialog.h"
 #include "AirportComboBox.h"
 
@@ -245,7 +244,7 @@ void SearchBookPage::setupConnections()
 }
 
 // ================ CHỖ NẠP DỮ LIỆU VÀO BẢNG ================
-void SearchBookPage::fillTable(const DynamicArray<FlightInstance*>& instances)
+void SearchBookPage::fillTable(const std::vector<FlightInstance*>& instances)
 {
     model_->removeRows(0, model_->rowCount());
 
@@ -286,7 +285,7 @@ void SearchBookPage::onSearchById()
     FlightInstance* instance = flightManager_->findInstanceById(id.toStdString());
     
     if (instance) {
-        DynamicArray<FlightInstance*> result;
+        std::vector<FlightInstance*> result;
         result.push_back(instance);
         fillTable(result);
     } else {
@@ -308,7 +307,7 @@ void SearchBookPage::onSearchByRoute()
     }
 
     // Tìm Flight theo route
-    DynamicArray<Flight*> flights = flightManager_->findFlightByRoute(fromIATA, toIATA);
+    std::vector<Flight*> flights = flightManager_->findFlightByRoute(fromIATA, toIATA);
 
     if (flights.size() == 0) {
         model_->removeRows(0, model_->rowCount());
@@ -318,10 +317,10 @@ void SearchBookPage::onSearchByRoute()
     }
 
     // Collect all instances for the found flights
-    DynamicArray<FlightInstance*> allInstancesForRoute;
+    std::vector<FlightInstance*> allInstancesForRoute;
     for (int i = 0; i < flights.size(); ++i) {
         Flight* flight = flights[i];
-        DynamicArray<FlightInstance*> instancesForFlight = flightManager_->findInstancesByFlightId(flight->getFlightId());
+        std::vector<FlightInstance*> instancesForFlight = flightManager_->findInstancesByFlightId(flight->getFlightId());
         for (int j = 0; j < instancesForFlight.size(); ++j) {
             allInstancesForRoute.push_back(instancesForFlight[j]);
         }
@@ -342,8 +341,8 @@ void SearchBookPage::onSearchByDate()
     std::string dateStr = date.toStdString();
 
     // Lọc tất cả instances theo ngày
-    const DynamicArray<FlightInstance*>& allInstances = flightManager_->getAllInstances();
-    DynamicArray<FlightInstance*> filtered;
+    const std::vector<FlightInstance*>& allInstances = flightManager_->getAllInstances();
+    std::vector<FlightInstance*> filtered;
     
     for (int i = 0; i < allInstances.size(); ++i) {
         FlightInstance* inst = allInstances[i];

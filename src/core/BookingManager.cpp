@@ -102,7 +102,7 @@ Booking* BookingManager::createNewBooking( FlightManager& flightManager,
     // Sử dụng seatId đã lấu được ở dòng 86 (KHÔNG gọi getSelectedSeat() vì đã bị reset)
     Booking* newBooking = new Booking(flightInstanceId, agentId, passengerId, seatId, currentDate, bookingClass, baseFare, BookingStatus::Issued);
 
-    // Thêm vào DynamicArray và HashTable
+    // Thêm vào std::vector và HashTable
     this->allBookings.push_back(newBooking);
     this->bookingIdTable.insert(newBooking->getBookingId(), newBooking);
     
@@ -173,13 +173,13 @@ Booking* BookingManager::findBookingById(const std::string& bookingId) {
 
 // --- Lấy dữ liệu  ---
 
-const DynamicArray<Booking*>& BookingManager::getAllBookings() const {
+const std::vector<Booking*>& BookingManager::getAllBookings() const {
     return this->allBookings;
 }
 
 // Lấy danh sách booking theo Agent ID
-DynamicArray<Booking*> BookingManager::getBookingsByAgentId(const std::string& agentId) const {
-    DynamicArray<Booking*> result;
+std::vector<Booking*> BookingManager::getBookingsByAgentId(const std::string& agentId) const {
+    std::vector<Booking*> result;
     for (int i = 0; i < allBookings.size(); ++i) {
         if (allBookings[i] != nullptr && allBookings[i]->getAgentId() == agentId) {
             result.push_back(allBookings[i]);

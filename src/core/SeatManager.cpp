@@ -241,11 +241,11 @@ bool SeatManager::updateAndSaveChanges() {
     return true;
 }
 
-DynamicArray<Seat*>* SeatManager::getActiveSeatMap() {
+std::vector<Seat*>* SeatManager::getActiveSeatMap() {
     return &activeSeatMap_;
 }
 
-const DynamicArray<Seat*>& SeatManager::getAllSeats() const {
+const std::vector<Seat*>& SeatManager::getAllSeats() const {
     return activeSeatMap_;
 }
 
