@@ -4,7 +4,7 @@
 #include "AccountsPage.h"
 #include "RoutesPage.h"
 #include "FlightsPage.h"
-#include "AdminReportPage.h"   // <-- Thêm
+#include "AdminReportPage.h"
 
 #include "core/AccountManager.h"
 #include "core/FlightManager.h"
