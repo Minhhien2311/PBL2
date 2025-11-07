@@ -359,50 +359,15 @@ void SearchBookPage::onBookClicked()
         return;
     }
     
-    // Hiển thị dialog đặt vé
-    BookingDialog dialog(instance, flightManager_, bookingManager_, this);
-    if (dialog.exec() != QDialog::Accepted) {
-        return; // User cancelled
-    }
+    // Hiển thị dialog đặt vé (dialog handles everything internally)
+    BookingDialog dialog(instance, flightManager_, bookingManager_, accountManager_, this);
     
-    // Lấy thông tin từ dialog
-    QString passengerId = dialog.getPassengerId();
-    BookingClass bkClass = dialog.getSelectedClass();
-    
-    // 3. Lấy ID của agent hiện tại
-    Account* currentUser = accountManager_->getCurrentUser();
-    if (!currentUser) {
-        QMessageBox::warning(this, "Lỗi", "Không thể xác định người dùng. Vui lòng đăng nhập lại.");
-        return;
+    if (dialog.exec() == QDialog::Accepted) {
+        // Booking already created and saved inside dialog!
+        QMessageBox::information(this, "Thành công", "Đặt vé thành công!");
+        
+        // Reload table to show updated seat availability
+        onSearchClicked(); // Re-run current search to refresh results
     }
-    std::string currentAgentId = currentUser->getId();
-    
-    // 4. Lấy giá vé từ FlightInstance
-    int fare = (bkClass == BookingClass::Economy) 
-               ? instance->getFareEconomy() 
-               : instance->getFareBusiness();
-
-    // 5. Tạo booking
-    Booking* newBk = bookingManager_->createNewBooking(
-        *flightManager_,
-        instanceId.toStdString(),
-        currentAgentId,
-        passengerId.toStdString(),
-        bkClass,
-        fare,
-        *flightManager_->getSeatManager()
-    );
-
-    if (newBk) {
-        QMessageBox::information(this, "Thành công",
-            QString("Đặt vé thành công!\n\nMã đặt chỗ: %1\nHành khách: %2\nGiá vé: %3 VND")
-            .arg(QString::fromStdString(newBk->getBookingId()))
-            .arg(passengerId)
-            .arg(fare));
-        // Sau khi đặt vé thì nên reload để cập nhật số ghế
-        fillTable(flightManager_->getAllInstances());
-    } else {
-        QMessageBox::critical(this, "Thất bại",
-            "Không đặt được vé. Có thể do hết ghế hoặc thông tin không hợp lệ.");
-    }
+    // else: User cancelled - no action needed
 }
