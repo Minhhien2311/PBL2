@@ -243,6 +243,13 @@ void BookingDialog::setupUi()
             return;
         }
         
+        // FIRST: Try to book the seat - this is the critical operation
+        if (!seatManager->bookSeat(selectedSeatId_.toStdString())) {
+            QMessageBox::critical(this, "Lỗi", 
+                "Không thể đặt ghế. Ghế có thể đã được đặt bởi người khác.");
+            return;
+        }
+        
         // Get current booking class
         BookingClass bookingClass = static_cast<BookingClass>(classComboBox_->currentData().toInt());
         
@@ -266,23 +273,17 @@ void BookingDialog::setupUi()
             BookingStatus::Issued
         );
         
-        // SAVE TO FILE IMMEDIATELY
+        // SECOND: Save to file immediately (after seat is successfully booked)
         if (!bookingManager_->saveBookingToFile(newBooking)) {
             QMessageBox::critical(this, "Lỗi", 
                 "Không thể lưu thông tin đặt vé. Vui lòng thử lại.");
             delete newBooking;
+            // Rollback: Release the seat since booking save failed
+            seatManager->releaseSeat(selectedSeatId_.toStdString());
             return;
         }
         
-        // Book the seat and save seat status
-        if (!seatManager->bookSeat(selectedSeatId_.toStdString())) {
-            QMessageBox::critical(this, "Lỗi", 
-                "Không thể đặt ghế. Vui lòng thử lại.");
-            // Note: booking is already saved to file, this is a partial failure
-            return;
-        }
-        
-        // Save seat changes to file
+        // THIRD: Save seat changes to file
         seatManager->saveChanges();
         
         // Show success message with booking ID

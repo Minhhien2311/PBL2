@@ -220,6 +220,12 @@ bool BookingManager::saveBookingToFile(Booking* booking) {
         return false;
     }
     
+    // Check if booking ID already exists in memory
+    if (bookingIdTable.find(booking->getBookingId()) != nullptr) {
+        std::cerr << "Lỗi: Booking ID đã tồn tại: " << booking->getBookingId() << std::endl;
+        return false;
+    }
+    
     // Mở file ở chế độ append để không ghi đè dữ liệu cũ
     std::ofstream file(bookingsFilePath_, std::ios::app);
     if (!file.is_open()) {
