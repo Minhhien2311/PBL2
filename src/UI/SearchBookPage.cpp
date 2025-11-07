@@ -83,63 +83,65 @@ void SearchBookPage::setupUi()
     topLayout->addWidget(title);
 
     // === FILTER BAR LAYOUT ===
+    // Sửa lỗi: Dùng QGridLayout để căn chỉnh nhãn và input
+    QGridLayout* filterLayout = new QGridLayout();
+    filterLayout->setHorizontalSpacing(15); // Khoảng cách ngang giữa các cột
+    filterLayout->setVerticalSpacing(8);   // Khoảng cách dọc giữa nhãn và input
 
-    // Row 1: Labels (above inputs)
-    QHBoxLayout* labelLayout = new QHBoxLayout();
-    labelLayout->setSpacing(15);
-    labelLayout->addWidget(new QLabel("Từ"));
-    labelLayout->addWidget(new QLabel("Đến"));
-    labelLayout->addWidget(new QLabel("Ngày khởi hành"));
-    labelLayout->addWidget(new QLabel("Hãng hàng không"));
-    labelLayout->addWidget(new QLabel("Khoảng giá"));
-    labelLayout->addStretch();
-    topLayout->addLayout(labelLayout);
+    // --- Hàng 0: Nhãn (Labels) ---
+    filterLayout->addWidget(new QLabel("Từ"), 0, 0);
+    filterLayout->addWidget(new QLabel("Đến"), 0, 1);
+    filterLayout->addWidget(new QLabel("Ngày khởi hành"), 0, 2);
+    filterLayout->addWidget(new QLabel("Hãng hàng không"), 0, 3);
+    // Nhãn "Khoảng giá" span 3 cột (4, 5, 6) để căn lề cho đẹp
+    filterLayout->addWidget(new QLabel("Khoảng giá"), 0, 4, 1, 3);
+    // Cột 7 (cho nút tìm kiếm) không có nhãn
 
-    // Row 2: Inputs + Search button (all inline, same row)
-    QHBoxLayout* inputLayout = new QHBoxLayout();
-    inputLayout->setSpacing(15);
+    // --- Hàng 1: Ô nhập liệu (Inputs) ---
 
-    // From dropdown
+    // From dropdown (Cột 0)
     fromSearchCombo_ = new AirportComboBox(airportManager_, this);
-    inputLayout->addWidget(fromSearchCombo_);
+    filterLayout->addWidget(fromSearchCombo_, 1, 0);
 
-    // To dropdown
+    // To dropdown (Cột 1)
     toSearchCombo_ = new AirportComboBox(airportManager_, this);
-    inputLayout->addWidget(toSearchCombo_);
+    filterLayout->addWidget(toSearchCombo_, 1, 1);
 
-    // Date picker with placeholder
+    // Date picker with placeholder (Cột 2)
     dateSearchEdit_ = new QDateEdit(this);
     dateSearchEdit_->setCalendarPopup(true);
     dateSearchEdit_->setDisplayFormat("dd/MM/yyyy");
     dateSearchEdit_->setSpecialValueText("Tùy chọn");
     dateSearchEdit_->clear();  // Clear initial date to show placeholder
-    inputLayout->addWidget(dateSearchEdit_);
+    filterLayout->addWidget(dateSearchEdit_, 1, 2);
 
-    // Airline dropdown with placeholder
+    // Airline dropdown with placeholder (Cột 3)
     airlineFilterCombo_ = new QComboBox(this);
     airlineFilterCombo_->addItem("Tùy chọn", "");  // Default placeholder
     airlineFilterCombo_->addItem("VietJet Air", "VietJet Air");
     airlineFilterCombo_->addItem("Vietnam Airlines", "Vietnam Airlines");
     airlineFilterCombo_->addItem("Bamboo Airways", "Bamboo Airways");
     airlineFilterCombo_->addItem("Vietravel Airlines", "Vietravel Airlines");
-    inputLayout->addWidget(airlineFilterCombo_);
+    filterLayout->addWidget(airlineFilterCombo_, 1, 3);
 
-    // Price range - QLineEdit (plain text, no spin buttons)
+    // Price range - QLineEdit (Cột 4, 5, 6)
     priceMinEdit_ = new QLineEdit(this);
     priceMinEdit_->setPlaceholderText("Tùy chọn");
     priceMinEdit_->setValidator(new QIntValidator(0, MAX_FLIGHT_PRICE, this));
     priceMinEdit_->setMaximumWidth(120);
-    inputLayout->addWidget(priceMinEdit_);
+    filterLayout->addWidget(priceMinEdit_, 1, 4);
 
-    inputLayout->addWidget(new QLabel("—"));  // Dash separator
+    QLabel* dashLabel = new QLabel("—");
+    dashLabel->setAlignment(Qt::AlignCenter); // Căn giữa dấu gạch
+    filterLayout->addWidget(dashLabel, 1, 5);  // Dash separator (Cột 5)
 
     priceMaxEdit_ = new QLineEdit(this);
     priceMaxEdit_->setPlaceholderText("Tùy chọn");
     priceMaxEdit_->setValidator(new QIntValidator(0, MAX_FLIGHT_PRICE, this));
     priceMaxEdit_->setMaximumWidth(120);
-    inputLayout->addWidget(priceMaxEdit_);
+    filterLayout->addWidget(priceMaxEdit_, 1, 6);
 
-    // Search button - inline, same row, smaller size
+    // Search button (Cột 7)
     QPushButton* searchBtn = new QPushButton("Tìm kiếm", this);  // Not uppercase
     searchBtn->setFixedHeight(fromSearchCombo_->sizeHint().height());  // Match input height
     searchBtn->setStyleSheet(
@@ -154,10 +156,15 @@ void SearchBookPage::setupUi()
         "  background-color: #365a9e;"
         "}"
     );
-    inputLayout->addWidget(searchBtn);
+    // Thêm nút vào hàng 1, cột 7
+    filterLayout->addWidget(searchBtn, 1, 7);
 
-    inputLayout->addStretch();
-    topLayout->addLayout(inputLayout);
+    // Cột co giãn (Cột 8)
+    // Thêm một cột co giãn (stretch) vào cuối để đẩy tất cả về bên trái
+    filterLayout->setColumnStretch(8, 1);
+
+    // Thêm layout lưới này vào topLayout (thay thế 2 addLayout cũ)
+    topLayout->addLayout(filterLayout);
 
     // Connect search button
     connect(searchBtn, &QPushButton::clicked, this, &SearchBookPage::onSearchClicked);
