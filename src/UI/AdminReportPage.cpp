@@ -12,8 +12,6 @@
 #include <QDateEdit>
 #include <QPushButton>
 #include <QFrame>
-
-// --- Includes cho Chart - KHÔNG dùng QtCharts:: ---
 #include <QChartView>
 #include <QChart>
 #include <QBarSeries>

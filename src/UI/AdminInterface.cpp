@@ -95,16 +95,6 @@ AdminInterface::AdminInterface(AccountManager* accManager,
     menuLayout->addWidget(btnRoutes_);
     menuLayout->addWidget(btnFlights_);
 
-    // Header TÀI KHOẢN
-    auto *header2 = new QLabel("TÀI KHOẢN", sidebar_);
-    header2->setStyleSheet("color: #6f99c6; font-weight: bold; background: transparent;");
-    menuLayout->addWidget(header2);
-
-    btnAccounts_ = new QPushButton("Quản lý tài khoản");
-    btnAccounts_->setStyleSheet(btnStyle);
-    btnAccounts_->setCheckable(true);
-    menuLayout->addWidget(btnAccounts_);
-
     // --- Thêm Thống kê ---
     auto *header3 = new QLabel("THỐNG KÊ", sidebar_);
     header3->setStyleSheet("color: #6f99c6; font-weight: bold; background: transparent;");
@@ -114,6 +104,16 @@ AdminInterface::AdminInterface(AccountManager* accManager,
     btnReport_->setStyleSheet(btnStyle);
     btnReport_->setCheckable(true);
     menuLayout->addWidget(btnReport_);
+
+    // Header TÀI KHOẢN
+    auto *header2 = new QLabel("TÀI KHOẢN", sidebar_);
+    header2->setStyleSheet("color: #6f99c6; font-weight: bold; background: transparent;");
+    menuLayout->addWidget(header2);
+
+    btnAccounts_ = new QPushButton("Quản lý tài khoản");
+    btnAccounts_->setStyleSheet(btnStyle);
+    btnAccounts_->setCheckable(true);
+    menuLayout->addWidget(btnAccounts_);
 
     menuLayout->addStretch();
     menuWidget->setLayout(menuLayout);

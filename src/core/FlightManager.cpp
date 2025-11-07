@@ -299,10 +299,7 @@ bool FlightManager::deleteInstance(const std::string& instanceId) {
             
             // Delete and remove from array
             delete allInstances[i];
-<<<<<<< HEAD
-=======
             // allInstances.erase(i);
->>>>>>> b3de18c70a83979139713280049fc072ed00d0d7
             allInstances.erase(allInstances.begin() + i);
             
             saveInstancesToFiles(instancesFilePath_);
