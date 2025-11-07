@@ -13,44 +13,56 @@ class BookingManager;
 class ReportManager;
 class AirportManager;
 
+class AdminTicketsReportPage;
+class AdminRevenueReportPage;
+
 class AdminInterface : public QWidget
 {
-    Q_OBJECT 
+    Q_OBJECT
 
 public:
     explicit AdminInterface(AccountManager* accManager,
-                            FlightManager* flManager,
-                            BookingManager* bkManager,
-                            ReportManager* reportManager,
-                            AirportManager* airportManager,
-                            QWidget* parent = nullptr);
+                           FlightManager* flManager,
+                           BookingManager* bkManager,
+                           ReportManager* reportManager,
+                           AirportManager* airportManager,
+                           QWidget* parent = nullptr);
 
-signals:
-    void logoutClicked(); 
-
-private:
+private slots:
     void setupConnections();
 
-    // Sidebar
-    QFrame* sidebar_;
-
-    // Buttons cho các mục sidebar
-    QPushButton* btnDashboard_;
-    QPushButton* btnRoutes_;
-    QPushButton* btnFlights_;
-    QPushButton* btnAccounts_;
-    QPushButton* btnReport_;
-    QPushButton* logoutBtn_;
-
-    // Stack chứa các trang
-    QStackedWidget* stack_;
-
-    // Con trỏ tới các Manager (không sở hữu)
+private:
     AccountManager* accountManager_;
     FlightManager* flightManager_;
     BookingManager* bookingManager_;
     ReportManager* reportManager_;
     AirportManager* airportManager_;
+
+    QFrame* sidebar_;
+    QStackedWidget* stack_;
+
+    // Các nút menu
+    QPushButton* btnDashboard_;
+    QPushButton* btnRoutes_;
+    QPushButton* btnFlights_;
+    QPushButton* btnFlightRules_;    // Mới: Quản lý luật bay
+    QPushButton* btnPromotions_;     // Mới: Quản lý khuyến mãi
+    QPushButton* btnTicketsReport_;  // Mới: Vé đã bán
+    QPushButton* btnRevenueReport_;  // Mới: Doanh thu
+    QPushButton* btnAccounts_;
+    QPushButton* btnAgentList_;      // Mới: Danh sách đại lý
+    QPushButton* logoutBtn_;
+
+    // Các trang
+    // DashboardPage* dashboardPage_;
+    // RoutesPage* routesPage_;
+    // FlightsPage* flightsPage_;
+    // AccountsPage* accountsPage_;
+    // AdminTicketsReportPage* ticketsReportPage_;  // Mới
+    // AdminRevenueReportPage* revenueReportPage_;  // Mới
+
+signals:
+    void logoutClicked();
 };
 
 #endif // ADMININTERFACE_H

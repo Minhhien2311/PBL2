@@ -4,10 +4,58 @@
 #include "entities/AccountAgent.h"
 #include "entities/Booking.h"
 #include "utils/DateTime.h"
+#include <chrono>
+#include <ctime>
+#include <vector>
+#include <cctype>
+#include <sstream>
+#include <iomanip>
 
 // Constructor
 ReportManager::ReportManager(AccountManager& am, BookingManager& bm)
     : accountManager_(am), bookingManager_(bm) {}
+
+// Hàm chuyển đổi an toàn
+int ReportManager::safeStoi(const std::string& str, int defaultValue) const {
+    if (str.empty()) return defaultValue;
+    
+    for (size_t i = 0; i < str.length(); ++i) {
+        if (!std::isdigit(str[i])) {
+            return defaultValue;
+        }
+    }
+    
+    return std::atoi(str.c_str());
+}
+
+// Hàm chuyển đổi định dạng ngày từ dd/mm/yyyy sang yyyy-mm-dd
+std::string ReportManager::convertDateFormat(const std::string& date) const {
+    if (date.length() < 10) return date;
+    
+    std::string day = date.substr(0, 2);
+    std::string month = date.substr(3, 2);
+    std::string year = date.substr(6, 4);
+    
+    return year + "-" + month + "-" + day;
+}
+
+// Hàm trích xuất phần ngày từ chuỗi datetime (dd/mm/yyyy HH:MM:SS)
+std::string ReportManager::extractDatePart(const std::string& datetime) const {
+    if (datetime.length() >= 10) {
+        return datetime.substr(0, 10); // Lấy dd/mm/yyyy
+    }
+    return datetime;
+}
+
+// Hàm so sánh ngày với định dạng dd/mm/yyyy
+bool ReportManager::isDateInRange(const std::string& bookingDate, const std::string& startDate, const std::string& endDate) const {
+    std::string bookingDateStr = extractDatePart(bookingDate);
+    std::string bookingYMD = convertDateFormat(bookingDateStr);
+    std::string startYMD = convertDateFormat(startDate);
+    std::string endYMD = convertDateFormat(endDate);
+    
+    return (bookingYMD >= startYMD && bookingYMD <= endYMD);
+}
 
 // --- Tổng quan (Admin) ---
 double ReportManager::getTotalRevenueAllAgents() const {
@@ -75,14 +123,23 @@ std::vector<AgentReport*>* ReportManager::generateFullAgentReport() const {
 double ReportManager::getDailyRevenue(const std::string& agentId) const {
     double total = 0.0;
     const auto& bookings = bookingManager_.getAllBookings();
-    std::string today = utils::DateTime::formatLocal(utils::DateTime::nowUtc(), "%Y-%m-%d");
+    
+    // Lấy ngày hôm nay định dạng dd/mm/yyyy
+    auto now = std::chrono::system_clock::now();
+    auto now_time_t = std::chrono::system_clock::to_time_t(now);
+    std::tm now_tm = *std::localtime(&now_time_t);
+    
+    char today[11];
+    std::strftime(today, sizeof(today), "%d/%m/%Y", &now_tm);
 
     for (int i = 0; i < bookings.size(); ++i) {
         Booking* b = bookings[i];
         if (!b) continue;
+        
+        std::string bookingDate = extractDatePart(b->getBookingDate());
         if (b->getAgentId() == agentId &&
             b->getStatus() == BookingStatus::Issued &&
-            b->getBookingDate().find(today) == 0) {
+            bookingDate == today) {
             total += b->getBaseFare();
         }
     }
@@ -92,14 +149,23 @@ double ReportManager::getDailyRevenue(const std::string& agentId) const {
 int ReportManager::getDailyTicketsSold(const std::string& agentId) const {
     int count = 0;
     const auto& bookings = bookingManager_.getAllBookings();
-    std::string today = utils::DateTime::formatLocal(utils::DateTime::nowUtc(), "%Y-%m-%d");
+    
+    // Lấy ngày hôm nay định dạng dd/mm/yyyy
+    auto now = std::chrono::system_clock::now();
+    auto now_time_t = std::chrono::system_clock::to_time_t(now);
+    std::tm now_tm = *std::localtime(&now_time_t);
+    
+    char today[11];
+    std::strftime(today, sizeof(today), "%d/%m/%Y", &now_tm);
 
     for (int i = 0; i < bookings.size(); ++i) {
         Booking* b = bookings[i];
         if (!b) continue;
+        
+        std::string bookingDate = extractDatePart(b->getBookingDate());
         if (b->getAgentId() == agentId &&
             b->getStatus() == BookingStatus::Issued &&
-            b->getBookingDate().find(today) == 0) {
+            bookingDate == today) {
             count++;
         }
     }
@@ -109,14 +175,23 @@ int ReportManager::getDailyTicketsSold(const std::string& agentId) const {
 int ReportManager::getDailyCancellations(const std::string& agentId) const {
     int count = 0;
     const auto& bookings = bookingManager_.getAllBookings();
-    std::string today = utils::DateTime::formatLocal(utils::DateTime::nowUtc(), "%Y-%m-%d");
+    
+    // Lấy ngày hôm nay định dạng dd/mm/yyyy
+    auto now = std::chrono::system_clock::now();
+    auto now_time_t = std::chrono::system_clock::to_time_t(now);
+    std::tm now_tm = *std::localtime(&now_time_t);
+    
+    char today[11];
+    std::strftime(today, sizeof(today), "%d/%m/%Y", &now_tm);
 
     for (int i = 0; i < bookings.size(); ++i) {
         Booking* b = bookings[i];
         if (!b) continue;
+        
+        std::string bookingDate = extractDatePart(b->getBookingDate());
         if (b->getAgentId() == agentId &&
             b->getStatus() == BookingStatus::Cancelled &&
-            b->getBookingDate().find(today) == 0) {
+            bookingDate == today) {
             count++;
         }
     }
@@ -132,8 +207,7 @@ int ReportManager::getTicketsSoldInRange(const std::string& startDate,
         Booking* b = bookings[i];
         if (!b) continue;
         if (b->getStatus() == BookingStatus::Issued &&
-            b->getBookingDate() >= startDate &&
-            b->getBookingDate() <= endDate) {
+            isDateInRange(b->getBookingDate(), startDate, endDate)) {
             count++;
         }
     }
@@ -148,8 +222,7 @@ double ReportManager::getRevenueInRange(const std::string& startDate,
         Booking* b = bookings[i];
         if (!b) continue;
         if (b->getStatus() == BookingStatus::Issued &&
-            b->getBookingDate() >= startDate &&
-            b->getBookingDate() <= endDate) {
+            isDateInRange(b->getBookingDate(), startDate, endDate)) {
             total += b->getBaseFare();
         }
     }
@@ -167,8 +240,7 @@ int ReportManager::getTicketsSoldInRange(const std::string& agentId,
         if (!b) continue;
         if (b->getAgentId() == agentId &&
             b->getStatus() == BookingStatus::Issued &&
-            b->getBookingDate() >= startDate &&
-            b->getBookingDate() <= endDate) {
+            isDateInRange(b->getBookingDate(), startDate, endDate)) {
             count++;
         }
     }
@@ -185,8 +257,7 @@ double ReportManager::getRevenueInRange(const std::string& agentId,
         if (!b) continue;
         if (b->getAgentId() == agentId &&
             b->getStatus() == BookingStatus::Issued &&
-            b->getBookingDate() >= startDate &&
-            b->getBookingDate() <= endDate) {
+            isDateInRange(b->getBookingDate(), startDate, endDate)) {
             total += b->getBaseFare();
         }
     }
@@ -212,8 +283,7 @@ std::vector<AgentReport*>* ReportManager::generateAgentReportInRange(const std::
             Booking* b = bookings[j];
             if (!b) continue;
             if (b->getAgentId() == agent->getId() &&
-                b->getBookingDate() >= startDate &&
-                b->getBookingDate() <= endDate) {
+                isDateInRange(b->getBookingDate(), startDate, endDate)) {
                 r->totalBookings++;
                 if (b->getStatus() == BookingStatus::Issued) {
                     r->issuedTickets++;
@@ -233,20 +303,128 @@ std::vector<AgentReport*>* ReportManager::generateAgentReportInRange(const std::
 // --- Báo cáo theo tháng (Agent view) ---
 std::vector<int>* ReportManager::getMonthlyTicketsByAgent(const std::string& agentId, int year) const {
     auto* monthly = new std::vector<int>(12, 0);
-
     const auto& bookings = bookingManager_.getAllBookings();
-    std::string yearStr = std::to_string(year);
 
     for (int i = 0; i < bookings.size(); ++i) {
         Booking* b = bookings[i];
         if (!b) continue;
+        
+        std::string bookingDate = extractDatePart(b->getBookingDate());
+        if (bookingDate.length() < 10) continue;
+            
+        // Trích xuất năm và tháng từ định dạng dd/mm/yyyy
+        int bookingYear = safeStoi(bookingDate.substr(6, 4), 0);
+        int bookingMonth = safeStoi(bookingDate.substr(3, 2), 0);
+        
         if (b->getAgentId() == agentId &&
             b->getStatus() == BookingStatus::Issued &&
-            b->getBookingDate().find(yearStr) == 0) {
-            int month = std::stoi(b->getBookingDate().substr(5,2));
-            if (month >= 1 && month <= 12) (*monthly)[month-1]++;
+            bookingYear == year && 
+            bookingMonth >= 1 && bookingMonth <= 12) {
+            (*monthly)[bookingMonth - 1]++;
         }
     }
 
     return monthly;
+}
+
+// --- Các hàm mới cho thống kê doanh thu ---
+double ReportManager::getTodayRevenue() const {
+    // Lấy ngày hôm nay định dạng dd/mm/yyyy
+    auto now = std::chrono::system_clock::now();
+    auto now_time_t = std::chrono::system_clock::to_time_t(now);
+    std::tm now_tm = *std::localtime(&now_time_t);
+    
+    char today[11];
+    std::strftime(today, sizeof(today), "%d/%m/%Y", &now_tm);
+    
+    return getRevenueInRange(today, today);
+}
+
+double ReportManager::getThisWeekRevenue() const {
+    auto now = std::chrono::system_clock::now();
+    auto now_time_t = std::chrono::system_clock::to_time_t(now);
+    std::tm now_tm = *std::localtime(&now_time_t);
+    
+    // Tìm ngày đầu tuần (thứ 2)
+    int days_since_monday = now_tm.tm_wday - 1;
+    if (days_since_monday < 0) days_since_monday = 6; // Chủ nhật
+    
+    auto week_start = now - std::chrono::hours(24 * days_since_monday);
+    auto week_start_time_t = std::chrono::system_clock::to_time_t(week_start);
+    std::tm week_start_tm = *std::localtime(&week_start_time_t);
+    
+    char start_date[11];
+    std::strftime(start_date, sizeof(start_date), "%d/%m/%Y", &week_start_tm);
+    char end_date[11];
+    std::strftime(end_date, sizeof(end_date), "%d/%m/%Y", &now_tm);
+    
+    return getRevenueInRange(start_date, end_date);
+}
+
+double ReportManager::getThisMonthRevenue() const {
+    auto now = std::chrono::system_clock::now();
+    auto now_time_t = std::chrono::system_clock::to_time_t(now);
+    std::tm now_tm = *std::localtime(&now_time_t);
+    
+    char start_date[11];
+    std::strftime(start_date, sizeof(start_date), "01/%m/%Y", &now_tm);
+    char end_date[11];
+    std::strftime(end_date, sizeof(end_date), "%d/%m/%Y", &now_tm);
+    
+    return getRevenueInRange(start_date, end_date);
+}
+
+std::vector<double> ReportManager::getMonthlyRevenue(int year) const {
+    std::vector<double> monthlyRevenue(12, 0.0);
+    const auto& bookings = bookingManager_.getAllBookings();
+    
+    for (int i = 0; i < bookings.size(); ++i) {
+        Booking* b = bookings[i];
+        if (!b) continue;
+        
+        if (b->getStatus() == BookingStatus::Issued) {
+            std::string bookingDate = extractDatePart(b->getBookingDate());
+            if (bookingDate.length() < 10) continue;
+            
+            int bookingYear = safeStoi(bookingDate.substr(6, 4), 0);
+            int bookingMonth = safeStoi(bookingDate.substr(3, 2), 0);
+            
+            if (bookingYear == year && bookingMonth >= 1 && bookingMonth <= 12) {
+                monthlyRevenue[bookingMonth - 1] += b->getBaseFare();
+            }
+        }
+    }
+    
+    return monthlyRevenue;
+}
+
+// --- Thống kê theo loại vé ---
+int ReportManager::getBusinessTicketsInRange(const std::string& startDate, const std::string& endDate) const {
+    int count = 0;
+    const auto& bookings = bookingManager_.getAllBookings();
+    for (int i = 0; i < bookings.size(); ++i) {
+        Booking* b = bookings[i];
+        if (!b) continue;
+        if (b->getStatus() == BookingStatus::Issued &&
+            b->getClass() == BookingClass::Business &&
+            isDateInRange(b->getBookingDate(), startDate, endDate)) {
+            count++;
+        }
+    }
+    return count;
+}
+
+int ReportManager::getEconomyTicketsInRange(const std::string& startDate, const std::string& endDate) const {
+    int count = 0;
+    const auto& bookings = bookingManager_.getAllBookings();
+    for (int i = 0; i < bookings.size(); ++i) {
+        Booking* b = bookings[i];
+        if (!b) continue;
+        if (b->getStatus() == BookingStatus::Issued &&
+            b->getClass() == BookingClass::Economy &&
+            isDateInRange(b->getBookingDate(), startDate, endDate)) {
+            count++;
+        }
+    }
+    return count;
 }
