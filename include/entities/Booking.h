@@ -28,7 +28,7 @@ private:
     BookingClass bookingClass;
 
     // Chi tiết giá vé  
-    double baseFare;       
+    int baseFare;       
 
     // Trạng thái của vé này
     BookingStatus status;

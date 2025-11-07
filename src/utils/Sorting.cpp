@@ -1,6 +1,8 @@
 #include "../../include/utils/Sorting.h"
 #include <algorithm>
 
+#include <iostream>
+
 // Sắp xếp FlightInstance theo giờ đến (arrivalTime) từ sớm tới trễ
 DynamicArray<FlightInstance*> Sorting::sortByArrivalTime(const DynamicArray<FlightInstance*>& flights) {
     // Tạo mảng kết quả
@@ -54,26 +56,49 @@ bool Sorting::compareDateTime(const std::string& date1, const std::string& time1
 
 // Chuyển đổi date string "DD/MM/YYYY" sang số để so sánh
 // Ví dụ: "15/10/2025" -> 20251015
+// long long Sorting::dateToNumber(const std::string& date) {
+//     if (date.length() < 10) return 0;
+    
+//     int day = std::stoi(date.substr(0, 2));
+//     int month = std::stoi(date.substr(3, 2));
+//     int year = std::stoi(date.substr(6, 4));
+    
+//     return year * 10000LL + month * 100LL + day;
+// }
+
+// // Chuyển đổi time string "HH:MM" sang số phút
+// // Ví dụ: "14:30" -> 870 (14*60 + 30)
+// int Sorting::timeToMinutes(const std::string& time) {
+//     if (time.length() < 5) return 0;
+    
+//     int hours = std::stoi(time.substr(0, 2));
+//     int minutes = std::stoi(time.substr(3, 2));
+    
+//     return hours * 60 + minutes;
+// }
+
 long long Sorting::dateToNumber(const std::string& date) {
     if (date.length() < 10) return 0;
-    
+
+    std::cerr << "[DEBUG] Parsing date: [" << date << "]" << std::endl;
     int day = std::stoi(date.substr(0, 2));
     int month = std::stoi(date.substr(3, 2));
     int year = std::stoi(date.substr(6, 4));
-    
+
     return year * 10000LL + month * 100LL + day;
 }
 
-// Chuyển đổi time string "HH:MM" sang số phút
-// Ví dụ: "14:30" -> 870 (14*60 + 30)
 int Sorting::timeToMinutes(const std::string& time) {
     if (time.length() < 5) return 0;
-    
+
+    std::cerr << "[DEBUG] Parsing time: [" << time << "]" << std::endl;
     int hours = std::stoi(time.substr(0, 2));
     int minutes = std::stoi(time.substr(3, 2));
-    
+
     return hours * 60 + minutes;
 }
+
+
 
 // ============= QUICK SORT CHO THỜI GIAN =============
 

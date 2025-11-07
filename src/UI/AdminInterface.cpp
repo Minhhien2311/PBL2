@@ -71,6 +71,16 @@ AdminInterface::AdminInterface(AccountManager* accManager,
     
     // --- Sửa lỗi: Cập nhật Sidebar theo file bạn gửi
     nav_ = new QListWidget(sidebar_);
+      // Cấu hình nhỏ để item được chọn sáng hơn // ==============
+    // nav_->setFrameShape(QFrame::NoFrame);
+    // nav_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    // nav_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    // nav_->setSelectionMode(QAbstractItemView::SingleSelection);
+    // nav_->setStyleSheet(R"(
+    //    QListWidget { background: transparent; color: #FFFFFF; }
+    //    QListWidget::item { padding: 10px 8px; }
+    //    QListWidget::item:selected { background: #6f99c6; color: white; }
+    // )");
     
     sideLay->addWidget(mkSection("QUẢN LÝ"));
     nav_->addItem("Trang tổng quan");       // Index 0
