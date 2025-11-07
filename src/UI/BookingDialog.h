@@ -12,6 +12,7 @@ class QWidget;
 class FlightInstance;
 class FlightManager;
 class BookingManager;
+class AccountManager;
 
 /**
  * @brief Dialog để nhập thông tin hành khách và đặt vé
@@ -24,6 +25,7 @@ public:
     explicit BookingDialog(FlightInstance* flightInstance, 
                           FlightManager* flightManager,
                           BookingManager* bookingManager,
+                          AccountManager* accountManager,
                           QWidget *parent = nullptr);
     
     // Lấy thông tin đã nhập
@@ -41,6 +43,7 @@ private:
     FlightInstance* flightInstance_;
     FlightManager* flightManager_;
     BookingManager* bookingManager_;
+    AccountManager* accountManager_;
     
     // Form fields
     QLineEdit* passengerIdEdit_;      // CCCD/ID
