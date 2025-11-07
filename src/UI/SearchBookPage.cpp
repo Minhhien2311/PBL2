@@ -27,6 +27,11 @@
 #include <QComboBox>
 #include <QIntValidator>
 
+// Constants
+namespace {
+    constexpr int MAX_PRICE_LIMIT = 99999999;  // Maximum price value for validation
+}
+
 SearchBookPage::SearchBookPage(FlightManager* flManager,
                                BookingManager* bkManager,
                                AccountManager* accManager,
@@ -107,7 +112,7 @@ void SearchBookPage::setupUi()
     dateSearchEdit_->setCalendarPopup(true);
     dateSearchEdit_->setDisplayFormat("dd/MM/yyyy");
     dateSearchEdit_->setSpecialValueText("Tùy chọn");
-    dateSearchEdit_->setDate(QDate());  // Clear initial date
+    dateSearchEdit_->clear();  // Clear initial date to show placeholder
     inputLayout->addWidget(dateSearchEdit_);
 
     // Airline dropdown with placeholder
@@ -122,7 +127,7 @@ void SearchBookPage::setupUi()
     // Price range - QLineEdit (plain text, no spin buttons)
     priceMinEdit_ = new QLineEdit(this);
     priceMinEdit_->setPlaceholderText("Tùy chọn");
-    priceMinEdit_->setValidator(new QIntValidator(0, 99999999, this));
+    priceMinEdit_->setValidator(new QIntValidator(0, MAX_PRICE_LIMIT, this));
     priceMinEdit_->setMaximumWidth(120);
     inputLayout->addWidget(priceMinEdit_);
 
@@ -130,7 +135,7 @@ void SearchBookPage::setupUi()
 
     priceMaxEdit_ = new QLineEdit(this);
     priceMaxEdit_->setPlaceholderText("Tùy chọn");
-    priceMaxEdit_->setValidator(new QIntValidator(0, 99999999, this));
+    priceMaxEdit_->setValidator(new QIntValidator(0, MAX_PRICE_LIMIT, this));
     priceMaxEdit_->setMaximumWidth(120);
     inputLayout->addWidget(priceMaxEdit_);
 
