@@ -1,10 +1,50 @@
+HAN_SGN|Vietnam Airlines|HAN|SGN
+HAN_DAD|Vietnam Airlines|HAN|DAD
+HAN_PQC|Vietnam Airlines|HAN|PQC
+HAN_HPH|Vietnam Airlines|HAN|HPH
+HAN_CXR|Vietnam Airlines|HAN|CXR
+SGN_DAD|Vietnam Airlines|SGN|DAD
+SGN_HUI|Vietnam Airlines|SGN|HUI
+SGN_PQC|Vietnam Airlines|SGN|PQC
+SGN_CXR|Vietnam Airlines|SGN|CXR
+SGN_VCL|Vietnam Airlines|SGN|VCL
 HAN_SGN|VietJet Air|HAN|SGN
 HAN_DAD|VietJet Air|HAN|DAD
+HAN_CXR|VietJet Air|HAN|CXR
+HAN_PQC|VietJet Air|HAN|PQC
+HAN_TBB|VietJet Air|HAN|TBB
+SGN_HAN|VietJet Air|SGN|HAN
+SGN_DAD|VietJet Air|SGN|DAD
+SGN_VCA|VietJet Air|SGN|VCA
+SGN_PQC|VietJet Air|SGN|PQC
+SGN_CXR|VietJet Air|SGN|CXR
 HAN_SGN|Bamboo Airways|HAN|SGN
+HAN_DAD|Bamboo Airways|HAN|DAD
+HAN_CXR|Bamboo Airways|HAN|CXR
+HAN_PQC|Bamboo Airways|HAN|PQC
+SGN_HAN|Bamboo Airways|SGN|HAN
 SGN_DAD|Bamboo Airways|SGN|DAD
-HAN_SGN|Vietnam Airlines|HAN|SGN
-SGN_DAD|Vietnam Airlines|SGN|DAD
+SGN_VCL|Bamboo Airways|SGN|VCL
+SGN_HPH|Bamboo Airways|SGN|HPH
 HAN_SGN|Pacific Airlines|HAN|SGN
+HAN_DAD|Pacific Airlines|HAN|DAD
+HAN_CXR|Pacific Airlines|HAN|CXR
 SGN_HAN|Pacific Airlines|SGN|HAN
+SGN_DAD|Pacific Airlines|SGN|DAD
 HAN_SGN|Vietravel Airlines|HAN|SGN
+HAN_DAD|Vietravel Airlines|HAN|DAD
+HAN_CXR|Vietravel Airlines|HAN|CXR
 SGN_HAN|Vietravel Airlines|SGN|HAN
+SGN_DAD|Vietravel Airlines|SGN|DAD
+SGN_PQC|Vietravel Airlines|SGN|PQC
+SGN_CXR|Vietravel Airlines|SGN|CXR
+HAN_SGN|VASCO|HAN|SGN
+HAN_DAD|VASCO|HAN|DAD
+SGN_PQC|VASCO|SGN|PQC
+SGN_CXR|VASCO|SGN|CXR
+DAD_HUI|Vietnam Airlines|DAD|HUI
+HAN_BMV|VietJet Air|HAN|BMV
+SGN_BMV|Bamboo Airways|SGN|BMV
+SGN_TBB|Pacific Airlines|SGN|TBB
+HAN_VCL|Vietnam Airlines|HAN|VCL
+SGN_UIH|Vietnam Airlines|SGN|UIH
