@@ -9,6 +9,8 @@ class QDateEdit;
 class QTableView;
 class QStandardItemModel;
 class QPushButton;
+class QComboBox;
+class QSpinBox;
 class FlightManager;
 class BookingManager;
 class AccountManager;
@@ -30,12 +32,8 @@ public:
                             QWidget *parent = nullptr);
 
 private slots:
-    // 3 kiểu tìm
-    void onSearchById();
-    void onSearchByRoute();
-    void onSearchByDate();
-    // tải lại
-    void onRefreshAll();
+    // Unified search
+    void onSearchClicked();
     // đặt vé
     void onBookClicked();
 
@@ -54,16 +52,12 @@ private:
     AirportManager*  airportManager_;
 
     // --- ô tìm kiếm ---
-    QLineEdit*  idSearchEdit_;           // tìm theo instanceId
     AirportComboBox*  fromSearchCombo_;  // điểm đi
     AirportComboBox*  toSearchCombo_;    // điểm đến
     QDateEdit*  dateSearchEdit_;         // ngày khởi hành
-
-    // --- nút tìm kiếm ---
-    QPushButton* searchByIdBtn_;
-    QPushButton* searchByRouteBtn_;
-    QPushButton* searchByDateBtn_;
-    QPushButton* refreshBtn_;
+    QComboBox* airlineFilterCombo_;      // hãng hàng không
+    QSpinBox* priceMinSpinBox_;          // giá tối thiểu
+    QSpinBox* priceMaxSpinBox_;          // giá tối đa
 
     // --- bảng ---
     QTableView*          tableView_;
