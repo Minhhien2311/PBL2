@@ -174,6 +174,7 @@ private:
                     node = nullptr;
                 } else {
                     // Node có 1 con - copy explicitly to avoid shallow copy issues
+                    // Không dùng assignment operator (*node = *temp) để tránh vấn đề shallow copy
                     node->key = temp->key;
                     node->value = temp->value;
                     node->left = temp->left;
