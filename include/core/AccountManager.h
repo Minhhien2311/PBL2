@@ -1,7 +1,7 @@
 #ifndef ACCOUNT_MANAGER_H
 #define ACCOUNT_MANAGER_H
 
-#include "DSA/DynamicArray.h"      // CTDL để lưu trữ danh sách các tài khoản
+#include <vector>                   // STL để lưu trữ danh sách các tài khoản
 #include "entities/AccountAdmin.h" // Đối tượng Admin
 #include "entities/AccountAgent.h" // Đối tượng Agent
 #include <string>
@@ -17,10 +17,10 @@
  */
 class AccountManager {
 private:
-    // Mảng động chứa các con trỏ trỏ tới đối tượng AccountAdmin
-    DynamicArray<AccountAdmin*> allAdmins;
-    // Mảng động chứa các con trỏ trỏ tới đối tượng AccountAgent
-    DynamicArray<AccountAgent*> allAgents;
+    // Vector chứa các con trỏ trỏ tới đối tượng AccountAdmin
+    std::vector<AccountAdmin*> allAdmins;
+    // Vector chứa các con trỏ trỏ tới đối tượng AccountAgent
+    std::vector<AccountAgent*> allAgents;
     
     // Con trỏ lưu trữ thông tin của người dùng *hiện tại* đang đăng nhập. Sẽ là nullptr nếu chưa ai đăng nhập.
     Account* currentUser;
@@ -75,8 +75,8 @@ public:
     AccountAgent* findAgentById(const std::string& agentId);
     
     // Lấy toàn bộ danh sách Agent (dùng cho Admin).
-    // Tham chiếu (const) đến mảng động chứa các con trỏ AccountAgent.
-    const DynamicArray<AccountAgent*>& getAllAgents() const;
+    // Tham chiếu (const) đến vector chứa các con trỏ AccountAgent.
+    const std::vector<AccountAgent*>& getAllAgents() const;
 
     // Tạo một tài khoản Agent mới. Tự động kiểm tra trùng lặp username trước khi tạo.
     // username phải là duy nhất, password sẽ được hash, true nếu tạo thành công, false nếu dữ liệu không hợp lệ hoặc username đã tồn tại.

@@ -1,17 +1,17 @@
 #ifndef SORTING_H
 #define SORTING_H
 
-#include "../DSA/DynamicArray.h"
+#include <vector>
 #include "../entities/FlightInstance.h"
 
 class Sorting {
 public:
     // Sắp xếp FlightInstance theo giờ bay (từ sớm tới trễ)
     // So sánh theo arrivalDate và arrivalTime
-    static DynamicArray<FlightInstance*> sortByArrivalTime(const DynamicArray<FlightInstance*>& flights);
+    static std::vector<FlightInstance*> sortByArrivalTime(const std::vector<FlightInstance*>& flights);
     
     // Sắp xếp FlightInstance theo giá vé Economy (từ thấp tới cao)
-    static DynamicArray<FlightInstance*> sortByPrice(const DynamicArray<FlightInstance*>& flights);
+    static std::vector<FlightInstance*> sortByPrice(const std::vector<FlightInstance*>& flights);
 
 private:
     // Helper function để so sánh thời gian
@@ -26,12 +26,12 @@ private:
     static int timeToMinutes(const std::string& time);
     
     // Quick Sort helpers cho sắp xếp theo thời gian
-    static void quickSortByTime(DynamicArray<FlightInstance*>& arr, int low, int high);
-    static int partitionByTime(DynamicArray<FlightInstance*>& arr, int low, int high);
+    static void quickSortByTime(std::vector<FlightInstance*>& arr, int low, int high);
+    static int partitionByTime(std::vector<FlightInstance*>& arr, int low, int high);
     
     // Quick Sort helpers cho sắp xếp theo giá
-    static void quickSortByPrice(DynamicArray<FlightInstance*>& arr, int low, int high);
-    static int partitionByPrice(DynamicArray<FlightInstance*>& arr, int low, int high);
+    static void quickSortByPrice(std::vector<FlightInstance*>& arr, int low, int high);
+    static int partitionByPrice(std::vector<FlightInstance*>& arr, int low, int high);
 };
 
 #endif

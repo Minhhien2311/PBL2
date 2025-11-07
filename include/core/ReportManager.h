@@ -56,7 +56,7 @@
 
 #pragma once
 
-#include "DSA/DynamicArray.h"
+#include <vector>
 #include "entities/Booking.h"
 #include <string>
 
@@ -87,7 +87,7 @@ public:
     double getTotalRevenueAllAgents() const;
     int getTotalTicketsSold() const;
     int countBookingsByStatus(BookingStatus status) const;
-    DynamicArray<AgentReport*>* generateFullAgentReport() const;
+    std::vector<AgentReport*>* generateFullAgentReport() const;
 
     // --- Thống kê theo ngày cho Agent ---
     double getDailyRevenue(const std::string& agentId) const;
@@ -107,9 +107,9 @@ public:
                              const std::string& startDate,
                              const std::string& endDate) const;
 
-    DynamicArray<AgentReport*>* generateAgentReportInRange(const std::string& startDate,
+    std::vector<AgentReport*>* generateAgentReportInRange(const std::string& startDate,
                                                            const std::string& endDate) const;
 
     // --- Báo cáo theo tháng (Agent view) ---
-    DynamicArray<int>* getMonthlyTicketsByAgent(const std::string& agentId, int year) const;
+    std::vector<int>* getMonthlyTicketsByAgent(const std::string& agentId, int year) const;
 };

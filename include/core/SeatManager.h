@@ -2,7 +2,7 @@
 #define SEATMANAGER_H
 
 #include <string>
-#include "DSA/DynamicArray.h"
+#include <vector>
 #include "entities/Seat.h"
 
 enum class SeatClass {
@@ -16,7 +16,7 @@ class SeatManager {
 private:
     // Dữ liệu chính
     std::string currentInstanceId_;
-    DynamicArray<Seat*> activeSeatMap_;
+    std::vector<Seat*> activeSeatMap_;
     Seat* selectedSeat_;
     
     int seatRows_;
@@ -55,8 +55,8 @@ public:
     bool updateAndSaveChanges();
     
     // --- Getters ---
-    DynamicArray<Seat*>* getActiveSeatMap();
-    const DynamicArray<Seat*>& getAllSeats() const;
+    std::vector<Seat*>* getActiveSeatMap();
+    const std::vector<Seat*>& getAllSeats() const;
     Seat* getSelectedSeat() const;
     const std::string& getCurrentInstanceId() const;
     int getSeatRows() const;
