@@ -4,27 +4,26 @@
 #include <QWidget>
 
 // Khai báo sớm
-class QListWidget;
 class QStackedWidget;
 class QPushButton;
 class QFrame;
 class AccountManager;
-class FlightManager; // <--- CẬP NHẬT
+class FlightManager;
 class BookingManager;
 class ReportManager;
 class AirportManager;
 
-// (Khai báo sớm các trang con MỚI)
+// Khai báo sớm các trang con
 class SearchBookPage;
 class AgentBookingsPage;
 class AccountsPage;
+class DashboardPage;
 
 class AgentInterface : public QWidget
 {
     Q_OBJECT
 
 public:
-    // <--- CẬP NHẬT: Thêm ReportManager
     explicit AgentInterface(AccountManager* accManager,
                             FlightManager* flManager,
                             BookingManager* bkManager,
@@ -41,13 +40,18 @@ private:
 
     // --- UI Components ---
     QFrame* sidebar_;
-    QListWidget* nav_;
-    QPushButton* logoutBtn_;
     QStackedWidget* stack_;
+    QPushButton* logoutBtn_;
 
-    // --- Managers (Không sở hữu) ---
+    // Nút sidebar
+    QPushButton* btnDashboard_;
+    QPushButton* btnSearchBook_;
+    QPushButton* btnBookings_;
+    QPushButton* btnAccounts_;
+
+    // --- Managers (không sở hữu) ---
     AccountManager* accountManager_;
-    FlightManager* flightManager_; // <--- CẬP NHẬT
+    FlightManager* flightManager_;
     BookingManager* bookingManager_;
     ReportManager* reportManager_;
     AirportManager* airportManager_;
