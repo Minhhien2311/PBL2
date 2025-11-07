@@ -1,6 +1,6 @@
 #include "Application.h"
 
-// Include các trang
+// Include các trang con cấp cao
 #include "LoginPage.h"
 #include "AdminInterface.h"
 #include "AgentInterface.h"
@@ -14,7 +14,7 @@
 
 #include <QStackedWidget>
 
-// Constructor mới
+// Constructor
 Application::Application(AccountManager* accManager, 
                          FlightManager* flManager, 
                          BookingManager* bkManager,
@@ -23,7 +23,7 @@ Application::Application(AccountManager* accManager,
                          QWidget *parent)
     : QMainWindow(parent), 
       accountManager_(accManager), 
-      flightManager_(flManager),    // <--- Sửa lỗi: Tên nhất quán (số ít)
+      flightManager_(flManager),
       bookingManager_(bkManager),
       reportManager_(reportManager),
       airportManager_(airportManager)
@@ -35,15 +35,14 @@ Application::Application(AccountManager* accManager,
     setupConnections();
 }
 
-Application::~Application() { }
+Application::~Application() {}
 
 void Application::setupUi()
 {
     // Khởi tạo các trang và "truyền" manager vào
-    // <--- Sửa lỗi: Truyền AccountManager cho LoginPage
     loginPage_ = new LoginPage(accountManager_, this); 
     
-    // <--- Sửa lỗi: Truyền cả 4 manager cho AdminInterface
+    // Truyền cả 4 manager cho AdminInterface
     adminInterface_ = new AdminInterface(accountManager_, 
                                          flightManager_, 
                                          bookingManager_,
@@ -51,7 +50,7 @@ void Application::setupUi()
                                          airportManager_,
                                          this);
     
-    // <--- Sửa lỗi: Truyền cả 4 manager cho AgentInterface
+    // Truyền cả 4 manager cho AgentInterface
     agentInterface_ = new AgentInterface(accountManager_, flightManager_, 
                                          bookingManager_, reportManager_,
                                          airportManager_, this);
@@ -69,6 +68,7 @@ void Application::setupUi()
     stack_->setCurrentWidget(loginPage_);
 }
 
+// Kết nối tín hiệu
 void Application::setupConnections()
 {
     // Kết nối tín hiệu đăng nhập thành công từ LoginPage
