@@ -38,10 +38,10 @@ SGN_HAN|Vietravel Airlines|SGN|HAN
 SGN_DAD|Vietravel Airlines|SGN|DAD
 SGN_PQC|Vietravel Airlines|SGN|PQC
 SGN_CXR|Vietravel Airlines|SGN|CXR
-HAN_SGN|VASCO|HAN|SGN
-HAN_DAD|VASCO|HAN|DAD
-SGN_PQC|VASCO|SGN|PQC
-SGN_CXR|VASCO|SGN|CXR
+HAN_SGN|Vietravel Airlines|HAN|SGN
+HAN_DAD|Vietravel Airlines|HAN|DAD
+SGN_PQC|Vietravel Airlines|SGN|PQC
+SGN_CXR|Vietravel Airlines|SGN|CXR
 DAD_HUI|Vietnam Airlines|DAD|HUI
 HAN_BMV|VietJet Air|HAN|BMV
 SGN_BMV|Bamboo Airways|SGN|BMV
