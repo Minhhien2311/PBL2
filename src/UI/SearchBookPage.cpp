@@ -26,6 +26,27 @@
 #include <QCalendarWidget>
 #include <QComboBox>
 #include <QIntValidator>
+#include <QLocale>
+
+// Helper function để format tiền tệ Việt Nam
+namespace {
+    QString formatVietnamCurrency(int price) {
+        QString priceStr = QString::number(price);
+        QString result;
+        int count = 0;
+        
+        for (int i = priceStr.length() - 1; i >= 0; --i) {
+            if (count == 3) {
+                result.prepend('.');
+                count = 0;
+            }
+            result.prepend(priceStr[i]);
+            count++;
+        }
+        
+        return result + " VNĐ";
+    }
+}
 
 // Constants
 namespace {
@@ -271,8 +292,8 @@ void SearchBookPage::fillTable(const std::vector<FlightInstance*>& instances)
             airline = QString::fromStdString(flight->getAirline());
         }
 
-        QLocale vietnamLocale(QLocale::Vietnamese, QLocale::Vietnam);
-        QString priceFormatted = vietnamLocale.toString(inst->getFareEconomy()) + " VNĐ";
+        // Format số tiền với dấu chấm phân cách hàng nghìn
+        QString priceFormatted = formatVietnamCurrency(inst->getFareEconomy());
 
         QList<QStandardItem*> row;
         row << new QStandardItem(QString::fromStdString(inst->getInstanceId()))
