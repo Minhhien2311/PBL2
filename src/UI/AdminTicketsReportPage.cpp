@@ -144,9 +144,9 @@ QFrame* AdminTicketsReportPage::createSummaryBox(const QString& title, QLabel*& 
 
 void AdminTicketsReportPage::onRefreshClicked()
 {
-    auto start = startDate_->date().toString("yyyy-MM-dd").toStdString();
-    auto end = endDate_->date().addDays(1).toString("yyyy-MM-dd").toStdString();
-
+    auto start = startDate_->date().toString("dd/MM/yyyy").toStdString();
+    auto end = endDate_->date().addDays(1).toString("dd/MM/yyyy").toStdString();
+    
     // Lấy dữ liệu thực từ ReportManager
     int totalSold = reportManager_->getTicketsSoldInRange(start, end);
     int businessSold = reportManager_->getBusinessTicketsInRange(start, end);
