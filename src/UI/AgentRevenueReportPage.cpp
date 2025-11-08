@@ -233,8 +233,10 @@ void AgentRevenueReportPage::updateChart()
     // Cấu hình trục Y
     auto* axisY = new QValueAxis();
     axisY->setRange(0, yAxisMax); // Sử dụng yAxisMax đã tính
-    axisY->setLabelFormat("%.1f triệu VND");
-    axisY->setTitleText("Doanh thu");
+    // axisY->setLabelFormat("%.1f triệu VND");
+    // axisY->setTitleText("Doanh thu");
+    axisY->setLabelFormat("%.1f");
+    axisY->setTitleText("Doanh thu (Triệu VND)");
     chart_->addAxis(axisY, Qt::AlignLeft);
     chartSeries_->attachAxis(axisY);
 
