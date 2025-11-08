@@ -271,6 +271,9 @@ void SearchBookPage::fillTable(const std::vector<FlightInstance*>& instances)
             airline = QString::fromStdString(flight->getAirline());
         }
 
+        QLocale vietnamLocale(QLocale::Vietnamese, QLocale::Vietnam);
+        QString priceFormatted = vietnamLocale.toString(inst->getFareEconomy()) + " VNĐ";
+
         QList<QStandardItem*> row;
         row << new QStandardItem(QString::fromStdString(inst->getInstanceId()))
             << new QStandardItem(QString::fromStdString(inst->getFlightId()))
@@ -278,7 +281,7 @@ void SearchBookPage::fillTable(const std::vector<FlightInstance*>& instances)
             << new QStandardItem(QString::fromStdString(inst->getDepartureTime()))
             << new QStandardItem(QString::fromStdString(inst->getArrivalDate()))
             << new QStandardItem(airline)
-            << new QStandardItem(QString::number(inst->getFareEconomy()));
+            << new QStandardItem(priceFormatted);
         model_->appendRow(row);
     }
 }
