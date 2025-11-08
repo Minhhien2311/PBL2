@@ -222,3 +222,11 @@ bool AccountManager::changePassword(const std::string& userId,
 
     return false; // không tìm thấy user
 }
+
+std::string AccountManager::getCurrentAgentId() const {
+    auto currentUser_ = this->getCurrentUser();
+    if (currentUser_ && currentUser_->getRole() == Role::Agent) {
+        return currentUser_->getId();
+    }
+    return "";
+}
