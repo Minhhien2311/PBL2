@@ -31,6 +31,11 @@ private:
     std::string adminFilePath_;
     std::string agentFilePath_;
 
+    // //====== DEBUG TẠM THỜI =========
+    // std::string m_currentAgentId;
+    // //=======================
+
+
     // --- Các hàm trợ giúp nội bộ ---
 
     
@@ -104,7 +109,7 @@ public:
                         const std::string& oldPasswordPlain,
                         const std::string& newPasswordPlain);
     
-    std::string getCurrentAgentId() const;
+    const std::string getCurrentAgentId() const;
 
 signals:
     // Phát tín hiệu khi người dùng đăng nhập thành công

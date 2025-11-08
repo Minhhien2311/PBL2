@@ -159,54 +159,6 @@ void AdminTicketsReportPage::onRefreshClicked()
     updateChart(start, end);
 }
 
-// void AdminTicketsReportPage::updateChart(const std::string& start, const std::string& end)
-// {
-//     // Xóa dữ liệu cũ
-//     chartSeries_->clear();
-    
-//     auto* reports = reportManager_->generateAgentReportInRange(start, end);
-//     if (!reports || reports->empty()) {
-//         // Nếu không có dữ liệu, hiển thị thông báo
-//         if (reports) delete reports;
-//         return;
-//     }
-
-//     QStringList categories;
-//     auto* barSet = new QBarSet("Vé đã bán");
-
-//     int maxTickets = 0;
-
-//     for (int i = 0; i < reports->size(); ++i) {
-//         auto* r = (*reports)[i];
-//         if (!r) continue;
-        
-//         *barSet << r->issuedTickets;
-//         categories << QString::fromStdString(r->agentName);
-        
-//         if (r->issuedTickets > maxTickets) {
-//             maxTickets = r->issuedTickets;
-//         }
-        
-//         delete r;
-//     }
-//     delete reports;
-
-//     chartSeries_->append(barSet);
-
-//     // Cập nhật trục X
-//     QBarCategoryAxis* axisX = qobject_cast<QBarCategoryAxis*>(chart_->axes(Qt::Horizontal).first());
-//     if (axisX) {
-//         axisX->clear();
-//         axisX->append(categories);
-//     }
-    
-//     // Cập nhật trục Y
-//     QValueAxis* axisY = qobject_cast<QValueAxis*>(chart_->axes(Qt::Vertical).first());
-//     if (axisY) {
-//         axisY->setMax(maxTickets + (maxTickets / 5)); // Thêm 20% khoảng đệm
-//     }
-// }
-
 void AdminTicketsReportPage::updateChart(const std::string& start, const std::string& end)
 {
     // Xóa dữ liệu cũ
