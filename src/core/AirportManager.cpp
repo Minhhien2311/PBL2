@@ -31,11 +31,7 @@ void AirportManager::loadDefaultAirports()
     addAirport("Vinh (VII)", "VII");
     addAirport("Vũng Tàu (VTG)", "VTG");
     
-<<<<<<< HEAD
-    // // Quốc tế (8 sân bay - đã sắp xếp alphabet)
-=======
     // Quốc tế (8 sân bay - đã sắp xếp alphabet)
->>>>>>> e08b8bdc38238195f4e9242433889e755f48f860
     // addAirport("Bangkok (BKK)", "BKK");
     // addAirport("Beijing (PEK)", "PEK");
     // addAirport("Hong Kong (HKG)", "HKG");
