@@ -225,8 +225,8 @@ void AdminRevenueReportPage::updateChart()
     // 7. Tạo trục Y (MỚI)
     auto* axisY = new QValueAxis();
     axisY->setRange(0, yAxisMax);
-    axisY->setLabelFormat("%.1f triệu VND"); // Hiển thị 1 chữ số thập phân
-    axisY->setTitleText("Doanh thu");
+    axisY->setLabelFormat("%.1f"); // Hiển thị 1 chữ số thập phân
+    axisY->setTitleText("Doanh thu (Triệu VND)");
     chart_->addAxis(axisY, Qt::AlignLeft);
     chartSeries_->attachAxis(axisY);
 
