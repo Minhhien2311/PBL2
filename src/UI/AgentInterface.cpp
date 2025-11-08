@@ -98,7 +98,7 @@ AgentInterface::AgentInterface(AccountManager* accManager,
 
     // Các nút nghiệp vụ
     btnDashboard_ = new QPushButton("Tổng quan");
-    btnSearchBook_ = new QPushButton("Tìm & Đặt vé");
+    btnSearchBook_ = new QPushButton("Tìm && Đặt vé");
     btnBookings_ = new QPushButton("Quản lý Đặt chỗ");
 
     btnDashboard_->setStyleSheet(btnStyle);
