@@ -129,11 +129,17 @@ void SearchBookPage::setupUi()
     filterLayout->addWidget(toSearchCombo_, 1, 1);
 
     // Date picker with placeholder (Cột 2)
+    // Date picker - hiển thị "Tùy chọn" khi chưa chọn
     dateSearchEdit_ = new QDateEdit(this);
     dateSearchEdit_->setCalendarPopup(true);
     dateSearchEdit_->setDisplayFormat("dd/MM/yyyy");
     dateSearchEdit_->setSpecialValueText("Tùy chọn");
-    dateSearchEdit_->clear();  // Clear initial date to show placeholder
+
+    // Set minimum date = 1 ngày trước (dễ scroll hơn năm 2000)
+    QDate oneDayAgo = QDate::currentDate().addDays(-1);
+    dateSearchEdit_->setMinimumDate(oneDayAgo);
+    dateSearchEdit_->clear();  // Hiển thị "Tùy chọn"
+
     filterLayout->addWidget(dateSearchEdit_, 1, 2);
 
     // Airline dropdown with placeholder (Cột 3)
@@ -169,7 +175,7 @@ void SearchBookPage::setupUi()
         "QPushButton {"
         "  background-color: #4472C4;"
         "  color: white;"
-        "  font-size: 11pt;"
+        "  font-size: 10pt;"
         "  padding: 5px 20px;"
         "  border-radius: 3px;"
         "}"
@@ -180,11 +186,15 @@ void SearchBookPage::setupUi()
     // Thêm nút vào hàng 1, cột 7
     filterLayout->addWidget(searchBtn, 1, 7);
 
-    // Cột co giãn (Cột 8)
-    // Thêm một cột co giãn (stretch) vào cuối để đẩy tất cả về bên trái
-    filterLayout->setColumnStretch(8, 1);
+    // ← XÓA setColumnStretch(8, 1)
+    // ← THAY BẰNG: Cho các cột input giãn đều
+    filterLayout->setColumnStretch(0, 1);  // Từ (Airport)
+    filterLayout->setColumnStretch(1, 1);  // Đến (Airport)
+    filterLayout->setColumnStretch(2, 1);  // Ngày khởi hành
+    filterLayout->setColumnStretch(3, 1);  // Hãng hàng không
+    filterLayout->setColumnStretch(7, 1);  // Nút Tìm kiếm
 
-    // Thêm layout lưới này vào topLayout (thay thế 2 addLayout cũ)
+    // Thêm layout lưới này vào topLayout
     topLayout->addLayout(filterLayout);
 
     // Connect search button
@@ -320,11 +330,13 @@ void SearchBookPage::onSearchClicked()
         return;
     }
     
-    // Date (optional)
-    if (dateSearchEdit_->date().isValid() && 
-        dateSearchEdit_->specialValueText() != dateSearchEdit_->text()) {
-        criteria.date = dateSearchEdit_->date().toString("dd/MM/yyyy").toStdString();
+    // Date (optional) - chỉ filter nếu user chọn ngày cụ thể
+    QDate selectedDate = dateSearchEdit_->date();
+    if (selectedDate.isValid() && selectedDate > QDate(2000, 1, 1)) {
+        // User đã chọn ngày → thêm vào criteria
+        criteria.date = selectedDate.toString("dd/MM/yyyy").toStdString();
     }
+    // Nếu date = "Tùy chọn" (minimum date) → không filter theo ngày
     
     // Airline (optional)
     if (airlineFilterCombo_->currentIndex() > 0) {
