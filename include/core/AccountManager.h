@@ -103,6 +103,8 @@ public:
     bool changePassword(const std::string& userId,
                         const std::string& oldPasswordPlain,
                         const std::string& newPasswordPlain);
+    
+    std::string getCurrentAgentId() const;
 
 signals:
     // Phát tín hiệu khi người dùng đăng nhập thành công

@@ -12,12 +12,15 @@ class FlightManager;
 class BookingManager;
 class ReportManager;
 class AirportManager;
+class AgentTicketsReportPage;  // Thêm
+class AgentRevenueReportPage;  // Thêm
 
 // Khai báo sớm các trang con
 class SearchBookPage;
 class AgentBookingsPage;
 class AccountsPage;
 class DashboardPage;
+class AgentReportPage;
 
 class AgentInterface : public QWidget
 {
@@ -53,12 +56,16 @@ private:
     QPushButton* btnSearchBook_;
     QPushButton* btnBookings_;
     QPushButton* btnAccounts_;
-    QPushButton* btnReport_;
+    QPushButton* btnTicketsReport_;  // Thêm
+    QPushButton* btnRevenueReport_;  // Thêm
 
     // --- Page references for refreshing ---
     DashboardPage* dashboardPage_;
     SearchBookPage* searchBookPage_;
     AgentBookingsPage* agentBookingsPage_;
+    AgentReportPage* agentReportPage_;
+    AgentTicketsReportPage* ticketsReportPage_;  // Thêm
+    AgentRevenueReportPage* revenueReportPage_;  // Thêm
 
     // --- Managers (không sở hữu) ---
     AccountManager* accountManager_;
