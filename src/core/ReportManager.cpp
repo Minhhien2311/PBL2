@@ -439,3 +439,181 @@ int ReportManager::getEconomyTicketsInRange(const std::string& startDate, const 
     }
     return count;
 }
+
+// ... (các hàm hiện có)
+
+// --- Các hàm mới cho Agent ---
+
+double ReportManager::getAgentTodayRevenue(const std::string& agentId) const {
+    // Lấy ngày hôm nay định dạng dd/mm/yyyy
+    auto now = std::chrono::system_clock::now();
+    auto now_time_t = std::chrono::system_clock::to_time_t(now);
+    std::tm now_tm = *std::localtime(&now_time_t);
+    
+    char today[11];
+    std::strftime(today, sizeof(today), "%d/%m/%Y", &now_tm);
+    
+    return getRevenueInRange(agentId, today, today);
+}
+
+double ReportManager::getAgentThisWeekRevenue(const std::string& agentId) const {
+    auto now = std::chrono::system_clock::now();
+    auto now_time_t = std::chrono::system_clock::to_time_t(now);
+    std::tm now_tm = *std::localtime(&now_time_t);
+    
+    // Tìm ngày đầu tuần (thứ 2)
+    int days_since_monday = now_tm.tm_wday - 1;
+    if (days_since_monday < 0) days_since_monday = 6; // Chủ nhật
+    
+    auto week_start = now - std::chrono::hours(24 * days_since_monday);
+    auto week_start_time_t = std::chrono::system_clock::to_time_t(week_start);
+    std::tm week_start_tm = *std::localtime(&week_start_time_t);
+    
+    char start_date[11];
+    std::strftime(start_date, sizeof(start_date), "%d/%m/%Y", &week_start_tm);
+    char end_date[11];
+    std::strftime(end_date, sizeof(end_date), "%d/%m/%Y", &now_tm);
+    
+    return getRevenueInRange(agentId, start_date, end_date);
+}
+
+double ReportManager::getAgentThisMonthRevenue(const std::string& agentId) const {
+    auto now = std::chrono::system_clock::now();
+    auto now_time_t = std::chrono::system_clock::to_time_t(now);
+    std::tm now_tm = *std::localtime(&now_time_t);
+    
+    char start_date[11];
+    std::strftime(start_date, sizeof(start_date), "01/%m/%Y", &now_tm);
+    char end_date[11];
+    std::strftime(end_date, sizeof(end_date), "%d/%m/%Y", &now_tm);
+    
+    return getRevenueInRange(agentId, start_date, end_date);
+}
+
+std::vector<double> ReportManager::getAgentMonthlyRevenue(const std::string& agentId, int year) const {
+    std::vector<double> monthlyRevenue(12, 0.0);
+    const auto& bookings = bookingManager_.getAllBookings();
+    
+    for (int i = 0; i < bookings.size(); ++i) {
+        Booking* b = bookings[i];
+        if (!b) continue;
+        
+        if (b->getAgentId() == agentId && b->getStatus() == BookingStatus::Issued) {
+            std::string bookingDate = extractDatePart(b->getBookingDate());
+            if (bookingDate.length() < 10) continue;
+            
+            int bookingYear = safeStoi(bookingDate.substr(6, 4), 0);
+            int bookingMonth = safeStoi(bookingDate.substr(3, 2), 0);
+            
+            if (bookingYear == year && bookingMonth >= 1 && bookingMonth <= 12) {
+                monthlyRevenue[bookingMonth - 1] += b->getBaseFare();
+            }
+        }
+    }
+    
+    return monthlyRevenue;
+}
+
+int ReportManager::getAgentBusinessTicketsInRange(const std::string& agentId, const std::string& startDate, const std::string& endDate) const {
+    int count = 0;
+    const auto& bookings = bookingManager_.getAllBookings();
+    for (int i = 0; i < bookings.size(); ++i) {
+        Booking* b = bookings[i];
+        if (!b) continue;
+        if (b->getAgentId() == agentId &&
+            b->getStatus() == BookingStatus::Issued &&
+            b->getClass() == BookingClass::Business &&
+            isDateInRange(b->getBookingDate(), startDate, endDate)) {
+            count++;
+        }
+    }
+    return count;
+}
+
+int ReportManager::getAgentEconomyTicketsInRange(const std::string& agentId, const std::string& startDate, const std::string& endDate) const {
+    int count = 0;
+    const auto& bookings = bookingManager_.getAllBookings();
+    for (int i = 0; i < bookings.size(); ++i) {
+        Booking* b = bookings[i];
+        if (!b) continue;
+        if (b->getAgentId() == agentId &&
+            b->getStatus() == BookingStatus::Issued &&
+            b->getClass() == BookingClass::Economy &&
+            isDateInRange(b->getBookingDate(), startDate, endDate)) {
+            count++;
+        }
+    }
+    return count;
+}
+
+std::vector<MonthlyTicketReport*>* ReportManager::generateMonthlyTicketReportForAgent(const std::string& agentId, const std::string& startDate, const std::string& endDate) const {
+    auto* reports = new std::vector<MonthlyTicketReport*>();
+    const auto& bookings = bookingManager_.getAllBookings();
+
+    // Tạo map để nhóm theo tháng
+    std::map<std::string, int> monthlyTickets;
+
+    for (int i = 0; i < bookings.size(); ++i) {
+        Booking* b = bookings[i];
+        if (!b) continue;
+        
+        if (b->getAgentId() == agentId &&
+            b->getStatus() == BookingStatus::Issued &&
+            isDateInRange(b->getBookingDate(), startDate, endDate)) {
+            
+            std::string bookingDate = extractDatePart(b->getBookingDate());
+            if (bookingDate.length() < 10) continue;
+            
+            // Trích xuất tháng và năm (MM/YYYY)
+            std::string month = bookingDate.substr(3, 2) + "/" + bookingDate.substr(6, 4);
+            monthlyTickets[month]++;
+        }
+    }
+
+    // Chuyển đổi map sang vector
+    for (const auto& pair : monthlyTickets) {
+        auto* report = new MonthlyTicketReport();
+        report->month = pair.first;
+        report->issuedTickets = pair.second;
+        reports->push_back(report);
+    }
+
+    return reports;
+}
+
+// --- Các hàm overload cho agent hiện tại ---
+// Giả sử có hàm getCurrentAgentId() trong AccountManager
+int ReportManager::getAgentTicketsSoldInRange(const std::string& startDate, const std::string& endDate) const {
+    std::string currentAgentId = accountManager_.getCurrentAgentId();
+    return getTicketsSoldInRange(currentAgentId, startDate, endDate);
+}
+
+int ReportManager::getAgentBusinessTicketsInRange(const std::string& startDate, const std::string& endDate) const {
+    std::string currentAgentId = accountManager_.getCurrentAgentId();
+    return getAgentBusinessTicketsInRange(currentAgentId, startDate, endDate);
+}
+
+int ReportManager::getAgentEconomyTicketsInRange(const std::string& startDate, const std::string& endDate) const {
+    std::string currentAgentId = accountManager_.getCurrentAgentId();
+    return getAgentEconomyTicketsInRange(currentAgentId, startDate, endDate);
+}
+
+double ReportManager::getAgentTodayRevenue() const {
+    std::string currentAgentId = accountManager_.getCurrentAgentId();
+    return getAgentTodayRevenue(currentAgentId);
+}
+
+double ReportManager::getAgentThisWeekRevenue() const {
+    std::string currentAgentId = accountManager_.getCurrentAgentId();
+    return getAgentThisWeekRevenue(currentAgentId);
+}
+
+double ReportManager::getAgentThisMonthRevenue() const {
+    std::string currentAgentId = accountManager_.getCurrentAgentId();
+    return getAgentThisMonthRevenue(currentAgentId);
+}
+
+std::vector<double> ReportManager::getAgentMonthlyRevenue(int year) const {
+    std::string currentAgentId = accountManager_.getCurrentAgentId();
+    return getAgentMonthlyRevenue(currentAgentId, year);
+}
