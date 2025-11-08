@@ -32,14 +32,14 @@ void AirportManager::loadDefaultAirports()
     addAirport("Vũng Tàu (VTG)", "VTG");
     
     // Quốc tế (8 sân bay - đã sắp xếp alphabet)
-    addAirport("Bangkok (BKK)", "BKK");
-    addAirport("Beijing (PEK)", "PEK");
-    addAirport("Hong Kong (HKG)", "HKG");
-    addAirport("Kuala Lumpur (KUL)", "KUL");
-    addAirport("Seoul (ICN)", "ICN");
-    addAirport("Shanghai (PVG)", "PVG");
-    addAirport("Singapore (SIN)", "SIN");
-    addAirport("Tokyo (NRT)", "NRT");
+    // addAirport("Bangkok (BKK)", "BKK");
+    // addAirport("Beijing (PEK)", "PEK");
+    // addAirport("Hong Kong (HKG)", "HKG");
+    // addAirport("Kuala Lumpur (KUL)", "KUL");
+    // addAirport("Seoul (ICN)", "ICN");
+    // addAirport("Shanghai (PVG)", "PVG");
+    // addAirport("Singapore (SIN)", "SIN");
+    // addAirport("Tokyo (NRT)", "NRT");
 }
 
 void AirportManager::addAirport(const std::string& displayName, const std::string& iataCode)

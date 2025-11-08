@@ -42,6 +42,7 @@ private slots:
     void onUserChanged();      // Handle user login/logout
     void onPageChanged(int index);  // Handle page switching
 
+private:
     // --- UI Components ---
     QFrame* sidebar_;
     QStackedWidget* stack_;
