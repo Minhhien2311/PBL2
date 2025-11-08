@@ -116,7 +116,10 @@ file(GLOB_RECURSE UI_SOURCES
     "src/UI/*.h"
 )
 
-file(GLOB_RECURSE CORE_SOURCES    "src/core/*.cpp")
+file(GLOB_RECURSE CORE_SOURCES 
+    "src/core/*.cpp"
+    "include/core/*.h"    # ← THÊM DÒNG NÀY
+)
 file(GLOB_RECURSE ENTITY_SOURCES  "src/entities/*.cpp")
 file(GLOB_RECURSE UTILS_SOURCES   "src/utils/*.cpp")
 
