@@ -146,7 +146,7 @@ void AdminTicketsReportPage::onRefreshClicked()
 {
     auto start = startDate_->date().toString("dd/MM/yyyy").toStdString();
     auto end = endDate_->date().addDays(1).toString("dd/MM/yyyy").toStdString();
-    
+
     // Lấy dữ liệu thực từ ReportManager
     int totalSold = reportManager_->getTicketsSoldInRange(start, end);
     int businessSold = reportManager_->getBusinessTicketsInRange(start, end);
@@ -159,50 +159,97 @@ void AdminTicketsReportPage::onRefreshClicked()
     updateChart(start, end);
 }
 
+// void AdminTicketsReportPage::updateChart(const std::string& start, const std::string& end)
+// {
+//     // Xóa dữ liệu cũ
+//     chartSeries_->clear();
+    
+//     auto* reports = reportManager_->generateAgentReportInRange(start, end);
+//     if (!reports || reports->empty()) {
+//         // Nếu không có dữ liệu, hiển thị thông báo
+//         if (reports) delete reports;
+//         return;
+//     }
+
+//     QStringList categories;
+//     auto* barSet = new QBarSet("Vé đã bán");
+
+//     int maxTickets = 0;
+
+//     for (int i = 0; i < reports->size(); ++i) {
+//         auto* r = (*reports)[i];
+//         if (!r) continue;
+        
+//         *barSet << r->issuedTickets;
+//         categories << QString::fromStdString(r->agentName);
+        
+//         if (r->issuedTickets > maxTickets) {
+//             maxTickets = r->issuedTickets;
+//         }
+        
+//         delete r;
+//     }
+//     delete reports;
+
+//     chartSeries_->append(barSet);
+
+//     // Cập nhật trục X
+//     QBarCategoryAxis* axisX = qobject_cast<QBarCategoryAxis*>(chart_->axes(Qt::Horizontal).first());
+//     if (axisX) {
+//         axisX->clear();
+//         axisX->append(categories);
+//     }
+    
+//     // Cập nhật trục Y
+//     QValueAxis* axisY = qobject_cast<QValueAxis*>(chart_->axes(Qt::Vertical).first());
+//     if (axisY) {
+//         axisY->setMax(maxTickets + (maxTickets / 5)); // Thêm 20% khoảng đệm
+//     }
+// }
+
 void AdminTicketsReportPage::updateChart(const std::string& start, const std::string& end)
 {
     // Xóa dữ liệu cũ
-    chartSeries_->clear();
-    
+    chart_->removeAllSeries(); // ← dùng cái này thay vì chartSeries_->clear()
+    chartSeries_ = new QBarSeries();
+    chart_->addSeries(chartSeries_);
+
     auto* reports = reportManager_->generateAgentReportInRange(start, end);
     if (!reports || reports->empty()) {
-        // Nếu không có dữ liệu, hiển thị thông báo
         if (reports) delete reports;
         return;
     }
 
     QStringList categories;
     auto* barSet = new QBarSet("Vé đã bán");
-
     int maxTickets = 0;
 
-    for (int i = 0; i < reports->size(); ++i) {
-        auto* r = (*reports)[i];
+    for (auto* r : *reports) {
         if (!r) continue;
-        
         *barSet << r->issuedTickets;
         categories << QString::fromStdString(r->agentName);
-        
-        if (r->issuedTickets > maxTickets) {
-            maxTickets = r->issuedTickets;
-        }
-        
+        if (r->issuedTickets > maxTickets) maxTickets = r->issuedTickets;
         delete r;
     }
     delete reports;
 
     chartSeries_->append(barSet);
 
-    // Cập nhật trục X
-    QBarCategoryAxis* axisX = qobject_cast<QBarCategoryAxis*>(chart_->axes(Qt::Horizontal).first());
-    if (axisX) {
-        axisX->clear();
-        axisX->append(categories);
-    }
-    
-    // Cập nhật trục Y
-    QValueAxis* axisY = qobject_cast<QValueAxis*>(chart_->axes(Qt::Vertical).first());
-    if (axisY) {
-        axisY->setMax(maxTickets + (maxTickets / 5)); // Thêm 20% khoảng đệm
-    }
+    // Trục X
+    auto* axisX = new QBarCategoryAxis();
+    axisX->append(categories);
+
+    // Trục Y
+    auto* axisY = new QValueAxis();
+    axisY->setRange(0, maxTickets + std::max(1, maxTickets / 5));
+    axisY->setLabelFormat("%d");
+
+    // Cập nhật lại chart
+    chart_->removeAxis(chart_->axes(Qt::Horizontal).value(0));
+    chart_->removeAxis(chart_->axes(Qt::Vertical).value(0));
+    chart_->addAxis(axisX, Qt::AlignBottom);
+    chart_->addAxis(axisY, Qt::AlignLeft);
+
+    chartSeries_->attachAxis(axisX);
+    chartSeries_->attachAxis(axisY);
 }
