@@ -87,7 +87,7 @@ void AdminRevenueReportPage::setupUI()
     // Tạo trục Y (doanh thu)
     auto* axisY = new QValueAxis();
     axisY->setMin(0);
-    axisY->setLabelFormat("%.0f triệu VND");
+    axisY->setLabelFormat("%.0f trieu VND");
     chart_->addAxis(axisY, Qt::AlignLeft);
     chartSeries_->attachAxis(axisY);
 
