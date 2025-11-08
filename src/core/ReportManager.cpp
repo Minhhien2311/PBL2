@@ -48,13 +48,24 @@ std::string ReportManager::extractDatePart(const std::string& datetime) const {
 }
 
 // Hàm so sánh ngày với định dạng dd/mm/yyyy
-bool ReportManager::isDateInRange(const std::string& bookingDate, const std::string& startDate, const std::string& endDate) const {
-    std::string bookingDateStr = extractDatePart(bookingDate);
-    std::string bookingYMD = convertDateFormat(bookingDateStr);
-    std::string startYMD = convertDateFormat(startDate);
-    std::string endYMD = convertDateFormat(endDate);
-    
-    return (bookingYMD >= startYMD && bookingYMD <= endYMD);
+bool ReportManager::isDateInRange(const std::string& bookingDate,
+                                  const std::string& startDate,
+                                  const std::string& endDate) const {
+    // Lấy phần ngày thôi (bỏ giờ)
+    std::string bookingDay = bookingDate.substr(0, 10);
+    std::string startDay = startDate.substr(0, 10);
+    std::string endDay = endDate.substr(0, 10);
+
+    std::tm tmBooking{}, tmStart{}, tmEnd{};
+    std::istringstream(bookingDay) >> std::get_time(&tmBooking, "%d/%m/%Y");
+    std::istringstream(startDay) >> std::get_time(&tmStart, "%d/%m/%Y");
+    std::istringstream(endDay) >> std::get_time(&tmEnd, "%d/%m/%Y");
+
+    std::time_t tBooking = std::mktime(&tmBooking);
+    std::time_t tStart = std::mktime(&tmStart);
+    std::time_t tEnd = std::mktime(&tmEnd);
+
+    return difftime(tBooking, tStart) >= 0 && difftime(tEnd, tBooking) >= 0;
 }
 
 // --- Tổng quan (Admin) ---
