@@ -332,7 +332,7 @@ void SearchBookPage::onSearchClicked()
     
     // Date (optional) - chỉ filter nếu user chọn ngày cụ thể
     QDate selectedDate = dateSearchEdit_->date();
-    if (selectedDate.isValid() && selectedDate > QDate(2000, 1, 1)) {
+    if (selectedDate.isValid() && selectedDate > QDate::currentDate().addDays(-1)) {
         // User đã chọn ngày → thêm vào criteria
         criteria.date = selectedDate.toString("dd/MM/yyyy").toStdString();
     }
