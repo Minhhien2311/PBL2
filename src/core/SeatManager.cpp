@@ -24,23 +24,6 @@ SeatManager::~SeatManager() {
     clearCurrentMap();
 }
 
-// void SeatManager::loadConfiguration() {
-//     std::ifstream file(seatConfigFilePath_);
-//     if (!file.is_open()) {
-//         std::cerr << "Warning: Cannot open " << seatConfigFilePath_ << ". Using defaults.\n";
-//         seatCols_ = 6;
-//         return;
-//     }
-    
-//     std::string line;
-//     while (std::getline(file, line)) {
-//         if (line.find("SEAT_LAYOUT_COLS=") == 0) {
-//             seatCols_ = std::stoi(line.substr(17));
-//         }
-//     }
-//     file.close();
-// }
-
 void SeatManager::loadConfiguration() {
     std::ifstream file(seatConfigFilePath_);
     if (!file.is_open()) {
@@ -48,23 +31,15 @@ void SeatManager::loadConfiguration() {
         seatCols_ = 6;
         return;
     }
-
+    
     std::string line;
     while (std::getline(file, line)) {
-        std::cout << "[DEBUG] Raw line: [" << line << "]" << std::endl;
-
         if (line.find("SEAT_LAYOUT_COLS=") == 0) {
-            std::string value = line.substr(17);
-            std::cout << "[DEBUG] Extracted value: [" << value << "]" << std::endl;
-            int seatCols = std::stoi(value);
-            std::cout << "[DEBUG] seatCols = " << seatCols << std::endl;
+            seatCols_ = std::stoi(line.substr(17));
         }
     }
-
-
     file.close();
 }
-
 
 bool SeatManager::loadForFlight(const std::string& instanceId) {
     clearCurrentMap();
@@ -295,9 +270,14 @@ void SeatManager::clearCurrentMap() {
 }
 
 std::string SeatManager::seatIdToString(int row, int col) const {
-    char rowChar = 'A' + row;
-    std::string colStr = (col < 9) ? ("0" + std::to_string(col + 1)) : std::to_string(col + 1);
-    return std::string(1, rowChar) + colStr;
+    // Seat ID format: {Column Letter}{Row Number with padding} e.g., A01, B12, H25
+    char colChar = 'A' + col;
+    int rowNum = row + 1;
+    
+    // Add leading zero for row numbers < 10
+    std::string rowStr = (rowNum < 10) ? ("0" + std::to_string(rowNum)) : std::to_string(rowNum);
+    
+    return std::string(1, colChar) + rowStr;
 }
 
 SeatType SeatManager::determineSeatType(int row) const {

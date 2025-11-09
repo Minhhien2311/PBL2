@@ -424,7 +424,8 @@ void BookingDialog::renderSeatMap()
         // Add row header if new row (closer to seats with reduced width)
         if (row != currentRow) {
             currentRow = row;
-            QLabel* rowLabel = new QLabel(QString::number(row));
+            // Display 1-based row numbers for better UX (internal index is 0-based)
+            QLabel* rowLabel = new QLabel(QString::number(row + 1));  // ← ĐÃ THÊM +1
             rowLabel->setFixedWidth(25); // Smaller width = closer to seats
             rowLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
             rowLabel->setStyleSheet("font-weight: bold;");

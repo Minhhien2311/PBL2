@@ -37,45 +37,30 @@ void Seat::setStatus(SeatStatus newStatus) {
     status = newStatus;
 }
 
-// std::pair<int, int> Seat::getCoordinates() const {
-//     if (id.empty() || !std::isalpha(id[0])) {
-//         return {-1, -1}; // ID không hợp lệ
-//     }
-
-//     int row = std::toupper(id[0]) - 'A';
-    
-//     try {
-//         int col = std::stoi(id.substr(1)) - 1;
-//         if (col < 0) return {-1, -1};
-//         return {row, col};
-//     } catch (const std::exception&) {
-//         return {-1, -1}; // Lỗi chuyển đổi
-//     }
-// }
-
 std::pair<int, int> Seat::getCoordinates() const {
     if (id.empty() || !std::isalpha(id[0])) {
-        return {-1, -1}; // ID không hợp lệ
+        return {-1, -1}; // Invalid ID
     }
 
-    int row = std::toupper(id[0]) - 'A';
+    // Seat ID format: {COL Letter}{ROW Number} e.g., A1, B10, H25
+    // Parse: First character = Column (A=0, B=1...), Number = Row (1-based)
+    int col = std::toupper(id[0]) - 'A';  // Column from letter (0-based)
     
     try {
         std::string numPart = id.substr(1);
-        std::cerr << "[DEBUG] Parsing seat id: " << id << " → number part: [" << numPart << "]\n";
-        int col = std::stoi(numPart) - 1;
-        if (col < 0) return {-1, -1};
+        std::cerr << "[DEBUG] Parsing seat ID: " << id 
+                  << " → col=" << col << ", numPart=" << numPart << std::endl;
+        int row = std::stoi(numPart) - 1;  // Row from number (convert to 0-based)
+        if (row < 0 || col < 0) return {-1, -1};
         return {row, col};
     } catch (const std::exception& e) {
-        std::cerr << "[ERROR] stoi failed for seat id: " << id 
+        std::cerr << "[ERROR] Failed to parse seat ID: " << id 
                   << " — reason: " << e.what() << std::endl;
         return {-1, -1}; 
     }
 }
 
-
-
 std::string Seat::coordinatesToId(const std::pair<int, int>& coords) {
-    char rowChar = 'A' + coords.first;
-    return rowChar + std::to_string(coords.second + 1);
+    char colChar = 'A' + coords.first;
+    return colChar + std::to_string(coords.second + 1);
 }

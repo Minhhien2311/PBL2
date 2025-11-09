@@ -37,12 +37,6 @@ file(GLOB_RECURSE CORE_SOURCES
 file(GLOB_RECURSE ENTITY_SOURCES  "src/entities/*.cpp")
 file(GLOB_RECURSE UTILS_SOURCES   "src/utils/*.cpp")
 
-set(ADDITIONAL_SOURCES
-    "src/entities/Seat.cpp"
-    "src/core/SeatManager.cpp"
-    "src/UI/Application.cpp"
-)
-
 # ===== Executable chính =====
 add_executable(pbl2 WIN32
     ${UI_SOURCES}
