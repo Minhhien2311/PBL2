@@ -194,6 +194,7 @@ void LoginPage::onLoginClicked()
         QString role = "agent";
         if (dynamic_cast<AccountAdmin*>(user) != nullptr)
             role = "admin";
+        
         emit loginSuccess(role, "fake_token");
     } else {
         QMessageBox::warning(this, "Đăng nhập thất bại",
