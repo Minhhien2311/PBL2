@@ -11,7 +11,8 @@ enum class BookingClass {
 
 enum BookingStatus {
     Issued,
-    Cancelled
+    Cancelled,
+    Changed
 };
 
 class Booking {
