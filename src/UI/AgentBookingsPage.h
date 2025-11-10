@@ -34,6 +34,7 @@ private slots:
     void onSearchClicked(); // Tìm/Làm mới
     void onCancelBookingClicked(); // Hủy vé
     void onViewDetailsClicked(); // Xem chi tiết vé
+    void onChangeBookingClicked(); // Đổi vé
 
 private:
     void setupUi();
@@ -60,6 +61,7 @@ private:
     
     QPushButton* cancelBookingBtn_; // Nút Hủy vé
     QPushButton* viewDetailsBtn_;   // Nút Xem chi tiết
+    QPushButton* changeBookingBtn_; // Nút Đổi vé
 };
 
 #endif // AGENTBOOKINGSPAGE_H
