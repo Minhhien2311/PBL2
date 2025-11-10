@@ -54,6 +54,10 @@ void Booking::setSeatId(const std::string& newSeatId) {
     this->seatID = newSeatId;
 }
 
+void Booking::setFlightInstanceId(const std::string& newFlightInstanceId) {
+    this->flightInstanceId = newFlightInstanceId;
+}
+
 // --- Đọc/Ghi file ---
 
 std::string Booking::toRecordLine() const {
