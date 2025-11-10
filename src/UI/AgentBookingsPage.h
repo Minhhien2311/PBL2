@@ -2,7 +2,6 @@
 #define AGENTBOOKINGSPAGE_H
 
 #include <QWidget>
-#include <functional>
 
 // Khai báo sớm
 class BookingManager;
@@ -42,13 +41,6 @@ private:
     void setupModel();
     void setupConnections();
     void refreshTable(); // Hàm tải dữ liệu
-    
-    // Create embedded seat map widget (no dialog wrapper)
-    QWidget* createEmbeddedSeatMap(
-        const QString& flightInstanceId,
-        const QString& currentSelectedSeat,
-        std::function<void(const QString&)> onSeatSelected
-    );
 
     // --- Managers ---
     BookingManager* bookingManager_;
