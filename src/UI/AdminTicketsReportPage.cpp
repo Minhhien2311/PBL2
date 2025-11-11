@@ -2,7 +2,6 @@
 #include "core/ReportManager.h"
 #include "core/AccountManager.h"
 #include "core/BookingManager.h"
-// #include "core/ReportStructs.h" // Giả sử AgentReport được định nghĩa ở đây
 #include "entities/AccountAgent.h" // Hoặc ở đây
 
 #include <QVBoxLayout>
