@@ -146,9 +146,6 @@ void AgentRevenueReportPage::updateData()
     updateChart();
 }
 
-// =================================================================
-// === HÀM UPDATECHART ĐÃ ĐƯỢC TÁI CẤU TRÚC (REFACTOR) HOÀN TOÀN ===
-// =================================================================
 void AgentRevenueReportPage::updateChart()
 {
     // Xóa hoàn toàn biểu đồ cũ và tạo mới
