@@ -15,8 +15,8 @@
 #include <QBarSet>
 #include <QBarCategoryAxis>
 #include <QValueAxis>
-#include <QDebug> // Thêm thư viện
-#include <numeric> // Thêm thư viện
+#include <QDebug>
+#include <numeric>
 
 AdminRevenueReportPage::AdminRevenueReportPage(AccountManager* am,
                         BookingManager* bm,
