@@ -86,107 +86,51 @@ void AgentBookingsPage::setupUi()
     title->setProperty("class", "PageTitle");
     topLayout->addWidget(title);
 
-    // ====== KHỐI TÌM KIẾM DÙNG GRID ======
+    // ====== KHỐI TÌM KIẾM ĐƠN GIẢN ======
     QGridLayout *searchGrid = new QGridLayout;
-    searchGrid->setHorizontalSpacing(18);
+    searchGrid->setHorizontalSpacing(20);
     searchGrid->setVerticalSpacing(10);
 
-    // để căn giữa toàn bộ khối
-    searchGrid->setColumnStretch(0, 0);
-    searchGrid->setColumnStretch(1, 0);
-    searchGrid->setColumnStretch(2, 0);
-    searchGrid->setColumnStretch(3, 1);   // đẩy nhẹ về trái-phải
+    // Thiết lập độ giãn cho các cột
+    searchGrid->setColumnStretch(0, 2); // Cột 0: Input mã đặt chỗ (rộng hơn)
+    searchGrid->setColumnStretch(1, 1); // Cột 1: Button mã đặt chỗ
+    searchGrid->setColumnStretch(2, 2); // Cột 2: Input CCCD (rộng hơn)
+    searchGrid->setColumnStretch(3, 1); // Cột 3: Button CCCD
 
-    // độ rộng các field
-    int fieldWidth = 230;
+    int inputWidth = 400;  // Độ rộng input box
+    int buttonWidth = 200; // Độ rộng button
 
-    // ----- HÀNG 0 -----
-    // (0,0) Mã đặt chỗ
-    {
-        QWidget *box = new QWidget;
-        box->setFixedWidth(fieldWidth);
-        QVBoxLayout *v = new QVBoxLayout(box);
-        v->setContentsMargins(0,0,0,0);
-        v->setSpacing(4);
+    // ----- HÀNG 0: INPUT | BUTTON | INPUT | BUTTON -----
 
-        bookingIdSearchEdit_ = new QLineEdit;
-        bookingIdSearchEdit_->setPlaceholderText("Nhập mã đặt chỗ");
+    // (0,0) Ô tìm theo mã đặt chỗ
+    bookingIdSearchEdit_ = new QLineEdit;
+    bookingIdSearchEdit_->setPlaceholderText("Tìm theo mã đặt chỗ (VD: BKG-0000001)");
+    bookingIdSearchEdit_->setMinimumWidth(inputWidth);
+    searchGrid->addWidget(bookingIdSearchEdit_, 0, 0);
 
-        v->addWidget(bookingIdSearchEdit_);
-
-        searchGrid->addWidget(box, 0, 0);
-    }
-
-    // (0,1) Điểm xuất phát
-    {
-        QWidget *box = new QWidget;
-        box->setFixedWidth(fieldWidth);
-        QVBoxLayout *v = new QVBoxLayout(box);
-        v->setContentsMargins(0,0,0,0);
-        v->setSpacing(4);
-
-        fromSearchCombo_ = new AirportComboBox(airportManager_);
-
-        v->addWidget(fromSearchCombo_);
-
-        searchGrid->addWidget(box, 0, 1);
-    }
-
-    // (0,2) Điểm đến
-    {
-        QWidget *box = new QWidget;
-        box->setFixedWidth(fieldWidth);
-        QVBoxLayout *v = new QVBoxLayout(box);
-        v->setContentsMargins(0,0,0,0);
-        v->setSpacing(4);
-
-        toSearchCombo_ = new AirportComboBox(airportManager_);
-
-        v->addWidget(toSearchCombo_);
-
-        searchGrid->addWidget(box, 0, 2);
-    }
-
-    // (0,3) Ngày đặt / khởi hành
-    {
-        QWidget *box = new QWidget;
-        box->setFixedWidth(fieldWidth);
-        QVBoxLayout *v = new QVBoxLayout(box);
-        v->setContentsMargins(0,0,0,0);
-        v->setSpacing(4);
-
-        dateSearchEdit_ = new QDateEdit(QDate::currentDate(), this);
-        dateSearchEdit_->setCalendarPopup(true);
-        dateSearchEdit_->setDisplayFormat("dd/MM/yyyy");
-
-        v->addWidget(dateSearchEdit_);
-
-        searchGrid->addWidget(box, 0, 3);
-    }
-
-    // ----- HÀNG 1 -----
-    // (1,0) nút tìm theo ID  (thẳng với ô 1)
-    searchButton_ = new QPushButton("Tìm theo mã đặt chỗ");
+    // (0,1) Nút tìm theo mã đặt chỗ
+    searchButton_ = new QPushButton("🔍 Tìm theo mã đặt chỗ");
     searchButton_->setProperty("class", "SearchBtn");
     searchButton_->setMinimumHeight(40);
-    searchGrid->addWidget(searchButton_, 1, 0);
+    searchButton_->setMinimumWidth(buttonWidth);
+    searchGrid->addWidget(searchButton_, 0, 1);
 
-    // (1,1)-(1,2) nút tìm theo lộ trình bay  (ghép 2 cột)
-    QPushButton *routeBtn = new QPushButton("Tìm theo lộ trình bay");
-    routeBtn->setProperty("class", "SearchBtn");
-    routeBtn->setMinimumHeight(40);
-    searchGrid->addWidget(routeBtn, 1, 1, 1, 2);  // row=1, col=1, rowspan=1, colspan=2
+    // (0,2) Ô tìm theo CCCD
+    passengerIdSearchEdit_ = new QLineEdit;
+    passengerIdSearchEdit_->setPlaceholderText("Tìm theo CCCD khách hàng");
+    passengerIdSearchEdit_->setMinimumWidth(inputWidth);
+    searchGrid->addWidget(passengerIdSearchEdit_, 0, 2);
 
-    // (1,3) nút tìm theo ngày khởi hành (thẳng với ô 4)
-    QPushButton *dateBtn = new QPushButton("Tìm theo ngày khởi hành");
-    dateBtn->setProperty("class", "SearchBtn");
-    dateBtn->setMinimumHeight(40);
-    searchGrid->addWidget(dateBtn, 1, 3);
+    // (0,3) Nút tìm theo CCCD
+    searchByPassengerBtn_ = new QPushButton("👤 Tìm theo CCCD khách hàng");
+    searchByPassengerBtn_->setProperty("class", "SearchBtn");
+    searchByPassengerBtn_->setMinimumHeight(40);
+    searchByPassengerBtn_->setMinimumWidth(buttonWidth);
+    searchGrid->addWidget(searchByPassengerBtn_, 0, 3);
 
-    // đưa cả grid vào topLayout
+    // Thêm layout vào topLayout
     topLayout->addLayout(searchGrid);
     mainLayout->addWidget(top);
-
 
     // ================== TIÊU ĐỀ BẢNG ==================
     auto *tableHeader = new QWidget(this);
@@ -271,7 +215,11 @@ void AgentBookingsPage::setupModel()
 
 void AgentBookingsPage::setupConnections()
 {
-    connect(searchButton_, &QPushButton::clicked, this, &AgentBookingsPage::onSearchClicked);
+    // 2 nút tìm kiếm
+    connect(searchButton_, &QPushButton::clicked, this, &AgentBookingsPage::onSearchByBookingId);
+    connect(searchByPassengerBtn_, &QPushButton::clicked, this, &AgentBookingsPage::onSearchByPassengerId);
+    
+    // Các nút khác
     connect(refreshButton_, &QPushButton::clicked, this, &AgentBookingsPage::refreshTable);
     connect(cancelBookingBtn_, &QPushButton::clicked, this, &AgentBookingsPage::onCancelBookingClicked);
     connect(viewDetailsBtn_, &QPushButton::clicked, this, &AgentBookingsPage::onViewDetailsClicked);
@@ -324,80 +272,6 @@ void AgentBookingsPage::refreshTable()
 
             model_->appendRow(rowItems);
         }
-    }
-}
-
-void AgentBookingsPage::onSearchClicked()
-{
-    // Lấy thông tin tìm kiếm
-    std::string bookingId = bookingIdSearchEdit_->text().toStdString();
-    std::string date = dateSearchEdit_->date().toString("dd/MM/yyyy").toStdString();
-    
-    // Nếu không có gì để tìm, hiển thị tất cả
-    if (bookingId.empty() && dateSearchEdit_->date() == QDate::currentDate()) {
-        refreshTable();
-        return;
-    }
-    
-    // 1. Lấy ID của Agent đang đăng nhập
-    Account* currentUser = accountManager_->getCurrentUser();
-    if (!currentUser) {
-        QMessageBox::warning(this, "Lỗi", "Không thể xác định người dùng. Vui lòng đăng nhập lại.");
-        return;
-    }
-    std::string currentAgentId = currentUser->getId();
-    
-    // 2. Lấy toàn bộ booking của Agent
-    std::vector<Booking*> agentBookings = bookingManager_->getBookingsByAgentId(currentAgentId);
-    
-    // 3. Lọc theo điều kiện tìm kiếm
-    model_->removeRows(0, model_->rowCount());
-    
-    for (int i = 0; i < agentBookings.size(); ++i) {
-        Booking* booking = agentBookings[i];
-        if (!booking) continue;
-        
-        // Lọc theo Booking ID nếu có nhập
-        if (!bookingId.empty()) {
-            if (booking->getBookingId().find(bookingId) == std::string::npos) {
-                continue; // Không khớp, bỏ qua
-            }
-        }
-        
-        // Lọc theo ngày nếu không phải ngày hiện tại (mặc định)
-        if (dateSearchEdit_->date() != QDate::currentDate()) {
-            std::string bookingDate = booking->getBookingDate();
-            // bookingDate format: "DD/MM/YYYY HH:MM:SS" hoặc "YYYY-MM-DD HH:MM:SS"
-            if (bookingDate.find(date) == std::string::npos) {
-                continue; // Không khớp, bỏ qua
-            }
-        }
-        
-        // Nếu qua được tất cả bộ lọc, thêm vào bảng
-        QList<QStandardItem *> rowItems;
-        rowItems << new QStandardItem(QString::fromStdString(booking->getBookingId()));
-        rowItems << new QStandardItem(QString::fromStdString(booking->getFlightInstanceId()));
-        rowItems << new QStandardItem(QString::fromStdString(booking->getPassengerId()));
-        rowItems << new QStandardItem(QString::fromStdString(booking->getBookingDate()));
-
-        // Hạng vé
-        QString classStr = (booking->getClass() == BookingClass::Economy) 
-                          ? "Hạng phổ thông" : "Thương gia";
-        rowItems << new QStandardItem(classStr);
-        rowItems << new QStandardItem(QString::number(booking->getBaseFare()));
-
-        // Trạng thái
-        QString statusStr;
-        if (booking->getStatus() == BookingStatus::Issued) {
-            statusStr = "Đang giữ chỗ";
-        } else if (booking->getStatus() == BookingStatus::Cancelled) {
-            statusStr = "Đã hủy";
-        } else {
-            statusStr = "Đã đổi";
-        }
-        rowItems << new QStandardItem(statusStr);
-
-        model_->appendRow(rowItems);
     }
 }
 
@@ -537,15 +411,139 @@ void AgentBookingsPage::onChangeBookingClicked()
     }
 }
 
-/**
- * @brief Refresh page when shown or when user changes
- */
+// ========== HÀM HELPER: HIỂN THỊ 1 BOOKING ==========
+void AgentBookingsPage::displayBooking(Booking* booking)
+{
+    if (!booking) return;
+    
+    QList<QStandardItem*> rowItems;
+    rowItems << new QStandardItem(QString::fromStdString(booking->getBookingId()));
+    rowItems << new QStandardItem(QString::fromStdString(booking->getFlightInstanceId()));
+    rowItems << new QStandardItem(QString::fromStdString(booking->getPassengerId()));
+    rowItems << new QStandardItem(QString::fromStdString(booking->getBookingDate()));
+    
+    // Hạng vé
+    QString classStr = (booking->getClass() == BookingClass::Economy) 
+                      ? "Hạng phổ thông" : "Thương gia";
+    rowItems << new QStandardItem(classStr);
+    rowItems << new QStandardItem(QString::number(booking->getBaseFare()));
+    
+    // Trạng thái
+    QString statusStr;
+    if (booking->getStatus() == BookingStatus::Issued) {
+        statusStr = "Đang giữ chỗ";
+    } else if (booking->getStatus() == BookingStatus::Cancelled) {
+        statusStr = "Đã hủy";
+    } else {
+        statusStr = "Đã đổi";
+    }
+    rowItems << new QStandardItem(statusStr);
+    
+    model_->appendRow(rowItems);
+}
+
+// ========== 1. TÌM THEO MÃ ĐẶT CHỖ ==========
+void AgentBookingsPage::onSearchByBookingId()
+{
+    QString input = bookingIdSearchEdit_->text().trimmed();
+    
+    if (input.isEmpty()) {
+        QMessageBox::warning(this, "Thiếu dữ liệu", 
+            "Vui lòng nhập mã đặt chỗ cần tìm.");
+        return;
+    }
+    
+    std::string bookingId = input.toStdString();
+    
+    // Lấy thông tin Agent hiện tại
+    Account* currentUser = accountManager_->getCurrentUser();
+    if (!currentUser) {
+        QMessageBox::warning(this, "Lỗi", "Không thể xác định người dùng. Vui lòng đăng nhập lại.");
+        return;
+    }
+    std::string currentAgentId = currentUser->getId();
+    
+    // Tìm booking
+    Booking* booking = bookingManager_->findBookingById(bookingId);
+    
+    // Xóa dữ liệu cũ trong bảng
+    model_->removeRows(0, model_->rowCount());
+    
+    if (!booking) {
+        QMessageBox::information(this, "Không tìm thấy", 
+            QString("Không tìm thấy đặt chỗ với mã:\n%1\n\n"
+                   "Vui lòng kiểm tra lại mã đặt chỗ.")
+                .arg(input));
+        return;
+    }
+    
+    // Kiểm tra booking có thuộc về Agent này không
+    if (booking->getAgentId() != currentAgentId) {
+        QMessageBox::warning(this, "Không có quyền truy cập", 
+            "Đặt chỗ này không thuộc về bạn.\n\n"
+            "Bạn chỉ có thể xem các đặt chỗ do chính bạn tạo.");
+        return;
+    }
+    
+    // Hiển thị kết quả
+    displayBooking(booking);
+    
+    QMessageBox::information(this, "Tìm thấy", 
+        QString("Đã tìm thấy đặt chỗ: %1").arg(input));
+}
+
+// ========== 2. TÌM THEO CCCD KHÁCH HÀNG ==========
+void AgentBookingsPage::onSearchByPassengerId()
+{
+    QString input = passengerIdSearchEdit_->text().trimmed();
+    
+    if (input.isEmpty()) {
+        QMessageBox::warning(this, "Thiếu dữ liệu", 
+            "Vui lòng nhập CCCD khách hàng cần tìm.");
+        return;
+    }
+    
+    std::string passengerId = input.toStdString();
+    
+    // Lấy thông tin Agent hiện tại
+    Account* currentUser = accountManager_->getCurrentUser();
+    if (!currentUser) {
+        QMessageBox::warning(this, "Lỗi", "Không thể xác định người dùng. Vui lòng đăng nhập lại.");
+        return;
+    }
+    std::string currentAgentId = currentUser->getId();
+    
+    // Lọc theo CCCD khách hàng
+    std::vector<Booking*> results = bookingManager_->findBookingsByPassengerId(passengerId);
+    
+    // Xóa dữ liệu cũ trong bảng
+    model_->removeRows(0, model_->rowCount());
+    
+    if (results.empty()) {
+        QMessageBox::information(this, "Không tìm thấy", 
+            QString("Không tìm thấy đặt chỗ nào cho CCCD:\n%1\n\n"
+                   "Có thể:\n"
+                   "• CCCD không đúng\n"
+                   "• Khách hàng này chưa đặt vé với bạn")
+                .arg(input));
+        return;
+    }
+    
+    // Hiển thị tất cả kết quả
+    for (Booking* booking : results) {
+        displayBooking(booking);
+    }
+    
+    QMessageBox::information(this, "Kết quả tìm kiếm", 
+        QString("Tìm thấy %1 đặt chỗ cho CCCD:\n%2")
+            .arg(results.size())
+            .arg(input));
+}
+
 void AgentBookingsPage::refreshPage() {
     // Clear search fields
     bookingIdSearchEdit_->clear();
-    fromSearchCombo_->setCurrentIndex(0);
-    toSearchCombo_->setCurrentIndex(0);
-    dateSearchEdit_->setDate(QDate::currentDate());
+    passengerIdSearchEdit_->clear();
     
     // Reload table with current user's bookings
     refreshTable();

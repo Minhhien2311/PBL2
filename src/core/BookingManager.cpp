@@ -16,8 +16,9 @@ BookingManager::BookingManager(const std::string& bookingsFilePath, FlightRule* 
 { 
     this->loadBookingsFromFile(bookingsFilePath);
 
-    // <<< THÊM MỚI: Xây dựng bảng băm >>>
+    // Xây dựng bảng băm sau khi nạp dữ liệu
     this->buildBookingIdTable();
+    this->buildPassengerIdTable();
 }
 
 // --- Destructor  ---
@@ -51,6 +52,23 @@ void BookingManager::buildBookingIdTable() {
     for (int i = 0; i < allBookings.size(); ++i) {
         if (allBookings[i] != nullptr) {
             bookingIdTable.insert(allBookings[i]->getBookingId(), allBookings[i]);
+        }
+    }
+}
+
+// <<< THÊM MỚI: Xây dựng bảng băm cho Passenger ID >>>
+void BookingManager::buildPassengerIdTable() {
+    for (int i = 0; i < allBookings.size(); ++i) {
+        if (allBookings[i] != nullptr) {
+            const std::string& passengerId = allBookings[i]->getPassengerId();
+            std::vector<Booking*>* bookingsForPassenger = passengerIdTable.find(passengerId);
+            if (bookingsForPassenger == nullptr) {
+                std::vector<Booking*> newList;
+                newList.push_back(allBookings[i]);
+                passengerIdTable.insert(passengerId, newList);
+            } else {
+                bookingsForPassenger->push_back(allBookings[i]);
+            }
         }
     }
 }
@@ -197,10 +215,14 @@ Booking* BookingManager::findBookingById(const std::string& bookingId) {
     return (bookingPtrPtr != nullptr) ? *bookingPtrPtr : nullptr;
 }
 
-// Const version of findBookingById for const methods
-Booking* BookingManager::findBookingById(const std::string& bookingId) const {
-    Booking** bookingPtrPtr = bookingIdTable.find(bookingId);
-    return (bookingPtrPtr != nullptr) ? *bookingPtrPtr : nullptr;
+std::vector<Booking*> BookingManager::findBookingsByPassengerId(const std::string& passengerId) {
+    std::vector<Booking*> result;
+    for (int i = 0; i < allBookings.size(); ++i) {
+        if (allBookings[i] != nullptr && allBookings[i]->getPassengerId() == passengerId) {
+            result.push_back(allBookings[i]);
+        }
+    }
+    return result;
 }
 
 // --- Lấy dữ liệu  ---
@@ -358,7 +380,7 @@ bool BookingManager::saveBookingToFile(Booking* booking) {
 // Check if booking can be cancelled (considering time constraints)
 bool BookingManager::canCancelBooking(const std::string& bookingId, 
                                      FlightManager& flightManager) const {
-    Booking* booking = findBookingById(bookingId);
+    Booking* booking = const_cast<BookingManager*>(this)->findBookingById(bookingId);
     if (!booking || booking->getStatus() != BookingStatus::Issued) {
         return false;
     }
@@ -388,8 +410,8 @@ bool BookingManager::canCancelBooking(const std::string& bookingId,
 std::string BookingManager::getCancellationDeadline(
     const std::string& bookingId,
     FlightManager& flightManager) const 
-{
-    Booking* booking = findBookingById(bookingId);
+{ 
+    Booking* booking = const_cast<BookingManager*>(this)->findBookingById(bookingId);
     if (!booking) return "N/A";
     
     FlightInstance* instance = flightManager.findInstanceById(
