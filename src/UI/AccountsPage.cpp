@@ -42,26 +42,26 @@ AccountsPage::AccountsPage(AccountManager* accManager, QWidget* parent)
     grid->setVerticalSpacing(20);               // giảm spacing dọc
     // khởi tạo lineedit
     idEdit_        = new QLineEdit(this); idEdit_->setPlaceholderText("ID tài khoản");
-    fullnameEdit_ = new QLineEdit(this); fullnameEdit_->setPlaceholderText("Họ và tên");
-    userEdit_        = new QLineEdit(this); userEdit_->setPlaceholderText("Tên tài khoản");
+    fullnameEdit_  = new QLineEdit(this); fullnameEdit_->setPlaceholderText("Họ và tên");
+    userEdit_      = new QLineEdit(this); userEdit_->setPlaceholderText("Tên tài khoản");
     phoneEdit_     = new QLineEdit(this); phoneEdit_->setPlaceholderText("Số điện thoại");
-    roleEdit_        = new QLineEdit(this); roleEdit_->setPlaceholderText("Chức vụ");
+    roleEdit_      = new QLineEdit(this); roleEdit_->setPlaceholderText("Chức vụ");
     emailEdit_     = new QLineEdit(this); emailEdit_->setPlaceholderText("Email");
     // hàng 1
     grid->addWidget(new QLabel("ID tài khoản"), 0, 0);
-    grid->addWidget(new QLabel("Họ và tên"),     0, 1);
-    grid->addWidget(idEdit_,                         1, 0);
-    grid->addWidget(fullnameEdit_,                1, 1);
+    grid->addWidget(new QLabel("Họ và tên"),0,1);
+    grid->addWidget(idEdit_,1,0);
+    grid->addWidget(fullnameEdit_,1,1);
     // hàng 2
     grid->addWidget(new QLabel("Tên tài khoản"), 2, 0);
     grid->addWidget(new QLabel("Số điện thoại"), 2, 1);
-    grid->addWidget(userEdit_,                        3, 0);
-    grid->addWidget(phoneEdit_,                      3, 1);
+    grid->addWidget(userEdit_,3, 0);
+    grid->addWidget(phoneEdit_,3, 1);
     // hàng 3
     grid->addWidget(new QLabel("Chức vụ"), 4, 0);
-    grid->addWidget(new QLabel("Email"),  4, 1);
-    grid->addWidget(roleEdit_,                5, 0);
-    grid->addWidget(emailEdit_,             5, 1);
+    grid->addWidget(new QLabel("Email"),4, 1);
+    grid->addWidget(roleEdit_,5, 0);
+    grid->addWidget(emailEdit_,5, 1);
     mainLayout->addWidget(form);
     // ====== nút ======
     QWidget *btnBar = new QWidget(this);
@@ -140,8 +140,6 @@ AccountsPage::AccountsPage(AccountManager* accManager, QWidget* parent)
     QString userId = QString::fromStdString(user->getId());
     ChangePasswordDialog dlg(accountManager_, userId, this);
     dlg.exec();
-    // Sau dialog, nếu đổi mật khẩu thành công và bạn muốn làm gì thêm, có thể reload dữ liệu:
-    // loadAccountData(); // (không cần thiết cho mật khẩu nhưng có thể bật nếu muốn)
     });
 }
 void AccountsPage::loadAccountData()
