@@ -73,7 +73,7 @@ AccountsPage::AccountsPage(AccountManager* accManager, QWidget* parent)
     btnLayout->setContentsMargins(24, 18, 24, 20);
     btnLayout->setSpacing(20);
     btnLayout->addStretch();
-    btnUpdate_ = new QPushButton(tr(u8"Cập nhật thông tin"), this);
+    btnUpdate_ = new QPushButton(tr(u8"Hiển thị thông tin"), this);
     QPushButton *btnPwd = new QPushButton(tr(u8"Đổi mật khẩu"), this);
     btnUpdate_->setProperty("class", "MainBtn");
     btnPwd->setProperty("class", "MainBtn");
