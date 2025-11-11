@@ -34,9 +34,9 @@
 
 //     // 2. Tạo các Manager logic
 //     // (Lưu ý: bạn cần cung cấp đúng đường dẫn file cho constructor)
-//     AccountManager accountManager("data/admins.txt", "data/agents.txt");
-//     FlightManager flightManager("data/flights.txt", "data/flight_instances.txt");
-//     BookingManager bookingManager("data/bookings.txt", nullptr); // (Tạm thời truyền nullptr cho FlightRule)
+//     AccountManager accountManager("C:/PBL2/data/admins.txt", "C:/PBL2/data/agents.txt");
+//     FlightManager flightManager("C:/PBL2/data/flights.txt", "C:/PBL2/data/flight_instances.txt");
+//     BookingManager bookingManager("C:/PBL2/data/bookings.txt", nullptr); // (Tạm thời truyền nullptr cho FlightRule)
 //     ReportManager reportManager(accountManager, bookingManager);
     
 //     // Khởi tạo AirportManager và load sân bay từ flights
@@ -87,9 +87,9 @@ int main(int argc, char *argv[]) {
         app.setStyleSheet(qss);
 
         // --- TẠO CÁC MANAGER ---
-        AccountManager accountManager("data/admins.txt", "data/agents.txt");
-        FlightManager flightManager("data/flights.txt", "data/flight_instances.txt");
-        BookingManager bookingManager("data/bookings.txt", nullptr); 
+        AccountManager accountManager("C:/PBL2/data/admins.txt", "C:/PBL2/data/agents.txt");
+        FlightManager flightManager("C:/PBL2/data/flights.txt", "C:/PBL2/data/flight_instances.txt");
+        BookingManager bookingManager("C:/PBL2/data/bookings.txt", nullptr); 
         ReportManager reportManager(accountManager, bookingManager);
         AirportManager airportManager;
         airportManager.loadAirportsFromFlights(&flightManager);
