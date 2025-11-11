@@ -263,8 +263,8 @@ void AgentBookingsPage::setupModel()
 {
     model_ = new QStandardItemModel(0, 7, this);
     model_->setHorizontalHeaderLabels({
-        "Mã Đặt chỗ", "Mã Chuyến", "Mã hành khách", 
-        "Ngày đặt", "Hạng vé", "Giá vé", "Trạng thái"
+        "Mã Đặt chỗ", "Mã Chuyến", "CCCD hành khách", 
+        "Ngày giờ đặt", "Hạng vé", "Giá vé", "Trạng thái"
     });
     tableView_->setModel(model_);
 }
