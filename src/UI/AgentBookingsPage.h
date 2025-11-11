@@ -14,6 +14,7 @@ class QLineEdit;      // <--- THÊM MỚI
 class QDateEdit;      // <--- THÊM MỚI
 class QPushButton;    // <--- THÊM MỚI
 class AirportComboBox;
+class Booking;
 
 class AgentBookingsPage : public QWidget
 {
@@ -31,7 +32,10 @@ public slots:
     void refreshPage();  // New method to refresh when page shown or user changed
 
 private slots:
-    void onSearchClicked(); // Tìm/Làm mới
+    // Hàng tìm kiếm
+    void onSearchByBookingId();
+    void onSearchByPassengerId();
+ 
     void onCancelBookingClicked(); // Hủy vé
     void onViewDetailsClicked(); // Xem chi tiết vé
     void onChangeBookingClicked(); // Đổi vé
@@ -41,6 +45,7 @@ private:
     void setupModel();
     void setupConnections();
     void refreshTable(); // Hàm tải dữ liệu
+    void displayBooking(Booking* booking);  // Helper để hiển thị một booking lên bảng
 
     // --- Managers ---
     BookingManager* bookingManager_;
@@ -49,11 +54,10 @@ private:
     AirportManager* airportManager_;
 
     // --- UI Components ---
-    QLineEdit* bookingIdSearchEdit_; // Tìm theo Mã Đặt chỗ
-    AirportComboBox* fromSearchCombo_;
-    AirportComboBox* toSearchCombo_;
-    QDateEdit* dateSearchEdit_;      // Tìm theo Ngày đặt
-    QPushButton* searchButton_;
+    QLineEdit* bookingIdSearchEdit_;   // Dòng tìm theo Mã Đặt chỗ
+    QLineEdit* passengerIdSearchEdit_; // Dòng tìm theo CCCD hành khách
+    QPushButton* searchButton_;        // Nút tìm theo Mã đặt chỗ
+    QPushButton* searchByPassengerBtn_;// Nút tìm theo CCCD
     QPushButton* refreshButton_;
 
     QTableView* tableView_;

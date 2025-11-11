@@ -18,6 +18,7 @@ private:
     FlightRule* currentRule;
 
     HashTable<std::string, Booking*> bookingIdTable;
+    HashTable<std::string, std::vector<Booking*>> passengerIdTable;
     
     std::string bookingsFilePath_; // Lưu đường dẫn file để dùng trong destructor
 
@@ -25,6 +26,7 @@ private:
     void loadBookingsFromFile(const std::string& filePath);
 
     void buildBookingIdTable();
+    void buildPassengerIdTable();
 
 public:
     // Constructor
@@ -69,7 +71,7 @@ public:
 
     // --- Tìm kiếm  ---
     Booking* findBookingById(const std::string& bookingId);
-    Booking* findBookingById(const std::string& bookingId) const;
+    std::vector<Booking*> findBookingsByPassengerId(const std::string& passengerId);
     
     // --- Lấy dữ liệu  ---
     const std::vector<Booking*>& getAllBookings() const;
