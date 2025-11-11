@@ -106,6 +106,16 @@ AccountAgent* AccountManager::findAgentById(const std::string& agentId) {
     return nullptr; // Không tìm thấy
 }
 
+AccountAdmin* AccountManager::findAdminById(const std::string& adminId) {
+    for (size_t i = 0; i < allAdmins.size(); ++i) {
+        if (allAdmins[i]->getId() == adminId) {
+            // allAgents[i] đã là một con trỏ, trả về nó
+            return allAdmins[i];
+        }
+    }
+    return nullptr; // Không tìm thấy
+}
+
 // LƯU Ý: Kiểu trả về của hàm này trong file .h cũng phải được sửa thành std::vector<AccountAgent*>
 const std::vector<AccountAgent*>& AccountManager::getAllAgents() const {
     return this->allAgents;
@@ -169,25 +179,28 @@ bool AccountManager::saveDataToFiles(const std::string& adminsFilePath, const st
 
 // --- Hàm bổ sung ---
 
-void AccountManager::updateAgentProfile(const std::string& agentId, std::string newName, std::string newPhone, std::string newEmail) {
-    AccountAgent* agent = findAgentById(agentId);
-    if (agent) {
-        agent->setFullName(newName);
-        agent->setPhone(newPhone);
-        agent->setEmail(newEmail);
-        
-        // Tự động lưu thay đổi vào file (dùng member variables)
-        saveDataToFiles(adminFilePath_, agentFilePath_);
+void AccountManager::updateProfile(const std::string& accountId, std::string newName, std::string newPhone, std::string newEmail) {
+    if (getCurrentUser()->getRole() == Role::Agent) {
+        AccountAgent* agent = findAgentById(accountId);
+        if (agent) {
+            agent->setFullName(newName);
+            agent->setPhone(newPhone);
+            agent->setEmail(newEmail);
+            
+            // Tự động lưu thay đổi vào file (dùng member variables)
+            saveDataToFiles(adminFilePath_, agentFilePath_);
+        }
     }
-}
-
-void AccountManager::changeAgentPassword(const std::string& agentId, std::string newPassword) {
-    AccountAgent* agent = findAgentById(agentId);
-    if (agent) {
-        agent->changePassword(newPassword);
-        
-        // Tự động lưu thay đổi vào file (dùng member variables)
-        saveDataToFiles(adminFilePath_, agentFilePath_);
+    else{
+        AccountAdmin* admin = findAdminById(accountId);
+        if (admin) {
+            admin->setFullName(newName);
+            admin->setPhone(newPhone);
+            admin->setEmail(newEmail);
+            
+            // Tự động lưu thay đổi vào file (dùng member variables)
+            saveDataToFiles(adminFilePath_, agentFilePath_);
+        }
     }
 }
 

@@ -10,11 +10,13 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QMessageBox>
+
 AccountsPage::AccountsPage(AccountManager* accManager, QWidget* parent)
     : QWidget(parent),
     accountManager_(accManager)
 {
     Q_ASSERT(accountManager_ != nullptr);
+
     // style giống route/flight
     this->setStyleSheet(
     "QWidget { background:#F2F6FD; }"
@@ -25,6 +27,7 @@ AccountsPage::AccountsPage(AccountManager* accManager, QWidget* parent)
     QVBoxLayout *mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0,0,0,0);
     mainLayout->setSpacing(0);
+
     // ====== top: tiêu đề ======
     QWidget *top = new QWidget(this);
     QVBoxLayout *topLayout = new QVBoxLayout(top);
@@ -34,6 +37,7 @@ AccountsPage::AccountsPage(AccountManager* accManager, QWidget* parent)
     title->setProperty("class", "PageTitle");
     topLayout->addWidget(title);
     mainLayout->addWidget(top);
+
     // ====== form 2 cột ======
     QWidget *form = new QWidget(this);
     QGridLayout *grid = new QGridLayout(form);
@@ -119,20 +123,25 @@ AccountsPage::AccountsPage(AccountManager* accManager, QWidget* parent)
         const std::string newPhone = phoneEdit_->text().toStdString();
         const std::string newEmail = emailEdit_->text().toStdString();
         // Gọi hàm update (trong repo có updateAgentProfile)
-        accountManager_->updateAgentProfile(id, newFull, newPhone, newEmail);
+        accountManager_->updateProfile(id, newFull, newPhone, newEmail);
         // Sau khi lưu, khóa lại các ô
         fullnameEdit_->setReadOnly(true);
         phoneEdit_->setReadOnly(true);
         emailEdit_->setReadOnly(true);
-        btnUpdate_->setText("Cập nhật thông tin");
+        btnUpdate_->setText("Sửa thông tin");
         // Reload data (đảm bảo hiển thị đúng dữ liệu đã lưu/ghi file)
         loadAccountData();
+        qDebug() << "2.[AccountsPage] Saved account data for user ID:"
+                 << (accountManager_->getCurrentUser() ?
+                     QString::fromStdString(accountManager_->getCurrentUser()->getId()) : "None");
         QMessageBox::information(this, "Thành công", "Đã cập nhật thông tin.");
     }
     });
     // Nút "Đổi mật khẩu": mở dialog đổi mật khẩu (sử dụng con trỏ accountManager_ hiện có)
     connect(btnPwd, &QPushButton::clicked, this, [this]() {
     Account* user = accountManager_->getCurrentUser();
+    qDebug() << "1.[AccountsPage] Change password clicked for user ID:"
+             << (user ? QString::fromStdString(user->getId()) : "None");
     if (!user) {
         QMessageBox::warning(this, "Lỗi", "Không có người dùng đang đăng nhập.");
         return;
@@ -142,6 +151,7 @@ AccountsPage::AccountsPage(AccountManager* accManager, QWidget* parent)
     dlg.exec();
     });
 }
+
 void AccountsPage::loadAccountData()
 {
     Account* user = accountManager_->getCurrentUser();

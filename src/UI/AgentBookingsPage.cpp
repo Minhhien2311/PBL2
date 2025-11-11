@@ -286,7 +286,7 @@ void AgentBookingsPage::refreshTable()
     // 1. Lấy ID của Agent đang đăng nhập
     Account* currentUser = accountManager_->getCurrentUser();
     if (!currentUser) {
-        QMessageBox::warning(this, "Lỗi", "Không thể xác định người dùng. Vui lòng đăng nhập lại.");
+        // QMessageBox::warning(this, "Lỗi", "Không thể xác định người dùng. Vui lòng đăng nhập lại.");
         return;
     }
     std::string currentAgentId = currentUser->getId();
