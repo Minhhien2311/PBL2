@@ -44,19 +44,19 @@ void LoginPage::setupUi()
 
     // ---------- LAYOUT GỐC: căn giữa ngang ----------
     QHBoxLayout *rootLayout = new QHBoxLayout(this);
-    rootLayout->setContentsMargins(0, 20, 0, 20);
+    rootLayout->setContentsMargins(0, 40, 0, 0);
     rootLayout->setAlignment(Qt::AlignCenter);
 
     // ---------- CỘT CHÍNH ----------
     QVBoxLayout *mainLayout = new QVBoxLayout();
-    mainLayout->setAlignment(Qt::AlignTop | Qt::AlignHCenter);
+    mainLayout->setAlignment(Qt::AlignCenter);  // Thay đổi từ AlignTop thành AlignCenter
+    mainLayout->setSpacing(50);  // Thêm spacing giữa title và login box
 
     // Tiêu đề
     QLabel *appTitle = new QLabel("PHẦN MỀM QUẢN LÝ BÁN VÉ MÁY BAY", this);
     appTitle->setObjectName("AppTitle");
     appTitle->setAlignment(Qt::AlignCenter);
     mainLayout->addWidget(appTitle);
-    mainLayout->addSpacing(60);
 
     // ---------- HỘP ĐĂNG NHẬP ----------
     // Hộp ngoài: bo góc, có viền xanh

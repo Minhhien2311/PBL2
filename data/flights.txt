@@ -98,3 +98,4 @@ SGN-BMV|Vietravel Airlines|SGN|BMV
 BMV-SGN|Vietravel Airlines|BMV|SGN
 HAN-CXR|Vietravel Airlines|HAN|CXR
 CXR-HAN|Vietravel Airlines|CXR|HAN
+CAH-HUI|Bamboo Airways|CAH|HUI

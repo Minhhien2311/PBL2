@@ -12,6 +12,7 @@
 #include "core/ReportManager.h"
 #include "core/AirportManager.h"
 
+#include <QTimer> // Required for QTimer::singleShot
 #include <QStackedWidget>
 
 // Constructor
@@ -29,10 +30,16 @@ Application::Application(AccountManager* accManager,
       airportManager_(airportManager)
 {
     setWindowTitle("Hệ thống Quản lý Bán vé máy bay");
-    resize(1100, 700); 
+    // Xóa dòng resize
+    // resize(1100, 700);  // <-- XÓA DÒNG NÀY
 
     setupUi();
     setupConnections();
+    
+    // Trì hoãn maximize để layout được tính toán xong
+    QTimer::singleShot(0, this, [this]() {
+        showMaximized();
+    });
 }
 
 Application::~Application() {}
@@ -97,4 +104,3 @@ void Application::onLogout()
     }
     stack_->setCurrentWidget(loginPage_);
 }
-

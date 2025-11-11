@@ -21,8 +21,6 @@ public:
     explicit RoutesPage(FlightManager* flightManager, AirportManager* airportManager, QWidget *parent = nullptr);
 
 private slots:
-    // (Các slot giữ nguyên)
-    void onSearchById();
     void onSearchByAirline();
     void onSearchByRoute(); 
     void onAddRoute();

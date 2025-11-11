@@ -117,7 +117,7 @@ bool FlightManager::createNewFlight( const std::string& airline,
     if (airline.empty() || departureIATA.empty() || arrivalIATA.empty()) return false;
     
     // Kiểm tra trùng lặp bằng ID mới (airline-departure-arrival)
-    std::string newId = airline + "-" + departureIATA + "-" + arrivalIATA;
+    std::string newId = departureIATA + "-" + arrivalIATA;
     if (findFlightById(newId) != nullptr) return false;
 
     Flight* newFlight = new Flight(airline, departureIATA, arrivalIATA);
