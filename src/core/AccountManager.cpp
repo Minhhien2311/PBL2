@@ -204,7 +204,7 @@ bool AccountManager::changePassword(const std::string& userId,
             // Thay mật khẩu (Account::changePassword sẽ hash)
             a->changePassword(newPasswordPlain);
             // Ghi lại file (hàm saveDataToFiles đã tồn tại trong class)
-            saveDataToFiles("data/admins.txt", "data/agents.txt");
+            saveDataToFiles("C:/PBL2/data/admins.txt", "C:/PBL2/data/agents.txt");
             return true;
         }
     }
@@ -215,7 +215,7 @@ bool AccountManager::changePassword(const std::string& userId,
         if (ag && ag->getId() == userId) {
             if (!ag->authenticate(oldPasswordPlain)) return false;
             ag->changePassword(newPasswordPlain);
-            saveDataToFiles("data/admins.txt", "data/agents.txt");
+            saveDataToFiles("C:/PBL2/data/admins.txt", "C:/PBL2/data/agents.txt");
             return true;
         }
     }
