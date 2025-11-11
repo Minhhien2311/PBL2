@@ -110,12 +110,12 @@ void SearchBookPage::setupUi()
     filterLayout->setVerticalSpacing(8);   // Khoảng cách dọc giữa nhãn và input
 
     // --- Hàng 0: Nhãn (Labels) ---
-    filterLayout->addWidget(new QLabel("Từ"), 0, 0);
-    filterLayout->addWidget(new QLabel("Đến"), 0, 1);
+    filterLayout->addWidget(new QLabel("Điểm đi"), 0, 0);
+    filterLayout->addWidget(new QLabel("Điểm đến"), 0, 1);
     filterLayout->addWidget(new QLabel("Ngày khởi hành"), 0, 2);
     filterLayout->addWidget(new QLabel("Hãng hàng không"), 0, 3);
     // Nhãn "Khoảng giá" span 3 cột (4, 5, 6) để căn lề cho đẹp
-    filterLayout->addWidget(new QLabel("Khoảng giá"), 0, 4, 1, 3);
+    filterLayout->addWidget(new QLabel("Khoảng giá mong muốn"), 0, 4, 1, 3);
     // Cột 7 (cho nút tìm kiếm) không có nhãn
 
     // --- Hàng 1: Ô nhập liệu (Inputs) ---
@@ -155,7 +155,7 @@ void SearchBookPage::setupUi()
     priceMinEdit_ = new QLineEdit(this);
     priceMinEdit_->setPlaceholderText("Tùy chọn");
     priceMinEdit_->setValidator(new QIntValidator(0, MAX_FLIGHT_PRICE, this));
-    priceMinEdit_->setMaximumWidth(120);
+    priceMinEdit_->setFixedHeight(fromSearchCombo_->sizeHint().height());
     filterLayout->addWidget(priceMinEdit_, 1, 4);
 
     QLabel* dashLabel = new QLabel("—");
@@ -165,17 +165,16 @@ void SearchBookPage::setupUi()
     priceMaxEdit_ = new QLineEdit(this);
     priceMaxEdit_->setPlaceholderText("Tùy chọn");
     priceMaxEdit_->setValidator(new QIntValidator(0, MAX_FLIGHT_PRICE, this));
-    priceMaxEdit_->setMaximumWidth(120);
+    priceMaxEdit_->setFixedHeight(fromSearchCombo_->sizeHint().height());
     filterLayout->addWidget(priceMaxEdit_, 1, 6);
 
     // Search button (Cột 7)
-    QPushButton* searchBtn = new QPushButton("Tìm kiếm", this);  // Not uppercase
-    searchBtn->setFixedHeight(fromSearchCombo_->sizeHint().height());  // Match input height
+    QPushButton* searchBtn = new QPushButton("Tìm kiếm", this);
+    searchBtn->setFixedHeight(fromSearchCombo_->sizeHint().height());
     searchBtn->setStyleSheet(
         "QPushButton {"
         "  background-color: #4472C4;"
         "  color: white;"
-        "  font-size: 10pt;"
         "  padding: 5px 20px;"
         "  border-radius: 3px;"
         "}"
@@ -266,14 +265,15 @@ void SearchBookPage::setupUi()
 
 void SearchBookPage::setupModel()
 {
-    // 7 cột giống bản cũ nhưng format kiểu FlightsPage
-    model_ = new QStandardItemModel(0, 7, this);
+    // 8 cột thông tin chuyến bay
+    model_ = new QStandardItemModel(0, 8, this);
     model_->setHorizontalHeaderLabels({
         "Mã Chuyến",          // instanceId
-        "Mã Tuyến (FlightId)",// flightId
+        "Số hiệu",
         "Ngày khởi hành",
         "Giờ khởi hành",
         "Ngày hạ cánh (dự kiến)",
+        "Giờ hạ cánh (dự kiến)",
         "Hãng hàng không",
         "Giá từ"
     });
@@ -307,10 +307,11 @@ void SearchBookPage::fillTable(const std::vector<FlightInstance*>& instances)
 
         QList<QStandardItem*> row;
         row << new QStandardItem(QString::fromStdString(inst->getInstanceId()))
-            << new QStandardItem(QString::fromStdString(inst->getFlightId()))
+            << new QStandardItem(QString::fromStdString(inst->getFlightNumber()))
             << new QStandardItem(QString::fromStdString(inst->getDepartureDate()))
             << new QStandardItem(QString::fromStdString(inst->getDepartureTime()))
             << new QStandardItem(QString::fromStdString(inst->getArrivalDate()))
+            << new QStandardItem(QString::fromStdString(inst->getArrivalTime()))
             << new QStandardItem(airline)
             << new QStandardItem(priceFormatted);
         model_->appendRow(row);

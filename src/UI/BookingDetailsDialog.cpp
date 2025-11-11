@@ -78,7 +78,8 @@ void BookingDetailsDialog::setupUi()
     // Trạng thái
     bookingLayout->addWidget(new QLabel("Trạng thái:"), row, 0);
     QString statusStr = (booking_->getStatus() == BookingStatus::Issued) 
-                        ? "Đang giữ chỗ" : "Đã hủy";
+                        ? "Đang giữ chỗ" : 
+                      (booking_->getStatus() == BookingStatus::Cancelled) ? "Đã hủy" : "Đã đổi";
     statusLabel_ = new QLabel(statusStr);
     QString statusColor = (booking_->getStatus() == BookingStatus::Issued) 
                           ? "#2E7D32" : "#C62828";

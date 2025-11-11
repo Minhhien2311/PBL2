@@ -15,7 +15,7 @@ SeatManager::SeatManager(const std::string& seatStatusPath,
       currentInstanceId_(""),
       selectedSeat_(nullptr),
       seatRows_(0),
-      seatCols_(6)
+      seatCols_(8)
 {
     loadConfiguration();
 }
@@ -28,7 +28,7 @@ void SeatManager::loadConfiguration() {
     std::ifstream file(seatConfigFilePath_);
     if (!file.is_open()) {
         std::cerr << "Warning: Cannot open " << seatConfigFilePath_ << ". Using defaults.\n";
-        seatCols_ = 6;
+        seatCols_ = 8;
         return;
     }
     
