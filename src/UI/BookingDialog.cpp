@@ -21,6 +21,8 @@
 #include <QScrollArea>
 #include <QDateTime>
 #include <QRegularExpression>
+#include <QRadioButton>
+#include <QButtonGroup>
 
 // Seat button style constants
 namespace {
@@ -141,23 +143,33 @@ void BookingDialog::setupUi()
     // Chọn hạng vé
     auto *classGroup = new QGroupBox("Chọn hạng vé", contentWidget);
     auto *classLayout = new QVBoxLayout(classGroup);
-    
-    classComboBox_ = new QComboBox(contentWidget);
-    classComboBox_->addItem("Hạng phổ thông (Economy)", static_cast<int>(BookingClass::Economy));
-    classComboBox_->addItem("Hạng thương gia (Business)", static_cast<int>(BookingClass::Business));
-    classLayout->addWidget(classComboBox_);
-    
+
+    // Radio buttons cho hạng vé
+    economyRadio_ = new QRadioButton("Hạng phổ thông (Economy)", contentWidget);
+    businessRadio_ = new QRadioButton("Hạng thương gia (Business)", contentWidget);
+
+    // Set default Economy
+    economyRadio_->setChecked(true);
+
+    // Group radio buttons
+    auto *classButtonGroup = new QButtonGroup(contentWidget);
+    classButtonGroup->addButton(economyRadio_);
+    classButtonGroup->addButton(businessRadio_);
+
+    classLayout->addWidget(economyRadio_);
+    classLayout->addWidget(businessRadio_);
+
     // Hiển thị giá vé
     fareLabel_ = new QLabel(contentWidget);
     fareLabel_->setStyleSheet("font-weight: 600; color: #2E7D32; font-size: 14px;");
     classLayout->addWidget(fareLabel_);
-    
-    // Cập nhật giá khi thay đổi hạng vé
-    connect(classComboBox_, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this](int index) {
-        BookingClass selectedClass = static_cast<BookingClass>(classComboBox_->itemData(index).toInt());
+
+    // Hàm helper cập nhật giá
+    auto updateFareDisplay = [this]() {
+        BookingClass selectedClass = economyRadio_->isChecked() ? BookingClass::Economy : BookingClass::Business;
         int fare = (selectedClass == BookingClass::Economy) 
-                   ? flightInstance_->getFareEconomy() 
-                   : flightInstance_->getFareBusiness();
+                ? flightInstance_->getFareEconomy() 
+                : flightInstance_->getFareBusiness();
         
         // Format with thousand separators
         QString fareStr = QString::number(fare);
@@ -167,11 +179,21 @@ void BookingDialog::setupUi()
             pos -= 3;
         }
         fareLabel_->setText(QString("Giá vé: %1 VND").arg(fareStr));
+    };
+
+    // Kết nối sự kiện thay đổi hạng vé
+    connect(economyRadio_, &QRadioButton::toggled, this, [this, updateFareDisplay]() {
+        updateFareDisplay();
+        renderSeatMap(); // Re-render seat map với lock/unlock seats
     });
-    
-    // Trigger initial fare display
-    classComboBox_->setCurrentIndex(0);
-    
+    connect(businessRadio_, &QRadioButton::toggled, this, [this, updateFareDisplay]() {
+        updateFareDisplay();
+        renderSeatMap(); // Re-render seat map với lock/unlock seats
+    });
+
+    // Hiển thị giá ban đầu
+    updateFareDisplay();
+
     contentLayout->addWidget(classGroup);
     
     // Sơ đồ ghế (NO separate scroll area)
@@ -277,7 +299,7 @@ void BookingDialog::setupUi()
         std::string agentId = currentUser->getId();
         
         // Get current booking class
-        BookingClass bookingClass = static_cast<BookingClass>(classComboBox_->currentData().toInt());
+        BookingClass bookingClass = economyRadio_->isChecked() ? BookingClass::Economy : BookingClass::Business;
         
         // Calculate fare
         int baseFare = (bookingClass == BookingClass::Economy) 
@@ -352,7 +374,7 @@ QString BookingDialog::getPassportNumber() const
 
 BookingClass BookingDialog::getSelectedClass() const
 {
-    return static_cast<BookingClass>(classComboBox_->currentData().toInt());
+    return economyRadio_->isChecked() ? BookingClass::Economy : BookingClass::Business;
 }
 
 QString BookingDialog::getSelectedSeatId() const
@@ -393,21 +415,15 @@ void BookingDialog::renderSeatMap()
 
     int cols = seatManager->getSeatColumns();
     
-    // Create a centered layout for the seat grid
-    QHBoxLayout* centerLayout = new QHBoxLayout();
-    centerLayout->addStretch(1); // Left padding for centering
-    
-    // Create a widget to hold the seat grid
-    QWidget* seatGridWidget = new QWidget();
-    QGridLayout* seatGridLayout = new QGridLayout(seatGridWidget);
-    seatGridLayout->setSpacing(5);
+    // Get selected class
+    BookingClass selectedClass = economyRadio_->isChecked() ? BookingClass::Economy : BookingClass::Business;
     
     // Add column headers (A, B, C, D, E, F)
     for (int col = 0; col < cols; ++col) {
         QLabel* header = new QLabel(QString(QChar('A' + col)));
         header->setAlignment(Qt::AlignCenter);
         header->setStyleSheet("font-weight: bold; padding: 5px;");
-        seatGridLayout->addWidget(header, 0, col + 1);
+        seatMapLayout_->addWidget(header, 0, col + 1);
     }
 
     // Render seats
@@ -421,15 +437,14 @@ void BookingDialog::renderSeatMap()
         int row, col;
         std::tie(row, col) = seat->getCoordinates();
         
-        // Add row header if new row (closer to seats with reduced width)
+        // Add row header if new row
         if (row != currentRow) {
             currentRow = row;
-            // Display 1-based row numbers for better UX (internal index is 0-based)
-            QLabel* rowLabel = new QLabel(QString::number(row + 1));  // ← ĐÃ THÊM +1
-            rowLabel->setFixedWidth(25); // Smaller width = closer to seats
+            QLabel* rowLabel = new QLabel(QString::number(row + 1));
+            rowLabel->setFixedWidth(25);
             rowLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
             rowLabel->setStyleSheet("font-weight: bold;");
-            seatGridLayout->addWidget(rowLabel, layoutRow, 0);
+            seatMapLayout_->addWidget(rowLabel, layoutRow, 0);
         }
 
         // Create seat button
@@ -440,7 +455,11 @@ void BookingDialog::renderSeatMap()
         QString btnStyle;
         bool isClickable = false;
         
-        if (seat->getStatus() == SeatStatus::Available) {
+        // Check if seat matches selected class and is available
+        bool matchesClass = (selectedClass == BookingClass::Economy && seat->getType() == SeatType::Economy) ||
+                           (selectedClass == BookingClass::Business && seat->getType() == SeatType::Business);
+
+        if (seat->getStatus() == SeatStatus::Available && matchesClass) {
             isClickable = true;
             if (seat->getType() == SeatType::Business) {
                 btnStyle = BUSINESS_AVAILABLE_STYLE;
@@ -450,6 +469,7 @@ void BookingDialog::renderSeatMap()
         } else if (seat->getStatus() == SeatStatus::Booked) {
             btnStyle = BOOKED_STYLE;
         } else {
+            // Locked (either booked OR doesn't match selected class)
             btnStyle = LOCKED_STYLE;
         }
         
@@ -460,14 +480,14 @@ void BookingDialog::renderSeatMap()
         
         // Connect click event for available seats
         if (isClickable) {
-            connect(seatBtn, &QPushButton::clicked, this, [this, seatGridLayout, seatBtn]() {
+            connect(seatBtn, &QPushButton::clicked, this, [this, seatBtn]() {
                 QString seatId = seatBtn->property("seatId").toString();
                 
                 // Deselect previous seat
                 if (!selectedSeatId_.isEmpty()) {
                     // Find and restore previous button style
-                    for (int i = 0; i < seatGridLayout->count(); ++i) {
-                        QLayoutItem* layoutItem = seatGridLayout->itemAt(i);
+                    for (int i = 0; i < seatMapLayout_->count(); ++i) {
+                        QLayoutItem* layoutItem = seatMapLayout_->itemAt(i);
                         if (!layoutItem) continue;
                         
                         QPushButton* btn = qobject_cast<QPushButton*>(layoutItem->widget());
@@ -491,7 +511,7 @@ void BookingDialog::renderSeatMap()
             });
         }
         
-        seatGridLayout->addWidget(seatBtn, layoutRow, col + 1);
+        seatMapLayout_->addWidget(seatBtn, layoutRow, col + 1);
         
         // Move to next row if we've filled all columns
         if (col == cols - 1) {
@@ -499,11 +519,11 @@ void BookingDialog::renderSeatMap()
         }
     }
     
-    // Add legend to seat grid
+    // Add legend
     layoutRow++;
     auto *legendLabel = new QLabel("Chú thích:");
     legendLabel->setStyleSheet("font-weight: bold; margin-top: 10px;");
-    seatGridLayout->addWidget(legendLabel, layoutRow, 0, 1, cols + 1);
+    seatMapLayout_->addWidget(legendLabel, layoutRow, 0, 1, cols + 1);
     
     layoutRow++;
     auto *legendWidget = new QWidget();
@@ -523,12 +543,5 @@ void BookingDialog::renderSeatMap()
     legendLayout->addWidget(bookedLegend);
     
     legendLayout->addStretch();
-    seatGridLayout->addWidget(legendWidget, layoutRow, 0, 1, cols + 1);
-    
-    // Add the seat grid to center layout
-    centerLayout->addWidget(seatGridWidget);
-    centerLayout->addStretch(1); // Right padding for centering
-    
-    // Add center layout to main seat map layout
-    seatMapLayout_->addLayout(centerLayout, 0, 0);
+    seatMapLayout_->addWidget(legendWidget, layoutRow, 0, 1, cols + 1);
 }

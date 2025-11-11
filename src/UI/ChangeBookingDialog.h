@@ -56,6 +56,7 @@ private:
     QWidget* seatMapContainer_;
     QGridLayout* seatMapLayout_;
     QString selectedSeatId_;
+    QLabel* classFareLabel_;
 };
 
 #endif // CHANGEBOOKINGDIALOG_H

@@ -2,6 +2,7 @@
 #define BOOKINGDIALOG_H
 
 #include <QDialog>
+
 #include "entities/Booking.h"
 
 class QLineEdit;
@@ -9,6 +10,8 @@ class QComboBox;
 class QLabel;
 class QGridLayout;
 class QWidget;
+class QRadioButton;
+class QButtonGroup;
 class FlightInstance;
 class FlightManager;
 class BookingManager;
@@ -50,7 +53,8 @@ private:
     QLineEdit* passengerNameEdit_;    // Họ tên
     QLineEdit* passengerPhoneEdit_;   // Số điện thoại
     QLineEdit* passportNumberEdit_;   // Số hộ chiếu
-    QComboBox* classComboBox_;        // Hạng vé
+    QRadioButton* economyRadio_;
+    QRadioButton* businessRadio_;
     
     QLabel* fareLabel_;               // Hiển thị giá vé
     

@@ -148,26 +148,30 @@ void ChangeBookingDialog::setupUi()
     
     // === CHỌN HẠNG VÉ ===
     auto *classGroup = new QGroupBox("Chọn hạng vé", contentWidget);
-    auto *classLayout = new QHBoxLayout(classGroup);
-    
-    economyRadio_ = new QRadioButton("Hạng phổ thông", contentWidget);
-    businessRadio_ = new QRadioButton("Thương gia", contentWidget);
-    
+    auto *classLayout = new QVBoxLayout(classGroup); // ← Đổi từ HBoxLayout → VBoxLayout
+
+    economyRadio_ = new QRadioButton("Hạng phổ thông (Economy)", contentWidget);
+    businessRadio_ = new QRadioButton("Hạng thương gia (Business)", contentWidget);
+
     // Set default based on current booking
     if (currentBooking_->getClass() == BookingClass::Economy) {
         economyRadio_->setChecked(true);
     } else {
         businessRadio_->setChecked(true);
     }
-    
+
     // Group radio buttons
     auto *classButtonGroup = new QButtonGroup(contentWidget);
     classButtonGroup->addButton(economyRadio_);
     classButtonGroup->addButton(businessRadio_);
-    
+
     classLayout->addWidget(economyRadio_);
     classLayout->addWidget(businessRadio_);
-    classLayout->addStretch();
+
+    // Hiển thị giá vé
+    classFareLabel_ = new QLabel(contentWidget); // ← Cần thêm member variable
+    classFareLabel_->setStyleSheet("font-weight: 600; color: #2E7D32; font-size: 14px; margin-top: 5px;");
+    classLayout->addWidget(classFareLabel_);
     
     contentLayout->addWidget(classGroup);
     
@@ -186,14 +190,6 @@ void ChangeBookingDialog::setupUi()
     seatMapContainer_->setLayout(seatMapLayout_);
     
     seatVLayout->addWidget(seatMapContainer_);
-    
-    // Legend
-    auto *legendLayout = new QHBoxLayout();
-    legendLayout->addWidget(new QLabel("Y=Business", contentWidget));
-    legendLayout->addWidget(new QLabel("G=Economy", contentWidget));
-    legendLayout->addWidget(new QLabel("X=Booked", contentWidget));
-    legendLayout->addStretch();
-    seatVLayout->addLayout(legendLayout);
     
     contentLayout->addWidget(seatGroup);
     
@@ -407,6 +403,7 @@ void ChangeBookingDialog::updatePriceDifference()
 {
     if (!selectedNewFlight_) {
         priceDiffLabel_->clear();
+        classFareLabel_->clear();
         return;
     }
     
@@ -418,11 +415,26 @@ void ChangeBookingDialog::updatePriceDifference()
     int oldFare = currentBooking_->getBaseFare();
     int priceDiff = newFare - oldFare;
     
+    // Format with thousand separators
+    auto formatFare = [](int fare) -> QString {
+        QString fareStr = QString::number(fare);
+        int pos = fareStr.length() - 3;
+        while (pos > 0) {
+            fareStr.insert(pos, ',');
+            pos -= 3;
+        }
+        return fareStr;
+    };
+    
+    // Hiển thị giá vé hạng đã chọn
+    classFareLabel_->setText(QString("Giá vé: %1 VND").arg(formatFare(newFare)));
+    
+    // Hiển thị chênh lệch
     if (priceDiff > 0) {
-        priceDiffLabel_->setText(QString("⚠️ Phí phát sinh thêm: %1 VND").arg(priceDiff));
+        priceDiffLabel_->setText(QString("⚠️ Phí phát sinh thêm: %1 VND").arg(formatFare(priceDiff)));
         priceDiffLabel_->setStyleSheet("font-size: 14px; font-weight: bold; padding: 10px; color: #0000FF;");
     } else if (priceDiff < 0) {
-        priceDiffLabel_->setText(QString("✅ Hoàn trả: %1 VND").arg(-priceDiff));
+        priceDiffLabel_->setText(QString("✅ Hoàn trả: %1 VND").arg(formatFare(-priceDiff)));
         priceDiffLabel_->setStyleSheet("font-size: 14px; font-weight: bold; padding: 10px; color: #FF0000;");
     } else {
         priceDiffLabel_->setText("Không có chênh lệch giá");
