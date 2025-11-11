@@ -80,6 +80,7 @@ public:
     // Nhập agentId ID của agent cần tìm.
     // Con trỏ trỏ tới AccountAgent nếu tìm thấy, ngược lại là nullptr.
     AccountAgent* findAgentById(const std::string& agentId);
+    AccountAdmin* findAdminById(const std::string& adminId);
     
     // Lấy toàn bộ danh sách Agent (dùng cho Admin).
     // Tham chiếu (const) đến vector chứa các con trỏ AccountAgent.
@@ -100,8 +101,7 @@ public:
     bool saveDataToFiles(const std::string& adminsFilePath, const std::string& agentsFilePath) const;
 
     // Hàm bổ sung nếu có thể
-    void updateAgentProfile(const std::string& agentId, std::string newName, std::string newPhone, std::string newEmail);
-    void changeAgentPassword(const std::string& agentId, std::string newPassword);
+    void updateProfile(const std::string& accountId, std::string newName, std::string newPhone, std::string newEmail);
 
     // Đổi mật khẩu cho bất kỳ user (Admin hoặc Agent).
     // Trả về true nếu mật khẩu cũ hợp lệ và mật khẩu được cập nhật + ghi file thành công.

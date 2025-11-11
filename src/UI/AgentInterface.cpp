@@ -178,8 +178,6 @@ AgentInterface::AgentInterface(AccountManager* accManager,
     stack_->addWidget(searchBookPage_); // 1
     stack_->addWidget(agentBookingsPage_); // 2
     stack_->addWidget(new AccountsPage(accountManager_, this)); // 3
-    // stack_->addWidget(new AgentReportPage(accountManager_->getCurrentUser()->getId(), reportManager_, this)); //4
-    // stack_->addWidget(new AgentReportPage(accountManager_, bookingManager_, reportManager_, this));
     stack_->addWidget(ticketsReportPage_); //4
     stack_->addWidget(revenueReportPage_); //5
 

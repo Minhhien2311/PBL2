@@ -12,7 +12,8 @@ class AccountsPage : public QWidget {
 public:
     // <--- Sửa lỗi: Constructor nhận AccountManager
     explicit AccountsPage(AccountManager* accManager, QWidget* parent=nullptr);
-
+    void refreshAccountData(); // Hàm public để reload dữ liệu
+    
 private:
     AccountManager* accountManager_; // <--- Sửa lỗi: Thêm con trỏ
 
