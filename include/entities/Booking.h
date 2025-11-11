@@ -11,7 +11,8 @@ enum class BookingClass {
 
 enum BookingStatus {
     Issued,
-    Cancelled
+    Cancelled,
+    Changed
 };
 
 class Booking {
@@ -62,6 +63,7 @@ public:
     void setPassengerId(const std::string& newPassengerId);
     void setClass(BookingClass newClass);
     void setSeatId(const std::string& newSeatId);
+    void setFlightInstanceId(const std::string& newFlightInstanceId);
 
     // --- Đọc/Ghi file ---
     std::string toRecordLine() const;

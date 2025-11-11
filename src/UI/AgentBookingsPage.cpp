@@ -5,14 +5,19 @@
 #include "core/FlightManager.h"
 #include "core/AccountManager.h"
 #include "core/AirportManager.h"
+#include "core/SeatManager.h"
 #include "entities/Booking.h"
 #include "entities/Account.h"
+#include "entities/FlightInstance.h"
+#include "entities/Seat.h"
 #include "BookingDetailsDialog.h" // Dialog xem chi tiết
+#include "ChangeBookingDialog.h"  // Dialog đổi vé
 #include "AirportComboBox.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QGridLayout>
+#include <QFormLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QDateEdit>
@@ -23,6 +28,9 @@
 #include <QMessageBox>
 #include <QCalendarWidget> // Để set lịch popup
 #include <QString>
+#include <QDialog>
+#include <QGroupBox>
+#include <QTextEdit>
 
 // <--- CẬP NHẬT CONSTRUCTOR: Nhận cả 3 manager
 AgentBookingsPage::AgentBookingsPage(BookingManager* bkManager,
@@ -238,13 +246,13 @@ void AgentBookingsPage::setupUi()
     cancelBookingBtn_ = new QPushButton("Hủy vé");
     cancelBookingBtn_->setStyleSheet(blueBtn);
 
-    auto *changeBtn = new QPushButton("Đổi vé");
-    changeBtn->setStyleSheet(blueBtn);
+    changeBookingBtn_ = new QPushButton("Đổi vé");
+    changeBookingBtn_->setStyleSheet(blueBtn);
 
     bottomLayout->addStretch();
     bottomLayout->addWidget(viewDetailsBtn_);
     bottomLayout->addWidget(cancelBookingBtn_);
-    bottomLayout->addWidget(changeBtn);
+    bottomLayout->addWidget(changeBookingBtn_);
     bottomLayout->addStretch();
 
     mainLayout->addWidget(bottom);
@@ -267,6 +275,7 @@ void AgentBookingsPage::setupConnections()
     connect(refreshButton_, &QPushButton::clicked, this, &AgentBookingsPage::refreshTable);
     connect(cancelBookingBtn_, &QPushButton::clicked, this, &AgentBookingsPage::onCancelBookingClicked);
     connect(viewDetailsBtn_, &QPushButton::clicked, this, &AgentBookingsPage::onViewDetailsClicked);
+    connect(changeBookingBtn_, &QPushButton::clicked, this, &AgentBookingsPage::onChangeBookingClicked);
 }
 
 // Hàm này tải (hoặc làm mới) TOÀN BỘ vé của Agent
@@ -303,8 +312,14 @@ void AgentBookingsPage::refreshTable()
             rowItems << new QStandardItem(QString::number(booking->getBaseFare()));
 
             // Trạng thái
-            QString statusStr = (booking->getStatus() == BookingStatus::Issued) 
-                               ? "Đang giữ chỗ" : "Đã hủy";
+            QString statusStr;
+            if (booking->getStatus() == BookingStatus::Issued) {
+                statusStr = "Đang giữ chỗ";
+            } else if (booking->getStatus() == BookingStatus::Cancelled) {
+                statusStr = "Đã hủy";
+            } else {
+                statusStr = "Đã đổi";
+            }
             rowItems << new QStandardItem(statusStr);
 
             model_->appendRow(rowItems);
@@ -372,8 +387,14 @@ void AgentBookingsPage::onSearchClicked()
         rowItems << new QStandardItem(QString::number(booking->getBaseFare()));
 
         // Trạng thái
-        QString statusStr = (booking->getStatus() == BookingStatus::Issued) 
-                           ? "Đang giữ chỗ" : "Đã hủy";
+        QString statusStr;
+        if (booking->getStatus() == BookingStatus::Issued) {
+            statusStr = "Đang giữ chỗ";
+        } else if (booking->getStatus() == BookingStatus::Cancelled) {
+            statusStr = "Đã hủy";
+        } else {
+            statusStr = "Đã đổi";
+        }
         rowItems << new QStandardItem(statusStr);
 
         model_->appendRow(rowItems);
@@ -481,6 +502,39 @@ void AgentBookingsPage::onViewDetailsClicked()
     // 4. Hiển thị dialog chi tiết
     BookingDetailsDialog dialog(booking, flightManager_, accountManager_, this);
     dialog.exec();
+}
+
+void AgentBookingsPage::onChangeBookingClicked()
+{
+    // 1. Get selected row
+    QModelIndexList selected = tableView_->selectionModel()->selectedRows();
+    if (selected.isEmpty()) {
+        QMessageBox::warning(this, "Lỗi", "Vui lòng chọn một vé để đổi.");
+        return;
+    }
+    
+    // Get Booking ID and Status
+    QString bookingId = model_->data(selected.first().siblingAtColumn(0)).toString();
+    QString status = model_->data(selected.first().siblingAtColumn(6)).toString();
+    
+    // 2. Validate status is Issued
+    if (status != "Đang giữ chỗ") {
+        QMessageBox::warning(this, "Lỗi", "Chỉ có thể đổi vé có trạng thái 'Đang giữ chỗ'.");
+        return;
+    }
+    
+    // 3. Find booking
+    Booking* booking = bookingManager_->findBookingById(bookingId.toStdString());
+    if (!booking) {
+        QMessageBox::warning(this, "Lỗi", "Không tìm thấy thông tin đặt chỗ.");
+        return;
+    }
+    
+    // 4. Open ChangeBookingDialog
+    ChangeBookingDialog dialog(booking, bookingManager_, flightManager_, this);
+    if (dialog.exec() == QDialog::Accepted) {
+        refreshTable();
+    }
 }
 
 /**

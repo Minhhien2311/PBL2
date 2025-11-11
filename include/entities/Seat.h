@@ -14,8 +14,7 @@ enum class SeatType {
 // Trạng thái của ghế
 enum class SeatStatus {
     Available,
-    Booked,
-    Locked
+    Booked
 };
 
 class Seat {

@@ -59,6 +59,13 @@ public:
                        const std::string& newPassengerId,
                        BookingClass newClass, 
                        const std::string& newSeatId);
+    
+    // NGHIỆP VỤ ĐỔI VÉ
+    bool changeBooking(FlightManager& flightManager,
+                      SeatManager& seatManager,
+                      const std::string& bookingId,
+                      const std::string& newFlightInstanceId,
+                      const std::string& newSeatNumber);
 
     // --- Tìm kiếm  ---
     Booking* findBookingById(const std::string& bookingId);

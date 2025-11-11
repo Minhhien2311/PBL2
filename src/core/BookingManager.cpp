@@ -245,6 +245,81 @@ bool BookingManager::updateBooking(const std::string& bookingId,
     return true;
 }
 
+// --- NGHIỆP VỤ 4: ĐỔI VÉ ---
+bool BookingManager::changeBooking(FlightManager& flightManager,
+                                  SeatManager& seatManager,
+                                  const std::string& bookingId,
+                                  const std::string& newFlightInstanceId,
+                                  const std::string& newSeatNumber) {
+    // Step 1: Find and validate booking
+    Booking* booking = findBookingById(bookingId);
+    if (!booking || booking->getStatus() != BookingStatus::Issued) {
+        std::cerr << "Cannot change booking: Booking not found or not in Issued status" << std::endl;
+        return false;
+    }
+    
+    // Step 2: Validate new flight instance exists
+    FlightInstance* newInstance = flightManager.findInstanceById(newFlightInstanceId);
+    if (!newInstance) {
+        std::cerr << "Cannot change booking: New flight instance not found" << std::endl;
+        return false;
+    }
+    
+    // Step 3: Save old flight info (for rollback if needed)
+    std::string oldFlightInstanceId = booking->getFlightInstanceId();
+    std::string oldSeatId = booking->getSeatID();
+    FlightInstance* oldInstance = flightManager.findInstanceById(oldFlightInstanceId);
+    
+    // BOOK NEW SEAT FIRST (Step 4)
+    if (!seatManager.loadSeatMapFor(newInstance)) {
+        std::cerr << "ERROR: Failed to load seat map for new flight instance" << std::endl;
+        return false;
+    }
+    
+    if (!seatManager.bookSeat(newSeatNumber)) {
+        std::cerr << "ERROR: Failed to book new seat" << std::endl;
+        return false;
+    }
+    
+    if (!seatManager.saveChanges()) {
+        // Rollback: release the new seat we just tried to book
+        seatManager.releaseSeat(newSeatNumber);
+        std::cerr << "ERROR: Failed to save new seat booking" << std::endl;
+        return false;
+    }
+    
+    std::cout << "Booked new seat " << newSeatNumber << std::endl;
+    
+    // ONLY AFTER NEW SEAT IS COMMITTED, RELEASE OLD SEAT (Step 5)
+    if (oldInstance && !oldSeatId.empty()) {
+        if (seatManager.loadSeatMapFor(oldInstance)) {
+            if (seatManager.releaseSeat(oldSeatId)) {
+                if (seatManager.saveChanges()) {
+                    std::cout << "Released old seat " << oldSeatId << std::endl;
+                } else {
+                    std::cerr << "WARNING: Failed to save after releasing old seat (new seat already booked)" << std::endl;
+                    // Not critical - new seat is already committed
+                }
+            }
+        }
+    }
+    
+    // Step 6: Update booking information
+    booking->setFlightInstanceId(newFlightInstanceId);
+    booking->setSeatId(newSeatNumber);
+    booking->setStatus(BookingStatus::Changed);
+    
+    // Step 7: Save booking changes to file
+    if (!saveDataToFiles(bookingsFilePath_)) {
+        std::cerr << "ERROR: Failed to save booking changes (seats already changed, manual intervention needed)" << std::endl;
+        // Critical error but seats are already changed
+        return false;
+    }
+    
+    std::cout << "Successfully changed booking " << bookingId << std::endl;
+    return true;
+}
+
 // --- LƯU BOOKING NGAY LẬP TỨC VÀO FILE ---
 bool BookingManager::saveBookingToFile(Booking* booking) {
     if (!booking) {
