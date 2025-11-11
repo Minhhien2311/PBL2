@@ -2,7 +2,7 @@
 #include "core/ReportManager.h"
 #include "core/AccountManager.h"
 #include "core/BookingManager.h"
-#include "entities/AccountAgent.h" // Hoặc ở đây
+#include "entities/AccountAgent.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -16,7 +16,7 @@
 #include <QBarSet>
 #include <QBarCategoryAxis>
 #include <QValueAxis>
-#include <QDebug> // Thêm thư viện
+#include <QDebug>
 
 AdminTicketsReportPage::AdminTicketsReportPage(AccountManager* am,
                        BookingManager* bm,
