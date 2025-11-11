@@ -17,6 +17,7 @@
 #include <QGroupBox>
 #include <QMessageBox>
 #include <QScrollArea>
+#include <QScreen> // Required for QScreen
 #include <QButtonGroup>
 
 // Seat button style constants (matching BookingDialog)
@@ -59,7 +60,19 @@ ChangeBookingDialog::ChangeBookingDialog(Booking* currentBooking,
     
     setWindowTitle("Thông tin đổi vé");
     setMinimumWidth(700);
-    setMinimumHeight(700);
+    setMinimumHeight(600);
+
+    // Giới hạn chiều cao tối đa = 90% màn hình (để không che taskbar)
+    QRect screenGeometry = QGuiApplication::primaryScreen()->availableGeometry();
+    int maxHeight = static_cast<int>(screenGeometry.height() * 0.9);
+    int maxWidth = static_cast<int>(screenGeometry.width() * 0.8);
+
+    setMaximumHeight(maxHeight);
+    setMaximumWidth(maxWidth);
+
+    // Center dialog on screen
+    resize(700, qMin(700, maxHeight));
+    move(screenGeometry.center() - rect().center());
     
     // Load current flight instance
     currentFlightInstance_ = flightManager_->findInstanceById(currentBooking_->getFlightInstanceId());
