@@ -5,14 +5,14 @@
 
 // Khai báo sớm
 class BookingManager;
-class FlightManager;  // <--- THÊM MỚI
-class AccountManager; // <--- THÊM MỚI
+class FlightManager;  
+class AccountManager; 
 class AirportManager;
 class QTableView;
 class QStandardItemModel;
-class QLineEdit;      // <--- THÊM MỚI
-class QDateEdit;      // <--- THÊM MỚI
-class QPushButton;    // <--- THÊM MỚI
+class QLineEdit;      
+class QDateEdit;      
+class QPushButton;    
 class AirportComboBox;
 class Booking;
 
@@ -49,8 +49,8 @@ private:
 
     // --- Managers ---
     BookingManager* bookingManager_;
-    FlightManager* flightManager_;   // <--- THÊM MỚI
-    AccountManager* accountManager_; // <--- THÊM MỚI
+    FlightManager* flightManager_;   
+    AccountManager* accountManager_; 
     AirportManager* airportManager_;
 
     // --- UI Components ---
