@@ -62,6 +62,7 @@ public:
     int getSeatRows() const;
     int getSeatColumns() const;
     int getAvailableSeats(SeatClass seatClass) const;
+    int getAvailableSeats() const;
 };
 
 #endif

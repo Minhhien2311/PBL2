@@ -260,6 +260,16 @@ int SeatManager::getAvailableSeats(SeatClass seatClass) const {
     return count;
 }
 
+int SeatManager::getAvailableSeats() const {
+    int count = 0;
+    for (int i = 0; i < activeSeatMap_.size(); i++) {
+        if (activeSeatMap_[i]->getStatus() == SeatStatus::Available) {
+            count++;
+        }
+    }
+    return count;
+}
+
 void SeatManager::clearCurrentMap() {
     for (int i = 0; i < activeSeatMap_.size(); i++) {
         delete activeSeatMap_[i];

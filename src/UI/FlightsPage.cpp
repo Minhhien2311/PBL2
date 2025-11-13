@@ -225,10 +225,10 @@ void FlightsPage::setupUi()
 
 void FlightsPage::setupModel()
 {
-    model_ = new QStandardItemModel(0, 9, this);
+    model_ = new QStandardItemModel(0, 8, this);
     model_->setHorizontalHeaderLabels({
-        "ID chuyến", "ID tuyến (FlightId)", "Số hiệu", "Ngày khởi hành", "Giờ khởi hành",
-        "Ngày đến", "Giờ đến", "Ghế P.thông", "Ghế T.gia"
+        "ID chuyến", "Số hiệu", "Hãng hàng không", "Ngày khởi hành", "Giờ khởi hành",
+        "Ngày hạ cánh", "Giờ hạ cánh", "Ghế trống"
     });
     tableView_->setModel(model_);
 }
@@ -258,27 +258,19 @@ void FlightsPage::refreshTable()
     // 2. Nạp dữ liệu mới
     for (int i = 0; i < instances.size(); ++i) {
         FlightInstance* inst = instances[i];
-        if (inst) {
-            // Load seat map for this instance to get availability
+        if (inst) { 
             seatManager->loadSeatMapFor(inst);
-            int ecoAvail = seatManager->getAvailableSeats(SeatClass::Economy);
-            int busAvail = seatManager->getAvailableSeats(SeatClass::Business);
-            
-            // Calculate totals (20% business, 80% economy)
-            int totalCap = inst->getTotalCapacity();
-            int busTotal = totalCap / 5;  // 20%
-            int ecoTotal = totalCap - busTotal;
+            int availableSeats = seatManager->getAvailableSeats(); // Cập nhật số ghế trống
             
             QList<QStandardItem *> rowItems;
             rowItems << new QStandardItem(QString::fromStdString(inst->getInstanceId()))
-                   << new QStandardItem(QString::fromStdString(inst->getFlightId()))
                    << new QStandardItem(QString::fromStdString(inst->getFlightNumber()))
+                   << new QStandardItem(QString::fromStdString(flightManager_->findFlightById(inst->getFlightId())->getAirline()))
                    << new QStandardItem(QString::fromStdString(inst->getDepartureDate()))
                    << new QStandardItem(QString::fromStdString(inst->getDepartureTime()))
                    << new QStandardItem(QString::fromStdString(inst->getArrivalDate()))
                    << new QStandardItem(QString::fromStdString(inst->getArrivalTime()))
-                   << new QStandardItem(QString("%1/%2").arg(ecoAvail).arg(ecoTotal))
-                   << new QStandardItem(QString("%1/%2").arg(busAvail).arg(busTotal));
+                   << new QStandardItem(QString::number(availableSeats) + " / " + QString::number(inst->getTotalCapacity()));
             model_->appendRow(rowItems);
         }
     }
