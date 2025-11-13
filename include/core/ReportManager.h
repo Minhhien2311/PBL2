@@ -75,6 +75,8 @@ public:
     // --- Thống kê theo loại vé ---
     int getBusinessTicketsInRange(const std::string& startDate, const std::string& endDate) const;
     int getEconomyTicketsInRange(const std::string& startDate, const std::string& endDate) const;
+    int getCancelledTicketsInRange(const std::string& startDate, const std::string& endDate) const;
+    int getChangedTicketsInRange(const std::string& startDate, const std::string& endDate) const;
 
     // --- Các hàm mới cho Agent ---
     // Doanh thu theo thời gian cho agent cụ thể
@@ -86,6 +88,12 @@ public:
     // Thống kê vé theo loại cho agent cụ thể
     int getAgentBusinessTicketsInRange(const std::string& agentId, const std::string& startDate, const std::string& endDate) const;
     int getAgentEconomyTicketsInRange(const std::string& agentId, const std::string& startDate, const std::string& endDate) const;
+    int getAgentCancelledTicketsInRange(const std::string& agentId, const std::string& startDate, const std::string& endDate) const;
+    int getAgentChangedTicketsInRange(const std::string& agentId, const std::string& startDate, const std::string& endDate) const;
+
+    // Overload không cần truyền agentId (dùng cho agent hiện tại)
+    int getAgentCancelledTicketsInRange(const std::string& startDate, const std::string& endDate) const;
+    int getAgentChangedTicketsInRange(const std::string& startDate, const std::string& endDate) const;
 
     // Báo cáo vé theo tháng cho agent
     std::vector<MonthlyTicketReport*>* generateMonthlyTicketReportForAgent(const std::string& agentId, const std::string& startDate, const std::string& endDate) const;

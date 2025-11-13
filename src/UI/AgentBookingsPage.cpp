@@ -74,80 +74,136 @@ void AgentBookingsPage::setupUi()
     auto *mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
-
+    
     // ================== TOP ==================
     auto *top = new QWidget(this);
     auto *topLayout = new QVBoxLayout(top);
     topLayout->setContentsMargins(24, 20, 24, 10);
     topLayout->setSpacing(10);
 
-    // tiêu đề
+    // === Hàng 1: Tiêu đề + Nút Tải lại ===
+    QHBoxLayout* headerRow = new QHBoxLayout();
+    headerRow->setSpacing(10);
+
     auto *title = new QLabel("Tìm thông tin đặt chỗ", this);
     title->setProperty("class", "PageTitle");
-    topLayout->addWidget(title);
+    headerRow->addWidget(title);
+    headerRow->addStretch();
 
-    // ====== KHỐI TÌM KIẾM ĐƠN GIẢN ======
-    QGridLayout *searchGrid = new QGridLayout;
-    searchGrid->setHorizontalSpacing(20);
-    searchGrid->setVerticalSpacing(10);
+    // ← NÚT TẢI LẠI (góc phải trên)
+    refreshButton_ = new QPushButton("🔄 Tải lại tất cả");
+    refreshButton_->setStyleSheet(
+        "QPushButton { background:#5886C0; color:white; border:none; "
+        "border-radius:6px; height:32px; padding:0 16px; font-weight:600; }"
+        "QPushButton:hover { background:#466a9a; }"
+    );
+    refreshButton_->setCursor(Qt::PointingHandCursor);
+    refreshButton_->setMinimumWidth(140);
+    headerRow->addWidget(refreshButton_);
 
-    // Thiết lập độ giãn cho các cột
-    searchGrid->setColumnStretch(0, 2); // Cột 0: Input mã đặt chỗ (rộng hơn)
-    searchGrid->setColumnStretch(1, 1); // Cột 1: Button mã đặt chỗ
-    searchGrid->setColumnStretch(2, 2); // Cột 2: Input CCCD (rộng hơn)
-    searchGrid->setColumnStretch(3, 1); // Cột 3: Button CCCD
+    topLayout->addLayout(headerRow);
 
-    int inputWidth = 400;  // Độ rộng input box
-    int buttonWidth = 200; // Độ rộng button
+    // ========== HÀNG TÌM KIẾM (2 BOX NGANG) ==========
+    QHBoxLayout* searchRowLayout = new QHBoxLayout();
+    searchRowLayout->setSpacing(16);
 
-    // ----- HÀNG 0: INPUT | BUTTON | INPUT | BUTTON -----
+    // ========== BOX 1: TÌM THEO MÃ ĐẶT CHỖ ==========
+    QWidget* searchBox1 = new QWidget;
+    QVBoxLayout* box1Layout = new QVBoxLayout(searchBox1);
+    box1Layout->setContentsMargins(12, 12, 12, 12);
+    box1Layout->setSpacing(8);
+    
+    searchBox1->setStyleSheet(
+        "QWidget { background: white; border: 1px solid #c2cfe2; border-radius: 6px; }"
+    );
 
-    // (0,0) Ô tìm theo mã đặt chỗ
+    QLabel* box1Title = new QLabel("🔍 Tra cứu theo mã đặt chỗ");
+    box1Title->setStyleSheet("font-weight: 600; color: #123B7A; font-size: 14px; background: transparent; border: none;");
+    box1Layout->addWidget(box1Title);
+
+    QHBoxLayout* box1Row = new QHBoxLayout();
+    box1Row->setSpacing(10);
+    
     bookingIdSearchEdit_ = new QLineEdit;
-    bookingIdSearchEdit_->setPlaceholderText("Tìm theo mã đặt chỗ (VD: BKG-0000001)");
-    bookingIdSearchEdit_->setMinimumWidth(inputWidth);
-    searchGrid->addWidget(bookingIdSearchEdit_, 0, 0);
+    bookingIdSearchEdit_->setPlaceholderText("Nhập mã đặt chỗ (VD: BKG-0000001)");
+    bookingIdSearchEdit_->setMinimumHeight(36);
+    box1Row->addWidget(bookingIdSearchEdit_, 1);
 
-    // (0,1) Nút tìm theo mã đặt chỗ
-    searchButton_ = new QPushButton("🔍 Tìm theo mã đặt chỗ");
+    searchButton_ = new QPushButton("Tìm kiếm");
     searchButton_->setProperty("class", "SearchBtn");
-    searchButton_->setMinimumHeight(40);
-    searchButton_->setMinimumWidth(buttonWidth);
-    searchGrid->addWidget(searchButton_, 0, 1);
+    searchButton_->setMinimumHeight(36);
+    searchButton_->setMinimumWidth(110);
+    searchButton_->setCursor(Qt::PointingHandCursor);
+    searchButton_->setStyleSheet(
+        "QPushButton { background:#4478BD; color:white; font-weight:600; "
+        "border-radius:6px; padding: 0 16px; }"
+        "QPushButton:hover { background:#365a9e; }"
+    );
+    box1Row->addWidget(searchButton_);
 
-    // (0,2) Ô tìm theo CCCD
+    box1Layout->addLayout(box1Row);
+
+    searchRowLayout->addWidget(searchBox1, 1);
+
+    // ========== BOX 2: TÌM THEO CCCD ==========
+    QWidget* searchBox2 = new QWidget;
+    QVBoxLayout* box2Layout = new QVBoxLayout(searchBox2);
+    box2Layout->setContentsMargins(12, 12, 12, 12);
+    box2Layout->setSpacing(8);
+    
+    searchBox2->setStyleSheet(
+        "QWidget { background: white; border: 1px solid #c2cfe2; border-radius: 6px; }"
+    );
+
+    QLabel* box2Title = new QLabel("👤 Tra cứu theo CCCD khách hàng");
+    box2Title->setStyleSheet("font-weight: 600; color: #123B7A; font-size: 14px; background: transparent; border: none;");
+    box2Layout->addWidget(box2Title);
+
+    QHBoxLayout* box2Row = new QHBoxLayout();
+    box2Row->setSpacing(10);
+    
     passengerIdSearchEdit_ = new QLineEdit;
-    passengerIdSearchEdit_->setPlaceholderText("Tìm theo CCCD khách hàng");
-    passengerIdSearchEdit_->setMinimumWidth(inputWidth);
-    searchGrid->addWidget(passengerIdSearchEdit_, 0, 2);
+    passengerIdSearchEdit_->setPlaceholderText("Nhập CCCD khách hàng");
+    passengerIdSearchEdit_->setMinimumHeight(36);
+    box2Row->addWidget(passengerIdSearchEdit_, 1);
 
-    // (0,3) Nút tìm theo CCCD
-    searchByPassengerBtn_ = new QPushButton("👤 Tìm theo CCCD khách hàng");
+    searchByPassengerBtn_ = new QPushButton("Tìm kiếm");
     searchByPassengerBtn_->setProperty("class", "SearchBtn");
-    searchByPassengerBtn_->setMinimumHeight(40);
-    searchByPassengerBtn_->setMinimumWidth(buttonWidth);
-    searchGrid->addWidget(searchByPassengerBtn_, 0, 3);
+    searchByPassengerBtn_->setMinimumHeight(36);
+    searchByPassengerBtn_->setMinimumWidth(110);
+    searchByPassengerBtn_->setCursor(Qt::PointingHandCursor);
+    searchByPassengerBtn_->setStyleSheet(
+        "QPushButton { background:#4478BD; color:white; font-weight:600; "
+        "border-radius:6px; padding: 0 16px; }"
+        "QPushButton:hover { background:#365a9e; }"
+    );
+    box2Row->addWidget(searchByPassengerBtn_);
 
-    // Thêm layout vào topLayout
-    topLayout->addLayout(searchGrid);
+    box2Layout->addLayout(box2Row);
+
+    searchRowLayout->addWidget(searchBox2, 1);
+
+    // Thêm layout ngang vào topLayout
+    topLayout->addLayout(searchRowLayout);
     mainLayout->addWidget(top);
 
-    // ================== TIÊU ĐỀ BẢNG ==================
+    // ================== TIÊU ĐỀ BẢNG + STATUS ==================
     auto *tableHeader = new QWidget(this);
     auto *thLayout = new QHBoxLayout(tableHeader);
     thLayout->setContentsMargins(24, 0, 24, 0);
-    thLayout->setSpacing(0);
+    thLayout->setSpacing(10);
 
-    auto *tblTitle = new QLabel("Tất cả thông tin đặt chỗ", this);
+    auto *tblTitle = new QLabel("📋 Kết quả tìm kiếm", this);
     tblTitle->setObjectName("tableTitle");
     tblTitle->setProperty("class", "SectionTitle");
     thLayout->addWidget(tblTitle);
-    thLayout->addStretch();
 
-    refreshButton_ = new QPushButton("Tải lại tất cả");
-    refreshButton_->setProperty("class", "SearchBtn");
-    refreshButton_->setMinimumWidth(120);
-    thLayout->addWidget(refreshButton_);
+    // Status label (hiển thị số kết quả)
+    statusLabel_ = new QLabel("", this);
+    statusLabel_->setStyleSheet("color: #123B7A; font-size: 12px;");
+    thLayout->addWidget(statusLabel_);
+
+    thLayout->addStretch();
 
     mainLayout->addWidget(tableHeader);
 
@@ -273,6 +329,10 @@ void AgentBookingsPage::refreshTable()
             model_->appendRow(rowItems);
         }
     }
+
+    statusLabel_->setText(
+        QString("Hiển thị tất cả %1 đặt chỗ").arg(agentBookings.size())
+    );
 }
 
 void AgentBookingsPage::onCancelBookingClicked()
@@ -487,6 +547,9 @@ void AgentBookingsPage::onSearchByBookingId()
     
     // Hiển thị kết quả
     displayBooking(booking);
+
+    // ← THÊM: Cập nhật status
+    statusLabel_->setText("✅ Tìm thấy 1 đặt chỗ");
     
     QMessageBox::information(this, "Tìm thấy", 
         QString("Đã tìm thấy đặt chỗ: %1").arg(input));
@@ -533,6 +596,10 @@ void AgentBookingsPage::onSearchByPassengerId()
     for (Booking* booking : results) {
         displayBooking(booking);
     }
+
+    statusLabel_->setText(
+    QString("🔍 Tìm thấy %1 đặt chỗ").arg(results.size())
+    );
     
     QMessageBox::information(this, "Kết quả tìm kiếm", 
         QString("Tìm thấy %1 đặt chỗ cho CCCD:\n%2")

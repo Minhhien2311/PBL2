@@ -41,8 +41,10 @@ private:
     QDateEdit* endDate_;
     QPushButton* refreshBtn_;
     QLabel* totalTicketsLabel_;
-    QLabel* businessTicketsLabel_;
     QLabel* economyTicketsLabel_;
+    QLabel* businessTicketsLabel_;
+    QLabel* cancelledTicketsLabel_;
+    QLabel* changedTicketsLabel_;
     
     QChartView* chartView_;
     QChart* chart_;

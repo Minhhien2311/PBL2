@@ -44,82 +44,151 @@ AdminRevenueReportPage::~AdminRevenueReportPage()
 
 void AdminRevenueReportPage::setupUI()
 {
-    auto* layout = new QVBoxLayout(this);
-    layout->setAlignment(Qt::AlignTop);
+    this->setStyleSheet(
+        "QWidget { background: #F2F6FD; }"
+        "QLabel.PageTitle { color:#123B7A; font-weight:700; font-size:17px; }"
+        "QLabel.SectionTitle { color:#123B7A; font-weight:700; font-size:16px; }"
+        "QFrame#StatCard { background: white; border:1px solid #0E3B7C; }"
+    );
 
-    // --- Nút làm mới ---
-    // (Giữ nguyên)
-    auto* refreshLayout = new QHBoxLayout();
-    refreshLayout->setAlignment(Qt::AlignLeft);
+    auto* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
 
-    auto* refreshBtn = new QPushButton("Làm mới", this);
-    refreshLayout->addWidget(refreshBtn);
-    refreshLayout->addStretch();
+    // ========== TOP BAR ==========
+    QWidget* topBar = new QWidget(this);
+    auto* topBarLayout = new QVBoxLayout(topBar);
+    topBarLayout->setContentsMargins(24, 20, 24, 16);
+    topBarLayout->setSpacing(16);
 
-    layout->addLayout(refreshLayout);
-    layout->addSpacing(10);
+    QHBoxLayout* headerRow = new QHBoxLayout();
+    headerRow->setSpacing(10);
 
-    // --- 1. Hàng thống kê tổng (3 hộp) ---
-    // (Giữ nguyên)
-    auto* summaryLayout = new QHBoxLayout();
-    summaryLayout->setSpacing(20);
+    QLabel* pageTitle = new QLabel("Báo cáo doanh thu", topBar);
+    pageTitle->setProperty("class", "PageTitle");
+    headerRow->addWidget(pageTitle);
+    headerRow->addStretch();
+
+    QPushButton* refreshBtn = new QPushButton("🔄 Làm mới", topBar);
+    refreshBtn->setStyleSheet(
+        "QPushButton { background:#5886C0; color:white; border:none; "
+        "border-radius:6px; height:32px; padding:0 16px; font-weight:600; }"
+        "QPushButton:hover { background:#466a9a; }"
+    );
+    refreshBtn->setCursor(Qt::PointingHandCursor);
+    headerRow->addWidget(refreshBtn);
+
+    topBarLayout->addLayout(headerRow);
+
+    QHBoxLayout* statsLayout = new QHBoxLayout();
+    statsLayout->setSpacing(16);
 
     QFrame* box1 = createRevenueBox("TRONG NGÀY", "0 triệu VND");
     QFrame* box2 = createRevenueBox("TRONG TUẦN", "0 triệu VND");
     QFrame* box3 = createRevenueBox("TRONG THÁNG", "0 triệu VND");
 
-    summaryLayout->addWidget(box1);
-    summaryLayout->addWidget(box2);
-    summaryLayout->addWidget(box3);
-    layout->addLayout(summaryLayout);
-    layout->addSpacing(20);
+    statsLayout->addWidget(box1);
+    statsLayout->addWidget(box2);
+    statsLayout->addWidget(box3);
 
-    // --- 2. Biểu đồ ---
-    // === SỬA: Chỉ tạo QChart và QChartView ===
+    topBarLayout->addLayout(statsLayout);
+    mainLayout->addWidget(topBar);
+
+    // ========== TIÊU ĐỀ BIỂU ĐỒ ==========
+    QWidget* chartHeader = new QWidget(this);
+    auto* chartHeaderLayout = new QHBoxLayout(chartHeader);
+    chartHeaderLayout->setContentsMargins(24, 6, 24, 0);
+    chartHeaderLayout->setSpacing(0);
+
+    QLabel* chartTitle = new QLabel("Doanh thu theo tháng (Toàn hệ thống)", chartHeader);
+    chartTitle->setProperty("class", "SectionTitle");
+    chartHeaderLayout->addWidget(chartTitle);
+    chartHeaderLayout->addStretch();
+
+    mainLayout->addWidget(chartHeader);
+
+    // ========== BIỂU ĐỒ TRONG KHUNG TRẮNG (KHÔNG CÓ SCROLL) ==========
+    QWidget* chartContainer = new QWidget(this);
+    auto* chartContainerLayout = new QVBoxLayout(chartContainer);
+    chartContainerLayout->setContentsMargins(24, 6, 24, 24);
+
+    QFrame* chartFrame = new QFrame(chartContainer);
+    chartFrame->setStyleSheet(
+        "QFrame { background: white; border: 1px solid #c2cfe2; border-radius: 8px; }"
+    );
+    auto* chartFrameLayout = new QVBoxLayout(chartFrame);
+    chartFrameLayout->setContentsMargins(16, 16, 16, 16);
+
     chart_ = new QChart();
-    chart_->setTitle("Doanh thu theo tháng (Toàn hệ thống)");
+    chart_->setTitle("");
+    chart_->setBackgroundVisible(false);
 
-    chartView_ = new QChartView(chart_, this);
+    chartView_ = new QChartView(chart_, chartFrame);
     chartView_->setRenderHint(QPainter::Antialiasing);
+    chartView_->setMinimumHeight(400);
 
-    // (Đã xóa code tạo series và trục ở đây)
+    // === FIX: THÊM TRỰC TIẾP chartView_, KHÔNG QUA ScrollArea ===
+    chartFrameLayout->addWidget(chartView_);
+    chartContainerLayout->addWidget(chartFrame);
+    
+    mainLayout->addWidget(chartContainer, 1);
 
-    layout->addWidget(chartView_);
-
-    // Kết nối nút làm mới
     connect(refreshBtn, &QPushButton::clicked, this, &AdminRevenueReportPage::updateData);
 }
 
 QFrame* AdminRevenueReportPage::createRevenueBox(const QString& title, const QString& value)
 {
-    // (Giữ nguyên)
-    auto* box = new QFrame(this);
-    box->setFrameShape(QFrame::StyledPanel);
-    box->setStyleSheet(
-    "QFrame { background: white; border: 1px solid #C9D6EB; border-radius: 8px; padding: 10px; }"
+    // === KHUNG NGOÀI (GIỐNG DASHBOARDPAGE) ===
+    QFrame* card = new QFrame(this);
+    card->setObjectName("StatCard");
+    card->setFixedHeight(90);  // ← Chiều cao giống DashboardPage
+    card->setStyleSheet(
+        "QFrame#StatCard {"
+        "   background: white;"
+        "   border: 1px solid #0E3B7C;"
+        "}"
     );
 
-    auto* boxLayout = new QVBoxLayout(box);
+    auto* cardLayout = new QVBoxLayout(card);
+    cardLayout->setContentsMargins(0, 0, 0, 0);
+    cardLayout->setSpacing(0);
 
-    auto* titleLabel = new QLabel(title, box);
-    titleLabel->setStyleSheet("font-size: 12px; font-weight: 600; color: #5B86C6; background: transparent; border: none;");
+    // === HEADER XANH ĐẬM (GIỐNG DASHBOARDPAGE) ===
+    QWidget* head = new QWidget(card);
+    head->setStyleSheet("background:#0E3B7C; color:white;");
+    head->setFixedHeight(28);
+    
+    auto* headLayout = new QHBoxLayout(head);
+    headLayout->setContentsMargins(10, 0, 10, 0);
+    
+    QLabel* titleLabel = new QLabel(title, head);
+    titleLabel->setStyleSheet("font-size:13px; font-weight:600; color:white;");
+    titleLabel->setAlignment(Qt::AlignCenter);
+    headLayout->addWidget(titleLabel);
 
-    auto* valueLabel = new QLabel(value, box);
-    valueLabel->setStyleSheet("font-size: 24px; font-weight: 700; color: #123B7A; background: transparent; border: none;");
+    // === BODY TRẮNG (GIỐNG DASHBOARDPAGE) ===
+    QWidget* body = new QWidget(card);
+    auto* bodyLayout = new QHBoxLayout(body);
+    bodyLayout->setContentsMargins(10, 6, 10, 6);
 
-    boxLayout->addWidget(titleLabel);
-    boxLayout->addWidget(valueLabel);
+    QLabel* valueLabel = new QLabel(value, body);
+    valueLabel->setStyleSheet("color:#0E3B7C; font-size:20px; font-weight:700;");
+    valueLabel->setAlignment(Qt::AlignCenter);
+    bodyLayout->addWidget(valueLabel, 0, Qt::AlignCenter);
 
-    // (Sửa lại key một chút cho khớp với UI)
+    // === LƯU TRỮ POINTER (để updateData() cập nhật sau) ===
     if (title == "TRONG NGÀY") {
-    dailyRevenueLabel_ = valueLabel;
+        dailyRevenueLabel_ = valueLabel;
     } else if (title == "TRONG TUẦN") {
-    weeklyRevenueLabel_ = valueLabel;
+        weeklyRevenueLabel_ = valueLabel;
     } else if (title == "TRONG THÁNG") {
-    monthlyRevenueLabel_ = valueLabel;
+        monthlyRevenueLabel_ = valueLabel;
     }
 
-    return box;
+    cardLayout->addWidget(head);
+    cardLayout->addWidget(body);
+
+    return card;
 }
 
 void AdminRevenueReportPage::updateData()
@@ -215,27 +284,46 @@ void AdminRevenueReportPage::updateChart()
     chartSeries_->append(barSet);
     chart_->addSeries(chartSeries_);
 
-    // 6. Tạo trục X (MỚI)
+    // 6. Tạo trục X (Không có tiêu đề ở giữa)
     auto* axisX = new QBarCategoryAxis();
     axisX->append(categories);
-    axisX->setTitleText("Tháng");
+    // ← XÓA: axisX->setTitleText("Tháng");  // Không dùng title ở giữa nữa
     chart_->addAxis(axisX, Qt::AlignBottom);
     chartSeries_->attachAxis(axisX);
 
-    // 7. Tạo trục Y (MỚI)
+    // 7. Tạo trục Y (Không có tiêu đề ở giữa)
     auto* axisY = new QValueAxis();
     axisY->setRange(0, yAxisMax);
-    axisY->setLabelFormat("%.1f"); // Hiển thị 1 chữ số thập phân
-    axisY->setTitleText("Doanh thu (Triệu VND)");
+    // Cách 2: Chỉ số, riêng đơn vị
+    axisY->setLabelFormat("%.1f");
+    axisY->setTitleText("Triệu VND");  // ← Title sẽ hiển thị ở giữa trục Y
+    QFont titleFont;
+    titleFont.setPointSize(10);
+    titleFont.setBold(true);
+    axisY->setTitleFont(titleFont);  // ← Font cho title
+    // axisY->setTitleBrush(QBrush(QColor(18, 59, 122)));  // ← Màu xanh đậm (tùy chọn)
+    // ← XÓA: axisY->setTitleText("Doanh thu (Triệu VND)");  // Không dùng title ở giữa
     chart_->addAxis(axisY, Qt::AlignLeft);
     chartSeries_->attachAxis(axisY);
 
-    // 8. Thêm hiệu ứng và legend
-    chart_->setTitle("Doanh thu theo Tháng (Toàn hệ thống) - Năm " + QString::number(currentYear));
+    // 8. Thêm hiệu ứng và ẨN LEGEND (xóa ô "Doanh thu" dưới biểu đồ)
+    chart_->setTitle("");  // Xóa title vì đã có tiêu đề riêng ở trên
     chart_->setAnimationOptions(QChart::SeriesAnimations);
-    chart_->legend()->setVisible(true);
-    chart_->legend()->setAlignment(Qt::AlignBottom);
+    chart_->legend()->setVisible(false);  // ← ẨN LEGEND (ô doanh thu dưới biểu đồ)
 
+    // === BỎ ĐƯỜNG KẺ DỌC (CHỈ GIỮ KẺ NGANG) ===
+    chart_->setBackgroundVisible(true);
+    chart_->setBackgroundBrush(Qt::white);
+    
+    // Tắt grid dọc cho trục X
+    axisX->setGridLineVisible(false);  // ← Bỏ đường kẻ dọc
+    
+    // Giữ grid ngang cho trục Y
+    axisY->setGridLineVisible(true);   // ← Giữ đường kẻ ngang
+    axisY->setGridLineColor(QColor(220, 220, 220));  // Màu xám nhạt
+    
+    // === TĂNG PADDING CHO BIỂU ĐỒ (không sát viền) ===
+    chart_->setMargins(QMargins(6, 20, 20, 20));
     chartView_->setChart(chart_);
     chartView_->update();
 }

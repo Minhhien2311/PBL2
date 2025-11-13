@@ -11,6 +11,8 @@ class QStandardItemModel;
 class FlightManager; // <--- Sửa lỗi: Tên đúng (số ít)
 class AirportManager;
 class AirportComboBox;
+class QComboBox;
+class QLabel;
 
 class RoutesPage : public QWidget
 {
@@ -21,8 +23,7 @@ public:
     explicit RoutesPage(FlightManager* flightManager, AirportManager* airportManager, QWidget *parent = nullptr);
 
 private slots:
-    void onSearchByAirline();
-    void onSearchByRoute(); 
+    void onSearchByRoute();
     void onAddRoute();
     void onEditRoute();
     void onDeleteRoute();
@@ -39,16 +40,16 @@ private:
 
     // --- UI Components ---
     QLineEdit* idSearchEdit_;
-    QLineEdit* airlineSearchEdit_;
+    QComboBox* airlineSearchCombo_; 
     AirportComboBox* fromSearchCombo_;
     AirportComboBox* toSearchCombo_;   
 
     QTableView* tableView_;
     QStandardItemModel* model_;
+    QLabel* statusLabel_;
 
     // <--- Sửa lỗi: Thêm các nút tìm kiếm làm biến thành viên
     QPushButton* searchByIdBtn_;
-    QPushButton* searchByAirlineBtn_;
     QPushButton* searchByRouteBtn_;
     
     QPushButton* addButton_;
@@ -57,4 +58,3 @@ private:
 };
 
 #endif // ROUTESPAGE_H
-

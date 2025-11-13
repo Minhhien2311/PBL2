@@ -12,6 +12,8 @@ class FlightManager; // Dùng FlightManager
 class QDateEdit;
 class AirportManager;
 class AirportComboBox; 
+class QComboBox;
+class QLabel;
 
 class FlightsPage : public QWidget
 {
@@ -21,15 +23,16 @@ public:
     explicit FlightsPage(FlightManager* flightManager, AirportManager* airportManager, QWidget *parent = nullptr);
 
 private slots:
+    private slots:
     void onSearchById();
-    void onSearchByRoute();
-    void onSearchByDate();
+    void onSearchFilter();         // ← THÊM dòng này (tìm kiếm tổng hợp)
     void onAddFlight();
     void onEditFlight();
     void onDeleteFlight();
     void refreshTable();
 
 private:
+    private:
     void setupUi();
     void setupModel();
     void setupConnections();
@@ -42,6 +45,8 @@ private:
     AirportComboBox* fromSearchCombo_;
     AirportComboBox* toSearchCombo_;
     QDateEdit* dateSearchEdit_; 
+    QComboBox* airlineFilterCombo_;  // ← THÊM dòng này
+    QLabel* statusLabel_;             // ← THÊM dòng này
 
     QTableView* tableView_;
     QStandardItemModel* model_;
@@ -50,6 +55,7 @@ private:
     QPushButton* searchByIdBtn_;
     QPushButton* searchByRouteBtn_;
     QPushButton* searchByDateBtn_;
+    QPushButton* searchFilterBtn_;    // ← THÊM dòng này (nút tìm kiếm tổng hợp)
     
     QPushButton* addButton_;
     QPushButton* editButton_;
@@ -57,4 +63,3 @@ private:
 };
 
 #endif // FLIGHTSPAGE_H
-

@@ -15,6 +15,7 @@ class QDateEdit;
 class QPushButton;    
 class AirportComboBox;
 class Booking;
+class QLabel;
 
 class AgentBookingsPage : public QWidget
 {
@@ -62,6 +63,7 @@ private:
 
     QTableView* tableView_;
     QStandardItemModel* model_;
+    QLabel* statusLabel_;
     
     QPushButton* cancelBookingBtn_; // Nút Hủy vé
     QPushButton* viewDetailsBtn_;   // Nút Xem chi tiết

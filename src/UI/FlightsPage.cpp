@@ -5,9 +5,11 @@
 #include "core/SeatManager.h"
 #include "core/AirportManager.h"
 #include "entities/FlightInstance.h" // Cần để đọc dữ liệu
+#include "FlightDialog.h"
 #include "AirportComboBox.h"
 #include <string>
 
+#include <QComboBox>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QGridLayout>
@@ -77,96 +79,192 @@ void FlightsPage::setupUi()
     topLayout->setContentsMargins(24, 20, 24, 16);   // giống RoutesPage
     topLayout->setSpacing(16);
 
-    // tiêu đề
+    // === Hàng 1: Tiêu đề + Nút Tải lại (DI CHUYỂN LÊN ĐÂY) ===
+    QHBoxLayout* headerRow = new QHBoxLayout();
+    headerRow->setSpacing(10);
+
     QLabel* title = new QLabel("Tìm chuyến bay", this);
     title->setProperty("class", "PageTitle");
-    topLayout->addWidget(title);
+    headerRow->addWidget(title);
+    headerRow->addStretch();
 
-    // hàng tìm kiếm 3 box
-    QHBoxLayout *searchRow = new QHBoxLayout();
-    searchRow->setSpacing(18);
+    // ← NÚT TẢI LẠI (di chuyển từ dưới lên đây)
+    QPushButton* refreshButton = new QPushButton("🔄 Tải lại tất cả", topBar);
+    refreshButton->setStyleSheet(
+        "QPushButton { background:#5886C0; color:white; border:none; "
+        "border-radius:6px; height:32px; padding:0 16px; font-weight:600; }"
+        "QPushButton:hover { background:#466a9a; }"
+    );
+    refreshButton->setCursor(Qt::PointingHandCursor);
+    refreshButton->setMinimumWidth(140);
+    headerRow->addWidget(refreshButton);
 
-    // --- Box 1: ID chuyến bay ---
-    {
-        QWidget *box = new QWidget;
-        QVBoxLayout *v = new QVBoxLayout(box);
-        v->setContentsMargins(0,0,0,0);
-        v->setSpacing(5);
+    topLayout->addLayout(headerRow);
 
-        idSearchEdit_ = new QLineEdit;
-        searchByIdBtn_ = new QPushButton("Tìm theo ID");
-        searchByIdBtn_->setProperty("class", "SearchBtn");
+    // Kết nối nút refresh
+    connect(refreshButton, &QPushButton::clicked, this, &FlightsPage::refreshTable);
 
-        v->addWidget(idSearchEdit_);
-        v->addWidget(searchByIdBtn_);
+    // ========== HÀNG TÌM KIẾM (2 BOX NGANG) ==========
+    QHBoxLayout* searchRowLayout = new QHBoxLayout();
+    searchRowLayout->setSpacing(16);
 
-        box->setMinimumWidth(200);
-        searchRow->addWidget(box);
-    }
+    // ========== BOX 1: TRA CỨU NHANH ==========
+    QWidget* quickSearchBox = new QWidget;
+    QVBoxLayout* qsLayout = new QVBoxLayout(quickSearchBox);
+    qsLayout->setContentsMargins(12, 12, 12, 12);
+    qsLayout->setSpacing(8);
+    
+    quickSearchBox->setStyleSheet(
+        "QWidget { background: white; border: 1px solid #c2cfe2; border-radius: 6px; }"
+    );
 
-    // --- Box 2: Lộ trình (từ – đến) ---
-    {
-        QWidget *box = new QWidget;
-        QVBoxLayout *v = new QVBoxLayout(box);
-        v->setContentsMargins(0,0,0,0);
-        v->setSpacing(5);
+    QLabel* qsTitle = new QLabel("⚡ Tra cứu nhanh theo ID chuyến bay");
+    qsTitle->setStyleSheet("font-weight: 600; color: #123B7A; font-size: 14px; background: transparent; border: none;");
+    qsLayout->addWidget(qsTitle);
 
-        QWidget *routeRow = new QWidget;
-        QHBoxLayout *routeHL = new QHBoxLayout(routeRow);
-        routeHL->setContentsMargins(0,0,0,0);
-        routeHL->setSpacing(6);
+    // ← NÚT TÌM KIẾM CÙNG HÀNG VỚI INPUT
+    QHBoxLayout* qsRow = new QHBoxLayout();
+    qsRow->setSpacing(10);
+    
+    idSearchEdit_ = new QLineEdit;
+    idSearchEdit_->setPlaceholderText("Nhập ID chuyến bay (VD: VN123_20112025_0600)");
+    idSearchEdit_->setMinimumHeight(36);
+    qsRow->addWidget(idSearchEdit_, 1);
 
-        fromSearchCombo_ = new AirportComboBox(airportManager_);
-        toSearchCombo_ = new AirportComboBox(airportManager_);
+    searchByIdBtn_ = new QPushButton("Tìm kiếm");  // ← Bỏ emoji
+    searchByIdBtn_->setProperty("class", "SearchBtn");
+    searchByIdBtn_->setMinimumHeight(36);
+    searchByIdBtn_->setMinimumWidth(110);
+    searchByIdBtn_->setCursor(Qt::PointingHandCursor);
+    searchByIdBtn_->setStyleSheet(
+        "QPushButton { background:#4478BD; color:white; font-weight:600; "
+        "border-radius:6px; padding: 0 16px; }"
+        "QPushButton:hover { background:#365a9e; }"
+    );
+    qsRow->addWidget(searchByIdBtn_);
 
-        routeHL->addWidget(new QLabel("Từ:"));
-        routeHL->addWidget(fromSearchCombo_, 1);
-        routeHL->addWidget(new QLabel("→"));
-        routeHL->addWidget(new QLabel("Đến:"));
-        routeHL->addWidget(toSearchCombo_, 1);
+    qsLayout->addLayout(qsRow);
+    qsLayout->addStretch();
 
-        searchByRouteBtn_ = new QPushButton("Tìm theo lộ trình bay");
-        searchByRouteBtn_->setProperty("class", "SearchBtn");
+    searchRowLayout->addWidget(quickSearchBox, 1);
 
-        v->addWidget(routeRow);
-        v->addWidget(searchByRouteBtn_);
+    // ========== BOX 2: TÌM KIẾM NÂNG CAO ==========
+    QWidget* advancedSearchBox = new QWidget;
+    QVBoxLayout* asLayout = new QVBoxLayout(advancedSearchBox);
+    asLayout->setContentsMargins(12, 12, 12, 12);
+    asLayout->setSpacing(10);
+    
+    advancedSearchBox->setStyleSheet(
+        "QWidget { background: white; border: 1px solid #c2cfe2; border-radius: 6px; }"
+    );
 
-        searchRow->addWidget(box, 1);
-    }
+    QLabel* asTitle = new QLabel("🔎 Tìm kiếm nâng cao theo nhiều tiêu chí");
+    asTitle->setStyleSheet("font-weight: 600; color: #123B7A; font-size: 14px; background: transparent; border: none;");
+    asLayout->addWidget(asTitle);
 
-    // --- Box 3: Ngày khởi hành ---
-    {
-        QWidget *box = new QWidget;
-        QVBoxLayout *v = new QVBoxLayout(box);
-        v->setContentsMargins(0,0,0,0);
-        v->setSpacing(5);
+    // ← LAYOUT NGANG: Labels + Inputs + Nút tìm kiếm
+    QHBoxLayout* filterRowLayout = new QHBoxLayout();
+    filterRowLayout->setSpacing(12);
 
-        dateSearchEdit_ = new QDateEdit(QDate::currentDate(), this);
-        dateSearchEdit_->setCalendarPopup(true);
-        dateSearchEdit_->setDisplayFormat("dd/MM/yyyy");
+    // === Cột 1: Điểm đi ===
+    QVBoxLayout* col1 = new QVBoxLayout();
+    col1->setSpacing(6);
+    QLabel* fromLabel = new QLabel("Điểm đi");
+    fromLabel->setStyleSheet("background: transparent; border: none; color: #123B7A;");  // ← Bỏ viền
+    col1->addWidget(fromLabel);
+    fromSearchCombo_ = new AirportComboBox(airportManager_);
+    fromSearchCombo_->setMinimumHeight(36);
+    col1->addWidget(fromSearchCombo_);
+    filterRowLayout->addLayout(col1, 1);
 
-        searchByDateBtn_ = new QPushButton("Tìm theo ngày khởi hành");
-        searchByDateBtn_->setProperty("class", "SearchBtn");
+    // === Cột 2: Điểm đến ===
+    QVBoxLayout* col2 = new QVBoxLayout();
+    col2->setSpacing(6);
+    QLabel* toLabel = new QLabel("Điểm đến");
+    toLabel->setStyleSheet("background: transparent; border: none; color: #123B7A;");  // ← Bỏ viền
+    col2->addWidget(toLabel);
+    toSearchCombo_ = new AirportComboBox(airportManager_);
+    toSearchCombo_->setMinimumHeight(36);
+    col2->addWidget(toSearchCombo_);
+    filterRowLayout->addLayout(col2, 1);
 
-        v->addWidget(dateSearchEdit_);
-        v->addWidget(searchByDateBtn_);
+    // === Cột 3: Ngày khởi hành ===
+    QVBoxLayout* col3 = new QVBoxLayout();
+    col3->setSpacing(6);
+    QLabel* dateLabel = new QLabel("Ngày khởi hành");
+    dateLabel->setStyleSheet("background: transparent; border: none; color: #123B7A;");  // ← Bỏ viền
+    col3->addWidget(dateLabel);
+    dateSearchEdit_ = new QDateEdit(this);
+    dateSearchEdit_->setCalendarPopup(true);
+    dateSearchEdit_->setDisplayFormat("dd/MM/yyyy");
+    dateSearchEdit_->setSpecialValueText("Tùy chọn");
+    QDate oneDayAgo = QDate::currentDate().addDays(-1);
+    dateSearchEdit_->setMinimumDate(oneDayAgo);
+    dateSearchEdit_->clear();
+    dateSearchEdit_->setMinimumHeight(36);
+    col3->addWidget(dateSearchEdit_);
+    filterRowLayout->addLayout(col3, 1);
 
-        searchRow->addWidget(box);
-    }
+    // === Cột 4: Hãng hàng không ===
+    QVBoxLayout* col4 = new QVBoxLayout();
+    col4->setSpacing(6);
+    QLabel* airlineLabel = new QLabel("Hãng hàng không");
+    airlineLabel->setStyleSheet("background: transparent; border: none; color: #123B7A;");  // ← Bỏ viền
+    col4->addWidget(airlineLabel);
+    airlineFilterCombo_ = new QComboBox(this);
+    airlineFilterCombo_->addItem("Tùy chọn", "");
+    airlineFilterCombo_->addItem("VietJet Air", "VietJet Air");
+    airlineFilterCombo_->addItem("Vietnam Airlines", "Vietnam Airlines");
+    airlineFilterCombo_->addItem("Bamboo Airways", "Bamboo Airways");
+    airlineFilterCombo_->addItem("Vietravel Airlines", "Vietravel Airlines");
+    airlineFilterCombo_->setMinimumHeight(36);
+    col4->addWidget(airlineFilterCombo_);
+    filterRowLayout->addLayout(col4, 1);
 
-    topLayout->addLayout(searchRow);
+    // === Cột 5: Nút tìm kiếm (CÙNG HÀNG) ===
+    QVBoxLayout* col5 = new QVBoxLayout();
+    col5->setSpacing(6);
+    // Thêm label trống để căn nút với các input khác
+    QLabel* emptyLabel = new QLabel(" ");  // ← Label trống để căn chỉnh
+    emptyLabel->setStyleSheet("background: transparent; border: none;");
+    col5->addWidget(emptyLabel);
+    
+    searchFilterBtn_ = new QPushButton("Tìm kiếm");  // ← Bỏ emoji
+    searchFilterBtn_->setProperty("class", "SearchBtn");
+    searchFilterBtn_->setMinimumHeight(36);
+    searchFilterBtn_->setMinimumWidth(110);
+    searchFilterBtn_->setCursor(Qt::PointingHandCursor);
+    searchFilterBtn_->setStyleSheet(
+        "QPushButton { background:#4472C4; color:white; font-weight:600; "
+        "border-radius:6px; padding: 0 16px; }"
+        "QPushButton:hover { background:#365a9e; }"
+    );
+    col5->addWidget(searchFilterBtn_);
+    filterRowLayout->addLayout(col5);
+
+    asLayout->addLayout(filterRowLayout);
+
+    searchRowLayout->addWidget(advancedSearchBox, 2);
+
+    topLayout->addLayout(searchRowLayout);
     mainLayout->addWidget(topBar);
 
-    // ========== TIÊU ĐỀ BẢNG ==========
+    // ========== TIÊU ĐỀ BẢNG + STATUS ==========
     QWidget *tableHeader = new QWidget(this);
     QHBoxLayout *tableHeaderLayout = new QHBoxLayout(tableHeader);
     tableHeaderLayout->setContentsMargins(24, 0, 24, 0);
-    tableHeaderLayout->setSpacing(0);
+    tableHeaderLayout->setSpacing(10);
 
-    QLabel* tableTitle = new QLabel("Tất cả chuyến bay", this);
+    QLabel* tableTitle = new QLabel("📋 Kết quả tìm kiếm", this);
     tableTitle->setProperty("class", "SectionTitle");
     tableTitle->setObjectName("TableTitle");
     tableHeaderLayout->addWidget(tableTitle);
+
+    // Status label (hiển thị số lượng kết quả)
+    statusLabel_ = new QLabel("", this);
+    statusLabel_->setStyleSheet("color: #123B7A; font-size: 12px;");
+    tableHeaderLayout->addWidget(statusLabel_);
+    
     tableHeaderLayout->addStretch();
 
     mainLayout->addWidget(tableHeader);
@@ -235,10 +333,9 @@ void FlightsPage::setupModel()
 
 void FlightsPage::setupConnections()
 {
-    // <--- Sửa lỗi: Kết nối các nút tìm kiếm
+    // Kết nối các nút tìm kiếm
     connect(searchByIdBtn_, &QPushButton::clicked, this, &FlightsPage::onSearchById);
-    connect(searchByRouteBtn_, &QPushButton::clicked, this, &FlightsPage::onSearchByRoute);
-    connect(searchByDateBtn_, &QPushButton::clicked, this, &FlightsPage::onSearchByDate);
+    connect(searchFilterBtn_, &QPushButton::clicked, this, &FlightsPage::onSearchFilter);
 
     // Kết nối CRUD
     connect(addButton_, &QPushButton::clicked, this, &FlightsPage::onAddFlight);
@@ -248,19 +345,16 @@ void FlightsPage::setupConnections()
 
 void FlightsPage::refreshTable()
 {
-    // --- [CHỖ NỐI API] ---
     model_->removeRows(0, model_->rowCount());
 
-    // 1. Gọi API/Core để lấy tất cả *Chuyến bay* (FlightInstance)
     const std::vector<FlightInstance*>& instances = flightManager_->getAllInstances();
     SeatManager* seatManager = flightManager_->getSeatManager();
     
-    // 2. Nạp dữ liệu mới
     for (int i = 0; i < instances.size(); ++i) {
         FlightInstance* inst = instances[i];
         if (inst) { 
             seatManager->loadSeatMapFor(inst);
-            int availableSeats = seatManager->getAvailableSeats(); // Cập nhật số ghế trống
+            int availableSeats = seatManager->getAvailableSeats();
             
             QList<QStandardItem *> rowItems;
             rowItems << new QStandardItem(QString::fromStdString(inst->getInstanceId()))
@@ -274,19 +368,63 @@ void FlightsPage::refreshTable()
             model_->appendRow(rowItems);
         }
     }
-    // --- [HẾT CHỖ NỐI API] ---
+    
+    statusLabel_->setText(QString("Hiển thị tất cả %1 chuyến bay").arg(instances.size()));
 }
 
+// === XỬ LÝ CRUD ===
 void FlightsPage::onAddFlight()
 {
-    // --- [CHỖ NỐI API] ---
-    // (Bạn cần tạo 1 QDialog, ví dụ FlightInstanceFormDialog)
-    // QString flightId = ...
-    // QString depDate = ...
-    // bool success = flightManager_->createNewInstance(flightId.toStdString(), ...);
-    // if (success) refreshTable();
-    QMessageBox::information(this, "WIP", "Chức năng Thêm chuyến (sẽ mở Dialog).");
-    // --- [HẾT CHỖ NỐI API] ---
+    FlightDialog dialog(flightManager_, airportManager_, this);
+    
+    if (dialog.exec() == QDialog::Accepted) {
+        QString flightId = dialog.getFlightId();
+        QString flightNumber = dialog.getFlightNumber();
+        QString depDate = dialog.getDepartureDate();
+        QString depTime = dialog.getDepartureTime();
+        QString arrDate = dialog.getArrivalDate();
+        QString arrTime = dialog.getArrivalTime();
+        int totalCapacity = dialog.getTotalCapacity();
+        int fareEconomy = dialog.getFareEconomy();
+        int fareBusiness = dialog.getFareBusiness();
+        
+        // Gọi hàm createNewInstance với ĐẦY ĐỦ tham số
+        bool success = flightManager_->createNewInstance(
+            flightId.toStdString(),
+            flightNumber.toStdString(),
+            depDate.toStdString(),
+            depTime.toStdString() + ":00",  // Thêm giây
+            arrDate.toStdString(),
+            arrTime.toStdString() + ":00",
+            totalCapacity,
+            fareEconomy,
+            fareBusiness
+        );
+        
+        if (success) {
+            QMessageBox::information(this, "Thành công", 
+                QString("Đã thêm chuyến bay:\n\n"
+                       "Số hiệu: %1\n"
+                       "Tuyến: %2 → %3\n"
+                       "Khởi hành: %4 %5\n"
+                       "Hạ cánh: %6 %7\n"
+                       "Sức chứa: %8 ghế\n"
+                       "Giá VT: %9 VNĐ | Giá TC: %10 VNĐ")
+                    .arg(flightNumber)
+                    .arg(dialog.getFromIATA(), dialog.getToIATA())
+                    .arg(depDate, depTime, arrDate, arrTime)
+                    .arg(totalCapacity)
+                    .arg(fareEconomy)
+                    .arg(fareBusiness));
+            refreshTable();
+        } else {
+            QMessageBox::critical(this, "Thất bại", 
+                "Không thể thêm chuyến bay.\n\n"
+                "Có thể do:\n"
+                "• Chuyến bay đã tồn tại\n"
+                "• Lỗi lưu dữ liệu");
+        }
+    }
 }
 
 void FlightsPage::onEditFlight()
@@ -296,11 +434,59 @@ void FlightsPage::onEditFlight()
         QMessageBox::warning(this, "Lỗi", "Vui lòng chọn một chuyến bay để sửa.");
         return;
     }
-    QString instanceId = model_->itemFromIndex(selected.first().siblingAtColumn(0))->text();
-    // --- [CHỖ NỐI API] ---
-    // (FlightManager.h chưa có hàm updateInstance, bạn sẽ cần bổ sung)
-    QMessageBox::information(this, "WIP", QString("Chức năng Sửa chuyến %1.").arg(instanceId));
-    // --- [HẾT CHỖ NỐI API] ---
+
+    int row = selected.first().row();
+    QString instanceId = model_->item(row, 0)->text();
+    
+    FlightInstance* instance = flightManager_->findInstanceById(instanceId.toStdString());
+    if (!instance) {
+        QMessageBox::critical(this, "Lỗi", "Không tìm thấy chuyến bay.");
+        return;
+    }
+    
+    Flight* flight = flightManager_->findFlightById(instance->getFlightId());
+    
+    FlightDialog dialog(flightManager_, airportManager_,
+                       instanceId,
+                       QString::fromStdString(instance->getFlightNumber()),
+                       QString::fromStdString(flight->getAirline()),
+                       QString::fromStdString(flight->getDepartureAirport()),
+                       QString::fromStdString(flight->getArrivalAirport()),
+                       QString::fromStdString(instance->getDepartureDate()),
+                       QString::fromStdString(instance->getDepartureTime()),
+                       QString::fromStdString(instance->getArrivalDate()),
+                       QString::fromStdString(instance->getArrivalTime()),
+                       instance->getTotalCapacity(),
+                       instance->getFareEconomy(),
+                       instance->getFareBusiness(),
+                       this);
+    
+    if (dialog.exec() == QDialog::Accepted) {
+        // Tạo FlightInstance mới với thông tin cập nhật
+        FlightInstance updatedInstance(
+            instance->getFlightId(),
+            dialog.getFlightNumber().toStdString(),
+            dialog.getDepartureDate().toStdString(),
+            (dialog.getDepartureTime() + ":00").toStdString(),
+            dialog.getArrivalDate().toStdString(),
+            (dialog.getArrivalTime() + ":00").toStdString(),
+            dialog.getTotalCapacity(),
+            dialog.getFareEconomy(),
+            dialog.getFareBusiness()
+        );
+        
+        updatedInstance.overrideIdForLoad(instanceId.toStdString());
+        
+        bool success = flightManager_->updateInstance(instanceId.toStdString(), updatedInstance);
+        
+        if (success) {
+            QMessageBox::information(this, "Thành công", 
+                QString("Đã cập nhật chuyến bay: %1").arg(instanceId));
+            refreshTable();
+        } else {
+            QMessageBox::critical(this, "Thất bại", "Không thể cập nhật chuyến bay.");
+        }
+    }
 }
 
 void FlightsPage::onDeleteFlight()
@@ -310,45 +496,126 @@ void FlightsPage::onDeleteFlight()
         QMessageBox::warning(this, "Lỗi", "Vui lòng chọn một chuyến bay để xóa.");
         return;
     }
-    QString instanceId = model_->itemFromIndex(selected.first().siblingAtColumn(0))->text();
 
-    auto reply = QMessageBox::question(this, "Xác nhận xóa", 
-        QString("Bạn có chắc muốn xóa chuyến bay %1?").arg(instanceId), 
-        QMessageBox::Yes | QMessageBox::No);
+    QString instanceId = model_->item(selected.first().row(), 0)->text();
+
+    auto reply = QMessageBox::question(this, "⚠️ Xác nhận xóa chuyến bay", 
+        QString("Bạn có chắc chắn muốn xóa chuyến bay <b>%1</b>?<br><br>"
+               "<font color='red'><b>Cảnh báo:</b></font><br>"
+               "• Tất cả booking liên quan sẽ bị ảnh hưởng<br>"
+               "• Hành động này <b>KHÔNG THỂ</b> hoàn tác")
+            .arg(instanceId), 
+        QMessageBox::Yes | QMessageBox::No,
+        QMessageBox::No);
 
     if (reply == QMessageBox::Yes) {
-        // --- [CHỖ NỐI API] ---
-        // (FlightManager.h chưa có hàm deleteInstance)
-        // bool success = flightManager_->deleteInstance(instanceId.toStdString());
-        // if (success) refreshTable();
-        QMessageBox::information(this, "WIP", QString("Chức năng Xóa chuyến %1.").arg(instanceId));
-        // --- [HẾT CHỐN NỐI API] ---
+        bool success = flightManager_->deleteInstance(instanceId.toStdString());
+        
+        if (success) {
+            QMessageBox::information(this, "✅ Xóa thành công", 
+                QString("Đã xóa chuyến bay: <b>%1</b>").arg(instanceId));
+            refreshTable();
+        } else {
+            QMessageBox::critical(this, "❌ Xóa thất bại", 
+                QString("Không thể xóa chuyến bay <b>%1</b>.").arg(instanceId));
+        }
     }
 }
 
-// --- Slots tìm kiếm (WIP) ---
+// === XỬ LÝ TÌM KIẾM ===
 void FlightsPage::onSearchById()
 {
-    QMessageBox::information(this, "WIP", QString("Tìm kiếm theo ID: %1").arg(idSearchEdit_->text()));
-}
-
-void FlightsPage::onSearchByRoute()
-{
-    std::string fromIATA = fromSearchCombo_->getSelectedIATA();
-    std::string toIATA = toSearchCombo_->getSelectedIATA();
-
-    if (fromIATA.empty() || toIATA.empty()) {
-        QMessageBox::information(this, "Thiếu dữ liệu", "Vui lòng chọn điểm đi và điểm đến.");
+    QString instanceId = idSearchEdit_->text().trimmed();
+    
+    if (instanceId.isEmpty()) {
+        QMessageBox::warning(this, "Thiếu dữ liệu", "Vui lòng nhập ID chuyến bay.");
         return;
     }
 
-    QMessageBox::information(this, "WIP", QString("Tìm kiếm theo lộ trình: %1 - %2")
-                                                .arg(QString::fromStdString(fromIATA))
-                                                .arg(QString::fromStdString(toIATA)));
+    FlightInstance* instance = flightManager_->findInstanceById(instanceId.toStdString());
+    
+    if (!instance) {
+        QMessageBox::warning(this, "Không tìm thấy", 
+            QString("Không tìm thấy chuyến bay với ID: <b>%1</b>").arg(instanceId));
+        return;
+    }
+
+    model_->removeRows(0, model_->rowCount());
+    
+    SeatManager* seatManager = flightManager_->getSeatManager();
+    seatManager->loadSeatMapFor(instance);
+    int availableSeats = seatManager->getAvailableSeats();
+    
+    QList<QStandardItem*> rowItems;
+    rowItems << new QStandardItem(QString::fromStdString(instance->getInstanceId()))
+           << new QStandardItem(QString::fromStdString(instance->getFlightNumber()))
+           << new QStandardItem(QString::fromStdString(flightManager_->findFlightById(instance->getFlightId())->getAirline()))
+           << new QStandardItem(QString::fromStdString(instance->getDepartureDate()))
+           << new QStandardItem(QString::fromStdString(instance->getDepartureTime()))
+           << new QStandardItem(QString::fromStdString(instance->getArrivalDate()))
+           << new QStandardItem(QString::fromStdString(instance->getArrivalTime()))
+           << new QStandardItem(QString::number(availableSeats) + " / " + QString::number(instance->getTotalCapacity()));
+    model_->appendRow(rowItems);
+
+    statusLabel_->setText("✅ Tìm thấy 1 chuyến bay");
+    
+    QMessageBox::information(this, "Tìm thấy", 
+        QString("Đã tìm thấy chuyến bay: <b>%1</b>").arg(instanceId));
 }
 
-void FlightsPage::onSearchByDate()
+void FlightsPage::onSearchFilter()
 {
-    QMessageBox::information(this, "WIP", QString("Tìm kiếm theo ngày: %1")
-                                                .arg(dateSearchEdit_->date().toString("dd/MM/yyyy")));
+    FlightManager::SearchCriteria criteria;
+    
+    criteria.fromIATA = fromSearchCombo_->getSelectedIATA();
+    criteria.toIATA = toSearchCombo_->getSelectedIATA();
+    
+    if (criteria.fromIATA.empty() || criteria.toIATA.empty()) {
+        QMessageBox::warning(this, "Thiếu dữ liệu", 
+            "Vui lòng chọn cả điểm đi và điểm đến.");
+        return;
+    }
+    
+    QDate selectedDate = dateSearchEdit_->date();
+    if (selectedDate.isValid() && selectedDate > QDate::currentDate().addDays(-1)) {
+        criteria.date = selectedDate.toString("dd/MM/yyyy").toStdString();
+    }
+    
+    if (airlineFilterCombo_->currentIndex() > 0) {
+        criteria.airline = airlineFilterCombo_->currentData().toString().toStdString();
+    }
+    
+    auto results = flightManager_->searchFlights(criteria);
+    
+    model_->removeRows(0, model_->rowCount());
+    
+    SeatManager* seatManager = flightManager_->getSeatManager();
+    
+    for (FlightInstance* inst : results) {
+        if (inst) {
+            seatManager->loadSeatMapFor(inst);
+            int availableSeats = seatManager->getAvailableSeats();
+            
+            QList<QStandardItem*> rowItems;
+            rowItems << new QStandardItem(QString::fromStdString(inst->getInstanceId()))
+                   << new QStandardItem(QString::fromStdString(inst->getFlightNumber()))
+                   << new QStandardItem(QString::fromStdString(flightManager_->findFlightById(inst->getFlightId())->getAirline()))
+                   << new QStandardItem(QString::fromStdString(inst->getDepartureDate()))
+                   << new QStandardItem(QString::fromStdString(inst->getDepartureTime()))
+                   << new QStandardItem(QString::fromStdString(inst->getArrivalDate()))
+                   << new QStandardItem(QString::fromStdString(inst->getArrivalTime()))
+                   << new QStandardItem(QString::number(availableSeats) + " / " + QString::number(inst->getTotalCapacity()));
+            model_->appendRow(rowItems);
+        }
+    }
+    
+    statusLabel_->setText(QString("🔍 Tìm thấy %1 chuyến bay").arg(results.size()));
+    
+    if (results.empty()) {
+        QMessageBox::information(this, "Không tìm thấy", 
+            "Không có chuyến bay nào phù hợp với bộ lọc.");
+    } else {
+        QMessageBox::information(this, "Kết quả", 
+            QString("Tìm thấy <b>%1</b> chuyến bay phù hợp.").arg(results.size()));
+    }
 }

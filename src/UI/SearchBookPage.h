@@ -44,6 +44,7 @@ private:
     void setupUi();
     void setupModel();
     void setupConnections();
+    void loadAllFlights();
 
     // nạp dữ liệu vào bảng
     void fillTable(const std::vector<FlightInstance*>& instances);

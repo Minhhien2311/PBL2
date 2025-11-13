@@ -71,6 +71,7 @@ SearchBookPage::SearchBookPage(FlightManager* flManager,
     setupUi();          // vẽ UI giống FlightsPage
     setupModel();       // tạo model bảng
     setupConnections(); // nối signal-slot
+    loadAllFlights();  // nạp tất cả chuyến bay ban đầu
 }
 
 void SearchBookPage::setupUi()
@@ -98,124 +99,171 @@ void SearchBookPage::setupUi()
     topLayout->setContentsMargins(24, 20, 24, 10);
     topLayout->setSpacing(14);
 
-    // Tiêu đề
-    QLabel *title = new QLabel("Tìm chuyến bay để đặt vé", this);
+    // === Hàng 1: Tiêu đề + Nút Tải lại (GIỐNG FLIGHTSPAGE) ===
+    QHBoxLayout* headerRow = new QHBoxLayout();
+    headerRow->setSpacing(10);
+
+    QLabel* title = new QLabel("Tìm chuyến bay để đặt vé", this);
     title->setProperty("class", "PageTitle");
-    topLayout->addWidget(title);
+    headerRow->addWidget(title);
+    headerRow->addStretch();
+
+    // ← NÚT TẢI LẠI (góc phải trên)
+    QPushButton* refreshButton = new QPushButton("🔄 Tải lại tất cả", topBar);
+    refreshButton->setStyleSheet(
+        "QPushButton { background:#5886C0; color:white; border:none; "
+        "border-radius:6px; height:32px; padding:0 16px; font-weight:600; }"
+        "QPushButton:hover { background:#466a9a; }"
+    );
+    refreshButton->setCursor(Qt::PointingHandCursor);
+    refreshButton->setMinimumWidth(140);
+    headerRow->addWidget(refreshButton);
+
+    topLayout->addLayout(headerRow);
+
+    // Kết nối nút refresh
+    connect(refreshButton, &QPushButton::clicked, this, &SearchBookPage::refreshPage);
+
+    // ========== KHUNG TÌM KIẾM (BO VIỀN TRẮNG) ==========
+    QWidget* searchBox = new QWidget;
+    QVBoxLayout* searchBoxLayout = new QVBoxLayout(searchBox);
+    searchBoxLayout->setContentsMargins(12, 12, 12, 12);
+    searchBoxLayout->setSpacing(10);
+    
+    searchBox->setStyleSheet(
+        "QWidget { background: white; border: 1px solid #c2cfe2; border-radius: 6px; }"
+    );
+
+    QLabel* searchTitle = new QLabel("🔎 Tìm kiếm chuyến bay theo nhiều tiêu chí");
+    searchTitle->setStyleSheet("font-weight: 600; color: #123B7A; font-size: 14px; background: transparent; border: none;");
+    searchBoxLayout->addWidget(searchTitle);
 
     // === FILTER BAR LAYOUT ===
-    // Sửa lỗi: Dùng QGridLayout để căn chỉnh nhãn và input
     QGridLayout* filterLayout = new QGridLayout();
-    filterLayout->setHorizontalSpacing(15); // Khoảng cách ngang giữa các cột
-    filterLayout->setVerticalSpacing(8);   // Khoảng cách dọc giữa nhãn và input
+    filterLayout->setHorizontalSpacing(12);
+    filterLayout->setVerticalSpacing(8);
 
     // --- Hàng 0: Nhãn (Labels) ---
-    filterLayout->addWidget(new QLabel("Điểm đi"), 0, 0);
-    filterLayout->addWidget(new QLabel("Điểm đến"), 0, 1);
-    filterLayout->addWidget(new QLabel("Ngày khởi hành"), 0, 2);
-    filterLayout->addWidget(new QLabel("Hãng hàng không"), 0, 3);
-    // Nhãn "Khoảng giá" span 3 cột (4, 5, 6) để căn lề cho đẹp
-    filterLayout->addWidget(new QLabel("Khoảng giá mong muốn"), 0, 4, 1, 3);
-    // Cột 7 (cho nút tìm kiếm) không có nhãn
+    QLabel* fromLbl = new QLabel("Điểm đi");
+    fromLbl->setStyleSheet("background: transparent; border: none; color: #123B7A;");
+    filterLayout->addWidget(fromLbl, 0, 0);
+    
+    QLabel* toLbl = new QLabel("Điểm đến");
+    toLbl->setStyleSheet("background: transparent; border: none; color: #123B7A;");
+    filterLayout->addWidget(toLbl, 0, 1);
+    
+    QLabel* dateLbl = new QLabel("Ngày khởi hành");
+    dateLbl->setStyleSheet("background: transparent; border: none; color: #123B7A;");
+    filterLayout->addWidget(dateLbl, 0, 2);
+    
+    QLabel* airlineLbl = new QLabel("Hãng hàng không");
+    airlineLbl->setStyleSheet("background: transparent; border: none; color: #123B7A;");
+    filterLayout->addWidget(airlineLbl, 0, 3);
+    
+    // Nhãn "Khoảng giá" span 3 cột (4, 5, 6)
+    QLabel* priceLbl = new QLabel("Khoảng giá mong muốn");
+    priceLbl->setStyleSheet("background: transparent; border: none; color: #123B7A;");
+    filterLayout->addWidget(priceLbl, 0, 4, 1, 3);
 
     // --- Hàng 1: Ô nhập liệu (Inputs) ---
 
     // From dropdown (Cột 0)
     fromSearchCombo_ = new AirportComboBox(airportManager_, this);
+    fromSearchCombo_->setMinimumHeight(36);
     filterLayout->addWidget(fromSearchCombo_, 1, 0);
 
     // To dropdown (Cột 1)
     toSearchCombo_ = new AirportComboBox(airportManager_, this);
+    toSearchCombo_->setMinimumHeight(36);
     filterLayout->addWidget(toSearchCombo_, 1, 1);
 
-    // Date picker with placeholder (Cột 2)
-    // Date picker - hiển thị "Tùy chọn" khi chưa chọn
+    // Date picker
     dateSearchEdit_ = new QDateEdit(this);
     dateSearchEdit_->setCalendarPopup(true);
     dateSearchEdit_->setDisplayFormat("dd/MM/yyyy");
     dateSearchEdit_->setSpecialValueText("Tùy chọn");
-
-    // Set minimum date = 1 ngày trước (dễ scroll hơn năm 2000)
     QDate oneDayAgo = QDate::currentDate().addDays(-1);
     dateSearchEdit_->setMinimumDate(oneDayAgo);
-    dateSearchEdit_->clear();  // Hiển thị "Tùy chọn"
-
+    dateSearchEdit_->clear();
+    dateSearchEdit_->setMinimumHeight(36);
     filterLayout->addWidget(dateSearchEdit_, 1, 2);
 
-    // Airline dropdown with placeholder (Cột 3)
+    // Airline dropdown
     airlineFilterCombo_ = new QComboBox(this);
-    airlineFilterCombo_->addItem("Tùy chọn", "");  // Default placeholder
+    airlineFilterCombo_->addItem("Tùy chọn", "");
     airlineFilterCombo_->addItem("VietJet Air", "VietJet Air");
     airlineFilterCombo_->addItem("Vietnam Airlines", "Vietnam Airlines");
     airlineFilterCombo_->addItem("Bamboo Airways", "Bamboo Airways");
     airlineFilterCombo_->addItem("Vietravel Airlines", "Vietravel Airlines");
+    airlineFilterCombo_->setMinimumHeight(36);
     filterLayout->addWidget(airlineFilterCombo_, 1, 3);
 
-    // Price range - QLineEdit (Cột 4, 5, 6)
+    // Price min
     priceMinEdit_ = new QLineEdit(this);
     priceMinEdit_->setPlaceholderText("Tùy chọn");
     priceMinEdit_->setValidator(new QIntValidator(0, MAX_FLIGHT_PRICE, this));
-    priceMinEdit_->setFixedHeight(fromSearchCombo_->sizeHint().height());
+    priceMinEdit_->setMinimumHeight(36);
     filterLayout->addWidget(priceMinEdit_, 1, 4);
 
+    // Dash separator
     QLabel* dashLabel = new QLabel("—");
-    dashLabel->setAlignment(Qt::AlignCenter); // Căn giữa dấu gạch
-    filterLayout->addWidget(dashLabel, 1, 5);  // Dash separator (Cột 5)
+    dashLabel->setAlignment(Qt::AlignCenter);
+    dashLabel->setStyleSheet("background: transparent; border: none; color: #123B7A;");
+    filterLayout->addWidget(dashLabel, 1, 5);
 
+    // Price max
     priceMaxEdit_ = new QLineEdit(this);
     priceMaxEdit_->setPlaceholderText("Tùy chọn");
     priceMaxEdit_->setValidator(new QIntValidator(0, MAX_FLIGHT_PRICE, this));
-    priceMaxEdit_->setFixedHeight(fromSearchCombo_->sizeHint().height());
+    priceMaxEdit_->setMinimumHeight(36);
     filterLayout->addWidget(priceMaxEdit_, 1, 6);
 
     // Search button (Cột 7)
     QPushButton* searchBtn = new QPushButton("Tìm kiếm", this);
-    searchBtn->setFixedHeight(fromSearchCombo_->sizeHint().height());
+    searchBtn->setMinimumHeight(36);
+    searchBtn->setMinimumWidth(110);
+    searchBtn->setCursor(Qt::PointingHandCursor);
     searchBtn->setStyleSheet(
-        "QPushButton {"
-        "  background-color: #4472C4;"
-        "  color: white;"
-        "  padding: 5px 20px;"
-        "  border-radius: 3px;"
-        "}"
-        "QPushButton:hover {"
-        "  background-color: #365a9e;"
-        "}"
+        "QPushButton { background-color: #4472C4; color: white; padding: 0 20px; "
+        "border-radius: 6px; font-weight: 600; }"
+        "QPushButton:hover { background-color: #365a9e; }"
     );
-    // Thêm nút vào hàng 1, cột 7
     filterLayout->addWidget(searchBtn, 1, 7);
 
-    // ← XÓA setColumnStretch(8, 1)
-    // ← THAY BẰNG: Cho các cột input giãn đều
-    filterLayout->setColumnStretch(0, 1);  // Từ (Airport)
-    filterLayout->setColumnStretch(1, 1);  // Đến (Airport)
-    filterLayout->setColumnStretch(2, 1);  // Ngày khởi hành
-    filterLayout->setColumnStretch(3, 1);  // Hãng hàng không
-    filterLayout->setColumnStretch(7, 1);  // Nút Tìm kiếm
+    // Set column stretch
+    filterLayout->setColumnStretch(0, 1);
+    filterLayout->setColumnStretch(1, 1);
+    filterLayout->setColumnStretch(2, 1);
+    filterLayout->setColumnStretch(3, 1);
+    filterLayout->setColumnStretch(7, 1);
 
-    // Thêm layout lưới này vào topLayout
-    topLayout->addLayout(filterLayout);
+    // Thêm layout vào searchBox
+    searchBoxLayout->addLayout(filterLayout);
+    
+    // Thêm searchBox vào topLayout
+    topLayout->addWidget(searchBox);
 
     // Connect search button
     connect(searchBtn, &QPushButton::clicked, this, &SearchBookPage::onSearchClicked);
 
     mainLayout->addWidget(topBar);
 
-    // ================== TIÊU ĐỀ BẢNG ==================
+    // ================== TIÊU ĐỀ BẢNG + STATUS ==================
     QWidget *tableHeader = new QWidget(this);
     QHBoxLayout *thLayout = new QHBoxLayout(tableHeader);
     thLayout->setContentsMargins(24, 0, 24, 0);
-    thLayout->setSpacing(0);
+    thLayout->setSpacing(10);
 
-    QLabel *tblTitle = new QLabel("Kết quả tìm kiếm chuyến bay", this);
+    QLabel *tblTitle = new QLabel("📋 Kết quả tìm kiếm", this);
     tblTitle->setProperty("class", "SectionTitle");
     thLayout->addWidget(tblTitle);
-    thLayout->addStretch();
 
-    // Add status label
+    // Status label (hiển thị số kết quả)
     statusLabel_ = new QLabel("", this);
     statusLabel_->setStyleSheet("color: #123B7A; font-size: 12px;");
     thLayout->addWidget(statusLabel_);
+
+    thLayout->addStretch();
 
     mainLayout->addWidget(tableHeader);
 
@@ -372,7 +420,7 @@ void SearchBookPage::onSearchClicked()
     
     // Update status
     statusLabel_->setText(
-        QString("Tìm thấy %1 chuyến bay").arg(results.size())
+        QString("🔍 Tìm thấy %1 chuyến bay").arg(results.size())
     );
 }
 
@@ -409,9 +457,20 @@ void SearchBookPage::onBookClicked()
     // else: User cancelled - no action needed
 }
 
-/**
- * @brief Refresh page when shown or when user changes
- */
+void SearchBookPage::loadAllFlights()
+{
+    // Get all flight instances (giống FlightsPage)
+    const std::vector<FlightInstance*>& instances = flightManager_->getAllInstances();
+    
+    // Display them in the table
+    fillTable(instances);
+    
+    // Update status label
+    statusLabel_->setText(
+        QString("Hiển thị tất cả %1 chuyến bay").arg(instances.size())
+    );
+}
+
 void SearchBookPage::refreshPage() {
     // Clear all search filters
     fromSearchCombo_->setCurrentIndex(0);
@@ -421,9 +480,6 @@ void SearchBookPage::refreshPage() {
     priceMinEdit_->clear();
     priceMaxEdit_->clear();
     
-    // Clear search results
-    model_->removeRows(0, model_->rowCount());
-    
-    // Clear status label
-    statusLabel_->setText("");
+    // ← SỬA: Load tất cả chuyến bay thay vì xóa bảng
+    loadAllFlights();
 }

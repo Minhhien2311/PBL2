@@ -43,6 +43,8 @@ private:
     QLabel* totalTicketsLabel_;
     QLabel* businessTicketsLabel_;
     QLabel* economyTicketsLabel_;
+    QLabel* cancelledTicketsLabel_;  // ← THÊM
+    QLabel* changedTicketsLabel_;    // ← THÊM
     
     QChartView* chartView_;
     QChart* chart_;

@@ -443,6 +443,34 @@ int ReportManager::getEconomyTicketsInRange(const std::string& startDate, const 
     return count;
 }
 
+int ReportManager::getCancelledTicketsInRange(const std::string& startDate, const std::string& endDate) const {
+    int count = 0;
+    const auto& bookings = bookingManager_.getAllBookings();
+    for (int i = 0; i < bookings.size(); ++i) {
+    Booking* b = bookings[i];
+    if (!b) continue;
+    if (b->getStatus() == BookingStatus::Cancelled &&
+        isDateInRange(b->getBookingDate(), startDate, endDate)) {
+        count++;
+    }
+    }
+    return count;
+}
+
+int ReportManager::getChangedTicketsInRange(const std::string& startDate, const std::string& endDate) const {
+    int count = 0;
+    const auto& bookings = bookingManager_.getAllBookings();
+    for (int i = 0; i < bookings.size(); ++i) {
+    Booking* b = bookings[i];
+    if (!b) continue;
+    if (b->getStatus() == BookingStatus::Changed &&
+        isDateInRange(b->getBookingDate(), startDate, endDate)) {
+        count++;
+    }
+    }
+    return count;
+}
+
 // --- Các hàm mới cho Agent ---
 
 double ReportManager::getAgentTodayRevenue(const std::string& agentId) const {
@@ -534,6 +562,47 @@ int ReportManager::getAgentEconomyTicketsInRange(const std::string& agentId, con
     }
     }
     return count;
+}
+
+// --- Các hàm mới cho Agent Tickets Report (5 ô thống kê) ---
+
+int ReportManager::getAgentCancelledTicketsInRange(const std::string& agentId, const std::string& startDate, const std::string& endDate) const {
+    int count = 0;
+    const auto& bookings = bookingManager_.getBookingsByAgentId(agentId);
+    for (int i = 0; i < bookings.size(); ++i) {
+        Booking* b = bookings[i];
+        if (!b) continue;
+        if (b->getStatus() == BookingStatus::Cancelled &&
+            isDateInRange(b->getBookingDate(), startDate, endDate)) {
+            count++;
+        }
+    }
+    return count;
+}
+
+int ReportManager::getAgentChangedTicketsInRange(const std::string& agentId, const std::string& startDate, const std::string& endDate) const {
+    int count = 0;
+    const auto& bookings = bookingManager_.getBookingsByAgentId(agentId);
+    for (int i = 0; i < bookings.size(); ++i) {
+        Booking* b = bookings[i];
+        if (!b) continue;
+        if (b->getStatus() == BookingStatus::Changed &&
+            isDateInRange(b->getBookingDate(), startDate, endDate)) {
+            count++;
+        }
+    }
+    return count;
+}
+
+// Overload cho agent hiện tại
+int ReportManager::getAgentCancelledTicketsInRange(const std::string& startDate, const std::string& endDate) const {
+    std::string currentAgentId = accountManager_.getCurrentAgentId();
+    return getAgentCancelledTicketsInRange(currentAgentId, startDate, endDate);
+}
+
+int ReportManager::getAgentChangedTicketsInRange(const std::string& startDate, const std::string& endDate) const {
+    std::string currentAgentId = accountManager_.getCurrentAgentId();
+    return getAgentChangedTicketsInRange(currentAgentId, startDate, endDate);
 }
 
 std::vector<MonthlyTicketReport*>* ReportManager::generateMonthlyTicketReportForAgent(const std::string& agentId, const std::string& startDate, const std::string& endDate) const {

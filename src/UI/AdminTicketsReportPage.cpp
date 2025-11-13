@@ -13,10 +13,12 @@
 #include <QChartView>
 #include <QChart>
 #include <QBarSeries>
+#include <QHorizontalBarSeries>
 #include <QBarSet>
 #include <QBarCategoryAxis>
 #include <QValueAxis>
 #include <QDebug>
+#include <QScrollArea>
 
 AdminTicketsReportPage::AdminTicketsReportPage(AccountManager* am,
                        BookingManager* bm,
@@ -30,8 +32,10 @@ AdminTicketsReportPage::AdminTicketsReportPage(AccountManager* am,
     endDate_(nullptr),
     refreshBtn_(nullptr),
     totalTicketsLabel_(nullptr),
-    businessTicketsLabel_(nullptr),
     economyTicketsLabel_(nullptr),
+    businessTicketsLabel_(nullptr),
+    cancelledTicketsLabel_(nullptr),
+    changedTicketsLabel_(nullptr),
     chartView_(nullptr),
     chart_(nullptr),
     chartSeries_(nullptr)
@@ -47,106 +51,222 @@ AdminTicketsReportPage::~AdminTicketsReportPage()
 
 void AdminTicketsReportPage::setupUI()
 {
-    auto* layout = new QVBoxLayout(this);
-    layout->setAlignment(Qt::AlignTop);
+    // === STYLE GIỐNG ADMINREVENUEREPORTPAGE ===
+    this->setStyleSheet(
+        "QWidget { background: #F2F6FD; }"
+        "QLabel.PageTitle { color:#123B7A; font-weight:700; font-size:17px; }"
+        "QLabel.SectionTitle { color:#123B7A; font-weight:700; font-size:16px; }"
+        "QFrame#StatCard { background: white; border:1px solid #0E3B7C; }"
+    );
 
-    // --- 1. Hàng chọn ngày ---
-    // (Giữ nguyên, không thay đổi)
-    auto* dateLayout = new QHBoxLayout();
-    dateLayout->setSpacing(10);
-    dateLayout->setAlignment(Qt::AlignLeft);
+    // === LAYOUT CHÍNH (0 margin để dính sidebar) ===
+    auto* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(0);
 
-    startDate_ = new QDateEdit(QDate::currentDate().addDays(-30), this);
+    // ========== TOP BAR (CÓ LỀ 24PX) ==========
+    QWidget* topBar = new QWidget(this);
+    auto* topBarLayout = new QVBoxLayout(topBar);
+    topBarLayout->setContentsMargins(24, 16, 24, 12);
+    topBarLayout->setSpacing(12);
+
+    // --- Hàng 1: Tiêu đề ---
+    QLabel* pageTitle = new QLabel("Thống kê đặt vé", topBar);
+    pageTitle->setProperty("class", "PageTitle");
+    topBarLayout->addWidget(pageTitle);
+
+    // --- Hàng 2: KHUNG CHỌN KHOẢNG THỜI GIAN (BO VIỀN TRẮNG) ---
+    QWidget* dateBox = new QWidget;
+    QVBoxLayout* dateBoxLayout = new QVBoxLayout(dateBox);
+    dateBoxLayout->setContentsMargins(10, 10, 10, 10);
+    dateBoxLayout->setSpacing(6);
+    
+    dateBox->setStyleSheet(
+        "QWidget { background: white; border: 1px solid #c2cfe2; border-radius: 6px; }"
+    );
+
+    QLabel* dateBoxTitle = new QLabel("📅 Chọn khoảng thời gian cần thống kê");
+    dateBoxTitle->setStyleSheet("font-weight: 600; color: #123B7A; font-size: 14px; background: transparent; border: none;");
+    dateBoxLayout->addWidget(dateBoxTitle);
+
+    // === FIX: Giãn đều các ô nhập và nút tìm kiếm ===
+    QHBoxLayout* dateRow = new QHBoxLayout();
+    dateRow->setSpacing(12);  // Khoảng cách đều giữa các phần tử
+
+    QLabel* fromLabel = new QLabel("Từ ngày:");
+    fromLabel->setStyleSheet("background: transparent; border: none; color: #123B7A;");
+    dateRow->addWidget(fromLabel);
+
+    startDate_ = new QDateEdit(QDate::currentDate().addDays(-30), dateBox);
     startDate_->setCalendarPopup(true);
-    startDate_->setFixedWidth(120);
-    endDate_ = new QDateEdit(QDate::currentDate(), this);
+    startDate_->setDisplayFormat("dd/MM/yyyy");
+    startDate_->setMinimumHeight(36);
+    startDate_->setMinimumWidth(160);  // ← THAY ĐỔI: Từ fixedWidth sang minWidth
+    dateRow->addWidget(startDate_, 1);  // ← THÊM stretch factor = 1
+
+    QLabel* toLabel = new QLabel("Đến ngày:");
+    toLabel->setStyleSheet("background: transparent; border: none; color: #123B7A;");
+    dateRow->addWidget(toLabel);
+
+    endDate_ = new QDateEdit(QDate::currentDate(), dateBox);
     endDate_->setCalendarPopup(true);
-    endDate_->setFixedWidth(120);
-    refreshBtn_ = new QPushButton("Làm mới", this);
+    endDate_->setDisplayFormat("dd/MM/yyyy");
+    endDate_->setMinimumHeight(36);
+    endDate_->setMinimumWidth(160);  // ← THAY ĐỔI: Từ fixedWidth sang minWidth
+    dateRow->addWidget(endDate_, 1);  // ← THÊM stretch factor = 1
 
-    dateLayout->addWidget(new QLabel("Thống kê theo:"));
-    dateLayout->addWidget(new QLabel("Từ ngày:"));
-    dateLayout->addWidget(startDate_);
-    dateLayout->addWidget(new QLabel("Đến ngày:"));
-    dateLayout->addWidget(endDate_);
-    dateLayout->addWidget(refreshBtn_);
-    dateLayout->addStretch();
-    layout->addLayout(dateLayout);
-    layout->addSpacing(20);
+    refreshBtn_ = new QPushButton("🔍 Truy vấn", dateBox);
+    refreshBtn_->setMinimumHeight(36);
+    refreshBtn_->setMinimumWidth(100);  // ← GIẢM: Từ 120px xuống 100px
+    refreshBtn_->setMaximumWidth(150);  // ← THÊM: Giới hạn chiều rộng tối đa
+    refreshBtn_->setCursor(Qt::PointingHandCursor);
+    refreshBtn_->setStyleSheet(
+        "QPushButton { background:#4478BD; color:white; font-weight:600; "
+        "border-radius:6px; padding: 0 16px; }"
+        "QPushButton:hover { background:#365a9e; }"
+    );
+    dateRow->addWidget(refreshBtn_);
+    // ← BỎ addStretch() để các phần tử tự giãn đều
 
-    // --- 2. Hàng thống kê tổng (3 hộp) ---
-    // (Giữ nguyên, không thay đổi)
-    auto* summaryLayout = new QHBoxLayout();
-    summaryLayout->setSpacing(20);
+    dateBoxLayout->addLayout(dateRow);
+    topBarLayout->addWidget(dateBox);
 
-    totalTicketsLabel_ = new QLabel("0", this);
-    businessTicketsLabel_ = new QLabel("0", this);
-    economyTicketsLabel_ = new QLabel("0", this);
+    // --- Hàng 3: 5 Ô THỐNG KÊ (GIỐNG DASHBOARDPAGE) ---
+    QHBoxLayout* statsLayout = new QHBoxLayout();
+    statsLayout->setSpacing(12);
 
-    QFrame* box1 = createSummaryBox("TỔNG SỐ VÉ ĐÃ BÁN", totalTicketsLabel_);
-    QFrame* box2 = createSummaryBox("SỐ VÉ THƯƠNG GIA", businessTicketsLabel_);
-    QFrame* box3 = createSummaryBox("SỐ VÉ PHỔ THÔNG", economyTicketsLabel_);
-     
-    summaryLayout->addWidget(box1);
-    summaryLayout->addWidget(box2);
-    summaryLayout->addWidget(box3);
-    layout->addLayout(summaryLayout);
-    layout->addSpacing(20);
+    QFrame* box1 = createSummaryBox("TỔNG VÉ ĐÃ BÁN", totalTicketsLabel_);
+    QFrame* box2 = createSummaryBox("VÉ PHỔ THÔNG", economyTicketsLabel_);
+    QFrame* box3 = createSummaryBox("VÉ THƯƠNG GIA", businessTicketsLabel_);
+    QFrame* box4 = createSummaryBox("VÉ ĐÃ HỦY", cancelledTicketsLabel_);
+    QFrame* box5 = createSummaryBox("VÉ ĐÃ ĐỔI", changedTicketsLabel_);
 
-    // --- 3. Biểu đồ ---
-    // === SỬA: Chỉ tạo QChart và QChartView ===
+    statsLayout->addWidget(box1);
+    statsLayout->addWidget(box2);
+    statsLayout->addWidget(box3);
+    statsLayout->addWidget(box4);
+    statsLayout->addWidget(box5);
+
+    topBarLayout->addLayout(statsLayout);
+
+    mainLayout->addWidget(topBar);
+
+    // ========== TIÊU ĐỀ BIỂU ĐỒ ==========
+    QWidget* chartHeader = new QWidget(this);
+    auto* chartHeaderLayout = new QHBoxLayout(chartHeader);
+    chartHeaderLayout->setContentsMargins(24, 6, 24, 0);
+    chartHeaderLayout->setSpacing(0);
+
+    QLabel* chartTitle = new QLabel("Số vé đã bán theo Đại lý", chartHeader);
+    chartTitle->setProperty("class", "SectionTitle");
+    chartHeaderLayout->addWidget(chartTitle);
+    chartHeaderLayout->addStretch();
+
+    mainLayout->addWidget(chartHeader);
+
+    // ========== BIỂU ĐỒ TRONG KHUNG TRẮNG + SCROLL ==========
+    QWidget* chartContainer = new QWidget(this);
+    auto* chartContainerLayout = new QVBoxLayout(chartContainer);
+    chartContainerLayout->setContentsMargins(24, 6, 24, 24);
+
+    // === KHUNG TRẮNG CHỨA BIỂU ĐỒ ===
+    QFrame* chartFrame = new QFrame(chartContainer);
+    chartFrame->setStyleSheet(
+        "QFrame { background: white; border: 1px solid #c2cfe2; border-radius: 8px; }"
+    );
+    auto* chartFrameLayout = new QVBoxLayout(chartFrame);
+    chartFrameLayout->setContentsMargins(16, 16, 16, 16);
+
     chart_ = new QChart();
-    chart_->setTitle("Số vé đã bán theo Đại lý");
+    chart_->setTitle("");
+    chart_->setBackgroundVisible(false);
 
-    chartView_ = new QChartView(chart_, this);
+    chartView_ = new QChartView(chart_, chartFrame);
     chartView_->setRenderHint(QPainter::Antialiasing);
+    chartView_->setMinimumWidth(800);
 
-    // (Đã xóa code tạo series và trục ở đây)
+    // === THÊM QSCROLLAREA ===
+    QScrollArea* scrollArea = new QScrollArea(chartFrame);
+    scrollArea->setWidget(chartView_);
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);  // ← Tắt scroll ngang
+    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    scrollArea->setMinimumHeight(300);
+    scrollArea->setMaximumHeight(450);
+    scrollArea->setStyleSheet(
+        "QScrollArea { background: transparent; border: none; }"
+    );
 
-    layout->addWidget(chartView_);
+    chartFrameLayout->addWidget(scrollArea);
+    chartContainerLayout->addWidget(chartFrame);
+    
+    mainLayout->addWidget(chartContainer, 1);
 
     connect(refreshBtn_, &QPushButton::clicked, this, &AdminTicketsReportPage::onRefreshClicked);
 }
 
 QFrame* AdminTicketsReportPage::createSummaryBox(const QString& title, QLabel*& valueLabel)
 {
-    // (Giữ nguyên, không thay đổi)
-    auto* box = new QFrame(this);
-    box->setFrameShape(QFrame::StyledPanel);
-    box->setStyleSheet(
-    "QFrame { background: white; border: 1px solid #C9D6EB; border-radius: 8px; padding: 10px; }"
+    QFrame* card = new QFrame(this);
+    card->setObjectName("StatCard");
+    card->setFixedHeight(80);
+    card->setStyleSheet(
+        "QFrame#StatCard {"
+        "   background: white;"
+        "   border: 1px solid #0E3B7C;"
+        "}"
     );
 
-    auto* boxLayout = new QVBoxLayout(box);
+    auto* cardLayout = new QVBoxLayout(card);
+    cardLayout->setContentsMargins(0, 0, 0, 0);
+    cardLayout->setSpacing(0);
 
-    auto* titleLabel = new QLabel(title, box);
-    titleLabel->setStyleSheet("font-size: 12px; font-weight: 600; color: #5B86C6; background: transparent; border: none;");
+    QWidget* head = new QWidget(card);
+    head->setStyleSheet("background:#0E3B7C; color:white;");
+    head->setFixedHeight(28);
+    
+    auto* headLayout = new QHBoxLayout(head);
+    headLayout->setContentsMargins(10, 0, 10, 0);
+    
+    QLabel* titleLabel = new QLabel(title, head);
+    titleLabel->setStyleSheet("font-size:13px; font-weight:600; color:white;");
+    titleLabel->setAlignment(Qt::AlignCenter);
+    headLayout->addWidget(titleLabel);
+
+    QWidget* body = new QWidget(card);
+    auto* bodyLayout = new QHBoxLayout(body);
+    bodyLayout->setContentsMargins(10, 6, 10, 6);
 
     if (valueLabel == nullptr) {
-    valueLabel = new QLabel("0", box);
+        valueLabel = new QLabel("0", body);
     }
-    valueLabel->setStyleSheet("font-size: 24px; font-weight: 700; color: #123B7A; background: transparent; border: none;");
+    valueLabel->setStyleSheet("color:#0E3B7C; font-size:20px; font-weight:700;");
+    valueLabel->setAlignment(Qt::AlignCenter);
+    bodyLayout->addWidget(valueLabel, 0, Qt::AlignCenter);
 
-    boxLayout->addWidget(titleLabel);
-    boxLayout->addWidget(valueLabel);
+    cardLayout->addWidget(head);
+    cardLayout->addWidget(body);
 
-    return box;
+    return card;
 }
 
 void AdminTicketsReportPage::onRefreshClicked()
 {
-    // === SỬA: Sửa lại logic lấy ngày cuối ===
     auto start = startDate_->date().toString("dd/MM/yyyy").toStdString();
-    auto end = endDate_->date().toString("dd/MM/yyyy").toStdString(); // Không +1 ngày
+    auto end = endDate_->date().toString("dd/MM/yyyy").toStdString();
 
-    // Lấy dữ liệu thực từ ReportManager
     int totalSold = reportManager_->getTicketsSoldInRange(start, end);
-    int businessSold = reportManager_->getBusinessTicketsInRange(start, end);
     int economySold = reportManager_->getEconomyTicketsInRange(start, end);
+    int businessSold = reportManager_->getBusinessTicketsInRange(start, end);
+    
+    int cancelled = reportManager_->getCancelledTicketsInRange(start, end);
+    int changed = reportManager_->getChangedTicketsInRange(start, end);
 
     totalTicketsLabel_->setText(QString::number(totalSold));
-    businessTicketsLabel_->setText(QString::number(businessSold));
     economyTicketsLabel_->setText(QString::number(economySold));
+    businessTicketsLabel_->setText(QString::number(businessSold));
+    cancelledTicketsLabel_->setText(QString::number(cancelled));
+    changedTicketsLabel_->setText(QString::number(changed));
 
     updateChart(start, end);
 }
@@ -155,24 +275,24 @@ void AdminTicketsReportPage::updateChart(const std::string& start, const std::st
 {
     // 1. Xóa dữ liệu cũ
     if (chart_) {
-    chart_->removeAllSeries();
-    for (QAbstractAxis* axis : chart_->axes()) {
-        chart_->removeAxis(axis);
-    }
+        chart_->removeAllSeries();
+        for (QAbstractAxis* axis : chart_->axes()) {
+            chart_->removeAxis(axis);
+        }
     } else {
-    chart_ = new QChart();
-    chartView_->setChart(chart_);
+        chart_ = new QChart();
+        chartView_->setChart(chart_);
     }
 
-    // 2. Tạo series mới
-    chartSeries_ = new QBarSeries();
+    // 2. Tạo series mới (BIỂU ĐỒ THANH NGANG)
+    auto* chartSeries = new QHorizontalBarSeries();
 
     // 3. Lấy dữ liệu
     auto* reports = reportManager_->generateAgentReportInRange(start, end);
 
     QStringList categories;
+    QList<int> ticketCounts;
     auto* barSet = new QBarSet("Số vé");
-    // === THÊM: Màu sắc ===
     barSet->setColor(QColor(91, 134, 198));
     barSet->setBorderColor(Qt::darkBlue);
 
@@ -180,56 +300,98 @@ void AdminTicketsReportPage::updateChart(const std::string& start, const std::st
     bool hasData = false;
 
     if (reports) {
-    for (auto* r : *reports) {
-        if (!r) continue;
+        for (auto* r : *reports) {
+            if (!r) continue;
 
-        // Chỉ thêm agent có bán được vé
-        if (r->issuedTickets > 0) {
-        *barSet << r->issuedTickets;
-        categories << QString::fromStdString(r->agentName);
-        if (r->issuedTickets > maxTickets) maxTickets = r->issuedTickets;
-        hasData = true;
+            if (r->issuedTickets > 0) {
+                *barSet << r->issuedTickets;
+                categories << QString::fromStdString(r->agentName);
+                ticketCounts << r->issuedTickets;
+                
+                if (r->issuedTickets > maxTickets) maxTickets = r->issuedTickets;
+                hasData = true;
+            }
+            delete r;
         }
-        delete r; // Dọn dẹp
-    }
-    delete reports; // Dọn dẹp
+        delete reports;
     }
 
-    int yAxisMax = 10; // Trục Y mặc định
+    int xAxisMax = 10;
 
-    // 4. Xử lý dữ liệu giả
     if (!hasData) {
-    qDebug() << "No ticket data for any agent, using dummy data";
-    *barSet << 1;
-    categories << "Không có dữ liệu";
-    yAxisMax = 10;
+        qDebug() << "No ticket data for any agent, using dummy data";
+        *barSet << 1;
+        categories << "Không có dữ liệu";
+        xAxisMax = 10;
     } else {
-    yAxisMax = maxTickets + 1; // Thêm 1 khoảng đệm
+        // === FIX: Tăng khoảng đệm để số không bị cắt ===
+        xAxisMax = maxTickets + (maxTickets * 0.15);  // ← Thêm 15% khoảng đệm
+        // VD: maxTickets=346 → xAxisMax = 346 + 52 = 398
     }
 
-    chartSeries_->append(barSet);
-    chart_->addSeries(chartSeries_);
+    // === FIX: Cấu hình hiển thị số trên thanh ===
+    barSet->setLabelColor(QColor(18, 59, 122));
+    QFont labelFont;
+    labelFont.setPointSize(9);
+    labelFont.setBold(true);
+    barSet->setLabelFont(labelFont);  // ← THÊM: Font cho số
+    
+    chartSeries->setLabelsVisible(true);
+    chartSeries->setLabelsPosition(QAbstractBarSeries::LabelsOutsideEnd);
+    chartSeries->setLabelsFormat("@value");  // ← THÊM: Format số (bỏ ký hiệu thập phân)
+    
+    chartSeries->append(barSet);
+    chart_->addSeries(chartSeries);
 
-    // 5. Tạo trục X (MỚI)
-    auto* axisX = new QBarCategoryAxis();
-    axisX->append(categories);
-    axisX->setTitleText("Đại lý");
-    chart_->addAxis(axisX, Qt::AlignBottom);
-    chartSeries_->attachAxis(axisX);
+    // 5. Tạo trục Y (DANH SÁCH ĐẠI LÝ - BÊN TRÁI)
+    auto* axisY = new QBarCategoryAxis();
+    axisY->append(categories);
 
-    // 6. Tạo trục Y (MỚI)
-    auto* axisY = new QValueAxis();
-    axisY->setRange(0, yAxisMax);
-    axisY->setLabelFormat("%d");
-    axisY->setTitleText("Số vé");
+    int agentCount = categories.size();
+    QFont axisLabelFont;
+    
+    if (agentCount > 20) {
+        axisLabelFont.setPointSize(7);
+    } else if (agentCount > 10) {
+        axisLabelFont.setPointSize(8);
+    } else {
+        axisLabelFont.setPointSize(9);
+    }
+    
+    axisY->setLabelsFont(axisLabelFont);
+    axisY->setLabelsAngle(0);
+    axisY->setLabelsColor(QColor(18, 59, 122));
+    
     chart_->addAxis(axisY, Qt::AlignLeft);
-    chartSeries_->attachAxis(axisY);
+    chartSeries->attachAxis(axisY);
 
-    // 7. Thêm hiệu ứng và legend
-    chart_->setTitle("Số vé đã bán theo Đại lý");
+    // 6. Tạo trục X (SỐ VÉ - PHÍA DƯỚI)
+    auto* axisX = new QValueAxis();
+    axisX->setRange(0, xAxisMax);
+    axisX->setLabelFormat("%d");
+    chart_->addAxis(axisX, Qt::AlignBottom);
+    chartSeries->attachAxis(axisX);
+
+    // 7. Cấu hình biểu đồ
+    chart_->setTitle("");
     chart_->setAnimationOptions(QChart::SeriesAnimations);
-    chart_->legend()->setVisible(true);
-    chart_->legend()->setAlignment(Qt::AlignBottom);
+    chart_->legend()->setVisible(false);
+
+    chart_->setBackgroundVisible(true);
+    chart_->setBackgroundBrush(Qt::white);
+    axisY->setGridLineVisible(false);
+    axisX->setGridLineVisible(true);
+    axisX->setGridLineColor(QColor(220, 220, 220));
+
+    // === FIX CHÍNH: Tăng margin phải để số không bị cắt ===
+    chart_->setMargins(QMargins(20, 10, 30, 10));
+    // ↑ left=30px (giữ nguyên)
+    // ↑ right=80px (tăng từ 60px) để đủ chỗ cho số 3 chữ số
+
+    // ========== TĂNG CHIỀU CAO ĐỘNG ==========
+    int minHeightPerAgent = 35;
+    int calculatedHeight = agentCount * minHeightPerAgent;
+    chartView_->setMinimumHeight(calculatedHeight);
 
     chartView_->setChart(chart_);
     chartView_->update();
