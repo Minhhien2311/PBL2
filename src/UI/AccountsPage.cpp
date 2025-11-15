@@ -73,7 +73,7 @@ AccountsPage::AccountsPage(AccountManager* accManager, QWidget* parent)
     btnLayout->setContentsMargins(24, 18, 24, 20);
     btnLayout->setSpacing(20);
     btnLayout->addStretch();
-    btnUpdate_ = new QPushButton(tr(u8"Hiển thị thông tin"), this);
+    btnUpdate_ = new QPushButton(tr(u8"Sửa thông tin"), this);
     QPushButton *btnPwd = new QPushButton(tr(u8"Đổi mật khẩu"), this);
     btnUpdate_->setProperty("class", "MainBtn");
     btnPwd->setProperty("class", "MainBtn");
@@ -99,8 +99,10 @@ AccountsPage::AccountsPage(AccountManager* accManager, QWidget* parent)
     fullnameEdit_->setEnabled(true);
     phoneEdit_->setEnabled(true);
     emailEdit_->setEnabled(true);
-    // Tải dữ liệu người dùng
-    loadAccountData();
+
+    // // Tải dữ liệu người dùng
+    // loadAccountData();
+
     // Nút Cập nhật: toggle chế độ chỉnh sửa -> lưu khi bấm lần nữa
     connect(btnUpdate_, &QPushButton::clicked, this, [this]() {
     bool currentlyReadOnly = fullnameEdit_->isReadOnly();
@@ -163,4 +165,22 @@ void AccountsPage::loadAccountData()
         roleEdit_->setText("Đại lý");
     }
     }
+}
+
+void AccountsPage::showEvent(QShowEvent *event)
+{
+    // 1. Luôn tải dữ liệu mới nhất khi trang được hiển thị
+    loadAccountData();
+
+    // 2. Đảm bảo trang luôn ở chế độ "chỉ xem" (read-only) khi mới vào
+    // (Phòng trường hợp người dùng đang sửa, rồi chuyển sang tab khác và quay lại)
+    fullnameEdit_->setReadOnly(true);
+    phoneEdit_->setReadOnly(true);
+    emailEdit_->setReadOnly(true);
+
+    // 3. Đặt lại tên nút về trạng thái ban đầu ("Sửa thông tin")
+    btnUpdate_->setText(tr(u8"Sửa thông tin"));
+
+    // 4. Gọi hàm của lớp cha
+    QWidget::showEvent(event);
 }

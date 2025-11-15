@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <qpushbutton.h>
+#include <QShowEvent>
 
 class AccountManager; // <--- Sửa lỗi: Khai báo sớm
 class QLineEdit;      // <--- Sửa lỗi: Khai báo sớm
@@ -12,7 +13,8 @@ class AccountsPage : public QWidget {
 public:
     // <--- Sửa lỗi: Constructor nhận AccountManager
     explicit AccountsPage(AccountManager* accManager, QWidget* parent=nullptr);
-    void refreshAccountData(); // Hàm public để reload dữ liệu
+protected:
+    void showEvent(QShowEvent *event) override;
     
 private:
     AccountManager* accountManager_; // <--- Sửa lỗi: Thêm con trỏ
