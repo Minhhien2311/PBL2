@@ -36,7 +36,7 @@ AgentRevenueReportPage::AgentRevenueReportPage(AccountManager* am,
     chartSeries_(nullptr)
 {
     setupUI();
-    updateData();
+    // updateData();
 }
 
 AgentRevenueReportPage::~AgentRevenueReportPage()
@@ -237,8 +237,6 @@ void AgentRevenueReportPage::updateChart()
 
     // 3. Lấy dữ liệu
     int currentYear = QDate::currentDate().year();
-    qDebug() << "=== Agent Revenue Chart Data ===";
-    qDebug() << "Fetching monthly revenue for year:" << currentYear;
 
     // Lấy doanh thu của AGENT hiện tại
     std::vector<double> monthlyRevenue = reportManager_->getAgentMonthlyRevenue(currentYear);
@@ -257,7 +255,6 @@ void AgentRevenueReportPage::updateChart()
     double maxRevenueInMillion = 0.0;
     double totalRevenue = std::accumulate(monthlyRevenue.begin(), monthlyRevenue.end(), 0.0);
 
-    qDebug() << "=== Monthly Revenue (from ReportManager) ===";
     for (int i = 0; i < 12; ++i) {
         double revenueInMillion = monthlyRevenue[i] / 1000000.0;
         if (revenueInMillion > maxRevenueInMillion) {
@@ -270,13 +267,11 @@ void AgentRevenueReportPage::updateChart()
 
     // 5. Xử lý dữ liệu giả
     if (totalRevenue == 0.0) {
-        qDebug() << "No revenue data, using dummy data for display";
         for (int i = 0; i < 12; ++i) {
             *barSet << 0.1; // Thêm 12 giá trị giả
         }
         yAxisMax = 1.0;
     } else {
-        qDebug() << "Using real revenue data";
         for (double revenue : monthlyRevenue) {
             *barSet << (revenue / 1000000.0); // Thêm 12 giá trị thật
         }
@@ -324,6 +319,13 @@ void AgentRevenueReportPage::updateChart()
     chart_->setMargins(QMargins(6, 20, 20, 20));
     chartView_->setChart(chart_);
     chartView_->update();
+}
 
-    qDebug() << "=== Agent Revenue Chart Update Complete ===";
+void AgentRevenueReportPage::showEvent(QShowEvent *event)
+{
+    // 1. Tự động gọi hàm làm mới dữ liệu mỗi khi trang được hiển thị
+    updateData();
+    
+    // 2. Gọi hàm của lớp cha
+    QWidget::showEvent(event);
 }

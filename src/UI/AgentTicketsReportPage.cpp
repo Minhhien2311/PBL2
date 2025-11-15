@@ -42,7 +42,7 @@ AgentTicketsReportPage::AgentTicketsReportPage(AccountManager* am,
     chartSeries_(nullptr)
 {
   setupUI();
-  onRefreshClicked();
+//   onRefreshClicked();
 }
 
 AgentTicketsReportPage::~AgentTicketsReportPage()
@@ -358,4 +358,21 @@ void AgentTicketsReportPage::updateChart()
     chartView_->update();
 
     qDebug() << "=== Agent Tickets Chart Update Complete ===";
+}
+
+void AgentTicketsReportPage::showEvent(QShowEvent *event)
+{
+    // 1. Đặt lại ngày về giá trị mặc định (30 ngày trước -> hôm nay)
+    if (startDate_) {
+        startDate_->setDate(QDate::currentDate().addDays(-30));
+    }
+    if (endDate_) {
+        endDate_->setDate(QDate::currentDate());
+    }
+    
+    // 2. Tự động gọi hàm làm mới dữ liệu
+    onRefreshClicked();
+    
+    // 3. Gọi hàm của lớp cha
+    QWidget::showEvent(event);
 }

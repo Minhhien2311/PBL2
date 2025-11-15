@@ -6,6 +6,7 @@
 #include <QChartView>
 #include <QChart>
 #include <QBarSeries>
+#include <QShowEvent>
 
 class AccountManager;
 class BookingManager;
@@ -20,6 +21,8 @@ public:
                                     ReportManager* rm,
                                     QWidget* parent = nullptr);
     ~AgentRevenueReportPage();
+protected:
+    void showEvent(QShowEvent *event) override;
 
 private:
     void setupUI();
