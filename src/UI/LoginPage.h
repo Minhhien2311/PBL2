@@ -6,6 +6,7 @@
 class QLineEdit;
 class QCheckBox;
 class QPushButton;
+class QLabel;
 class AccountManager; // <--- Sửa lỗi: Khai báo sớm (Forward declare)
 
 class LoginPage : public QWidget
@@ -22,6 +23,7 @@ signals:
 private slots:
     void onLoginClicked();
     void onShowPasswordToggled(bool checked);
+    void onForgotPasswordClicked();
 
 private:
     void setupUi();
@@ -32,6 +34,7 @@ private:
     QLineEdit *passwordEdit_;
     QCheckBox *showPasswordCheck_;
     QPushButton *loginButton_;
+    QLabel* forgotPasswordLabel_;
 
     // <--- Sửa lỗi: Thêm con trỏ tới Manager
     AccountManager* accountManager_; 

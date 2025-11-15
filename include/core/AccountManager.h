@@ -111,6 +111,11 @@ public:
     
     const std::string getCurrentAgentId() const;
 
+    bool resetPassword(const std::string& email, const std::string& newPassword);
+
+    bool saveAdminsToFile(const std::string& filePath);
+    bool saveAgentsToFile(const std::string& filePath);
+    
 signals:
     // Phát tín hiệu khi người dùng đăng nhập thành công
     void userLoggedIn(Account* user);

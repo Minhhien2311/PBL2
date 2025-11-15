@@ -131,17 +131,12 @@ AccountsPage::AccountsPage(AccountManager* accManager, QWidget* parent)
         btnUpdate_->setText("Sửa thông tin");
         // Reload data (đảm bảo hiển thị đúng dữ liệu đã lưu/ghi file)
         loadAccountData();
-        qDebug() << "2.[AccountsPage] Saved account data for user ID:"
-                 << (accountManager_->getCurrentUser() ?
-                     QString::fromStdString(accountManager_->getCurrentUser()->getId()) : "None");
         QMessageBox::information(this, "Thành công", "Đã cập nhật thông tin.");
     }
     });
     // Nút "Đổi mật khẩu": mở dialog đổi mật khẩu (sử dụng con trỏ accountManager_ hiện có)
     connect(btnPwd, &QPushButton::clicked, this, [this]() {
     Account* user = accountManager_->getCurrentUser();
-    qDebug() << "1.[AccountsPage] Change password clicked for user ID:"
-             << (user ? QString::fromStdString(user->getId()) : "None");
     if (!user) {
         QMessageBox::warning(this, "Lỗi", "Không có người dùng đang đăng nhập.");
         return;

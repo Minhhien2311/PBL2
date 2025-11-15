@@ -245,3 +245,48 @@ const std::string AccountManager::getCurrentAgentId() const {
     }
     return "";
 }
+
+bool AccountManager::resetPassword(const std::string& email, const std::string& newPassword)
+{
+    // Tim kiem bang email
+    for (Account* acc : allAdmins) {
+        if (acc->getEmail() == email) {
+            // Reset password
+            acc->setPassword(newPassword);
+            
+            // Save changes to file
+            return saveAdminsToFile(this->adminFilePath_);
+        }
+    }
+
+    for(Account* acc : allAgents) {
+        if (acc->getEmail() == email) {
+            // Reset password
+            acc->setPassword(newPassword);
+            
+            // Save changes to file
+            return saveAgentsToFile(this->agentFilePath_);
+        }
+    }
+    return false;
+}
+
+bool AccountManager::saveAdminsToFile(const std::string& filePath) {
+    std::ofstream adminFile(filePath);
+    if (!adminFile.is_open()) return false; // Không mở được file để ghi
+    for (size_t i = 0; i < allAdmins.size(); ++i) {
+        adminFile << allAdmins[i]->toRecordLine() << "\n";
+    }
+    adminFile.close();
+    return true;
+}
+
+bool AccountManager::saveAgentsToFile(const std::string& filePath) {
+    std::ofstream agentFile(filePath);
+    if (!agentFile.is_open()) return false; // Không mở được file để ghi
+    for (size_t i = 0; i < allAgents.size(); ++i) {
+        agentFile << allAgents[i]->toRecordLine() << "\n";
+    }
+    agentFile.close();
+    return true;
+}

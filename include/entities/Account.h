@@ -51,7 +51,8 @@ public:
     void setFullName(const std::string& name);
     void setPhone(const std::string& phone);
     void setEmail(const std::string& email);
-
+    void setPassword(const std::string& newPassword);
+    
     // --- Chức năng chính ---
     bool authenticate(const std::string& passwordPlain) const;
     void changePassword(const std::string& newPasswordPlain);

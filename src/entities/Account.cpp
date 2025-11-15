@@ -88,6 +88,10 @@ void Account::setPhone(const std::string& phone) {
 void Account::setEmail(const std::string& email) {
     this->email = email;
 }
+void Account::setPassword(const std::string& newPassword) {
+    // Mã hóa mật khẩu mới trước khi lưu (nếu cần)
+    passwordHash = hashPassword(newPassword);
+}
 
 // --- Chức năng chính ---
 // bool Account::authenticate(const std::string& passwordPlain) const {

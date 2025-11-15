@@ -2,6 +2,7 @@
 
 #include "core/AccountManager.h"
 #include "entities/AccountAdmin.h"
+#include "ForgotPasswordDialog.h"
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
@@ -156,11 +157,30 @@ void LoginPage::setupUi()
         contentLayout->addLayout(row);
     }
 
+    // // "Quên mật khẩu?"
+    // forgotPasswordLabel_ = new QLabel("Quên mật khẩu?", content);
+    // forgotPasswordLabel_->setObjectName("ForgotLabel");
+    // forgotPasswordLabel_->setAlignment(Qt::AlignCenter);
+
+    // // Make it look clickable
+    // forgotPasswordLabel_->setStyleSheet("QLabel#ForgotLabel { cursor: pointer; text-decoration: underline; }");
+    // contentLayout->addWidget(forgotPasswordLabel_);
+
+    
     // "Quên mật khẩu?"
-    QLabel *forgotPasswordLabel = new QLabel("Quên mật khẩu?", content);
-    forgotPasswordLabel->setObjectName("ForgotLabel");
-    forgotPasswordLabel->setAlignment(Qt::AlignCenter);
-    contentLayout->addWidget(forgotPasswordLabel);
+    // Dùng HTML để tạo một cái link
+    forgotPasswordLabel_ = new QLabel(R"(<a href="#">Quên mật khẩu?</a>)", content);
+
+    // THÊM DÒNG NÀY:
+    // Báo cho QLabel biết là phải xử lý việc nhấn vào link
+    forgotPasswordLabel_->setTextInteractionFlags(Qt::TextBrowserInteraction);
+
+    forgotPasswordLabel_->setObjectName("ForgotLabel");
+    forgotPasswordLabel_->setAlignment(Qt::AlignCenter);
+
+    // Dòng stylesheet này vẫn giữ nguyên, nó sẽ ghi đè màu #133e87 lên màu link mặc định
+    forgotPasswordLabel_->setStyleSheet("QLabel#ForgotLabel { color: #133e87; text-decoration: underline; }");
+    contentLayout->addWidget(forgotPasswordLabel_);
 
     contentLayout->addStretch();
     boxLayout->addWidget(content);
@@ -178,6 +198,7 @@ void LoginPage::setupConnections()
 {
     connect(loginButton_, &QPushButton::clicked, this, &LoginPage::onLoginClicked);
     connect(showPasswordCheck_, &QCheckBox::toggled, this, &LoginPage::onShowPasswordToggled);
+    connect(forgotPasswordLabel_, &QLabel::linkActivated, this, &LoginPage::onForgotPasswordClicked);
 }
 
 void LoginPage::onLoginClicked()
@@ -207,4 +228,25 @@ void LoginPage::onLoginClicked()
 void LoginPage::onShowPasswordToggled(bool checked)
 {
     passwordEdit_->setEchoMode(checked ? QLineEdit::Normal : QLineEdit::Password);
+}
+
+void LoginPage::onForgotPasswordClicked()
+{
+    ForgotPasswordDialog dialog(this);
+    
+    if (dialog.exec() == QDialog::Accepted) {
+        QString email = dialog.getEmail();
+        QString newPassword = dialog.getNewPassword();
+        
+        // Gọi AccountManager để reset password
+        bool success = accountManager_->resetPassword(email.toStdString(), newPassword.toStdString());
+        
+        if (success) {
+            QMessageBox::information(this, tr("Thành công"), 
+                                   tr("Đặt lại mật khẩu thành công!\nBạn có thể đăng nhập với mật khẩu mới."));
+        } else {
+            QMessageBox::warning(this, tr("Lỗi"), 
+                               tr("Không tìm thấy tài khoản với email này hoặc có lỗi xảy ra."));
+        }
+    }
 }
