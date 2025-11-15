@@ -50,8 +50,8 @@ void LoginPage::setupUi()
 
     // ---------- CỘT CHÍNH ----------
     QVBoxLayout *mainLayout = new QVBoxLayout();
-    mainLayout->setAlignment(Qt::AlignCenter);  // Thay đổi từ AlignTop thành AlignCenter
-    mainLayout->setSpacing(50);  // Thêm spacing giữa title và login box
+    mainLayout->setAlignment(Qt::AlignCenter);
+    mainLayout->setSpacing(50);
 
     // Tiêu đề
     QLabel *appTitle = new QLabel("PHẦN MỀM QUẢN LÝ BÁN VÉ MÁY BAY", this);
@@ -63,7 +63,7 @@ void LoginPage::setupUi()
     // Hộp ngoài: bo góc, có viền xanh
     QFrame *loginBox = new QFrame(this);
     loginBox->setObjectName("LoginBox");
-    loginBox->setFixedSize(460, 360);                 // to hơn để giống ảnh 1
+    loginBox->setFixedSize(460, 360);
     loginBox->setFrameShape(QFrame::StyledPanel);
 
     // layout của hộp
@@ -120,7 +120,7 @@ void LoginPage::setupUi()
     passwordEdit_ = new QLineEdit(content);
     passwordEdit_->setPlaceholderText("Password");
     passwordEdit_->setEchoMode(QLineEdit::Password);
-    passwordEdit_->setFixedWidth(350);          // <--- thêm
+    passwordEdit_->setFixedWidth(350);
     {
         QHBoxLayout *row = new QHBoxLayout();
         row->addStretch();
@@ -146,7 +146,7 @@ void LoginPage::setupUi()
     // Nút đăng nhập
     loginButton_ = new QPushButton("Đăng nhập", content);
     loginButton_->setObjectName("LoginButton");
-    loginButton_->setFixedWidth(180);           // <--- giống ảnh
+    loginButton_->setFixedWidth(180);
     loginButton_->setFixedHeight(32);
     {
         QHBoxLayout *row = new QHBoxLayout();
@@ -157,28 +157,15 @@ void LoginPage::setupUi()
         contentLayout->addLayout(row);
     }
 
-    // // "Quên mật khẩu?"
-    // forgotPasswordLabel_ = new QLabel("Quên mật khẩu?", content);
-    // forgotPasswordLabel_->setObjectName("ForgotLabel");
-    // forgotPasswordLabel_->setAlignment(Qt::AlignCenter);
-
-    // // Make it look clickable
-    // forgotPasswordLabel_->setStyleSheet("QLabel#ForgotLabel { cursor: pointer; text-decoration: underline; }");
-    // contentLayout->addWidget(forgotPasswordLabel_);
-
-    
     // "Quên mật khẩu?"
     // Dùng HTML để tạo một cái link
     forgotPasswordLabel_ = new QLabel(R"(<a href="#">Quên mật khẩu?</a>)", content);
 
-    // THÊM DÒNG NÀY:
     // Báo cho QLabel biết là phải xử lý việc nhấn vào link
     forgotPasswordLabel_->setTextInteractionFlags(Qt::TextBrowserInteraction);
 
     forgotPasswordLabel_->setObjectName("ForgotLabel");
     forgotPasswordLabel_->setAlignment(Qt::AlignCenter);
-
-    // Dòng stylesheet này vẫn giữ nguyên, nó sẽ ghi đè màu #133e87 lên màu link mặc định
     forgotPasswordLabel_->setStyleSheet("QLabel#ForgotLabel { color: #133e87; text-decoration: underline; }");
     contentLayout->addWidget(forgotPasswordLabel_);
 
