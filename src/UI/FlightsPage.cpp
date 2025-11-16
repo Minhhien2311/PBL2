@@ -323,9 +323,9 @@ void FlightsPage::setupUi()
 
 void FlightsPage::setupModel()
 {
-    model_ = new QStandardItemModel(0, 8, this);
+    model_ = new QStandardItemModel(0, 7, this);
     model_->setHorizontalHeaderLabels({
-        "ID chuyến", "Số hiệu", "Hãng hàng không", "Ngày khởi hành", "Giờ khởi hành",
+        "ID chuyến", "Hãng hàng không", "Số hiệu", "Ngày khởi hành", "Giờ khởi hành",
         "Ngày hạ cánh", "Giờ hạ cánh", "Ghế trống"
     });
     tableView_->setModel(model_);
@@ -360,7 +360,6 @@ void FlightsPage::refreshTable()
             rowItems << new QStandardItem(QString::fromStdString(flight->getFlightId()))
                    << new QStandardItem(QString::fromStdString(flight->getAirline()))
                    << new QStandardItem(QString::fromStdString(flight->getFlightNumber()))
-                   << new QStandardItem(QString::fromStdString(flightManager_->findFlightById(flight->getFlightId())->getAirline()))
                    << new QStandardItem(QString::fromStdString(flight->getDepartureDate()))
                    << new QStandardItem(QString::fromStdString(flight->getDepartureTime()))
                    << new QStandardItem(QString::fromStdString(flight->getArrivalDate()))
@@ -522,11 +521,11 @@ void FlightsPage::onDeleteFlight()
         
         if (success) {
             QMessageBox::information(this, "✅ Xóa thành công", 
-                QString("Đã xóa chuyến bay: <b>%1</b>").arg(flightId));
+                QString("Đã xóa chuyến bay mã <b>%1</b>").arg(flightId));
             refreshTable();
         } else {
             QMessageBox::critical(this, "❌ Xóa thất bại", 
-                QString("Không thể xóa chuyến bay <b>%1</b>.").arg(flightId));
+                QString("Không thể xóa chuyến bay mã <b>%1</b>.").arg(flightId));
         }
     }
 }
@@ -544,8 +543,7 @@ void FlightsPage::onSearchById()
     Flight* flight = flightManager_->findFlightById(flightId.toStdString());
     
     if (!flight) {
-        QMessageBox::warning(this, "Không tìm thấy", 
-            QString("Không tìm thấy chuyến bay với ID: <b>%1</b>").arg(flightId));
+        statusLabel_->setText(QString("Không tìm thấy chuyến bay mã <b>%1</b>").arg(flightId));
         return;
     }
 
@@ -567,10 +565,7 @@ void FlightsPage::onSearchById()
            << new QStandardItem(QString::number(availableSeats) + " / " + QString::number(flight->getTotalCapacity()));
     model_->appendRow(rowItems);
 
-    statusLabel_->setText("✅ Tìm thấy 1 chuyến bay");
-    
-    QMessageBox::information(this, "Tìm thấy", 
-        QString("Đã tìm thấy chuyến bay: <b>%1</b>").arg(flightId));
+    statusLabel_->setText(QString("✅ Tìm thấy 1 chuyến bay với mã <b>%1</b>").arg(flightId));
 }
 
 void FlightsPage::onSearchFilter()
@@ -610,7 +605,6 @@ void FlightsPage::onSearchFilter()
             rowItems << new QStandardItem(QString::fromStdString(inst->getFlightId()))
                    << new QStandardItem(QString::fromStdString(inst->getAirline()))
                    << new QStandardItem(QString::fromStdString(inst->getFlightNumber()))
-                   << new QStandardItem(QString::fromStdString(flightManager_->findFlightById(inst->getFlightId())->getAirline()))
                    << new QStandardItem(QString::fromStdString(inst->getDepartureDate()))
                    << new QStandardItem(QString::fromStdString(inst->getDepartureTime()))
                    << new QStandardItem(QString::fromStdString(inst->getArrivalDate()))
@@ -623,10 +617,8 @@ void FlightsPage::onSearchFilter()
     statusLabel_->setText(QString("🔍 Tìm thấy %1 chuyến bay").arg(results.size()));
     
     if (results.empty()) {
-        QMessageBox::information(this, "Không tìm thấy", 
-            "Không có chuyến bay nào phù hợp với bộ lọc.");
+        statusLabel_->setText("Không tìm thấy chuyến bay phù hợp với các tiêu chí đã chọn.");
     } else {
-        QMessageBox::information(this, "Kết quả", 
-            QString("Tìm thấy <b>%1</b> chuyến bay phù hợp.").arg(results.size()));
+        statusLabel_->setText(QString("✅ Tìm thấy %1 chuyến bay phù hợp.").arg(results.size()));
     }
 }

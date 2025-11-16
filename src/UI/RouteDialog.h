@@ -40,7 +40,6 @@ private:
     QString currentId_;  // Chỉ dùng khi edit
 
     // UI Components
-    QComboBox* airlineCombo_;
     AirportComboBox* fromCombo_;
     AirportComboBox* toCombo_;
     QPushButton* saveButton_;

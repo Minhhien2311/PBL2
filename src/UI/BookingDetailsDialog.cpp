@@ -95,13 +95,12 @@ void BookingDetailsDialog::setupUi()
     // Lấy thông tin chuyến bay
     Flight* flight = flightManager_->findFlightById(booking_->getFlightId());
     if (flight) {
-        Flight* flight = flightManager_->findFlightById(flight->getFlightId());
+        Route* route = flightManager_->findRouteById(flight->getRouteId()); // ✅ ĐÚNG
         
         QString flightInfo = QString("Mã chuyến: %1\n")
             .arg(QString::fromStdString(flight->getFlightNumber()));
         
-        if (flight) {
-            Route* route = flightManager_->findRouteById(flight->getRouteId());
+        if (route) {
             flightInfo += QString("Hãng bay: %1\n").arg(QString::fromStdString(flight->getAirline()));
             flightInfo += QString("Lộ trình: %1 → %2\n")
                 .arg(QString::fromStdString(route->getDepartureAirport()))

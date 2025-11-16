@@ -344,11 +344,11 @@ void SearchBookPage::fillTable(const std::vector<Flight*>& flights)
         if (!inst) continue;
 
         // Lấy thông tin hãng hàng không từ Flight
-        QString airline = "N/A";
-        Flight* flight = flightManager_->findFlightById(inst->getFlightId());
-        if (flight) {
-            airline = QString::fromStdString(flight->getAirline());
-        }
+        // QString airline = "N/A";
+        Flight* flight = flights[i];
+
+        if (!flight) continue;
+        QString airline = QString::fromStdString(flight->getAirline());
 
         // Format số tiền với dấu chấm phân cách hàng nghìn
         QString priceFormatted = formatVietnamCurrency(inst->getFareEconomy());

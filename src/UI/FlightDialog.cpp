@@ -378,23 +378,21 @@ void FlightDialog::setupUi(bool isEditMode)
     connect(cancelButton_, &QPushButton::clicked, this, &QDialog::reject);
 }
 
-void FlightDialog::loadExistingFlights()
-{
-    const std::vector<Flight*>& flights = flightManager_->getAllFlights();
+// DÒNG 388 - loadExistingFlights() - NÊN ĐỔI THÀNH loadExistingRoutes()
+void FlightDialog::loadExistingFlights() {
+    flightRouteCombo_->clear();
+    flightRouteCombo_->addItem("-- Chọn tuyến bay --", "");
+
+    const std::vector<Route*>& routes = flightManager_->getAllRoutes();
     
-    // Thêm option mặc định nếu không phải edit mode
-    if (!isEditMode_) {
-        flightRouteCombo_->addItem("-- Chọn tuyến bay --", "");
-    }
-    
-    for (Flight* flight : flights) {
-        if (flight) {
-            Route* route = flightManager_->findRouteById(flight->getRouteId());
-            QString displayText = QString("%1 → %2 (%3)")
+    for (int i = 0; i < routes.size(); ++i) {
+        Route* route = routes[i];
+        if (route) {
+            QString displayText = QString("%1 → %2")
                 .arg(QString::fromStdString(route->getDepartureAirport()))
                 .arg(QString::fromStdString(route->getArrivalAirport()));
             
-            flightRouteCombo_->addItem(displayText, QString::fromStdString(flight->getFlightId()));
+            flightRouteCombo_->addItem(displayText, QString::fromStdString(route->getRouteId()));
         }
     }
 }

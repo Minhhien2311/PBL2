@@ -35,11 +35,11 @@ int main(int argc, char *argv[]) {
 
         // --- TẠO CÁC MANAGER ---
         AccountManager accountManager("C:/PBL2/data/admins.txt", "C:/PBL2/data/agents.txt");
-        FlightManager flightManager("C:/PBL2/data/flights.txt", "C:/PBL2/data/flight_instances.txt");
+        FlightManager flightManager("C:/PBL2/data/routes.txt", "C:/PBL2/data/flights.txt");
         BookingManager bookingManager("C:/PBL2/data/bookings.txt", nullptr); 
         ReportManager reportManager(accountManager, bookingManager);
         AirportManager airportManager;
-        airportManager.loadAirportsFromFlights(&flightManager);
+        airportManager.loadAirportsFromRoutes(&flightManager);
 
         // --- KHỞI ĐỘNG ỨNG DỤNG ---
         Application w(&accountManager, &flightManager, &bookingManager,

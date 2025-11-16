@@ -53,6 +53,10 @@ void Flight::setFareBusiness(double fare) {
     this->fareBusiness = fare;
 }
 
+void Flight::setAirline(const std::string& airline) {
+    this->airline = airline;
+}
+
 // --- Đọc/Ghi file cấu hình ---
 
 // Chuyển đổi đối tượng thành một dòng string, ngăn cách bởi dấu '|'.

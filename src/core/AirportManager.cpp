@@ -11,25 +11,25 @@ AirportManager::AirportManager()
 void AirportManager::loadDefaultAirports()
 {
     // Việt Nam (19 sân bay - đã sắp xếp alphabet)
-    addAirport("Buôn Ma Thuột (BMV)", "BMV");
-    addAirport("Cà Mau (CAH)", "CAH");
-    addAirport("Cần Thơ (VCA)", "VCA");
-    addAirport("Côn Đảo (VCS)", "VCS");
-    addAirport("Điện Biên Phủ (DIN)", "DIN");
-    addAirport("Đà Lạt (DLI)", "DLI");
-    addAirport("Đà Nẵng (DAD)", "DAD");
-    addAirport("Hà Nội (HAN)", "HAN");
-    addAirport("Hải Phòng (HPH)", "HPH");
-    addAirport("Huế (HUI)", "HUI");
-    addAirport("Nha Trang (CXR)", "CXR");
-    addAirport("Phú Quốc (PQC)", "PQC");
-    addAirport("Pleiku (PXU)", "PXU");
-    addAirport("Quy Nhơn (UIH)", "UIH");
-    addAirport("Rạch Giá (VKG)", "VKG");
-    addAirport("Thanh Hóa (THD)", "THD");
-    addAirport("TP. Hồ Chí Minh (SGN)", "SGN");
-    addAirport("Vinh (VII)", "VII");
-    addAirport("Vũng Tàu (VTG)", "VTG");
+    addAirport("Buôn Ma Thuột", "BMV");
+    addAirport("Cà Mau", "CAH");
+    addAirport("Cần Thơ", "VCA");
+    addAirport("Côn Đảo", "VCS");
+    addAirport("Điện Biên Phủ", "DIN");
+    addAirport("Đà Lạt", "DLI");
+    addAirport("Đà Nẵng", "DAD");
+    addAirport("Hà Nội", "HAN");
+    addAirport("Hải Phòng", "HPH");
+    addAirport("Huế", "HUI");
+    addAirport("Nha Trang", "CXR");
+    addAirport("Phú Quốc", "PQC");
+    addAirport("Pleiku", "PXU");
+    addAirport("Quy Nhơn", "UIH");
+    addAirport("Rạch Giá", "VKG");
+    addAirport("Thanh Hóa", "THD");
+    addAirport("TP. Hồ Chí Minh", "SGN");
+    addAirport("Vinh", "VII");
+    addAirport("Vũng Tàu", "VTG");
     
     // Quốc tế (8 sân bay - đã sắp xếp alphabet)
     // addAirport("Bangkok (BKK)", "BKK");
@@ -80,7 +80,7 @@ std::vector<std::string> AirportManager::getAllDisplayNames() const
     return names;
 }
 
-void AirportManager::loadAirportsFromFlights(FlightManager* flightManager)
+void AirportManager::loadAirportsFromRoutes(FlightManager* flightManager)
 {
     if (!flightManager) return;
     
@@ -95,12 +95,12 @@ void AirportManager::loadAirportsFromFlights(FlightManager* flightManager)
         std::string depIATA = route->getDepartureAirport(); // <-- ĐÃ THAY ĐỔI
         std::string arrIATA = route->getArrivalAirport(); // <-- ĐÃ THAY ĐỔI
         
-        // Nếu chưa có trong danh sách, tạo display name mặc định: "HAN (HAN)"
+        // Nếu chưa có trong danh sách, tạo display name mặc định: "HAN"
         if (!hasAirport(depIATA)) {
-            addAirport(depIATA + " (" + depIATA + ")", depIATA);
+            addAirport(depIATA, depIATA);
         }
         if (!hasAirport(arrIATA)) {
-            addAirport(arrIATA + " (" + arrIATA + ")", arrIATA);
+            addAirport(arrIATA, arrIATA);
         }
     }
 }
