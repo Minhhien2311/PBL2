@@ -5,7 +5,7 @@
 #include "core/BookingManager.h"
 #include "core/AccountManager.h"
 #include "core/AirportManager.h"
-#include "entities/FlightInstance.h"
+#include "entities/Flight.h"
 #include "entities/Flight.h"
 #include "entities/Account.h"
 #include "BookingDialog.h"
@@ -316,7 +316,7 @@ void SearchBookPage::setupModel()
     // 8 cột thông tin chuyến bay
     model_ = new QStandardItemModel(0, 8, this);
     model_->setHorizontalHeaderLabels({
-        "Mã Chuyến",          // instanceId
+        "Mã Chuyến",          // flightId
         "Số hiệu",
         "Ngày khởi hành",
         "Giờ khởi hành",
@@ -335,12 +335,12 @@ void SearchBookPage::setupConnections()
 }
 
 // ================ CHỖ NẠP DỮ LIỆU VÀO BẢNG ================
-void SearchBookPage::fillTable(const std::vector<FlightInstance*>& instances)
+void SearchBookPage::fillTable(const std::vector<Flight*>& flights)
 {
     model_->removeRows(0, model_->rowCount());
 
-    for (int i = 0; i < instances.size(); ++i) {
-        FlightInstance* inst = instances[i];
+    for (int i = 0; i < flights.size(); ++i) {
+        Flight* inst = flights[i];
         if (!inst) continue;
 
         // Lấy thông tin hãng hàng không từ Flight
@@ -354,7 +354,7 @@ void SearchBookPage::fillTable(const std::vector<FlightInstance*>& instances)
         QString priceFormatted = formatVietnamCurrency(inst->getFareEconomy());
 
         QList<QStandardItem*> row;
-        row << new QStandardItem(QString::fromStdString(inst->getInstanceId()))
+        row << new QStandardItem(QString::fromStdString(inst->getFlightId()))
             << new QStandardItem(QString::fromStdString(inst->getFlightNumber()))
             << new QStandardItem(QString::fromStdString(inst->getDepartureDate()))
             << new QStandardItem(QString::fromStdString(inst->getDepartureTime()))
@@ -434,18 +434,18 @@ void SearchBookPage::onBookClicked()
         return;
     }
 
-    // Lấy instanceId từ cột 0
-    QString instanceId = model_->itemFromIndex(selected.first().siblingAtColumn(0))->text();
+    // Lấy flightId từ cột 0
+    QString flightId = model_->itemFromIndex(selected.first().siblingAtColumn(0))->text();
     
     // Lấy thông tin chuyến bay
-    FlightInstance* instance = flightManager_->findInstanceById(instanceId.toStdString());
-    if (!instance) {
+    Flight* flight = flightManager_->findFlightById(flightId.toStdString());
+    if (!flight) {
         QMessageBox::warning(this, "Lỗi", "Không tìm thấy chuyến bay.");
         return;
     }
     
     // Hiển thị dialog đặt vé (dialog handles everything internally)
-    BookingDialog dialog(instance, flightManager_, bookingManager_, accountManager_, this);
+    BookingDialog dialog(flight, flightManager_, bookingManager_, accountManager_, this);
     
     if (dialog.exec() == QDialog::Accepted) {
         // Booking already created and saved inside dialog!
@@ -459,15 +459,15 @@ void SearchBookPage::onBookClicked()
 
 void SearchBookPage::loadAllFlights()
 {
-    // Get all flight instances (giống FlightsPage)
-    const std::vector<FlightInstance*>& instances = flightManager_->getAllInstances();
+    // Get all flight flights (giống FlightsPage)
+    const std::vector<Flight*>& flights = flightManager_->getAllFlights();
     
     // Display them in the table
-    fillTable(instances);
+    fillTable(flights); // Use the correct type for fillTable
     
     // Update status label
     statusLabel_->setText(
-        QString("Hiển thị tất cả %1 chuyến bay").arg(instances.size())
+        QString("Hiển thị tất cả %1 chuyến bay").arg(flights.size())
     );
 }
 

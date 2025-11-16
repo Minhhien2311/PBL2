@@ -3,8 +3,8 @@
 #include "entities/Booking.h"
 #include "core/FlightManager.h"
 #include "core/AccountManager.h"
-#include "entities/FlightInstance.h"
 #include "entities/Flight.h"
+#include "entities/Route.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -93,27 +93,28 @@ void BookingDetailsDialog::setupUi()
     auto *flightLayout = new QVBoxLayout(flightGroup);
     
     // Lấy thông tin chuyến bay
-    FlightInstance* instance = flightManager_->findInstanceById(booking_->getFlightInstanceId());
-    if (instance) {
-        Flight* flight = flightManager_->findFlightById(instance->getFlightId());
+    Flight* flight = flightManager_->findFlightById(booking_->getFlightId());
+    if (flight) {
+        Flight* flight = flightManager_->findFlightById(flight->getFlightId());
         
         QString flightInfo = QString("Mã chuyến: %1\n")
-            .arg(QString::fromStdString(instance->getFlightNumber()));
+            .arg(QString::fromStdString(flight->getFlightNumber()));
         
         if (flight) {
+            Route* route = flightManager_->findRouteById(flight->getRouteId());
             flightInfo += QString("Hãng bay: %1\n").arg(QString::fromStdString(flight->getAirline()));
             flightInfo += QString("Lộ trình: %1 → %2\n")
-                .arg(QString::fromStdString(flight->getDepartureAirport()))
-                .arg(QString::fromStdString(flight->getArrivalAirport()));
+                .arg(QString::fromStdString(route->getDepartureAirport()))
+                .arg(QString::fromStdString(route->getArrivalAirport()));
         }
         
         flightInfo += QString("Khởi hành: %1 %2\n")
-            .arg(QString::fromStdString(instance->getDepartureDate()))
-            .arg(QString::fromStdString(instance->getDepartureTime()));
+            .arg(QString::fromStdString(flight->getDepartureDate()))
+            .arg(QString::fromStdString(flight->getDepartureTime()));
         
         flightInfo += QString("Đến: %1 %2")
-            .arg(QString::fromStdString(instance->getArrivalDate()))
-            .arg(QString::fromStdString(instance->getArrivalTime()));
+            .arg(QString::fromStdString(flight->getArrivalDate()))
+            .arg(QString::fromStdString(flight->getArrivalTime()));
         
         flightInfoLabel_ = new QLabel(flightInfo);
     } else {

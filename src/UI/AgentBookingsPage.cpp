@@ -8,7 +8,7 @@
 #include "core/SeatManager.h"
 #include "entities/Booking.h"
 #include "entities/Account.h"
-#include "entities/FlightInstance.h"
+#include "entities/Flight.h"
 #include "entities/Seat.h"
 #include "BookingDetailsDialog.h" // Dialog xem chi tiết
 #include "ChangeBookingDialog.h"  // Dialog đổi vé
@@ -305,7 +305,7 @@ void AgentBookingsPage::refreshTable()
         if (booking) {
             QList<QStandardItem *> rowItems;
             rowItems << new QStandardItem(QString::fromStdString(booking->getBookingId()));
-            rowItems << new QStandardItem(QString::fromStdString(booking->getFlightInstanceId()));
+            rowItems << new QStandardItem(QString::fromStdString(booking->getFlightId()));
             rowItems << new QStandardItem(QString::fromStdString(booking->getPassengerId()));
             rowItems << new QStandardItem(QString::fromStdString(booking->getBookingDate()));
 
@@ -478,7 +478,7 @@ void AgentBookingsPage::displayBooking(Booking* booking)
     
     QList<QStandardItem*> rowItems;
     rowItems << new QStandardItem(QString::fromStdString(booking->getBookingId()));
-    rowItems << new QStandardItem(QString::fromStdString(booking->getFlightInstanceId()));
+    rowItems << new QStandardItem(QString::fromStdString(booking->getFlightId()));
     rowItems << new QStandardItem(QString::fromStdString(booking->getPassengerId()));
     rowItems << new QStandardItem(QString::fromStdString(booking->getBookingDate()));
     

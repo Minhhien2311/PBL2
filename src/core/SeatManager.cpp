@@ -1,5 +1,5 @@
 #include "core/SeatManager.h"
-#include "entities/FlightInstance.h"
+#include "entities/Flight.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -12,7 +12,7 @@ SeatManager::SeatManager(const std::string& seatStatusPath,
                          const std::string& seatConfigPath)
     : seatStatusFilePath_(seatStatusPath),
       seatConfigFilePath_(seatConfigPath),
-      currentInstanceId_(""),
+      currentFlightId_(""),
       selectedSeat_(nullptr),
       seatRows_(0),
       seatCols_(8)
@@ -41,22 +41,22 @@ void SeatManager::loadConfiguration() {
     file.close();
 }
 
-bool SeatManager::loadForFlight(const std::string& instanceId) {
+bool SeatManager::loadForFlight(const std::string& flightId) {
     clearCurrentMap();
-    currentInstanceId_ = instanceId;
+    currentFlightId_ = flightId;
     
-    // Will be called by loadSeatMapFor(FlightInstance*)
+    // Will be called by loadSeatMapFor(Flightflight*)
     return true;
 }
 
-bool SeatManager::loadSeatMapFor(FlightInstance* instance) {
-    if (!instance) return false;
+bool SeatManager::loadSeatMapFor(Flight* flight) {
+    if (!flight) return false;
     
     clearCurrentMap();
-    currentInstanceId_ = instance->getInstanceId();
+    currentFlightId_ = flight->getFlightId();
     
     // Calculate rows from capacity
-    int capacity = instance->getTotalCapacity();
+    int capacity = flight->getTotalCapacity();
     seatRows_ = (capacity + seatCols_ - 1) / seatCols_;
     
     // Create all seats
@@ -83,8 +83,8 @@ bool SeatManager::loadSeatMapFor(FlightInstance* instance) {
         size_t pos = line.find('|');
         if (pos == std::string::npos) continue;
         
-        std::string fileInstanceId = line.substr(0, pos);
-        if (fileInstanceId != currentInstanceId_) continue;
+        std::string fileflightId = line.substr(0, pos);
+        if (fileflightId != currentFlightId_) continue;
         
         std::string bookedSeatsStr = line.substr(pos + 1);
         if (bookedSeatsStr.empty()) break;
@@ -164,7 +164,7 @@ bool SeatManager::saveChanges() {
 }
 
 bool SeatManager::updateAndSaveChanges() {
-    if (currentInstanceId_.empty()) return false;
+    if (currentFlightId_.empty()) return false;
     
     // Read existing file
     std::vector<std::string> allLines;
@@ -188,12 +188,12 @@ bool SeatManager::updateAndSaveChanges() {
         }
     }
     
-    std::string newLine = currentInstanceId_ + "|" + bookedSeats.str();
+    std::string newLine = currentFlightId_ + "|" + bookedSeats.str();
     
     // Update or add line
     bool found = false;
     for (size_t i = 0; i < allLines.size(); i++) {
-        if (allLines[i].find(currentInstanceId_ + "|") == 0) {
+        if (allLines[i].find(currentFlightId_ + "|") == 0) {
             allLines[i] = newLine;
             found = true;
             break;
@@ -228,8 +228,8 @@ Seat* SeatManager::getSelectedSeat() const {
     return selectedSeat_;
 }
 
-const std::string& SeatManager::getCurrentInstanceId() const {
-    return currentInstanceId_;
+const std::string& SeatManager::getCurrentFlightId() const {
+    return currentFlightId_;
 }
 
 int SeatManager::getSeatRows() const {
@@ -275,7 +275,7 @@ void SeatManager::clearCurrentMap() {
         delete activeSeatMap_[i];
     }
     activeSeatMap_.clear();
-    currentInstanceId_ = "";
+    currentFlightId_ = "";
     selectedSeat_ = nullptr;
 }
 

@@ -2,16 +2,16 @@
 #define SORTING_H
 
 #include <vector>
-#include "../entities/FlightInstance.h"
+#include "../entities/Flight.h"
 
 class Sorting {
 public:
     // Sắp xếp FlightInstance theo giờ bay (từ sớm tới trễ)
     // So sánh theo arrivalDate và arrivalTime
-    static std::vector<FlightInstance*> sortByArrivalTime(const std::vector<FlightInstance*>& flights);
+    static std::vector<Flight*> sortByArrivalTime(const std::vector<Flight*>& flights);
     
     // Sắp xếp FlightInstance theo giá vé Economy (từ thấp tới cao)
-    static std::vector<FlightInstance*> sortByPrice(const std::vector<FlightInstance*>& flights);
+    static std::vector<Flight*> sortByPrice(const std::vector<Flight*>& flights);
 
 private:
     // Helper function để so sánh thời gian
@@ -26,12 +26,12 @@ private:
     static int timeToMinutes(const std::string& time);
     
     // Quick Sort helpers cho sắp xếp theo thời gian
-    static void quickSortByTime(std::vector<FlightInstance*>& arr, int low, int high);
-    static int partitionByTime(std::vector<FlightInstance*>& arr, int low, int high);
+    static void quickSortByTime(std::vector<Flight*>& arr, int low, int high);
+    static int partitionByTime(std::vector<Flight*>& arr, int low, int high);
     
     // Quick Sort helpers cho sắp xếp theo giá
-    static void quickSortByPrice(std::vector<FlightInstance*>& arr, int low, int high);
-    static int partitionByPrice(std::vector<FlightInstance*>& arr, int low, int high);
+    static void quickSortByPrice(std::vector<Flight*>& arr, int low, int high);
+    static int partitionByPrice(std::vector<Flight*>& arr, int low, int high);
 };
 
 #endif

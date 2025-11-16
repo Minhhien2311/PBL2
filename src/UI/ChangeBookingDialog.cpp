@@ -1,5 +1,5 @@
 #include "ChangeBookingDialog.h"
-#include "entities/FlightInstance.h"
+#include "entities/Flight.h"
 #include "core/FlightManager.h"
 #include "core/BookingManager.h"
 #include "core/SeatManager.h"
@@ -48,7 +48,7 @@ ChangeBookingDialog::ChangeBookingDialog(Booking* currentBooking,
       currentBooking_(currentBooking),
       bookingManager_(bookingManager),
       flightManager_(flightManager),
-      currentFlightInstance_(nullptr),
+      currentFlight_(nullptr),
       selectedNewFlight_(nullptr),
       seatMapContainer_(nullptr),
       seatMapLayout_(nullptr),
@@ -75,7 +75,7 @@ ChangeBookingDialog::ChangeBookingDialog(Booking* currentBooking,
     move(screenGeometry.center() - rect().center());
     
     // Load current flight instance
-    currentFlightInstance_ = flightManager_->findInstanceById(currentBooking_->getFlightInstanceId());
+    currentFlight_ = flightManager_->findFlightById(currentBooking_->getFlightId());
     
     setupUi();
 }
@@ -110,10 +110,10 @@ void ChangeBookingDialog::setupUi()
     
     QString currentInfo = QString("Mã đặt chỗ: %1\n"
                                  "Chuyến bay: %2\n"
-                                 "Ghế: %3\n"
+                                 "Ghế: %3 (%4)\n"
                                  "Giá vé: %4 VND")
         .arg(QString::fromStdString(currentBooking_->getBookingId()))
-        .arg(currentFlightInstance_ ? QString::fromStdString(currentFlightInstance_->getFlightNumber()) : "N/A")
+        .arg(currentFlight_ ? QString::fromStdString(currentFlight_->getFlightNumber()) : "N/A")
         .arg(QString::fromStdString(currentBooking_->getSeatID()))
         .arg(currentBooking_->getBaseFare());
     
@@ -238,7 +238,7 @@ void ChangeBookingDialog::onViewFlightInfoClicked()
         return;
     }
     
-    selectedNewFlight_ = flightManager_->findInstanceById(flightId.toStdString());
+    selectedNewFlight_ = flightManager_->findFlightById(flightId.toStdString());
     if (!selectedNewFlight_) {
         QMessageBox::warning(this, "Lỗi", "Không tìm thấy chuyến bay.");
         flightInfoText_->clear();
@@ -469,7 +469,7 @@ void ChangeBookingDialog::onConfirmClicked()
         *flightManager_,
         *seatManager,
         currentBooking_->getBookingId(),
-        selectedNewFlight_->getInstanceId(),
+        selectedNewFlight_->getFlightId(),
         selectedSeatId_.toStdString()
     );
     

@@ -21,13 +21,11 @@ public:
     // Constructor cho chế độ SỬA (truyền dữ liệu hiện tại vào)
     RouteDialog(AirportManager* airportManager,
                 const QString& currentId,
-                const QString& currentAirline,
                 const QString& currentFrom,
                 const QString& currentTo,
                 QWidget* parent = nullptr);
 
     // Getters để lấy dữ liệu sau khi dialog đóng
-    QString getAirline() const;
     QString getFromIATA() const;
     QString getToIATA() const;
 

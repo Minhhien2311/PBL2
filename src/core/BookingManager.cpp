@@ -1,7 +1,7 @@
 #include "core/BookingManager.h"
-#include "core/FlightManager.h"         // Cần để tìm FlightInstance
-#include "entities/FlightInstance.h"    // Cần để gọi bookSeats/releaseSeats
-#include "utils/DateTime.h"                 // Cần để lấy ngày giờ
+#include "core/FlightManager.h"         // Cần để tìm Flight (trước là FlightInstance)
+#include "entities/Flight.h"            // Cần để gọi bookSeats/releaseSeats (trước là FlightInstance)
+#include "utils/DateTime.h"             // Cần để lấy ngày giờ
 #include "entities/FlightRule.h"        // Cần để kiểm tra luật
 #include <fstream>
 #include <string>
@@ -87,15 +87,15 @@ bool BookingManager::saveDataToFiles(const std::string& bookingsFilePath) const 
 // --- NGHIỆP VỤ 1: BÁN VÉ (TẠO BOOKING) ---
 // <<< THAY ĐỔI: Cập nhật HashTable >>>
 Booking* BookingManager::createNewBooking( FlightManager& flightManager,
-                                           const std::string& flightInstanceId,
-                                           const std::string& agentId,
-                                           const std::string& passengerId,
-                                           BookingClass bookingClass,
-                                           int baseFare,
-                                           SeatManager& seatManager) // Dùng tham chiếu &
+                                       const std::string& flightId, // <-- Đã đổi
+                                       const std::string& agentId,
+                                       const std::string& passengerId,
+                                       BookingClass bookingClass,
+                                       int baseFare,
+                                       SeatManager& seatManager) // Dùng tham chiếu &
 {
     // BƯỚC 1: Kiểm tra các đầu vào cơ bản
-    if (flightInstanceId.empty() || passengerId.empty() || baseFare < 0) return nullptr;
+    if (flightId.empty() || passengerId.empty() || baseFare < 0) return nullptr; // <-- Đã đổi
 
     // BƯỚC 2: Kiểm tra SeatManager
     const Seat* selectedSeat = seatManager.getSelectedSeat();
@@ -118,7 +118,7 @@ Booking* BookingManager::createNewBooking( FlightManager& flightManager,
     std::string currentDate = utils::DateTime::formatLocal(utils::DateTime::nowUtc(), "%Y-%m-%d %H:%M:%S");
     
     // Sử dụng seatId đã lấu được ở dòng 86 (KHÔNG gọi getSelectedSeat() vì đã bị reset)
-    Booking* newBooking = new Booking(flightInstanceId, agentId, passengerId, seatId, currentDate, bookingClass, baseFare, BookingStatus::Issued);
+    Booking* newBooking = new Booking(flightId, agentId, passengerId, seatId, currentDate, bookingClass, baseFare, BookingStatus::Issued); // <-- Đã đổi
 
     // Thêm vào std::vector và HashTable
     this->allBookings.push_back(newBooking);
@@ -142,14 +142,15 @@ bool BookingManager::cancelBooking(FlightManager& flightManager, SeatManager& se
         return false; 
     }
     
-    // Step 3: Get flight instance
-    FlightInstance* instance = flightManager.findInstanceById(booking->getFlightInstanceId());
+    // Step 3: Get flight (trước là flight instance)
+    // <-- ĐÃ ĐỔI TÊN HÀNG LOẠT Ở ĐÂY
+    Flight* flight = flightManager.findFlightById(booking->getFlightId());
     
     // Step 4: CHECK TIME CONSTRAINT FIRST (before releasing seat)
-    if (instance != nullptr) {
+    if (flight != nullptr) { // <-- Đã đổi
         auto departureTime = utils::DateTime::fromDmYHm(
-            instance->getDepartureDate(), 
-            instance->getDepartureTime()
+            flight->getDepartureDate(), // <-- Đã đổi
+            flight->getDepartureTime()  // <-- Đã đổi
         );
         auto now = utils::DateTime::nowUtc();
         auto duration = std::chrono::duration_cast<std::chrono::hours>(
@@ -158,7 +159,7 @@ bool BookingManager::cancelBooking(FlightManager& flightManager, SeatManager& se
         
         if (!currentRule->isCancellable(duration.count())) {
             std::cerr << "Cannot cancel: Too close to departure time" << std::endl;
-            return false;  // Fail early - no seat changes made yet
+            return false;   // Fail early - no seat changes made yet
         }
     }
     
@@ -166,8 +167,8 @@ bool BookingManager::cancelBooking(FlightManager& flightManager, SeatManager& se
     std::string seatIdToRelease = booking->getSeatID();
     bool seatReleased = false;
     
-    if (!seatIdToRelease.empty() && instance != nullptr) {
-        if (seatManager.loadSeatMapFor(instance)) {
+    if (!seatIdToRelease.empty() && flight != nullptr) { // <-- Đã đổi
+        if (seatManager.loadSeatMapFor(flight)) { // <-- Đã đổi
             if (seatManager.releaseSeat(seatIdToRelease)) {
                 // SAVE SEAT CHANGES IMMEDIATELY
                 if (seatManager.saveChanges()) {
@@ -178,7 +179,7 @@ bool BookingManager::cancelBooking(FlightManager& flightManager, SeatManager& se
                     // No rollback needed here - seat was released in memory only
                     // and save failed, so nothing was persisted to disk yet.
                     // Booking status hasn't been changed yet, so state is consistent.
-                    return false;  // Fail if can't save
+                    return false;   // Fail if can't save
                 }
             }
         }
@@ -192,8 +193,8 @@ bool BookingManager::cancelBooking(FlightManager& flightManager, SeatManager& se
         std::cerr << "ERROR: Failed to save booking status!" << std::endl;
         
         // ROLLBACK: Re-book the seat if it was released
-        if (seatReleased && instance != nullptr) {
-            seatManager.loadSeatMapFor(instance);
+        if (seatReleased && flight != nullptr) { // <-- Đã đổi
+            seatManager.loadSeatMapFor(flight); // <-- Đã đổi
             seatManager.bookSeat(seatIdToRelease);
             seatManager.saveChanges();
             std::cerr << "Rolled back seat release" << std::endl;
@@ -244,9 +245,9 @@ std::vector<Booking*> BookingManager::getBookingsByAgentId(const std::string& ag
 
 // --- NGHIỆP VỤ 3: CẬP NHẬT BOOKING ---
 bool BookingManager::updateBooking(const std::string& bookingId,
-                                     const std::string& newPassengerId,
-                                     BookingClass newClass,
-                                     const std::string& newSeatId) {
+                                   const std::string& newPassengerId,
+                                   BookingClass newClass,
+                                   const std::string& newSeatId) {
     // Tìm booking theo ID
     Booking* booking = findBookingById(bookingId);
     if (!booking) {
@@ -269,10 +270,10 @@ bool BookingManager::updateBooking(const std::string& bookingId,
 
 // --- NGHIỆP VỤ 4: ĐỔI VÉ ---
 bool BookingManager::changeBooking(FlightManager& flightManager,
-                                  SeatManager& seatManager,
-                                  const std::string& bookingId,
-                                  const std::string& newFlightInstanceId,
-                                  const std::string& newSeatNumber) {
+                             SeatManager& seatManager,
+                             const std::string& bookingId,
+                             const std::string& newFlightId, // <-- Đã đổi
+                             const std::string& newSeatNumber) {
     // Step 1: Find and validate booking
     Booking* booking = findBookingById(bookingId);
     if (!booking || booking->getStatus() != BookingStatus::Issued) {
@@ -280,21 +281,22 @@ bool BookingManager::changeBooking(FlightManager& flightManager,
         return false;
     }
     
-    // Step 2: Validate new flight instance exists
-    FlightInstance* newInstance = flightManager.findInstanceById(newFlightInstanceId);
-    if (!newInstance) {
-        std::cerr << "Cannot change booking: New flight instance not found" << std::endl;
+    // Step 2: Validate new flight exists (trước là flight instance)
+    // <-- ĐÃ ĐỔI TÊN HÀNG LOẠT Ở ĐÂY
+    Flight* newFlight = flightManager.findFlightById(newFlightId);
+    if (!newFlight) {
+        std::cerr << "Cannot change booking: New flight not found" << std::endl; // <-- Đã đổi
         return false;
     }
     
     // Step 3: Save old flight info (for rollback if needed)
-    std::string oldFlightInstanceId = booking->getFlightInstanceId();
+    std::string oldFlightId = booking->getFlightId(); // <-- Đã đổi
     std::string oldSeatId = booking->getSeatID();
-    FlightInstance* oldInstance = flightManager.findInstanceById(oldFlightInstanceId);
+    Flight* oldFlight = flightManager.findFlightById(oldFlightId); // <-- Đã đổi
     
     // BOOK NEW SEAT FIRST (Step 4)
-    if (!seatManager.loadSeatMapFor(newInstance)) {
-        std::cerr << "ERROR: Failed to load seat map for new flight instance" << std::endl;
+    if (!seatManager.loadSeatMapFor(newFlight)) { // <-- Đã đổi
+        std::cerr << "ERROR: Failed to load seat map for new flight" << std::endl; // <-- Đã đổi
         return false;
     }
     
@@ -313,8 +315,8 @@ bool BookingManager::changeBooking(FlightManager& flightManager,
     std::cout << "Booked new seat " << newSeatNumber << std::endl;
     
     // ONLY AFTER NEW SEAT IS COMMITTED, RELEASE OLD SEAT (Step 5)
-    if (oldInstance && !oldSeatId.empty()) {
-        if (seatManager.loadSeatMapFor(oldInstance)) {
+    if (oldFlight && !oldSeatId.empty()) { // <-- Đã đổi
+        if (seatManager.loadSeatMapFor(oldFlight)) { // <-- Đã đổi
             if (seatManager.releaseSeat(oldSeatId)) {
                 if (seatManager.saveChanges()) {
                     std::cout << "Released old seat " << oldSeatId << std::endl;
@@ -327,7 +329,7 @@ bool BookingManager::changeBooking(FlightManager& flightManager,
     }
     
     // Step 6: Update booking information
-    booking->setFlightInstanceId(newFlightInstanceId);
+    booking->setFlightId(newFlightId); // <-- Đã đổi
     booking->setSeatId(newSeatNumber);
     booking->setStatus(BookingStatus::Changed);
     
@@ -379,7 +381,7 @@ bool BookingManager::saveBookingToFile(Booking* booking) {
 
 // Check if booking can be cancelled (considering time constraints)
 bool BookingManager::canCancelBooking(const std::string& bookingId, 
-                                     FlightManager& flightManager) const {
+                                      FlightManager& flightManager) const {
     Booking* booking = const_cast<BookingManager*>(this)->findBookingById(bookingId);
     if (!booking || booking->getStatus() != BookingStatus::Issued) {
         return false;
@@ -389,14 +391,15 @@ bool BookingManager::canCancelBooking(const std::string& bookingId,
         return false;
     }
     
-    FlightInstance* instance = flightManager.findInstanceById(
-        booking->getFlightInstanceId()
+    // <-- ĐÃ ĐỔI TÊN HÀNG LOẠT Ở ĐÂY
+    Flight* flight = flightManager.findFlightById(
+        booking->getFlightId()
     );
-    if (!instance) return false;
+    if (!flight) return false;
     
     auto departureTime = utils::DateTime::fromDmYHm(
-        instance->getDepartureDate(), 
-        instance->getDepartureTime()
+        flight->getDepartureDate(), 
+        flight->getDepartureTime()
     );
     auto now = utils::DateTime::nowUtc();
     auto duration = std::chrono::duration_cast<std::chrono::hours>(
@@ -414,17 +417,18 @@ std::string BookingManager::getCancellationDeadline(
     Booking* booking = const_cast<BookingManager*>(this)->findBookingById(bookingId);
     if (!booking) return "N/A";
     
-    FlightInstance* instance = flightManager.findInstanceById(
-        booking->getFlightInstanceId()
+    // <-- ĐÃ ĐỔI TÊN HÀNG LOẠT Ở ĐÂY
+    Flight* flight = flightManager.findFlightById(
+        booking->getFlightId()
     );
-    if (!instance) return "N/A";
+    if (!flight) return "N/A";
     
     if (!currentRule) return "N/A";
     
     // Get departure time
     auto departureTime = utils::DateTime::fromDmYHm(
-        instance->getDepartureDate(), 
-        instance->getDepartureTime()
+        flight->getDepartureDate(), 
+        flight->getDepartureTime()
     );
     
     // Subtract minimum cancellation hours

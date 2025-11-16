@@ -1,5 +1,5 @@
 #include "BookingDialog.h"
-#include "entities/FlightInstance.h"
+#include "entities/Flight.h"
 #include "core/FlightManager.h"
 #include "core/BookingManager.h"
 #include "core/AccountManager.h"
@@ -44,13 +44,13 @@ namespace {
     const QString NORMAL_BORDER = "2px solid";
 }
 
-BookingDialog::BookingDialog(FlightInstance* flightInstance, 
+BookingDialog::BookingDialog(Flight* flight, 
                              FlightManager* flightManager,
                              BookingManager* bookingManager,
                              AccountManager* accountManager,
                              QWidget *parent)
     : QDialog(parent),
-      flightInstance_(flightInstance),
+      flight_(flight),
       flightManager_(flightManager),
       bookingManager_(bookingManager),
       accountManager_(accountManager),
@@ -58,7 +58,7 @@ BookingDialog::BookingDialog(FlightInstance* flightInstance,
       seatMapLayout_(nullptr),
       selectedSeatId_("")
 {
-    Q_ASSERT(flightInstance_ != nullptr);
+    Q_ASSERT(flight_ != nullptr);
     Q_ASSERT(flightManager_ != nullptr);
     Q_ASSERT(bookingManager_ != nullptr);
     Q_ASSERT(accountManager_ != nullptr);
@@ -98,16 +98,20 @@ void BookingDialog::setupUi()
     auto *flightGroup = new QGroupBox("Thông tin chuyến bay", contentWidget);
     auto *flightLayout = new QVBoxLayout(flightGroup);
     
-    QString flightInfo = QString("Mã chuyến: %1\n")
-        .arg(QString::fromStdString(flightInstance_->getFlightNumber()));
+    QString
+    flightInfo = QString("Hãng hàng không: %1\n")
+        .arg(QString::fromStdString(flight_->getAirline()));
+
+    flightInfo += QString("Mã chuyến: %1\n")
+        .arg(QString::fromStdString(flight_->getFlightNumber()));
     
     flightInfo += QString("Khởi hành: %1 %2\n")
-        .arg(QString::fromStdString(flightInstance_->getDepartureDate()))
-        .arg(QString::fromStdString(flightInstance_->getDepartureTime()));
+        .arg(QString::fromStdString(flight_->getDepartureDate()))
+        .arg(QString::fromStdString(flight_->getDepartureTime()));
     
     flightInfo += QString("Đến: %1 %2")
-        .arg(QString::fromStdString(flightInstance_->getArrivalDate()))
-        .arg(QString::fromStdString(flightInstance_->getArrivalTime()));
+        .arg(QString::fromStdString(flight_->getArrivalDate()))
+        .arg(QString::fromStdString(flight_->getArrivalTime()));
     
     auto *flightInfoLabel = new QLabel(flightInfo);
     flightLayout->addWidget(flightInfoLabel);
@@ -168,8 +172,8 @@ void BookingDialog::setupUi()
     auto updateFareDisplay = [this]() {
         BookingClass selectedClass = economyRadio_->isChecked() ? BookingClass::Economy : BookingClass::Business;
         int fare = (selectedClass == BookingClass::Economy) 
-                ? flightInstance_->getFareEconomy() 
-                : flightInstance_->getFareBusiness();
+                ? flight_->getFareEconomy() 
+                : flight_->getFareBusiness();
         
         // Format with thousand separators
         QString fareStr = QString::number(fare);
@@ -303,15 +307,15 @@ void BookingDialog::setupUi()
         
         // Calculate fare
         int baseFare = (bookingClass == BookingClass::Economy) 
-                       ? flightInstance_->getFareEconomy() 
-                       : flightInstance_->getFareBusiness();
+                       ? flight_->getFareEconomy() 
+                       : flight_->getFareBusiness();
         
         // Get current date and time in correct format
         QString currentDateTime = QDateTime::currentDateTime().toString("dd/MM/yyyy HH:mm:ss");
         
         // Create new booking
         Booking* newBooking = new Booking(
-            flightInstance_->getInstanceId(),
+            flight_->getFlightId(),
             agentId, // Fixed: use real agent ID
             passengerIdEdit_->text().trimmed().toStdString(),
             selectedSeatId_.toStdString(),
@@ -384,7 +388,7 @@ QString BookingDialog::getSelectedSeatId() const
 
 void BookingDialog::renderSeatMap()
 {
-    if (!seatMapLayout_ || !flightManager_ || !flightInstance_) {
+    if (!seatMapLayout_ || !flightManager_ || !flight_) {
         return;
     }
 
@@ -401,7 +405,7 @@ void BookingDialog::renderSeatMap()
         return;
     }
 
-    if (!seatManager->loadSeatMapFor(flightInstance_)) {
+    if (!seatManager->loadSeatMapFor(flight_)) {
         QLabel* errorLabel = new QLabel("Không thể tải sơ đồ ghế");
         errorLabel->setStyleSheet("color: red;");
         seatMapLayout_->addWidget(errorLabel, 0, 0);

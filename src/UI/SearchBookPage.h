@@ -16,7 +16,7 @@ class BookingManager;
 class AccountManager;
 class AirportManager;
 class AirportComboBox;
-class FlightInstance;
+class Flight;
 
 /**
  * @brief Trang tìm kiếm chuyến bay và đặt vé cho Agent
@@ -47,7 +47,7 @@ private:
     void loadAllFlights();
 
     // nạp dữ liệu vào bảng
-    void fillTable(const std::vector<FlightInstance*>& instances);
+    void fillTable(const std::vector<Flight*>& flights);
 
     // --- managers ---
     FlightManager*   flightManager_;

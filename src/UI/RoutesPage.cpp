@@ -289,14 +289,13 @@ void RoutesPage::refreshTable()
 {
     model_->removeRows(0, model_->rowCount());
 
-    const std::vector<Flight*>& routes = flightManager_->getAllFlights();
+    const std::vector<Route*>& routes = flightManager_->getAllRoutes();
     
     for (int i = 0; i < routes.size(); ++i) {
-        Flight* route = routes[i];
+        Route* route = routes[i];
         if (route) {
             QList<QStandardItem *> rowItems;
-            rowItems << new QStandardItem(QString::fromStdString(route->getFlightId()))
-                   << new QStandardItem(QString::fromStdString(route->getAirline()))
+            rowItems << new QStandardItem(QString::fromStdString(route->getRouteId()))
                    << new QStandardItem(QString::fromStdString(route->getDepartureAirport()))
                    << new QStandardItem(QString::fromStdString(route->getArrivalAirport()));
             model_->appendRow(rowItems);
@@ -312,12 +311,10 @@ void RoutesPage::onAddRoute()
     RouteDialog dialog(airportManager_, this);
     
     if (dialog.exec() == QDialog::Accepted) {
-        QString airline = dialog.getAirline();
         QString fromIATA = dialog.getFromIATA();
         QString toIATA = dialog.getToIATA();
         
-        bool success = flightManager_->createNewFlight(
-            airline.toStdString(),
+        bool success = flightManager_->createNewRoute(
             fromIATA.toStdString(),
             toIATA.toStdString()
         );
@@ -325,9 +322,8 @@ void RoutesPage::onAddRoute()
         if (success) {
             QMessageBox::information(this, "Thành công", 
                 QString("Đã thêm tuyến bay mới:\n\n"
-                       "Hãng: %1\n"
-                       "Từ: %2 → Đến: %3")
-                    .arg(airline, fromIATA, toIATA));
+                       "Từ: %1 → Đến: %2")
+                    .arg(fromIATA, toIATA));
             refreshTable();
         } else {
             QMessageBox::critical(this, "Thất bại", 
@@ -349,20 +345,17 @@ void RoutesPage::onEditRoute()
 
     int row = selected.first().row();
     QString routeId = model_->item(row, 0)->text();
-    QString airline = model_->item(row, 1)->text();
-    QString fromIATA = model_->item(row, 2)->text();
-    QString toIATA = model_->item(row, 3)->text();
+    QString fromIATA = model_->item(row, 1)->text();
+    QString toIATA = model_->item(row, 2)->text();
 
-    RouteDialog dialog(airportManager_, routeId, airline, fromIATA, toIATA, this);
+    RouteDialog dialog(airportManager_, routeId, fromIATA, toIATA, this);
     
     if (dialog.exec() == QDialog::Accepted) {
-        QString newAirline = dialog.getAirline();
         QString newFrom = dialog.getFromIATA();
         QString newTo = dialog.getToIATA();
         
-        bool success = flightManager_->updateFlight(
+        bool success = flightManager_->updateRoute(
             routeId.toStdString(),
-            newAirline.toStdString(),
             newFrom.toStdString(),
             newTo.toStdString()
         );
@@ -373,7 +366,7 @@ void RoutesPage::onEditRoute()
                        "Mã tuyến: %1\n"
                        "Hãng: %2\n"
                        "Lộ trình: %3 → %4")
-                    .arg(routeId, newAirline, newFrom, newTo));
+                    .arg(routeId, newFrom, newTo));
             refreshTable();
         } else {
             QMessageBox::critical(this, "Thất bại", 
@@ -437,22 +430,20 @@ void RoutesPage::onSearchByRoute()
         return;
     }
 
-    const std::vector<Flight*>& allRoutes = flightManager_->getAllFlights();
+    const std::vector<Route*>& allRoutes = flightManager_->getAllRoutes();
     
     model_->removeRows(0, model_->rowCount());
     
     int count = 0;
-    for (Flight* route : allRoutes) {
+    for (Route* route : allRoutes) {
         if (route) {
             bool matchFrom = fromIATA.empty() || (route->getDepartureAirport() == fromIATA);
             bool matchTo = toIATA.empty() || (route->getArrivalAirport() == toIATA);
-            bool matchAirline = selectedAirline.isEmpty() || 
-                              (QString::fromStdString(route->getAirline()) == selectedAirline);
+            bool matchAirline = selectedAirline.isEmpty(); // Routes don't have airlines, so this filter is always true if not specified
             
             if (matchFrom && matchTo && matchAirline) {
                 QList<QStandardItem*> rowItems;
-                rowItems << new QStandardItem(QString::fromStdString(route->getFlightId()))
-                         << new QStandardItem(QString::fromStdString(route->getAirline()))
+                rowItems << new QStandardItem(QString::fromStdString(route->getRouteId()))
                          << new QStandardItem(QString::fromStdString(route->getDepartureAirport()))
                          << new QStandardItem(QString::fromStdString(route->getArrivalAirport()));
                 model_->appendRow(rowItems);

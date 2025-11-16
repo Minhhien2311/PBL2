@@ -19,7 +19,7 @@ class Booking {
 private:
     // Định danh & Liên kết
     std::string bookingId;          // Khóa nội bộ duy nhất
-    std::string flightInstanceId;   // Chuyến bay cụ thể
+    std::string flightId;           // Chuyến bay cụ thể
     std::string agentId;            // ID của Agent tạo booking
     std::string passengerId;        // ID duy nhất của hành khác
     std::string seatID;             // ID ghế được đặt
@@ -38,7 +38,7 @@ public:
     Booking() = default;
 
     // Constructor
-    explicit Booking(const std::string& flightInstanceId,
+    explicit Booking(const std::string& flightId,
             const std::string& agentId,
             const std::string& passengerId,
             const std::string& seatID,
@@ -48,7 +48,7 @@ public:
 
     // --- Getters ---
     const std::string& getBookingId() const;
-    const std::string& getFlightInstanceId() const;
+    const std::string& getFlightId() const;
     const std::string& getAgentId() const;
     const std::string& getPassengerId() const;
     const std::string& getSeatID() const;
@@ -63,7 +63,7 @@ public:
     void setPassengerId(const std::string& newPassengerId);
     void setClass(BookingClass newClass);
     void setSeatId(const std::string& newSeatId);
-    void setFlightInstanceId(const std::string& newFlightInstanceId);
+    void setFlightId(const std::string& newFlightId);
 
     // --- Đọc/Ghi file ---
     std::string toRecordLine() const;

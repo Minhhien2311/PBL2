@@ -4,9 +4,9 @@
 #include <iostream>
 
 // Sắp xếp FlightInstance theo giờ đến (arrivalTime) từ sớm tới trễ
-std::vector<FlightInstance*> Sorting::sortByArrivalTime(const std::vector<FlightInstance*>& flights) {
+std::vector<Flight*> Sorting::sortByArrivalTime(const std::vector<Flight*>& flights) {
     // Tạo vector kết quả
-    std::vector<FlightInstance*> result;
+    std::vector<Flight*> result;
     
     // Copy tất cả các phần tử vào vector kết quả
     for (int i = 0; i < flights.size(); i++) {
@@ -22,9 +22,9 @@ std::vector<FlightInstance*> Sorting::sortByArrivalTime(const std::vector<Flight
 }
 
 // Sắp xếp FlightInstance theo giá vé Economy từ thấp tới cao
-std::vector<FlightInstance*> Sorting::sortByPrice(const std::vector<FlightInstance*>& flights) {
+std::vector<Flight*> Sorting::sortByPrice(const std::vector<Flight*>& flights) {
     // Tạo vector kết quả
-    std::vector<FlightInstance*> result;
+    std::vector<Flight*> result;
     
     // Copy tất cả các phần tử vào vector kết quả
     for (int i = 0; i < flights.size(); i++) {
@@ -103,7 +103,7 @@ int Sorting::timeToMinutes(const std::string& time) {
 // ============= QUICK SORT CHO THỜI GIAN =============
 
 // Hàm Quick Sort đệ quy cho sắp xếp theo thời gian
-void Sorting::quickSortByTime(std::vector<FlightInstance*>& arr, int low, int high) {
+void Sorting::quickSortByTime(std::vector<Flight*>& arr, int low, int high) {
     if (low < high) {
         // Tìm pivot index
         int pi = partitionByTime(arr, low, high);
@@ -115,9 +115,9 @@ void Sorting::quickSortByTime(std::vector<FlightInstance*>& arr, int low, int hi
 }
 
 // Hàm partition cho Quick Sort theo thời gian
-int Sorting::partitionByTime(std::vector<FlightInstance*>& arr, int low, int high) {
+int Sorting::partitionByTime(std::vector<Flight*>& arr, int low, int high) {
     // Chọn phần tử cuối làm pivot
-    FlightInstance* pivot = arr[high];
+    Flight* pivot = arr[high];
     int i = low - 1; // Index của phần tử nhỏ hơn
     
     for (int j = low; j < high; j++) {
@@ -128,14 +128,14 @@ int Sorting::partitionByTime(std::vector<FlightInstance*>& arr, int low, int hig
         )) {
             i++;
             // Swap arr[i] và arr[j]
-            FlightInstance* temp = arr[i];
+            Flight* temp = arr[i];
             arr[i] = arr[j];
             arr[j] = temp;
         }
     }
     
     // Swap arr[i+1] và arr[high] (pivot)
-    FlightInstance* temp = arr[i + 1];
+    Flight* temp = arr[i + 1];
     arr[i + 1] = arr[high];
     arr[high] = temp;
     
@@ -145,7 +145,7 @@ int Sorting::partitionByTime(std::vector<FlightInstance*>& arr, int low, int hig
 // ============= QUICK SORT CHO GIÁ VÉ =============
 
 // Hàm Quick Sort đệ quy cho sắp xếp theo giá
-void Sorting::quickSortByPrice(std::vector<FlightInstance*>& arr, int low, int high) {
+void Sorting::quickSortByPrice(std::vector<Flight*>& arr, int low, int high) {
     if (low < high) {
         // Tìm pivot index
         int pi = partitionByPrice(arr, low, high);
@@ -157,9 +157,9 @@ void Sorting::quickSortByPrice(std::vector<FlightInstance*>& arr, int low, int h
 }
 
 // Hàm partition cho Quick Sort theo giá
-int Sorting::partitionByPrice(std::vector<FlightInstance*>& arr, int low, int high) {
+int Sorting::partitionByPrice(std::vector<Flight*>& arr, int low, int high) {
     // Chọn phần tử cuối làm pivot
-    FlightInstance* pivot = arr[high];
+    Flight* pivot = arr[high];
     int i = low - 1; // Index của phần tử nhỏ hơn
     
     for (int j = low; j < high; j++) {
@@ -167,14 +167,14 @@ int Sorting::partitionByPrice(std::vector<FlightInstance*>& arr, int low, int hi
         if (arr[j]->getFareEconomy() <= pivot->getFareEconomy()) {
             i++;
             // Swap arr[i] và arr[j]
-            FlightInstance* temp = arr[i];
+            Flight* temp = arr[i];
             arr[i] = arr[j];
             arr[j] = temp;
         }
     }
     
     // Swap arr[i+1] và arr[high] (pivot)
-    FlightInstance* temp = arr[i + 1];
+    Flight* temp = arr[i + 1];
     arr[i + 1] = arr[high];
     arr[high] = temp;
     
