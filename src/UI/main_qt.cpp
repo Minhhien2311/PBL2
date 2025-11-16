@@ -38,8 +38,7 @@ int main(int argc, char *argv[]) {
         FlightManager flightManager("C:/PBL2/data/routes.txt", "C:/PBL2/data/flights.txt");
         BookingManager bookingManager("C:/PBL2/data/bookings.txt", nullptr); 
         ReportManager reportManager(accountManager, bookingManager);
-        AirportManager airportManager;
-        airportManager.loadAirportsFromRoutes(&flightManager);
+        AirportManager airportManager("C:/PBL2/data/airports.txt");
 
         // --- KHỞI ĐỘNG ỨNG DỤNG ---
         Application w(&accountManager, &flightManager, &bookingManager,

@@ -63,7 +63,7 @@ private slots:
 
 private:
     void setupUi(bool isEditMode);
-    void loadExistingFlights();
+    void loadExistingRoutes();
 
     FlightManager* flightManager_;
     AirportManager* airportManager_;

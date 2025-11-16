@@ -1,10 +1,9 @@
 #include "FlightsPage.h"
-
-// <--- Sửa lỗi: Include manager và các thư viện cần thiết
 #include "core/FlightManager.h"
 #include "core/SeatManager.h"
 #include "core/AirportManager.h"
-#include "entities/Flight.h" // Cần để đọc dữ liệu
+#include "entities/Flight.h"
+#include "utils/Helpers.h"
 #include "FlightDialog.h"
 #include "AirportComboBox.h"
 #include <string>
@@ -215,10 +214,11 @@ void FlightsPage::setupUi()
     col4->addWidget(airlineLabel);
     airlineFilterCombo_ = new QComboBox(this);
     airlineFilterCombo_->addItem("Tùy chọn", "");
-    airlineFilterCombo_->addItem("VietJet Air", "VietJet Air");
-    airlineFilterCombo_->addItem("Vietnam Airlines", "Vietnam Airlines");
-    airlineFilterCombo_->addItem("Bamboo Airways", "Bamboo Airways");
-    airlineFilterCombo_->addItem("Vietravel Airlines", "Vietravel Airlines");
+    std::vector<std::string> airlines = Helpers::loadAirlinesFromFile("C:/PBL2/data/airlines.txt");
+    for (const std::string& airline : airlines) {
+        airlineFilterCombo_->addItem(QString::fromStdString(airline), 
+                                      QString::fromStdString(airline));
+    }
     airlineFilterCombo_->setMinimumHeight(36);
     col4->addWidget(airlineFilterCombo_);
     filterRowLayout->addLayout(col4, 1);
@@ -325,9 +325,9 @@ void FlightsPage::setupUi()
 
 void FlightsPage::setupModel()
 {
-    model_ = new QStandardItemModel(0, 7, this);
+    model_ = new QStandardItemModel(0, 8, this);
     model_->setHorizontalHeaderLabels({
-        "ID chuyến", "Hãng hàng không", "Số hiệu", "Ngày khởi hành", "Giờ khởi hành",
+        "ID chuyến", "Mã tuyến", "Hãng hàng không", "Số hiệu", "Ngày khởi hành", "Giờ khởi hành",
         "Ngày hạ cánh", "Giờ hạ cánh", "Ghế trống"
     });
     tableView_->setModel(model_);
@@ -360,6 +360,7 @@ void FlightsPage::refreshTable()
             
             QList<QStandardItem *> rowItems;
             rowItems << new QStandardItem(QString::fromStdString(flight->getFlightId()))
+                   << new QStandardItem(QString::fromStdString(flight->getRouteId()))
                    << new QStandardItem(QString::fromStdString(flight->getAirline()))
                    << new QStandardItem(QString::fromStdString(flight->getFlightNumber()))
                    << new QStandardItem(QString::fromStdString(flight->getDepartureDate()))

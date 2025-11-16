@@ -125,7 +125,7 @@ bool FlightManager::createNewRoute( const std::string& departureIATA,
                                     const std::string& arrivalIATA) {
     if (departureIATA.empty() || arrivalIATA.empty()) return false;
     
-    // Kiểm tra trùng lặp bằng ID mới (airline-departure-arrival)
+    // Kiểm tra trùng lặp bằng ID mới (departure-arrival)
     std::string newId = departureIATA + "-" + arrivalIATA;
     // Đổi findFlightById -> findRouteById
     if (findRouteById(newId) != nullptr) return false;

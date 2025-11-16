@@ -15,11 +15,11 @@ private:
     SimpleMap<std::string, std::string> iataToDisplay_;  // "HAN" → "Hà Nội (HAN)"
 
     // Load danh sách sân bay mặc định (Việt Nam + quốc tế)
-    void loadDefaultAirports();
+    void loadAirportsFromFile(const std::string& filePath);
     
 public:
-    // Constructor - tự động load danh sách sân bay mặc định
-    AirportManager();
+    // Constructor
+    AirportManager(const std::string& airportsFilePath);
 
     // Destructor
     ~AirportManager() = default;

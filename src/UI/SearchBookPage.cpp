@@ -10,7 +10,8 @@
 #include "entities/Account.h"
 #include "BookingDialog.h"
 #include "AirportComboBox.h"
-
+#include "utils/Helpers.h"
+#include <string>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QGridLayout>
@@ -193,10 +194,11 @@ void SearchBookPage::setupUi()
     // Airline dropdown
     airlineFilterCombo_ = new QComboBox(this);
     airlineFilterCombo_->addItem("Tùy chọn", "");
-    airlineFilterCombo_->addItem("VietJet Air", "VietJet Air");
-    airlineFilterCombo_->addItem("Vietnam Airlines", "Vietnam Airlines");
-    airlineFilterCombo_->addItem("Bamboo Airways", "Bamboo Airways");
-    airlineFilterCombo_->addItem("Vietravel Airlines", "Vietravel Airlines");
+    std::vector<std::string> airlines = Helpers::loadAirlinesFromFile("C:/PBL2/data/airlines.txt");
+    for (const std::string& airline : airlines) {
+        airlineFilterCombo_->addItem(QString::fromStdString(airline), 
+                                      QString::fromStdString(airline));
+    }
     airlineFilterCombo_->setMinimumHeight(36);
     filterLayout->addWidget(airlineFilterCombo_, 1, 3);
 

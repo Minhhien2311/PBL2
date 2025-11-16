@@ -1,0 +1,15 @@
+HAN|Hà Nội
+SGN|TP. Hồ Chí Minh
+DAD|Đà Nẵng
+PQC|Phú Quốc
+CXR|Nha Trang
+BKK|Bangkok
+SIN|Singapore
+NRT|Tokyo
+ICN|Seoul
+HPH|Hải Phòng
+HUI|Huế
+UIH|Quy Nhơn
+BMV|Buôn Ma Thuột
+VCA|Cần Thơ
+CAH|Cà Mau

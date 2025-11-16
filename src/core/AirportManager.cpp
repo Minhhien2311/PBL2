@@ -1,45 +1,41 @@
 #include "core/AirportManager.h"
 #include "core/FlightManager.h"
-#include "entities/Route.h" // <-- ĐÃ THAY ĐỔI
+#include "entities/Route.h"
+#include <fstream> // Required for std::ifstream
+#include <stdexcept> // Required for std::runtime_error
 
-AirportManager::AirportManager()
+AirportManager::AirportManager(const std::string& airportsFilePath)
     : displayToIATA_(), iataToDisplay_()
 {
-    loadDefaultAirports();
+    loadAirportsFromFile(airportsFilePath);
 }
-
-void AirportManager::loadDefaultAirports()
+void AirportManager::loadAirportsFromFile(const std::string& filePath)
 {
-    // Việt Nam (19 sân bay - đã sắp xếp alphabet)
-    addAirport("Buôn Ma Thuột", "BMV");
-    addAirport("Cà Mau", "CAH");
-    addAirport("Cần Thơ", "VCA");
-    addAirport("Côn Đảo", "VCS");
-    addAirport("Điện Biên Phủ", "DIN");
-    addAirport("Đà Lạt", "DLI");
-    addAirport("Đà Nẵng", "DAD");
-    addAirport("Hà Nội", "HAN");
-    addAirport("Hải Phòng", "HPH");
-    addAirport("Huế", "HUI");
-    addAirport("Nha Trang", "CXR");
-    addAirport("Phú Quốc", "PQC");
-    addAirport("Pleiku", "PXU");
-    addAirport("Quy Nhơn", "UIH");
-    addAirport("Rạch Giá", "VKG");
-    addAirport("Thanh Hóa", "THD");
-    addAirport("TP. Hồ Chí Minh", "SGN");
-    addAirport("Vinh", "VII");
-    addAirport("Vũng Tàu", "VTG");
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        throw std::runtime_error("Cannot open airports file: " + filePath);
+    }
+
+    std::string line;
+    while (std::getline(file, line)) {
+        if (line.empty() || line[0] == '#') continue; // Bỏ qua comment
+        
+        size_t pos = line.find('|');
+        if (pos == std::string::npos) continue;
+        
+        std::string iataCode = line.substr(0, pos);
+        std::string cityName = line.substr(pos + 1);
+        
+        // Loại bỏ khoảng trắng thừa
+        iataCode.erase(0, iataCode.find_first_not_of(" \t\r\n"));
+        iataCode.erase(iataCode.find_last_not_of(" \t\r\n") + 1);
+        cityName.erase(0, cityName.find_first_not_of(" \t\r\n"));
+        cityName.erase(cityName.find_last_not_of(" \t\r\n") + 1);
+        
+        addAirport(cityName, iataCode);
+    }
     
-    // Quốc tế (8 sân bay - đã sắp xếp alphabet)
-    // addAirport("Bangkok (BKK)", "BKK");
-    // addAirport("Beijing (PEK)", "PEK");
-    // addAirport("Hong Kong (HKG)", "HKG");
-    // addAirport("Kuala Lumpur (KUL)", "KUL");
-    // addAirport("Seoul (ICN)", "ICN");
-    // addAirport("Shanghai (PVG)", "PVG");
-    // addAirport("Singapore (SIN)", "SIN");
-    // addAirport("Tokyo (NRT)", "NRT");
+    file.close();
 }
 
 void AirportManager::addAirport(const std::string& displayName, const std::string& iataCode)

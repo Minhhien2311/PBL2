@@ -282,8 +282,8 @@ void RoutesPage::refreshTable()
         if (route) {
             QList<QStandardItem *> rowItems;
             rowItems << new QStandardItem(QString::fromStdString(route->getRouteId()))
-                   << new QStandardItem(QString::fromStdString(route->getDepartureAirport()))
-                   << new QStandardItem(QString::fromStdString(route->getArrivalAirport()));
+                   << new QStandardItem(QString::fromStdString(airportManager_->getDisplayName(route->getDepartureAirport())))
+                   << new QStandardItem(QString::fromStdString(airportManager_->getDisplayName(route->getArrivalAirport())));
             model_->appendRow(rowItems);
         }
     }
@@ -315,8 +315,7 @@ void RoutesPage::onAddRoute()
             QMessageBox::critical(this, "Thất bại", 
                 "Không thể thêm tuyến bay.\n\n"
                 "Có thể do:\n"
-                "• Tuyến bay đã tồn tại\n"
-                "• Lỗi lưu dữ liệu");
+                "• Tuyến bay đã tồn tại");
         }
     }
 }
