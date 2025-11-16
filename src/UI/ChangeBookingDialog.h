@@ -8,7 +8,7 @@
 class Booking;
 class BookingManager;
 class FlightManager;
-class FlightInstance;
+class Flight;
 class QLineEdit;
 class QTextEdit;
 class QRadioButton;
@@ -41,8 +41,8 @@ private:
     Booking* currentBooking_;
     BookingManager* bookingManager_;
     FlightManager* flightManager_;
-    FlightInstance* currentFlightInstance_;
-    FlightInstance* selectedNewFlight_;
+    Flight* currentFlight_;
+    Flight* selectedNewFlight_;
 
     // === UI components ===
     QLineEdit* newFlightIdEdit_;

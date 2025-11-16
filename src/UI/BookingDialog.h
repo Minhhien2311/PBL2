@@ -12,7 +12,7 @@ class QGridLayout;
 class QWidget;
 class QRadioButton;
 class QButtonGroup;
-class FlightInstance;
+class Flight;
 class FlightManager;
 class BookingManager;
 class AccountManager;
@@ -25,7 +25,7 @@ class BookingDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit BookingDialog(FlightInstance* flightInstance, 
+    explicit BookingDialog(Flight* flightInstance, 
                           FlightManager* flightManager,
                           BookingManager* bookingManager,
                           AccountManager* accountManager,
@@ -43,7 +43,7 @@ private:
     void setupUi();
     void renderSeatMap();
     
-    FlightInstance* flightInstance_;
+    Flight* flight_;
     FlightManager* flightManager_;
     BookingManager* bookingManager_;
     AccountManager* accountManager_;

@@ -23,7 +23,6 @@ RouteDialog::RouteDialog(AirportManager* airportManager, QWidget* parent)
 // Constructor cho SỬA
 RouteDialog::RouteDialog(AirportManager* airportManager,
                          const QString& currentId,
-                         const QString& currentAirline,
                          const QString& currentFrom,
                          const QString& currentTo,
                          QWidget* parent)
@@ -33,13 +32,7 @@ RouteDialog::RouteDialog(AirportManager* airportManager,
       currentId_(currentId)
 {
     setupUi(true);
-    
-    // Set giá trị hiện tại
-    int airlineIndex = airlineCombo_->findText(currentAirline);
-    if (airlineIndex >= 0) {
-        airlineCombo_->setCurrentIndex(airlineIndex);
-    }
-    
+    // Thiết lập giá trị ban đầu
     fromCombo_->setSelectedIATA(currentFrom.toStdString());
     toCombo_->setSelectedIATA(currentTo.toStdString());
 }
@@ -88,16 +81,6 @@ void RouteDialog::setupUi(bool isEditMode)
     formLayout->setSpacing(15);
     formLayout->setLabelAlignment(Qt::AlignRight);
 
-    // Hãng hàng không (Dropdown)
-    airlineCombo_ = new QComboBox();
-    airlineCombo_->addItem("-- Chọn hãng hàng không --", "");
-    airlineCombo_->addItem("Vietnam Airlines", "Vietnam Airlines");
-    airlineCombo_->addItem("VietJet Air", "VietJet Air");
-    airlineCombo_->addItem("Bamboo Airways", "Bamboo Airways");
-    airlineCombo_->addItem("Vietravel Airlines", "Vietravel Airlines");
-    airlineCombo_->addItem("Pacific Airlines", "Pacific Airlines");
-    formLayout->addRow("Hãng hàng không:", airlineCombo_);
-
     // Điểm đi
     fromCombo_ = new AirportComboBox(airportManager_);
     formLayout->addRow("Điểm đi:", fromCombo_);
@@ -143,11 +126,6 @@ void RouteDialog::setupUi(bool isEditMode)
 void RouteDialog::onAccept()
 {
     // Validate
-    if (airlineCombo_->currentIndex() == 0) {
-        QMessageBox::warning(this, "Thiếu dữ liệu", "Vui lòng chọn hãng hàng không.");
-        return;
-    }
-
     std::string fromIATA = fromCombo_->getSelectedIATA();
     std::string toIATA = toCombo_->getSelectedIATA();
 
@@ -168,11 +146,6 @@ void RouteDialog::onAccept()
     }
 
     accept();
-}
-
-// Getters
-QString RouteDialog::getAirline() const {
-    return airlineCombo_->currentData().toString();
 }
 
 QString RouteDialog::getFromIATA() const {

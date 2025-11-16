@@ -90,7 +90,7 @@ namespace IdGenerator {
         return ss.str();
     }
 
-    std::string generateInstanceId() {
+    std::string generateFlightId() {
         ++instanceCounter;
         
         // Dùng stringstream để tạo định dạng "FI-00001"

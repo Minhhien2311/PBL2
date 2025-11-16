@@ -4,7 +4,7 @@
 #include "core/FlightManager.h"
 #include "core/SeatManager.h"
 #include "core/AirportManager.h"
-#include "entities/FlightInstance.h" // Cần để đọc dữ liệu
+#include "entities/Flight.h" // Cần để đọc dữ liệu
 #include "FlightDialog.h"
 #include "AirportComboBox.h"
 #include <string>
@@ -325,9 +325,9 @@ void FlightsPage::setupUi()
 
 void FlightsPage::setupModel()
 {
-    model_ = new QStandardItemModel(0, 8, this);
+    model_ = new QStandardItemModel(0, 7, this);
     model_->setHorizontalHeaderLabels({
-        "ID chuyến", "Số hiệu", "Hãng hàng không", "Ngày khởi hành", "Giờ khởi hành",
+        "ID chuyến", "Hãng hàng không", "Số hiệu", "Ngày khởi hành", "Giờ khởi hành",
         "Ngày hạ cánh", "Giờ hạ cánh", "Ghế trống"
     });
     tableView_->setModel(model_);
@@ -349,29 +349,29 @@ void FlightsPage::refreshTable()
 {
     model_->removeRows(0, model_->rowCount());
 
-    const std::vector<FlightInstance*>& instances = flightManager_->getAllInstances();
+    const std::vector<Flight*>& flights = flightManager_->getAllFlights();
     SeatManager* seatManager = flightManager_->getSeatManager();
     
-    for (int i = 0; i < instances.size(); ++i) {
-        FlightInstance* inst = instances[i];
-        if (inst) { 
-            seatManager->loadSeatMapFor(inst);
+    for (int i = 0; i < flights.size(); ++i) {
+        Flight* flight = flights[i];
+        if (flight) { 
+            seatManager->loadSeatMapFor(flight);
             int availableSeats = seatManager->getAvailableSeats();
             
             QList<QStandardItem *> rowItems;
-            rowItems << new QStandardItem(QString::fromStdString(inst->getInstanceId()))
-                   << new QStandardItem(QString::fromStdString(inst->getFlightNumber()))
-                   << new QStandardItem(QString::fromStdString(flightManager_->findFlightById(inst->getFlightId())->getAirline()))
-                   << new QStandardItem(QString::fromStdString(inst->getDepartureDate()))
-                   << new QStandardItem(QString::fromStdString(inst->getDepartureTime()))
-                   << new QStandardItem(QString::fromStdString(inst->getArrivalDate()))
-                   << new QStandardItem(QString::fromStdString(inst->getArrivalTime()))
-                   << new QStandardItem(QString::number(availableSeats) + " / " + QString::number(inst->getTotalCapacity()));
+            rowItems << new QStandardItem(QString::fromStdString(flight->getFlightId()))
+                   << new QStandardItem(QString::fromStdString(flight->getAirline()))
+                   << new QStandardItem(QString::fromStdString(flight->getFlightNumber()))
+                   << new QStandardItem(QString::fromStdString(flight->getDepartureDate()))
+                   << new QStandardItem(QString::fromStdString(flight->getDepartureTime()))
+                   << new QStandardItem(QString::fromStdString(flight->getArrivalDate()))
+                   << new QStandardItem(QString::fromStdString(flight->getArrivalTime()))
+                   << new QStandardItem(QString::number(availableSeats) + " / " + QString::number(flight->getTotalCapacity()));
             model_->appendRow(rowItems);
         }
     }
     
-    statusLabel_->setText(QString("Hiển thị tất cả %1 chuyến bay").arg(instances.size()));
+    statusLabel_->setText(QString("Hiển thị tất cả %1 chuyến bay").arg(flights.size()));
 }
 
 // === XỬ LÝ CRUD ===
@@ -381,6 +381,7 @@ void FlightsPage::onAddFlight()
     
     if (dialog.exec() == QDialog::Accepted) {
         QString flightId = dialog.getFlightId();
+        QString airline = dialog.getAirline();
         QString flightNumber = dialog.getFlightNumber();
         QString depDate = dialog.getDepartureDate();
         QString depTime = dialog.getDepartureTime();
@@ -390,9 +391,10 @@ void FlightsPage::onAddFlight()
         int fareEconomy = dialog.getFareEconomy();
         int fareBusiness = dialog.getFareBusiness();
         
-        // Gọi hàm createNewInstance với ĐẦY ĐỦ tham số
-        bool success = flightManager_->createNewInstance(
+        // Gọi hàm createNewflight với ĐẦY ĐỦ tham số
+        bool success = flightManager_->createNewFlight(
             flightId.toStdString(),
+            airline.toStdString(),
             flightNumber.toStdString(),
             depDate.toStdString(),
             depTime.toStdString() + ":00",  // Thêm giây
@@ -406,12 +408,16 @@ void FlightsPage::onAddFlight()
         if (success) {
             QMessageBox::information(this, "Thành công", 
                 QString("Đã thêm chuyến bay:\n\n"
-                       "Số hiệu: %1\n"
-                       "Tuyến: %2 → %3\n"
-                       "Khởi hành: %4 %5\n"
-                       "Hạ cánh: %6 %7\n"
-                       "Sức chứa: %8 ghế\n"
-                       "Giá VT: %9 VNĐ | Giá TC: %10 VNĐ")
+                       "Mã chuyến: %1\n"
+                       "Hãng hàng không: %2\n"
+                       "Số hiệu: %3\n"
+                       "Tuyến: %4 → %5\n"
+                       "Khởi hành: %6 %7\n"
+                       "Hạ cánh: %8 %9\n"
+                       "Sức chứa: %10 ghế\n"
+                       "Giá VT: %11 VNĐ | Giá TC: %12 VNĐ")
+                    .arg(flightId)
+                    .arg(airline)
                     .arg(flightNumber)
                     .arg(dialog.getFromIATA(), dialog.getToIATA())
                     .arg(depDate, depTime, arrDate, arrTime)
@@ -438,35 +444,37 @@ void FlightsPage::onEditFlight()
     }
 
     int row = selected.first().row();
-    QString instanceId = model_->item(row, 0)->text();
+    QString flightId = model_->item(row, 0)->text();
     
-    FlightInstance* instance = flightManager_->findInstanceById(instanceId.toStdString());
-    if (!instance) {
+    Flight* flight = flightManager_->findFlightById(flightId.toStdString());
+    if (!flight) {
         QMessageBox::critical(this, "Lỗi", "Không tìm thấy chuyến bay.");
         return;
     }
     
-    Flight* flight = flightManager_->findFlightById(instance->getFlightId());
+    // Lấy thông tin tuyến từ FlightManager, có thể rò rỉ bộ nhớ nếu không quản lý tốt
+    Route* route = flightManager_->findRouteById(flight->getRouteId());
     
     FlightDialog dialog(flightManager_, airportManager_,
-                       instanceId,
-                       QString::fromStdString(instance->getFlightNumber()),
+                       flightId,
+                       QString::fromStdString(flight->getFlightNumber()),
                        QString::fromStdString(flight->getAirline()),
-                       QString::fromStdString(flight->getDepartureAirport()),
-                       QString::fromStdString(flight->getArrivalAirport()),
-                       QString::fromStdString(instance->getDepartureDate()),
-                       QString::fromStdString(instance->getDepartureTime()),
-                       QString::fromStdString(instance->getArrivalDate()),
-                       QString::fromStdString(instance->getArrivalTime()),
-                       instance->getTotalCapacity(),
-                       instance->getFareEconomy(),
-                       instance->getFareBusiness(),
+                       QString::fromStdString(route->getDepartureAirport()),
+                       QString::fromStdString(route->getArrivalAirport()),
+                       QString::fromStdString(flight->getDepartureDate()),
+                       QString::fromStdString(flight->getDepartureTime()),
+                       QString::fromStdString(flight->getArrivalDate()),
+                       QString::fromStdString(flight->getArrivalTime()),
+                       flight->getTotalCapacity(),
+                       flight->getFareEconomy(),
+                       flight->getFareBusiness(),
                        this);
     
     if (dialog.exec() == QDialog::Accepted) {
-        // Tạo FlightInstance mới với thông tin cập nhật
-        FlightInstance updatedInstance(
-            instance->getFlightId(),
+        // Tạo Flight mới với thông tin cập nhật
+        Flight updatedFlight(
+            flight->getFlightId(),
+            dialog.getAirline().toStdString(),
             dialog.getFlightNumber().toStdString(),
             dialog.getDepartureDate().toStdString(),
             (dialog.getDepartureTime() + ":00").toStdString(),
@@ -477,13 +485,13 @@ void FlightsPage::onEditFlight()
             dialog.getFareBusiness()
         );
         
-        updatedInstance.overrideIdForLoad(instanceId.toStdString());
+        updatedFlight.overrideIdForLoad(flightId.toStdString());
         
-        bool success = flightManager_->updateInstance(instanceId.toStdString(), updatedInstance);
+        bool success = flightManager_->updateFlight(flightId.toStdString(), updatedFlight);
         
         if (success) {
             QMessageBox::information(this, "Thành công", 
-                QString("Đã cập nhật chuyến bay: %1").arg(instanceId));
+                QString("Đã cập nhật chuyến bay: %1").arg(flightId));
             refreshTable();
         } else {
             QMessageBox::critical(this, "Thất bại", "Không thể cập nhật chuyến bay.");
@@ -499,27 +507,27 @@ void FlightsPage::onDeleteFlight()
         return;
     }
 
-    QString instanceId = model_->item(selected.first().row(), 0)->text();
+    QString flightId = model_->item(selected.first().row(), 0)->text();
 
     auto reply = QMessageBox::question(this, "⚠️ Xác nhận xóa chuyến bay", 
         QString("Bạn có chắc chắn muốn xóa chuyến bay <b>%1</b>?<br><br>"
                "<font color='red'><b>Cảnh báo:</b></font><br>"
                "• Tất cả booking liên quan sẽ bị ảnh hưởng<br>"
                "• Hành động này <b>KHÔNG THỂ</b> hoàn tác")
-            .arg(instanceId), 
+            .arg(flightId), 
         QMessageBox::Yes | QMessageBox::No,
         QMessageBox::No);
 
     if (reply == QMessageBox::Yes) {
-        bool success = flightManager_->deleteInstance(instanceId.toStdString());
+        bool success = flightManager_->deleteFlight(flightId.toStdString());
         
         if (success) {
             QMessageBox::information(this, "✅ Xóa thành công", 
-                QString("Đã xóa chuyến bay: <b>%1</b>").arg(instanceId));
+                QString("Đã xóa chuyến bay mã <b>%1</b>").arg(flightId));
             refreshTable();
         } else {
             QMessageBox::critical(this, "❌ Xóa thất bại", 
-                QString("Không thể xóa chuyến bay <b>%1</b>.").arg(instanceId));
+                QString("Không thể xóa chuyến bay mã <b>%1</b>.").arg(flightId));
         }
     }
 }
@@ -527,42 +535,39 @@ void FlightsPage::onDeleteFlight()
 // === XỬ LÝ TÌM KIẾM ===
 void FlightsPage::onSearchById()
 {
-    QString instanceId = idSearchEdit_->text().trimmed();
+    QString flightId = idSearchEdit_->text().trimmed();
     
-    if (instanceId.isEmpty()) {
+    if (flightId.isEmpty()) {
         QMessageBox::warning(this, "Thiếu dữ liệu", "Vui lòng nhập ID chuyến bay.");
         return;
     }
 
-    FlightInstance* instance = flightManager_->findInstanceById(instanceId.toStdString());
+    Flight* flight = flightManager_->findFlightById(flightId.toStdString());
     
-    if (!instance) {
-        QMessageBox::warning(this, "Không tìm thấy", 
-            QString("Không tìm thấy chuyến bay với ID: <b>%1</b>").arg(instanceId));
+    if (!flight) {
+        statusLabel_->setText(QString("Không tìm thấy chuyến bay mã <b>%1</b>").arg(flightId));
         return;
     }
 
     model_->removeRows(0, model_->rowCount());
     
     SeatManager* seatManager = flightManager_->getSeatManager();
-    seatManager->loadSeatMapFor(instance);
+    seatManager->loadSeatMapFor(flight);
     int availableSeats = seatManager->getAvailableSeats();
     
     QList<QStandardItem*> rowItems;
-    rowItems << new QStandardItem(QString::fromStdString(instance->getInstanceId()))
-           << new QStandardItem(QString::fromStdString(instance->getFlightNumber()))
-           << new QStandardItem(QString::fromStdString(flightManager_->findFlightById(instance->getFlightId())->getAirline()))
-           << new QStandardItem(QString::fromStdString(instance->getDepartureDate()))
-           << new QStandardItem(QString::fromStdString(instance->getDepartureTime()))
-           << new QStandardItem(QString::fromStdString(instance->getArrivalDate()))
-           << new QStandardItem(QString::fromStdString(instance->getArrivalTime()))
-           << new QStandardItem(QString::number(availableSeats) + " / " + QString::number(instance->getTotalCapacity()));
+    rowItems << new QStandardItem(QString::fromStdString(flight->getFlightId()))
+           << new QStandardItem(QString::fromStdString(flight->getAirline()))
+           << new QStandardItem(QString::fromStdString(flight->getFlightNumber()))
+           << new QStandardItem(QString::fromStdString(flightManager_->findFlightById(flight->getFlightId())->getAirline()))
+           << new QStandardItem(QString::fromStdString(flight->getDepartureDate()))
+           << new QStandardItem(QString::fromStdString(flight->getDepartureTime()))
+           << new QStandardItem(QString::fromStdString(flight->getArrivalDate()))
+           << new QStandardItem(QString::fromStdString(flight->getArrivalTime()))
+           << new QStandardItem(QString::number(availableSeats) + " / " + QString::number(flight->getTotalCapacity()));
     model_->appendRow(rowItems);
 
-    statusLabel_->setText("✅ Tìm thấy 1 chuyến bay");
-    
-    QMessageBox::information(this, "Tìm thấy", 
-        QString("Đã tìm thấy chuyến bay: <b>%1</b>").arg(instanceId));
+    statusLabel_->setText(QString("✅ Tìm thấy 1 chuyến bay với mã <b>%1</b>").arg(flightId));
 }
 
 void FlightsPage::onSearchFilter()
@@ -593,15 +598,15 @@ void FlightsPage::onSearchFilter()
     
     SeatManager* seatManager = flightManager_->getSeatManager();
     
-    for (FlightInstance* inst : results) {
+    for (Flight* inst : results) {
         if (inst) {
             seatManager->loadSeatMapFor(inst);
             int availableSeats = seatManager->getAvailableSeats();
             
             QList<QStandardItem*> rowItems;
-            rowItems << new QStandardItem(QString::fromStdString(inst->getInstanceId()))
+            rowItems << new QStandardItem(QString::fromStdString(inst->getFlightId()))
+                   << new QStandardItem(QString::fromStdString(inst->getAirline()))
                    << new QStandardItem(QString::fromStdString(inst->getFlightNumber()))
-                   << new QStandardItem(QString::fromStdString(flightManager_->findFlightById(inst->getFlightId())->getAirline()))
                    << new QStandardItem(QString::fromStdString(inst->getDepartureDate()))
                    << new QStandardItem(QString::fromStdString(inst->getDepartureTime()))
                    << new QStandardItem(QString::fromStdString(inst->getArrivalDate()))
@@ -614,10 +619,8 @@ void FlightsPage::onSearchFilter()
     statusLabel_->setText(QString("🔍 Tìm thấy %1 chuyến bay").arg(results.size()));
     
     if (results.empty()) {
-        QMessageBox::information(this, "Không tìm thấy", 
-            "Không có chuyến bay nào phù hợp với bộ lọc.");
+        statusLabel_->setText("Không tìm thấy chuyến bay phù hợp với các tiêu chí đã chọn.");
     } else {
-        QMessageBox::information(this, "Kết quả", 
-            QString("Tìm thấy <b>%1</b> chuyến bay phù hợp.").arg(results.size()));
+        statusLabel_->setText(QString("✅ Tìm thấy %1 chuyến bay phù hợp.").arg(results.size()));
     }
 }

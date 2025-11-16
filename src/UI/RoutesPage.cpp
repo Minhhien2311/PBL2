@@ -157,23 +157,7 @@ void RoutesPage::setupUi()
     col2->addWidget(toSearchCombo_);
     filterRowLayout->addLayout(col2, 1);
 
-    // === Cột 3: Hãng hàng không ===
-    QVBoxLayout* col3 = new QVBoxLayout();
-    col3->setSpacing(6);
-    QLabel* airlineLabel = new QLabel("Hãng hàng không");
-    airlineLabel->setStyleSheet("background: transparent; border: none; color: #123B7A;");
-    col3->addWidget(airlineLabel);
-    airlineSearchCombo_ = new QComboBox(this);
-    airlineSearchCombo_->addItem("Tùy chọn", "");
-    airlineSearchCombo_->addItem("VietJet Air", "VietJet Air");
-    airlineSearchCombo_->addItem("Vietnam Airlines", "Vietnam Airlines");
-    airlineSearchCombo_->addItem("Bamboo Airways", "Bamboo Airways");
-    airlineSearchCombo_->addItem("Vietravel Airlines", "Vietravel Airlines");
-    airlineSearchCombo_->setMinimumHeight(36);
-    col3->addWidget(airlineSearchCombo_);
-    filterRowLayout->addLayout(col3, 1);
-
-    // === Cột 4: Nút tìm kiếm (CÙNG HÀNG) ===
+    // === Cột 3: Nút tìm kiếm (CÙNG HÀNG) ===
     QVBoxLayout* col4 = new QVBoxLayout();
     col4->setSpacing(6);
     QLabel* emptyLabel = new QLabel(" ");
@@ -271,9 +255,9 @@ void RoutesPage::setupUi()
 
 void RoutesPage::setupModel()
 {
-    model_ = new QStandardItemModel(0, 4, this);
+    model_ = new QStandardItemModel(0, 3, this);
     model_->setHorizontalHeaderLabels({
-        "ID tuyến (FlightId)", "Hãng hàng không", "Điểm đi (IATA)", "Điểm đến (IATA)"
+        "ID tuyến (FlightId)", "Điểm đi (IATA)", "Điểm đến (IATA)"
     });
     tableView_->setModel(model_);
 }
@@ -291,14 +275,13 @@ void RoutesPage::refreshTable()
 {
     model_->removeRows(0, model_->rowCount());
 
-    const std::vector<Flight*>& routes = flightManager_->getAllFlights();
+    const std::vector<Route*>& routes = flightManager_->getAllRoutes();
     
     for (int i = 0; i < routes.size(); ++i) {
-        Flight* route = routes[i];
+        Route* route = routes[i];
         if (route) {
             QList<QStandardItem *> rowItems;
-            rowItems << new QStandardItem(QString::fromStdString(route->getFlightId()))
-                   << new QStandardItem(QString::fromStdString(route->getAirline()))
+            rowItems << new QStandardItem(QString::fromStdString(route->getRouteId()))
                    << new QStandardItem(QString::fromStdString(route->getDepartureAirport()))
                    << new QStandardItem(QString::fromStdString(route->getArrivalAirport()));
             model_->appendRow(rowItems);
@@ -314,12 +297,10 @@ void RoutesPage::onAddRoute()
     RouteDialog dialog(airportManager_, this);
     
     if (dialog.exec() == QDialog::Accepted) {
-        QString airline = dialog.getAirline();
         QString fromIATA = dialog.getFromIATA();
         QString toIATA = dialog.getToIATA();
         
-        bool success = flightManager_->createNewFlight(
-            airline.toStdString(),
+        bool success = flightManager_->createNewRoute(
             fromIATA.toStdString(),
             toIATA.toStdString()
         );
@@ -327,9 +308,8 @@ void RoutesPage::onAddRoute()
         if (success) {
             QMessageBox::information(this, "Thành công", 
                 QString("Đã thêm tuyến bay mới:\n\n"
-                       "Hãng: %1\n"
-                       "Từ: %2 → Đến: %3")
-                    .arg(airline, fromIATA, toIATA));
+                       "Từ: %1 → Đến: %2")
+                    .arg(fromIATA, toIATA));
             refreshTable();
         } else {
             QMessageBox::critical(this, "Thất bại", 
@@ -351,20 +331,17 @@ void RoutesPage::onEditRoute()
 
     int row = selected.first().row();
     QString routeId = model_->item(row, 0)->text();
-    QString airline = model_->item(row, 1)->text();
-    QString fromIATA = model_->item(row, 2)->text();
-    QString toIATA = model_->item(row, 3)->text();
+    QString fromIATA = model_->item(row, 1)->text();
+    QString toIATA = model_->item(row, 2)->text();
 
-    RouteDialog dialog(airportManager_, routeId, airline, fromIATA, toIATA, this);
+    RouteDialog dialog(airportManager_, routeId, fromIATA, toIATA, this);
     
     if (dialog.exec() == QDialog::Accepted) {
-        QString newAirline = dialog.getAirline();
         QString newFrom = dialog.getFromIATA();
         QString newTo = dialog.getToIATA();
         
-        bool success = flightManager_->updateFlight(
+        bool success = flightManager_->updateRoute(
             routeId.toStdString(),
-            newAirline.toStdString(),
             newFrom.toStdString(),
             newTo.toStdString()
         );
@@ -375,7 +352,7 @@ void RoutesPage::onEditRoute()
                        "Mã tuyến: %1\n"
                        "Hãng: %2\n"
                        "Lộ trình: %3 → %4")
-                    .arg(routeId, newAirline, newFrom, newTo));
+                    .arg(routeId, newFrom, newTo));
             refreshTable();
         } else {
             QMessageBox::critical(this, "Thất bại", 
@@ -428,35 +405,31 @@ void RoutesPage::onSearchByRoute()
 {
     std::string fromIATA = fromSearchCombo_->getSelectedIATA();
     std::string toIATA = toSearchCombo_->getSelectedIATA();
-    QString selectedAirline = airlineSearchCombo_->currentData().toString();
     
-    if (fromIATA.empty() && toIATA.empty() && selectedAirline.isEmpty()) {
+    if (fromIATA.empty() && toIATA.empty()) {
         QMessageBox::warning(this, "Thiếu dữ liệu", 
             "Vui lòng chọn ít nhất một tiêu chí tìm kiếm:\n"
             "• Điểm đi\n"
-            "• Điểm đến\n"
-            "• Hãng hàng không");
+            "• Điểm đến");
         return;
     }
 
-    const std::vector<Flight*>& allRoutes = flightManager_->getAllFlights();
+    const std::vector<Route*>& allRoutes = flightManager_->getAllRoutes();
     
     model_->removeRows(0, model_->rowCount());
     
     int count = 0;
-    for (Flight* route : allRoutes) {
+    
+    for (Route* route : allRoutes) {
         if (route) {
             bool matchFrom = fromIATA.empty() || (route->getDepartureAirport() == fromIATA);
             bool matchTo = toIATA.empty() || (route->getArrivalAirport() == toIATA);
-            bool matchAirline = selectedAirline.isEmpty() || 
-                              (QString::fromStdString(route->getAirline()) == selectedAirline);
             
-            if (matchFrom && matchTo && matchAirline) {
+            if (matchFrom && matchTo) {
                 QList<QStandardItem*> rowItems;
-                rowItems << new QStandardItem(QString::fromStdString(route->getFlightId()))
-                         << new QStandardItem(QString::fromStdString(route->getAirline()))
-                         << new QStandardItem(QString::fromStdString(route->getDepartureAirport()))
-                         << new QStandardItem(QString::fromStdString(route->getArrivalAirport()));
+                rowItems << new QStandardItem(QString::fromStdString(route->getRouteId()))
+                        << new QStandardItem(QString::fromStdString(route->getDepartureAirport()))
+                        << new QStandardItem(QString::fromStdString(route->getArrivalAirport()));
                 model_->appendRow(rowItems);
                 count++;
             }
@@ -464,24 +437,19 @@ void RoutesPage::onSearchByRoute()
     }
 
     // ← CẬP NHẬT STATUS
-    statusLabel_->setText(QString("🔍 Tìm thấy %1 tuyến bay").arg(count));
+    statusLabel_->setText(QString("🔍 Tìm thấy tuyến bay"));
 
-    QString criteria;
-    if (!fromIATA.empty()) criteria += QString("Từ: <b>%1</b>").arg(QString::fromStdString(fromIATA));
-    if (!toIATA.empty()) {
-        if (!criteria.isEmpty()) criteria += " | ";
-        criteria += QString("Đến: <b>%1</b>").arg(QString::fromStdString(toIATA));
-    }
-    if (!selectedAirline.isEmpty()) {
-        if (!criteria.isEmpty()) criteria += " | ";
-        criteria += QString("Hãng: <b>%1</b>").arg(selectedAirline);
-    }
+    // QString criteria;
+    // if (!fromIATA.empty()) criteria += QString("Từ: <b>%1</b>").arg(QString::fromStdString(fromIATA));
+    // if (!toIATA.empty()) {
+    //     if (!criteria.isEmpty()) criteria += " | ";
+    //     criteria += QString("Đến: <b>%1</b>").arg(QString::fromStdString(toIATA));
+    // }
 
     if (count == 0) {
-        QMessageBox::information(this, "Không tìm thấy", 
-            QString("Không tìm thấy tuyến bay nào khớp với:<br>%1").arg(criteria));
-    } else {
-        QMessageBox::information(this, "Kết quả", 
-            QString("Tìm thấy <b>%1</b> tuyến bay khớp với:<br>%2").arg(count).arg(criteria));
+        statusLabel_->setText(QString("❌ Không tìm thấy tuyến bay phù hợp"));
     }
+    // else {
+    //     statusLabel_->setText(QString("✅ Tìm thấy %1 tuyến bay khớp với <br>%2").arg(count).arg(criteria));
+    // }
 }

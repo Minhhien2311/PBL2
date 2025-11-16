@@ -10,12 +10,12 @@ enum class SeatClass {
     Business
 };
 
-class FlightInstance;
+class Flight; // <-- Đã đổi tên
 
 class SeatManager {
 private:
     // Dữ liệu chính
-    std::string currentInstanceId_;
+    std::string currentFlightId_; // <-- Đã đổi tên
     std::vector<Seat*> activeSeatMap_;
     Seat* selectedSeat_;
     
@@ -40,9 +40,9 @@ public:
     ~SeatManager();
     
     // -- Chức năng chính --
-    bool loadForFlight(const std::string& instanceId);
-    bool loadSeatMapFor(FlightInstance* instance);
-    
+    bool loadForFlight(const std::string& flightId); // <-- Đã đổi tên
+    bool loadSeatMapFor(Flight* flight); // <-- Đã đổi tên
+
     // --- Chức năng thao tác ghế ---
     bool selectSeat(const std::string& seatId);
     void cancelSelection();
@@ -58,11 +58,11 @@ public:
     std::vector<Seat*>* getActiveSeatMap();
     const std::vector<Seat*>& getAllSeats() const;
     Seat* getSelectedSeat() const;
-    const std::string& getCurrentInstanceId() const;
+    const std::string& getCurrentFlightId() const; // <-- Đã đổi tên
     int getSeatRows() const;
     int getSeatColumns() const;
     int getAvailableSeats(SeatClass seatClass) const;
     int getAvailableSeats() const;
 };
 
-#endif
+#endif // SEATMANAGER_H

@@ -40,7 +40,6 @@ private:
 
     // --- UI Components ---
     QLineEdit* idSearchEdit_;
-    QComboBox* airlineSearchCombo_; 
     AirportComboBox* fromSearchCombo_;
     AirportComboBox* toSearchCombo_;   
 

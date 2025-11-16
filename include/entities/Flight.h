@@ -3,34 +3,63 @@
 
 #include <string>
 
-// Flight: Đại diện cho một tuyến bay (route) gốc, không thay đổi.
-// Ví dụ: Tuyến bay từ Hà Nội (HAN) đến TP.HCM (SGN) của Vietnam Airlines.
-// Không chứa thông tin về ngày/giờ, giá vé, hay số ghế.
-// ID được tự động tạo từ: "<DepartureIATA>-<ArrivalIATA>-<Airline>"
+// Flight: Đại diện cho MỘT LẦN BAY CỤ THỂ của một Flight.
+// Ví dụ: Chuyến bay VN123 vào lúc 08:00 ngày 12/10/2025.
 class Flight {
 private:
-    std::string flightId;           // ID nội bộ duy nhất, tạo từ airline-departure-arrival
-    std::string airline;            // Tên hãng hàng không (VD: "Vietnam Airlines")
-    std::string departureAirport;   // Sân bay đi (Mã IATA, VD: "HAN")
-    std::string arrivalAirport;     // Sân bay đến (Mã IATA, VD: "SGN")
+    std::string flightId;       // ID nội bộ duy nhất, tạo từ flightNumber-YYYYMMDD
+    std::string routeId;        // Khóa ngoại, tham chiếu tới Route gốc
+    std::string airline;        // Tên hãng hàng không (VD: "Vietnam Airlines")
+    std::string flightNumber;   // Mã tuyến bay công khai (VD: "VN123")
+    
+    std::string departureDate;  // Định dạng "DD/MM/YYYY"
+    std::string departureTime;  // Định dạng "HH:MM"
+    std::string arrivalDate;    // Định dạng "DD/MM/YYYY"
+    std::string arrivalTime;    // Định dạng "HH:MM"
+
+    // --- Capacity info ---
+    int totalCapacity;          // Tổng số ghế
+
+    // --- Giá vé ---
+    int fareEconomy;
+    int fareBusiness;
 
 public:
     // Không cho phép tạo đối tượng rỗng
     Flight() = delete;
 
-    // Constructor: Tự động tạo ID từ departure-arrival-airline.
-    explicit Flight(const std::string& airline,
-                    const std::string& departureIATA,
-                    const std::string& arrivalIATA);
+    // Constructor
+    explicit Flight(const std::string& routeId,
+                    const std::string& airline,
+                    const std::string& flightNumber,
+                    const std::string& departureDate,
+                    const std::string& departureTime,
+                    const std::string& arrivalDate,
+                    const std::string& arrivalTime,
+                    int totalCapacity,
+                    int fareEconomy,
+                    int fareBusiness);
 
     // --- Getters ---
-    // Trả về tham chiếu hằng để hiệu quả, tránh sao chép không cần thiết.
-    const std::string& getFlightId()        const;
-    const std::string& getAirline()         const;
-    const std::string& getDepartureAirport()const;
-    const std::string& getArrivalAirport()  const;
+    const std::string& getFlightId  () const;
+    const std::string& getRouteId() const;
+    const std::string& getAirline() const;
+    const std::string& getFlightNumber() const;
+    const std::string& getDepartureDate() const;
+    const std::string& getDepartureTime() const;
+    const std::string& getArrivalDate() const;
+    const std::string& getArrivalTime() const;
+    int getTotalCapacity() const;
+    
+    double getFareEconomy() const;
+    double getFareBusiness() const;
 
-    // --- Đọc/Ghi file ---
+    // --- Setters cho các thông tin có thể thay đổi ---
+    void setFareEconomy(double fare);
+    void setFareBusiness(double fare);
+    void setAirline(const std::string& airline);
+
+    // --- Đọc/Ghi file cấu hình ---
     // Chuyển đổi đối tượng thành 1 dòng string để lưu vào file.
     std::string toRecordLine() const;
     
@@ -42,4 +71,4 @@ public:
     void overrideIdForLoad(const std::string& existingId);
 };
 
-#endif // FLIGHT_H
+#endif

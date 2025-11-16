@@ -68,14 +68,14 @@ private:
     FlightManager* flightManager_;
     AirportManager* airportManager_;
     bool isEditMode_;
-    QString currentInstanceId_;
+    QString currentFlightId_;
 
     // UI Components
-    QComboBox* flightRouteCombo_;  // Chọn tuyến bay (HAN → SGN - Vietnam Airlines)
+    QComboBox* flightRouteCombo_;  // Chọn tuyến bay (HAN → SGN)
     QLineEdit* flightNumberEdit_;  // Số hiệu (tự động fill hoặc nhập)
     AirportComboBox* fromCombo_;   // Điểm đi (readonly)
     AirportComboBox* toCombo_;     // Điểm đến (readonly)
-    QLabel* airlineLabel_;         // Hãng (readonly)
+    QComboBox* airlineCombo_;         // Hãng (readonly)
     
     QDateEdit* departureDateEdit_;
     QTimeEdit* departureTimeEdit_;

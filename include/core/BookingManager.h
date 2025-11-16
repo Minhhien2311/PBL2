@@ -38,7 +38,7 @@ public:
 
     // NGHIỆP VỤ ĐẶT VÉ 
     Booking* createNewBooking( FlightManager& flightManager,
-                               const std::string& flightInstanceId,
+                               const std::string& flightId, // <-- Đã đổi tên
                                const std::string& agentId,
                                const std::string& passengerId,
                                BookingClass bookingClass,
@@ -50,11 +50,11 @@ public:
     
     // Check if booking can be cancelled (considering time constraints)
     bool canCancelBooking(const std::string& bookingId, 
-                         FlightManager& flightManager) const;
+                          FlightManager& flightManager) const;
     
     // Get cancellation deadline for a booking
     std::string getCancellationDeadline(const std::string& bookingId,
-                                       FlightManager& flightManager) const;
+                                        FlightManager& flightManager) const;
     
     // NGHIỆP VỤ Cập nhật vé
     bool updateBooking(const std::string& bookingId, 
@@ -64,29 +64,29 @@ public:
     
     // NGHIỆP VỤ ĐỔI VÉ
     bool changeBooking(FlightManager& flightManager,
-                      SeatManager& seatManager,
-                      const std::string& bookingId,
-                      const std::string& newFlightInstanceId,
-                      const std::string& newSeatNumber);
+                       SeatManager& seatManager,
+                       const std::string& bookingId,
+                       const std::string& newFlightId, // <-- Đã đổi tên
+                       const std::string& newSeatNumber);
 
     // --- Tìm kiếm  ---
     Booking* findBookingById(const std::string& bookingId);
     std::vector<Booking*> findBookingsByPassengerId(const std::string& passengerId);
     
-    // --- Lấy dữ liệu  ---
+    // --- Lấy dữ liệu ---
     const std::vector<Booking*>& getAllBookings() const;
 
     // Lấy danh sách booking theo Agent ID
     std::vector<Booking*> getBookingsByAgentId(const std::string& agentId) const;
     
-    // Lấy danh sách booking theo Flight Instance ID (sẽ triển khai sau nếu cần)
-    // std::vector<Booking*> getBookingsByFlightInstanceId(const std::string& instanceId) const;
+    // Lấy danh sách booking theo Flight ID (sẽ triển khai sau nếu cần) // <-- Đã đổi comment
+    // std::vector<Booking*> getBookingsByFlightId(const std::string& flightId) const; // <-- Đã đổi tên hàm
 
-    // --- Lưu trữ  ---
+    // --- Lưu trữ ---
     bool saveDataToFiles(const std::string& bookingsFilePath) const;
     
     // Lưu một booking riêng lẻ ngay lập tức vào file
     bool saveBookingToFile(Booking* booking);
 };
 
-#endif
+#endif // BOOKING_MANAGER_H

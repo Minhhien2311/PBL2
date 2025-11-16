@@ -36,7 +36,7 @@ public:
     std::vector<std::string> getAllDisplayNames() const;
 
     // Load thêm sân bay từ FlightManager, quét tất cả chuyến bay, tự động thêm sân bay chưa có
-    void loadAirportsFromFlights(FlightManager* flightManager);
+    void loadAirportsFromRoutes(FlightManager* flightManager);
 
     // Kiểm tra sân bay đã tồn tại chưa
     bool hasAirport(const std::string& iataCode) const;

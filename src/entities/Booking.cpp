@@ -3,16 +3,16 @@
 #include <string> 
 
 //  Constructor
-Booking::Booking(const std::string& flightInstanceId,
+Booking::Booking(const std::string& flightId, // <-- Đã đổi
                  const std::string& agentId,
                  const std::string& passengerId,
                  const std::string& seatID,
                  const std::string& bookingDate,
                  BookingClass bookingClass,
                  int baseFare,
-                BookingStatus status)
+                 BookingStatus status)
     : bookingId(IdGenerator::generateBookingId()),
-      flightInstanceId(flightInstanceId),
+      flightId(flightId), // <-- Đã đổi
       agentId(agentId),
       passengerId(passengerId),
       seatID(seatID),
@@ -22,15 +22,15 @@ Booking::Booking(const std::string& flightInstanceId,
       status(status) {}
 
 //  Getters
-const std::string& Booking::getBookingId()      const { return bookingId; }
-const std::string& Booking::getFlightInstanceId() const { return flightInstanceId; }
-const std::string& Booking::getAgentId()        const { return agentId; }
-const std::string& Booking::getPassengerId()    const { return passengerId; }
+const std::string& Booking::getBookingId()     const { return bookingId; }
+const std::string& Booking::getFlightId() const { return flightId; } // <-- Đã đổi
+const std::string& Booking::getAgentId()       const { return agentId; }
+const std::string& Booking::getPassengerId()   const { return passengerId; }
 const std::string& Booking::getSeatID()        const { return seatID; }
-const std::string& Booking::getBookingDate()    const { return bookingDate; }
-BookingClass       Booking::getClass()          const { return bookingClass; }
-int                Booking::getBaseFare()       const { return baseFare; }
-BookingStatus      Booking::getStatus()         const { return status; }
+const std::string& Booking::getBookingDate()   const { return bookingDate; }
+BookingClass       Booking::getClass()         const { return bookingClass; }
+int                Booking::getBaseFare()      const { return baseFare; }
+BookingStatus      Booking::getStatus()        const { return status; }
 
 //  Setters
 void Booking::setBaseFare(int value) {
@@ -54,8 +54,8 @@ void Booking::setSeatId(const std::string& newSeatId) {
     this->seatID = newSeatId;
 }
 
-void Booking::setFlightInstanceId(const std::string& newFlightInstanceId) {
-    this->flightInstanceId = newFlightInstanceId;
+void Booking::setFlightId(const std::string& newFlightId) { // <-- Đã đổi
+    this->flightId = newFlightId; // <-- Đã đổi
 }
 
 // --- Đọc/Ghi file ---
@@ -65,7 +65,7 @@ std::string Booking::toRecordLine() const {
     std::string statusStr = std::to_string(static_cast<int>(this->status)); // Thêm status
 
     return this->bookingId + "|" +
-           this->flightInstanceId + "|" +
+           this->flightId + "|" + // <-- Đã đổi
            this->agentId + "|" +
            this->passengerId + "|" +
            this->seatID + "|" +
@@ -83,7 +83,7 @@ Booking Booking::fromRecordLine(const std::string& line) {
     start = end + 1;
     end = line.find('|', start);
 
-    std::string instanceId = line.substr(start, end - start);
+    std::string flightId = line.substr(start, end - start); // <-- Đã đổi
     start = end + 1;
     end = line.find('|', start);
 
@@ -116,7 +116,7 @@ Booking Booking::fromRecordLine(const std::string& line) {
     BookingStatus status = static_cast<BookingStatus>(statusInt);
 
     // Tạo đối tượng với đầy đủ thông tin
-    Booking booking(instanceId, agentId, passengerId, seatID, bookingDate, bClass, baseFare, status);
+    Booking booking(flightId, agentId, passengerId, seatID, bookingDate, bClass, baseFare, status); // <-- Đã đổi
     
     // Ghi đè ID
     booking.overrideIdForLoad(id);
