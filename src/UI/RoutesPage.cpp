@@ -59,6 +59,8 @@ void RoutesPage::setupUi()
         "QLineEdit { background:white; border:1px solid #608bc1; border-radius:4px; height:26px; padding-left:6px; }"
         "QPushButton.SearchBtn { background:#4478BD; color:white; border-radius:6px; height:24px; font-weight:600; }"
         "QTableView { background:white; border:0px solid #d4dce5; }"
+        "QTableView::item:hover { background-color:#EAF2F8; color:#123B7A; }"
+        "QTableView::item:selected { background-color:#4478BD; color:white; font-weight:600; }"
         "QHeaderView::section { background:#d5e2f2; padding:6px; border:1px solid #c2cfe2; }"
         "TableTitle { font-size: 18px; }"
     );
