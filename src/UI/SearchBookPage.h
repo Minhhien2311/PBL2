@@ -15,12 +15,10 @@ class FlightManager;
 class BookingManager;
 class AccountManager;
 class AirportManager;
+class PassengerManager;
 class AirportComboBox;
 class Flight;
 
-/**
- * @brief Trang tìm kiếm chuyến bay và đặt vé cho Agent
- */
 class SearchBookPage : public QWidget
 {
     Q_OBJECT
@@ -29,6 +27,7 @@ public:
                             BookingManager* bkManager,
                             AccountManager* accManager,
                             AirportManager* airportManager,
+                            PassengerManager* passengerManager,
                             QWidget *parent = nullptr);
 
 public slots:
@@ -54,6 +53,7 @@ private:
     BookingManager*  bookingManager_;
     AccountManager*  accountManager_;
     AirportManager*  airportManager_;
+    PassengerManager* passengerManager_;
 
     // --- ô tìm kiếm ---
     AirportComboBox*  fromSearchCombo_;  // điểm đi

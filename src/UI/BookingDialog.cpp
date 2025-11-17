@@ -1,9 +1,11 @@
+#include <iostream>
 #include "BookingDialog.h"
 #include "entities/Flight.h"
 #include "core/FlightManager.h"
 #include "core/BookingManager.h"
 #include "core/AccountManager.h"
 #include "core/SeatManager.h"
+#include "core/PassengerManager.h"
 #include "entities/Seat.h"
 #include "entities/Account.h"
 #include "utils/DateTime.h"
@@ -23,6 +25,7 @@
 #include <QRegularExpression>
 #include <QRadioButton>
 #include <QButtonGroup>
+#include <QTimer>
 
 // Seat button style constants
 namespace {
@@ -48,12 +51,14 @@ BookingDialog::BookingDialog(Flight* flight,
                              FlightManager* flightManager,
                              BookingManager* bookingManager,
                              AccountManager* accountManager,
+                             PassengerManager* passengerManager,
                              QWidget *parent)
     : QDialog(parent),
       flight_(flight),
       flightManager_(flightManager),
       bookingManager_(bookingManager),
       accountManager_(accountManager),
+      passengerManager_(passengerManager),
       seatMapContainer_(nullptr),
       seatMapLayout_(nullptr),
       selectedSeatId_("")
@@ -62,6 +67,7 @@ BookingDialog::BookingDialog(Flight* flight,
     Q_ASSERT(flightManager_ != nullptr);
     Q_ASSERT(bookingManager_ != nullptr);
     Q_ASSERT(accountManager_ != nullptr);
+    Q_ASSERT(passengerManager_ != nullptr);
     
     setWindowTitle("Đặt vé máy bay");
     setMinimumWidth(700);
@@ -126,6 +132,43 @@ void BookingDialog::setupUi()
     passengerIdEdit_ = new QLineEdit(contentWidget);
     passengerIdEdit_->setPlaceholderText("Nhập CMND/CCCD");
     formLayout->addRow("CMND/CCCD: *", passengerIdEdit_);
+
+    // ✅ THÊM: Auto-fill khi nhập xong CCCD
+    connect(passengerIdEdit_, &QLineEdit::editingFinished, this, [this]() {
+        QString passengerId = passengerIdEdit_->text().trimmed();
+        
+        // Chỉ tìm nếu đã nhập đủ 9 hoặc 12 số
+        if (passengerId.length() != 9 && passengerId.length() != 12) {
+            return;
+        }
+        
+        // Tìm passenger trong database
+        Passenger* p = passengerManager_->findPassengerById(passengerId.toStdString());
+        
+        if (p) {
+            // ✅ Auto-fill thông tin
+            passengerNameEdit_->setText(QString::fromStdString(p->getFullName()));
+            passengerPhoneEdit_->setText(QString::fromStdString(p->getPhoneNumber()));
+            passportNumberEdit_->setText(QString::fromStdString(p->getPassportNumber()));
+            
+            // Thông báo nhẹ (không dùng QMessageBox để không làm gián đoạn)
+            passengerNameEdit_->setStyleSheet("QLineEdit { background: #E8F5E9; }");  // Màu xanh nhạt
+            passengerPhoneEdit_->setStyleSheet("QLineEdit { background: #E8F5E9; }");
+            
+            // Reset style sau 2 giây
+            QTimer::singleShot(2000, this, [this]() {
+                passengerNameEdit_->setStyleSheet("");
+                passengerPhoneEdit_->setStyleSheet("");
+            });
+            
+            std::cout << "[INFO] Auto-filled passenger info for CCCD: " 
+                    << passengerId.toStdString() << std::endl;
+        } else {
+            // Clear fields nếu không tìm thấy
+            // (User có thể nhập mới)
+            std::cout << "[INFO] New passenger CCCD: " << passengerId.toStdString() << std::endl;
+        }
+    });
     
     // Họ tên (tùy chọn)
     passengerNameEdit_ = new QLineEdit(contentWidget);
@@ -254,99 +297,159 @@ void BookingDialog::setupUi()
     
     mainLayout->addLayout(buttonLayout);
     
-    // Connect buttons
-    connect(confirmButton, &QPushButton::clicked, this, [this]() {
+    // BookingDialog.cpp - confirmButton clicked - Dòng ~260
+    connect(confirmButton, &QPushButton::clicked, this, [this, confirmButton]() {
+        // ✅ Disable button để tránh double-click
+        confirmButton->setEnabled(false);
+        
         // Validate required fields
         if (passengerIdEdit_->text().trimmed().isEmpty()) {
             QMessageBox::warning(this, "Thiếu thông tin", "Vui lòng nhập CMND/CCCD.");
             passengerIdEdit_->setFocus();
+            confirmButton->setEnabled(true);
             return;
         }
         
-        // Validate passenger ID format (9 or 12 digits for Vietnam ID/CCCD)
+        // Validate passenger ID format
         QString passengerId = passengerIdEdit_->text().trimmed();
         QRegularExpression idRegex(R"(^\d{9}$|^\d{12}$)");
         if (!idRegex.match(passengerId).hasMatch()) {
             QMessageBox::warning(this, "Định dạng không hợp lệ", 
                 "CMND/CCCD phải là 9 hoặc 12 chữ số.");
             passengerIdEdit_->setFocus();
+            confirmButton->setEnabled(true);
             return;
         }
         
         // Validate seat selection
         if (selectedSeatId_.isEmpty()) {
             QMessageBox::warning(this, "Thiếu thông tin", "Vui lòng chọn ghế ngồi.");
+            confirmButton->setEnabled(true);
             return;
+        }
+        
+        // ✅ THÊM: Lưu/cập nhật thông tin passenger
+        QString fullName = passengerNameEdit_->text().trimmed();
+        QString phoneNumber = passengerPhoneEdit_->text().trimmed();
+        QString passportNumber = passportNumberEdit_->text().trimmed();
+        
+        // Nếu không có tên → Hỏi user
+        if (fullName.isEmpty()) {
+            auto reply = QMessageBox::question(this, "Xác nhận",
+                "Bạn chưa nhập họ tên hành khách.\n\n"
+                "Bạn có muốn tiếp tục không?",
+                QMessageBox::Yes | QMessageBox::No);
+            
+            if (reply == QMessageBox::No) {
+                passengerNameEdit_->setFocus();
+                confirmButton->setEnabled(true);
+                return;
+            }
+            
+            fullName = "Khách hàng " + passengerId;  // Tên mặc định
+        }
+        
+        // Tạo hoặc cập nhật passenger
+        // Lưu ý: Thiếu dateOfBirth và gender → Dùng giá trị mặc định
+        Passenger* passenger = passengerManager_->createOrUpdatePassenger(
+            passengerId.toStdString(),
+            fullName.toStdString(),
+            "01/01/1990",  // ← Giá trị mặc định (có thể thêm field nhập ngày sinh sau)
+            Gender::Male,  // ← Giá trị mặc định (có thể thêm combobox chọn giới tính sau)
+            phoneNumber.toStdString(),
+            passportNumber.toStdString(),
+            "Việt Nam"     // ← Giá trị mặc định
+        );
+        
+        if (!passenger) {
+            QMessageBox::critical(this, "Lỗi", "Không thể lưu thông tin hành khách.");
+            confirmButton->setEnabled(true);
+            return;
+        }
+        
+        // Lưu passenger vào file ngay
+        if (!passengerManager_->saveAllData()) {
+            QMessageBox::warning(this, "Cảnh báo", 
+                "Thông tin hành khách đã được lưu trong bộ nhớ nhưng chưa ghi vào file.\n"
+                "Dữ liệu sẽ được lưu khi thoát chương trình.");
         }
         
         // Get seat manager
         SeatManager* seatManager = flightManager_->getSeatManager();
         if (!seatManager) {
             QMessageBox::critical(this, "Lỗi", "Không thể truy cập SeatManager.");
+            confirmButton->setEnabled(true);
             return;
         }
         
-        // FIRST: Try to book the seat - this is the critical operation
+        // FIRST: Try to book the seat
         if (!seatManager->bookSeat(selectedSeatId_.toStdString())) {
             QMessageBox::critical(this, "Lỗi", 
                 "Không thể đặt ghế. Ghế có thể đã được đặt bởi người khác.");
+            confirmButton->setEnabled(true);
             return;
         }
         
-        // Get current user (agent) ID safely
+        // Get current user (agent) ID
         Account* currentUser = accountManager_->getCurrentUser();
         if (!currentUser) {
-            seatManager->releaseSeat(selectedSeatId_.toStdString()); // Rollback
+            seatManager->releaseSeat(selectedSeatId_.toStdString());
             QMessageBox::critical(this, "Lỗi", "Không xác định được người dùng.");
+            confirmButton->setEnabled(true);
             return;
         }
         std::string agentId = currentUser->getId();
         
         // Get current booking class
-        BookingClass bookingClass = economyRadio_->isChecked() ? BookingClass::Economy : BookingClass::Business;
+        BookingClass bookingClass = economyRadio_->isChecked() 
+                                ? BookingClass::Economy 
+                                : BookingClass::Business;
         
         // Calculate fare
         int baseFare = (bookingClass == BookingClass::Economy) 
-                       ? flight_->getFareEconomy() 
-                       : flight_->getFareBusiness();
+                    ? flight_->getFareEconomy() 
+                    : flight_->getFareBusiness();
         
-        // Get current date and time in correct format
+        // Get current date and time
         QString currentDateTime = QDateTime::currentDateTime().toString("dd/MM/yyyy HH:mm:ss");
         
         // Create new booking
         Booking* newBooking = new Booking(
             flight_->getFlightId(),
-            agentId, // Fixed: use real agent ID
-            passengerIdEdit_->text().trimmed().toStdString(),
+            agentId,
+            passengerId.toStdString(),  // ← Chỉ lưu CCCD
             selectedSeatId_.toStdString(),
-            currentDateTime.toStdString(), // Fixed: correct date format
+            currentDateTime.toStdString(),
             bookingClass,
             baseFare,
             BookingStatus::Issued
         );
         
-        // SECOND: Save to file immediately (after seat is successfully booked)
+        // Save booking to file
         if (!bookingManager_->saveBookingToFile(newBooking)) {
             QMessageBox::critical(this, "Lỗi", 
                 "Không thể lưu thông tin đặt vé. Vui lòng thử lại.");
             delete newBooking;
-            // Rollback: Release the seat since booking save failed
             seatManager->releaseSeat(selectedSeatId_.toStdString());
+            confirmButton->setEnabled(true);
             return;
         }
         
-        // THIRD: Save seat changes to file
+        // Save seat changes to file
         if (!seatManager->saveChanges()) {
             QMessageBox::warning(this, "Cảnh báo",
-                "Đặt vé thành công nhưng không cập nhật được sơ đồ ghế. "
-                "Tình trạng ghế có thể không được cập nhật ngay trong hệ thống.");
-            // Don't rollback booking - it's already saved
+                "Đặt vé thành công nhưng không cập nhật được sơ đồ ghế.");
         }
         
-        // Show success message with booking ID
+        // Show success message
         QMessageBox::information(this, "Thành công",
-            QString("Đặt vé thành công!\n\nMã đặt chỗ: %1\nGhế: %2\nGiá vé: %3 VND")
+            QString("Đặt vé thành công!\n\n"
+                "Mã đặt chỗ: %1\n"
+                "Hành khách: %2\n"
+                "Ghế: %3\n"
+                "Giá vé: %L4 VND")
             .arg(QString::fromStdString(newBooking->getBookingId()))
+            .arg(fullName)
             .arg(selectedSeatId_)
             .arg(baseFare));
         

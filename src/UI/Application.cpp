@@ -11,6 +11,7 @@
 #include "core/BookingManager.h"
 #include "core/ReportManager.h"
 #include "core/AirportManager.h"
+#include "core/PassengerManager.h"
 
 #include <QTimer> // Required for QTimer::singleShot
 #include <QStackedWidget>
@@ -21,13 +22,15 @@ Application::Application(AccountManager* accManager,
                          BookingManager* bkManager,
                          ReportManager* reportManager,
                          AirportManager* airportManager,
+                         PassengerManager* passengerManager,
                          QWidget *parent)
     : QMainWindow(parent), 
       accountManager_(accManager), 
       flightManager_(flManager),
       bookingManager_(bkManager),
       reportManager_(reportManager),
-      airportManager_(airportManager)
+      airportManager_(airportManager),
+      passengerManager_(passengerManager)
 {
     setWindowTitle("Hệ thống Quản lý Bán vé máy bay");
     // Xóa dòng resize
@@ -60,7 +63,7 @@ void Application::setupUi()
     // Truyền cả 4 manager cho AgentInterface
     agentInterface_ = new AgentInterface(accountManager_, flightManager_, 
                                          bookingManager_, reportManager_,
-                                         airportManager_, this);
+                                         airportManager_, passengerManager_, this);
 
     // Khởi tạo QStackedWidget
     stack_ = new QStackedWidget(this);

@@ -7,6 +7,7 @@
 #include "core/BookingManager.h"
 #include "core/ReportManager.h"
 #include "core/AirportManager.h"
+#include "core/PassengerManager.h"  // ✅ THÊM: PassengerManager
 
 #include <iostream>
 #include <exception>
@@ -39,10 +40,12 @@ int main(int argc, char *argv[]) {
         BookingManager bookingManager("C:/PBL2/data/bookings.txt", nullptr); 
         ReportManager reportManager(accountManager, bookingManager);
         AirportManager airportManager("C:/PBL2/data/airports.txt");
+        // ✅ THÊM: Khởi tạo PassengerManager
+        PassengerManager passengerManager("C:/PBL2/data/passengers.txt");
 
         // --- KHỞI ĐỘNG ỨNG DỤNG ---
         Application w(&accountManager, &flightManager, &bookingManager,
-                      &reportManager, &airportManager);
+                      &reportManager, &airportManager, &passengerManager);
         w.show();
 
         return app.exec();

@@ -28,13 +28,15 @@ AgentInterface::AgentInterface(AccountManager* accManager,
                                BookingManager* bkManager,
                                ReportManager* reportManager,
                                AirportManager* airportManager,
+                               PassengerManager* passengerManager,
                                QWidget *parent)
     : QWidget(parent),
       accountManager_(accManager),
       flightManager_(flManager),
       bookingManager_(bkManager),
       reportManager_(reportManager),
-      airportManager_(airportManager)
+      airportManager_(airportManager),
+      passengerManager_(passengerManager)
 {
     Q_ASSERT(accountManager_ != nullptr);
     Q_ASSERT(flightManager_ != nullptr);
@@ -169,7 +171,7 @@ AgentInterface::AgentInterface(AccountManager* accManager,
     
     // Create pages and store references for refreshing
     dashboardPage_ = new DashboardPage(accountManager_, reportManager_, this);
-    searchBookPage_ = new SearchBookPage(flightManager_, bookingManager_, accountManager_, airportManager_, this);
+    searchBookPage_ = new SearchBookPage(flightManager_, bookingManager_, accountManager_, airportManager_, passengerManager_, this);
     agentBookingsPage_ = new AgentBookingsPage(bookingManager_, flightManager_, accountManager_, airportManager_, this);
     ticketsReportPage_ = new AgentTicketsReportPage(accountManager_, bookingManager_, reportManager_, this);
     revenueReportPage_ = new AgentRevenueReportPage(accountManager_, bookingManager_, reportManager_, this);

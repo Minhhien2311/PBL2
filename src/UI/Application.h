@@ -13,6 +13,7 @@ class FlightManager;
 class BookingManager;
 class ReportManager;
 class AirportManager;
+class PassengerManager;
 
 class Application : public QMainWindow
 {
@@ -25,6 +26,7 @@ public:
                          BookingManager* bkManager,
                          ReportManager* reportManager,
                          AirportManager* airportManager,
+                         PassengerManager* passengerManager,
                          QWidget *parent = nullptr); 
     ~Application();
 
@@ -49,6 +51,7 @@ private:
     BookingManager* bookingManager_;
     ReportManager* reportManager_;
     AirportManager* airportManager_;
+    PassengerManager* passengerManager_;
 };
 
 #endif // APPLICATION_H

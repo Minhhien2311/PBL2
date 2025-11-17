@@ -58,12 +58,14 @@ SearchBookPage::SearchBookPage(FlightManager* flManager,
                                BookingManager* bkManager,
                                AccountManager* accManager,
                                AirportManager* airportManager,
+                               PassengerManager* passengerManager,
                                QWidget* parent)
     : QWidget(parent),
       flightManager_(flManager),
       bookingManager_(bkManager),
       accountManager_(accManager),
-      airportManager_(airportManager)
+      airportManager_(airportManager),
+      passengerManager_(passengerManager)
 {
     Q_ASSERT(flightManager_ != nullptr);
     Q_ASSERT(bookingManager_ != nullptr);
@@ -449,7 +451,7 @@ void SearchBookPage::onBookClicked()
     }
     
     // Hiển thị dialog đặt vé (dialog handles everything internally)
-    BookingDialog dialog(flight, flightManager_, bookingManager_, accountManager_, this);
+    BookingDialog dialog(flight, flightManager_, bookingManager_, accountManager_, passengerManager_, this);
     
     if (dialog.exec() == QDialog::Accepted) {
         // Booking already created and saved inside dialog!

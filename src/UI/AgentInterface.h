@@ -11,6 +11,7 @@ class AccountManager;
 class FlightManager;
 class BookingManager;
 class ReportManager;
+class PassengerManager;
 class AirportManager;
 class AgentTicketsReportPage;  // Thêm
 class AgentRevenueReportPage;  // Thêm
@@ -32,6 +33,7 @@ public:
                             BookingManager* bkManager,
                             ReportManager* reportManager,
                             AirportManager* airportManager,
+                            PassengerManager* passengerManager,
                             QWidget *parent = nullptr);
 
 signals:
@@ -73,6 +75,7 @@ private:
     BookingManager* bookingManager_;
     ReportManager* reportManager_;
     AirportManager* airportManager_;
+    PassengerManager* passengerManager_;
 };
 
 #endif // AGENTINTERFACE_H
