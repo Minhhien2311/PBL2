@@ -381,7 +381,7 @@ void RoutesPage::onDeleteRoute()
         QMessageBox::No);
 
     if (reply == QMessageBox::Yes) {
-        bool success = flightManager_->deleteFlight(routeId.toStdString());
+        bool success = flightManager_->deleteRoute(routeId.toStdString());
         
         if (success) {
             QMessageBox::information(this, "✅ Xóa thành công", 
@@ -427,8 +427,8 @@ void RoutesPage::onSearchByRoute()
             if (matchFrom && matchTo) {
                 QList<QStandardItem*> rowItems;
                 rowItems << new QStandardItem(QString::fromStdString(route->getRouteId()))
-                        << new QStandardItem(QString::fromStdString(route->getDepartureAirport()))
-                        << new QStandardItem(QString::fromStdString(route->getArrivalAirport()));
+                        << new QStandardItem(QString::fromStdString(airportManager_->getDisplayName(route->getDepartureAirport())))
+                        << new QStandardItem(QString::fromStdString(airportManager_->getDisplayName(route->getArrivalAirport())));
                 model_->appendRow(rowItems);
                 count++;
             }

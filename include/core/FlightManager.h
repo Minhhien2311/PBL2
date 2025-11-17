@@ -2,8 +2,8 @@
 #define FLIGHT_MANAGER_H
 
 #include <vector>
-#include "entities/Route.h"           // Đối tượng tuyến đường gốc (Route)
-#include "entities/Flight.h"          // Đối tượng chuyến bay cụ thể (Flight)
+#include "entities/Route.h"
+#include "entities/Flight.h"
 #include "DSA/HashTable.h"
 #include <string>
 
@@ -11,25 +11,21 @@ class SeatManager;
 
 class FlightManager {
 private:
-    // Lưu trữ một vector các con trỏ thay vì đối tượng
     std::vector<Route*> allRoutes;
     std::vector<Flight*> allFlights;
 
-    // Thêm bảng băm để tra cứu bằng ID
     HashTable<std::string, Route*> routeIdTable;
     HashTable<std::string, Flight*> flightIdTable;
     
-    // Lưu đường dẫn file để dùng trong saveAllData() và destructor
     std::string routesFilePath_;
     std::string flightsFilePath_;
 
-    // SeatManager để quản lý sơ đồ chỗ ngồi
     SeatManager* seatManager_;
 
     // Route index for fast lookup
     struct RouteData {
         std::string routeKey;
-        std::vector<Flight*> allFlights;  // sorted by datetime
+        std::vector<Flight*> allFlights;
         
         RouteData(const std::string& key) : routeKey(key) {}
         
@@ -40,12 +36,16 @@ private:
     
     HashTable<std::string, RouteData*> routeIndex_;
     
+    // RouteIndex management helpers
+    bool addFlightToRouteIndex(Flight* flight);
+    bool removeFlightFromRouteIndex(Flight* flight);
+    bool updateFlightInRouteIndex(Flight* flight, const std::string& oldRouteId);
+    
     void buildRouteIndex();
     void sortFlightsByDateTime(std::vector<Flight*>& flights);
     static int compareDates(const std::string& date1, const std::string& date2);
     static int compareTimes(const std::string& time1, const std::string& time2);
 
-    // Hàm xây dựng bảng băm
     void buildRouteIdTable();
     void buildFlightIdTable();
 
@@ -61,7 +61,6 @@ public:
     bool createNewRoute(const std::string& departureIATA,
                          const std::string& arrivalIATA);
 
-    // Tạo mới chuyến bay cụ thể
     bool createNewFlight(const std::string& routeId,
                          const std::string& airline,
                          const std::string& flightNumber,
@@ -88,7 +87,6 @@ public:
     // --- Các hàm lưu ---
     bool saveRoutesToFiles(const std::string& routesFilePath) const;
     bool saveFlightsToFiles(const std::string& flightsFilePath) const;
-    // Lưu tất cả dữ liệu (routes, flights)
     bool saveAllData();
 
     // --- Các hàm Getters ---
@@ -97,24 +95,21 @@ public:
     SeatManager* getSeatManager() const;
     
     // --- Search and Filter Methods ---
-    // Search criteria
     struct SearchCriteria {
-        std::string fromIATA;           // Required
-        std::string toIATA;             // Required
-        std::string date;               // Optional: "" = all dates
-        std::string airline;            // Optional: "" = all airlines
-        int minPrice = 0;               // Optional: 0 = no min
-        int maxPrice = 0;               // Optional: 0 = no max
-        bool useAVLForPrice = false;    // false = linear, true = AVL
+        std::string fromIATA;
+        std::string toIATA;
+        std::string date;
+        std::string airline;
+        int minPrice = 0;
+        int maxPrice = 0;
+        bool useAVLForPrice = false;
     };
     
-    // Get all flights by route (sorted by datetime)
     std::vector<Flight*> getFlightsByRoute(
         const std::string& fromIATA,
         const std::string& toIATA
     ) const;
     
-    // Filters (apply to vector)
     std::vector<Flight*> filterByDate(
         const std::vector<Flight*>& flights,
         const std::string& date
@@ -137,7 +132,6 @@ public:
         int maxPrice
     ) const;
     
-    // Combined search with all filters
     std::vector<Flight*> searchFlights(
         const SearchCriteria& criteria
     ) const;

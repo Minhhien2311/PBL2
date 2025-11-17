@@ -407,6 +407,9 @@ void FlightsPage::onAddFlight()
         );
         
         if (success) {
+            // Refresh the table to show the new flight
+            refreshTable();
+
             QMessageBox::information(this, "Thành công", 
                 QString("Đã thêm chuyến bay:\n\n"
                        "Mã chuyến: %1\n"
@@ -474,7 +477,7 @@ void FlightsPage::onEditFlight()
     if (dialog.exec() == QDialog::Accepted) {
         // Tạo Flight mới với thông tin cập nhật
         Flight updatedFlight(
-            flight->getFlightId(),
+            dialog.getRouteId().toStdString(),
             dialog.getAirline().toStdString(),
             dialog.getFlightNumber().toStdString(),
             dialog.getDepartureDate().toStdString(),

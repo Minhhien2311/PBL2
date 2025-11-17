@@ -6,41 +6,31 @@
 
 // --- Constructor & Destructor ---
 
-// Tên tham số đã được đổi: flightsFilePath -> routesFilePath, instancesFilePath -> flightsFilePath
 FlightManager::FlightManager(const std::string& routesFilePath, const std::string& flightsFilePath) 
     : routesFilePath_(routesFilePath), flightsFilePath_(flightsFilePath), seatManager_(nullptr) {
     
-    // Initialize SeatManager at startup
     seatManager_ = new SeatManager("data/seat_maps.txt", "data/seat_config.txt");
     
-    // Đổi tên hàm load
     this->loadRoutesFromFile(routesFilePath);
     this->loadFlightsFromFile(flightsFilePath);
 
-    // Đổi tên hàm xây dựng bảng băm
     this->buildRouteIdTable();
     this->buildFlightIdTable();
     this->buildRouteIndex();
 }
 
 FlightManager::~FlightManager() {
-    // Save all data before destruction
     saveAllData();
     
-    // Cleanup SeatManager
     delete seatManager_;
     
-    // Cleanup routeIndex_ - need to iterate through hash table and delete RouteData
-    // Since we don't have an iterator, we'll track which RouteData we've deleted
     std::vector<RouteData*> deletedRoutes;
-    // Dùng allRoutes (trước là allFlights)
     for (Route* route : allRoutes) { 
         if (!route) continue;
         std::string routeKey = route->getDepartureAirport() + "_" + 
                                route->getArrivalAirport();
         RouteData** dataPtr = routeIndex_.find(routeKey);
         if (dataPtr && *dataPtr) {
-            // Check if we haven't already deleted this RouteData
             bool alreadyDeleted = false;
             for (RouteData* rd : deletedRoutes) {
                 if (rd == *dataPtr) {
@@ -55,7 +45,6 @@ FlightManager::~FlightManager() {
         }
     }
    
-    // Đổi tên vector
     for (int i = 0; i < allRoutes.size(); i++) {
         delete allRoutes[i]; 
     }
@@ -63,16 +52,15 @@ FlightManager::~FlightManager() {
         delete allFlights[i]; 
     }
 }
+
 // --- Hàm trợ giúp nội bộ ---
 
-// Đổi tên hàm loadFlightsFromFile -> loadRoutesFromFile
 void FlightManager::loadRoutesFromFile(const std::string& filePath) {
     std::ifstream file(filePath);
     std::string line;
     if (file.is_open()) {
         while (std::getline(file, line)) {
             if (!line.empty()) {
-                // Đổi Flight -> Route
                 Route routeOnStack = Route::fromRecordLine(line);
                 this->allRoutes.push_back(new Route(routeOnStack));
             }
@@ -81,14 +69,12 @@ void FlightManager::loadRoutesFromFile(const std::string& filePath) {
     }
 }
 
-// Đổi tên hàm loadInstancesFromFile -> loadFlightsFromFile
 void FlightManager::loadFlightsFromFile(const std::string& filePath) {
     std::ifstream file(filePath);
     std::string line;
     if (file.is_open()) {
         while (std::getline(file, line)) {
             if (!line.empty()) {
-                // Đổi FlightInstance -> Flight
                 Flight flightOnStack = Flight::fromRecordLine(line);
                 this->allFlights.push_back(new Flight(flightOnStack));
             }
@@ -97,52 +83,135 @@ void FlightManager::loadFlightsFromFile(const std::string& filePath) {
     }
 }
 
-// Xây dựng bảng băm
-// Đổi tên buildFlightIdTable -> buildRouteIdTable
 void FlightManager::buildRouteIdTable() {
     for (int i = 0; i < allRoutes.size(); ++i) {
         if (allRoutes[i] != nullptr) {
-            // Đổi flightIdTable -> routeIdTable, getFlightId -> getRouteId
             routeIdTable.insert(allRoutes[i]->getRouteId(), allRoutes[i]);
         }
     }
 }
 
-// Đổi tên buildInstanceIdTable -> buildFlightIdTable
 void FlightManager::buildFlightIdTable() {
     for (int i = 0; i < allFlights.size(); ++i) {
         if (allFlights[i] != nullptr) {
-            // Đổi instanceIdTable -> flightIdTable, getInstanceId -> getFlightId
             flightIdTable.insert(allFlights[i]->getFlightId(), allFlights[i]);
         }
     }
 }
 
+// --- RouteIndex Management Helpers ---
+
+bool FlightManager::addFlightToRouteIndex(Flight* flight) {
+    if (!flight) return false;
+    
+    Route* route = findRouteById(flight->getRouteId());
+    if (!route) return false;
+    
+    std::string routeKey = route->getDepartureAirport() + "_" + 
+                           route->getArrivalAirport();
+    
+    RouteData** dataPtr = routeIndex_.find(routeKey);
+    
+    if (dataPtr && *dataPtr) {
+        (*dataPtr)->addFlight(flight);
+        sortFlightsByDateTime((*dataPtr)->allFlights);
+    } else {
+        RouteData* newData = new RouteData(routeKey);
+        newData->addFlight(flight);
+        routeIndex_.insert(routeKey, newData);
+    }
+    
+    return true;
+}
+
+bool FlightManager::removeFlightFromRouteIndex(Flight* flight) {
+    if (!flight) return false;
+    
+    Route* route = findRouteById(flight->getRouteId());
+    if (!route) return false;
+    
+    std::string routeKey = route->getDepartureAirport() + "_" + 
+                           route->getArrivalAirport();
+    
+    RouteData** dataPtr = routeIndex_.find(routeKey);
+    if (!dataPtr || !(*dataPtr)) return false;
+    
+    std::vector<Flight*>& flights = (*dataPtr)->allFlights;
+    for (size_t i = 0; i < flights.size(); ++i) {
+        if (flights[i] == flight) {
+            flights.erase(flights.begin() + i);
+            return true;
+        }
+    }
+    
+    return false;
+}
+
+bool FlightManager::updateFlightInRouteIndex(Flight* flight, const std::string& oldRouteId) {
+    if (!flight) return false;
+    
+    std::string newRouteId = flight->getRouteId();
+    
+    if (oldRouteId == newRouteId) {
+        Route* route = findRouteById(newRouteId);
+        if (route) {
+            std::string routeKey = route->getDepartureAirport() + "_" + 
+                                   route->getArrivalAirport();
+            
+            RouteData** dataPtr = routeIndex_.find(routeKey);
+            if (dataPtr && *dataPtr) {
+                sortFlightsByDateTime((*dataPtr)->allFlights);
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    Route* oldRoute = findRouteById(oldRouteId);
+    if (oldRoute) {
+        std::string oldRouteKey = oldRoute->getDepartureAirport() + "_" + 
+                                  oldRoute->getArrivalAirport();
+        
+        RouteData** oldDataPtr = routeIndex_.find(oldRouteKey);
+        if (oldDataPtr && *oldDataPtr) {
+            std::vector<Flight*>& oldFlights = (*oldDataPtr)->allFlights;
+            for (size_t i = 0; i < oldFlights.size(); ++i) {
+                if (oldFlights[i] == flight) {
+                    oldFlights.erase(oldFlights.begin() + i);
+                    break;
+                }
+            }
+        }
+    }
+    
+    return addFlightToRouteIndex(flight);
+}
+
+void FlightManager::buildRouteIndex() {
+    for (Flight* flight : allFlights) {
+        if (!flight) continue;
+        addFlightToRouteIndex(flight);
+    }
+}
+
 // --- Chức năng Tạo mới (Create) ---
 
-// Đổi createNewFlight -> createNewRoute
-bool FlightManager::createNewRoute( const std::string& departureIATA,
-                                    const std::string& arrivalIATA) {
+bool FlightManager::createNewRoute(const std::string& departureIATA,
+                                   const std::string& arrivalIATA) {
     if (departureIATA.empty() || arrivalIATA.empty()) return false;
     
-    // Kiểm tra trùng lặp bằng ID mới (departure-arrival)
     std::string newId = departureIATA + "-" + arrivalIATA;
-    // Đổi findFlightById -> findRouteById
     if (findRouteById(newId) != nullptr) return false;
 
-    // Đổi Flight -> Route
     Route* newRoute = new Route(departureIATA, arrivalIATA);
     this->allRoutes.push_back(newRoute);
-    
-    // Cập nhật bảng băm ID
     this->routeIdTable.insert(newRoute->getRouteId(), newRoute);
     return true;
 }
 
-// Đổi createNewInstance -> createNewFlight
-bool FlightManager::createNewFlight(const std::string& routeId, // Đổi flightId -> routeId
-                                    const std::string& flightNumber,
+bool FlightManager::createNewFlight(const std::string& routeId,
                                     const std::string& airline,
+                                    const std::string& flightNumber,
                                     const std::string& departureDate,
                                     const std::string& departureTime,
                                     const std::string& arrivalDate,
@@ -150,54 +219,58 @@ bool FlightManager::createNewFlight(const std::string& routeId, // Đổi flight
                                     int totalCapacity,
                                     int fareEconomy,
                                     int fareBusiness) {
-    // Kiểm tra Route (Flight cũ) gốc bằng HashTable
-    if (findRouteById(routeId) == nullptr) return false; // Đổi hàm
+    if (findRouteById(routeId) == nullptr) return false;
     if (totalCapacity <= 0 || fareEconomy <= 0.0 || fareBusiness <= 0.0) return false;
-    if (routeId.empty() || flightNumber.empty() || airline.empty() || departureDate.empty() || departureTime.empty() || arrivalDate.empty() || arrivalTime.empty()) return false;
+    if (routeId.empty() || flightNumber.empty() || airline.empty() || 
+        departureDate.empty() || departureTime.empty() || 
+        arrivalDate.empty() || arrivalTime.empty()) return false;
 
-    // Đổi FlightInstance -> Flight
     Flight* newFlight = new Flight(
-        routeId, flightNumber, airline, departureDate, departureTime, arrivalDate, arrivalTime, 
-        totalCapacity, fareEconomy, fareBusiness
+        routeId, airline, flightNumber, departureDate, departureTime, 
+        arrivalDate, arrivalTime, totalCapacity, fareEconomy, fareBusiness
     );
-    this->allFlights.push_back(newFlight);
     
-    // Cập nhật bảng băm ID
+    this->allFlights.push_back(newFlight);
     this->flightIdTable.insert(newFlight->getFlightId(), newFlight);
+    
+    if (!addFlightToRouteIndex(newFlight)) {
+        allFlights.pop_back();
+        flightIdTable.remove(newFlight->getFlightId());
+        delete newFlight;
+        return false;
+    }
+    
     return true;
 }
 
 // --- Chức năng Đọc/Tìm kiếm (Read) ---
 
-// Đổi findFlightById -> findRouteById
 Route* FlightManager::findRouteById(const std::string& routeId) const {
-    Route** routePtrPtr = routeIdTable.find(routeId); // Đổi
+    Route** routePtrPtr = routeIdTable.find(routeId);
     return (routePtrPtr != nullptr) ? *routePtrPtr : nullptr;
 }
 
-// Đổi findInstanceById -> findFlightById
 Flight* FlightManager::findFlightById(const std::string& flightId) const {
-    Flight** flightPtrPtr = flightIdTable.find(flightId); // Đổi
+    Flight** flightPtrPtr = flightIdTable.find(flightId);
     return (flightPtrPtr != nullptr) ? *flightPtrPtr : nullptr;
 }
 
-// Đổi findInstancesByFlightId -> findFlightsByRouteId
 std::vector<Flight*> FlightManager::findFlightsByRouteId(const std::string& routeId) const {
-    std::vector<Flight*> results; // Đổi
-    for (size_t i = 0; i < allFlights.size(); ++i) { // Đổi
-        if (allFlights[i]->getRouteId() == routeId) { // Đổi
-            results.push_back(allFlights[i]); // Đổi
+    std::vector<Flight*> results;
+    for (size_t i = 0; i < allFlights.size(); ++i) {
+        if (allFlights[i]->getRouteId() == routeId) {
+            results.push_back(allFlights[i]);
         }
     }
     return results;
 }
 
-// Đổi findFlightByRoute -> findRouteByRoute
 std::vector<Route*> FlightManager::findRouteByRoute(const std::string& fromIATA, const std::string& toIATA) const {
-    std::vector<Route*> results; // Đổi
-    for (size_t i = 0; i < allRoutes.size(); ++i) { // Đổi
-        if (allRoutes[i]->getDepartureAirport() == fromIATA && allRoutes[i]->getArrivalAirport() == toIATA) { // Đổi
-            results.push_back(allRoutes[i]); // Đổi
+    std::vector<Route*> results;
+    for (size_t i = 0; i < allRoutes.size(); ++i) {
+        if (allRoutes[i]->getDepartureAirport() == fromIATA && 
+            allRoutes[i]->getArrivalAirport() == toIATA) {
+            results.push_back(allRoutes[i]);
         }
     }
     return results;
@@ -205,42 +278,39 @@ std::vector<Route*> FlightManager::findRouteByRoute(const std::string& fromIATA,
 
 // --- Chức năng Lưu trữ (Persistence) ---
 
-// Đổi saveFlightsToFiles -> saveRoutesToFiles
 bool FlightManager::saveRoutesToFiles(const std::string& routesFilePath) const {
-    std::ofstream routesFile(routesFilePath); // Đổi
+    std::ofstream routesFile(routesFilePath);
     if (!routesFile.is_open()) return false;
-    for (size_t i = 0; i < allRoutes.size(); ++i) { // Đổi
-        routesFile << allRoutes[i]->toRecordLine() << "\n"; // Đổi
+    for (size_t i = 0; i < allRoutes.size(); ++i) {
+        routesFile << allRoutes[i]->toRecordLine() << "\n";
     }
-    routesFile.close(); // Đổi
+    routesFile.close();
     return true;
 }
 
-// Đổi saveInstancesToFiles -> saveFlightsToFiles
 bool FlightManager::saveFlightsToFiles(const std::string& flightsFilePath) const {
-    std::ofstream flightsFile(flightsFilePath); // Đổi
+    std::ofstream flightsFile(flightsFilePath);
     if (!flightsFile.is_open()) return false;
-    for (size_t i = 0; i < allFlights.size(); ++i) { // Đổi
-        flightsFile << allFlights[i]->toRecordLine() << "\n"; // Đổi
+    for (size_t i = 0; i < allFlights.size(); ++i) {
+        flightsFile << allFlights[i]->toRecordLine() << "\n";
     }
-    flightsFile.close(); // Đổi
+    flightsFile.close();
     return true;
 }
 
 // --- Getters ---
-// Đổi getAllFlights -> getAllRoutes
-const std::vector<Route*>& FlightManager::getAllRoutes() const{
+
+const std::vector<Route*>& FlightManager::getAllRoutes() const {
     return this->allRoutes;
 }     
 
-// Đổi getAllInstances -> getAllFlights
-const std::vector<Flight*>& FlightManager::getAllFlights() const{
+const std::vector<Flight*>& FlightManager::getAllFlights() const {
     return this->allFlights;
 }
 
 // --- Save All Data ---
+
 bool FlightManager::saveAllData() {
-    // Đổi tên biến và hàm
     bool routesSaved = saveRoutesToFiles(routesFilePath_);
     bool flightsSaved = saveFlightsToFiles(flightsFilePath_);
     return routesSaved && flightsSaved;
@@ -248,71 +318,71 @@ bool FlightManager::saveAllData() {
 
 // --- Update and Delete Functions ---
 
-// Đổi updateFlight -> updateRoute
 bool FlightManager::updateRoute(const std::string& routeId,
                                 const std::string& newDeparture, 
                                 const std::string& newDestination) {
-    Route* route = findRouteById(routeId); // Đổi
+    Route* route = findRouteById(routeId);
     if (!route) return false;
     
-    Route* newRoute = new Route(newDeparture, newDestination); // Đổi
+    Route* newRoute = new Route(newDeparture, newDestination);
     
-    for (int i = 0; i < allRoutes.size(); i++) { // Đổi
-        if (allRoutes[i]->getRouteId() == routeId) { // Đổi
-            routeIdTable.remove(routeId); // Đổi
-            
-            delete allRoutes[i]; // Đổi
-            allRoutes[i] = newRoute; // Đổi
-            
-            routeIdTable.insert(newRoute->getRouteId(), newRoute); // Đổi
-            
-            saveRoutesToFiles(routesFilePath_); // Đổi
+    for (int i = 0; i < allRoutes.size(); i++) {
+        if (allRoutes[i]->getRouteId() == routeId) {
+            routeIdTable.remove(routeId);
+            delete allRoutes[i];
+            allRoutes[i] = newRoute;
+            routeIdTable.insert(newRoute->getRouteId(), newRoute);
+            saveRoutesToFiles(routesFilePath_);
             return true;
         }
     }
     
-    delete newRoute; // Đổi
+    delete newRoute;
     return false;
 }
 
-// Đổi deleteFlight -> deleteRoute
 bool FlightManager::deleteRoute(const std::string& routeId) {
-    for (int i = 0; i < allRoutes.size(); i++) { // Đổi
-        if (allRoutes[i]->getRouteId() == routeId) { // Đổi
-            routeIdTable.remove(routeId); // Đổi
-            
-            delete allRoutes[i]; // Đổi
-            allRoutes.erase(allRoutes.begin() + i); // Đổi
-            
-            saveRoutesToFiles(routesFilePath_); // Đổi
+    for (int i = 0; i < allRoutes.size(); i++) {
+        if (allRoutes[i]->getRouteId() == routeId) {
+            routeIdTable.remove(routeId);
+            delete allRoutes[i];
+            allRoutes.erase(allRoutes.begin() + i);
+            saveRoutesToFiles(routesFilePath_);
             return true;
         }
     }
     return false;
 }
 
-// Đổi updateInstance -> updateFlight
 bool FlightManager::updateFlight(const std::string& flightId, 
-                                 const Flight& updatedFlight) { // Đổi
-    Flight* flight = findFlightById(flightId); // Đổi
-    if (!flight) return false;
+                                 const Flight& updatedFlight) {
+    Flight* oldFlight = findFlightById(flightId);
+    if (!oldFlight) return false;
     
-    *flight = updatedFlight; // Đổi
+    std::string oldRouteId = oldFlight->getRouteId();
     
-    saveFlightsToFiles(flightsFilePath_); // Đổi
+    *oldFlight = updatedFlight;
+    
+    updateFlightInRouteIndex(oldFlight, oldRouteId);
+    
+    saveFlightsToFiles(flightsFilePath_);
     return true;
 }
 
-// Đổi deleteInstance -> deleteFlight
 bool FlightManager::deleteFlight(const std::string& flightId) {
-    for (int i = 0; i < allFlights.size(); i++) { // Đổi
-        if (allFlights[i]->getFlightId() == flightId) { // Đổi
-            flightIdTable.remove(flightId); // Đổi
+    for (int i = 0; i < allFlights.size(); i++) {
+        if (allFlights[i]->getFlightId() == flightId) {
+            Flight* flightToDelete = allFlights[i];
             
-            delete allFlights[i]; // Đổi
-            allFlights.erase(allFlights.begin() + i); // Đổi
+            removeFlightFromRouteIndex(flightToDelete);
             
-            saveFlightsToFiles(flightsFilePath_); // Đổi
+            flightIdTable.remove(flightId);
+            
+            delete flightToDelete;
+            allFlights.erase(allFlights.begin() + i);
+            
+            saveFlightsToFiles(flightsFilePath_);
+            
             return true;
         }
     }
@@ -325,62 +395,7 @@ SeatManager* FlightManager::getSeatManager() const {
 
 // --- Route Index and Search Implementation ---
 
-void FlightManager::buildRouteIndex() {
-    // Đổi instance -> flight, allInstances -> allFlights
-    for (Flight* flight : allFlights) {
-        if (!flight) continue;
-        
-        // Đổi instance->getFlightId() -> flight->getRouteId()
-        // Đổi findFlightById -> findRouteById
-        // Đổi Flight* flight -> Route* route
-        Route* route = findRouteById(flight->getRouteId());
-        if (!route) continue;
-        
-        std::string routeKey = route->getDepartureAirport() + "_" + 
-                               route->getArrivalAirport();
-        
-        RouteData** dataPtr = routeIndex_.find(routeKey);
-        
-        if (dataPtr == nullptr) {
-            RouteData* newData = new RouteData(routeKey);
-            newData->addFlight(flight); // Đổi addInstance -> addFlight
-            routeIndex_.insert(routeKey, newData);
-        } else {
-            (*dataPtr)->addFlight(flight); // Đổi addInstance -> addFlight
-        }
-    }
-    
-    // Sort each route by datetime
-    std::vector<std::string> sortedRoutes;
-    // Đổi allFlights -> allRoutes
-    for (Route* route : allRoutes) {
-        if (!route) continue;
-        std::string routeKey = route->getDepartureAirport() + "_" + 
-                               route->getArrivalAirport();
-        
-        bool alreadySorted = false;
-        for (const std::string& sorted : sortedRoutes) {
-            if (sorted == routeKey) {
-                alreadySorted = true;
-                break;
-            }
-        }
-        
-        if (!alreadySorted) {
-            RouteData** dataPtr = routeIndex_.find(routeKey);
-            if (dataPtr && *dataPtr) {
-                // Đổi sortInstancesByDateTime -> sortFlightsByDateTime
-                // Đổi (*dataPtr)->allInstances -> (*dataPtr)->allFlights
-                sortFlightsByDateTime((*dataPtr)->allFlights);
-                sortedRoutes.push_back(routeKey);
-            }
-        }
-    }
-}
-
-// Đổi sortInstancesByDateTime -> sortFlightsByDateTime
 void FlightManager::sortFlightsByDateTime(std::vector<Flight*>& flights) {
-    // Bubble sort with custom comparator
     for (size_t i = 0; i < flights.size(); i++) {
         for (size_t j = i + 1; j < flights.size(); j++) {
             if (!flights[i] || !flights[j]) continue;
@@ -400,13 +415,11 @@ void FlightManager::sortFlightsByDateTime(std::vector<Flight*>& flights) {
     }
 }
 
-// (compareDates và compareTimes là static, không thay đổi)
 int FlightManager::compareDates(const std::string& date1, const std::string& date2) {
-    // ... (logic không đổi) ...
     if (date1.length() != 10 || date2.length() != 10 ||
         date1[2] != '/' || date1[5] != '/' ||
         date2[2] != '/' || date2[5] != '/') {
-        return 0; // Invalid format, treat as equal
+        return 0;
     }
 
     try {
@@ -433,7 +446,6 @@ int FlightManager::compareDates(const std::string& date1, const std::string& dat
 }
 
 int FlightManager::compareTimes(const std::string& time1, const std::string& time2) {
-    // ... (logic không đổi) ...
     if (time1.length() != 5 || time2.length() != 5 ||
         time1[2] != ':' || time2[2] != ':') {
         return 0; 
@@ -460,7 +472,6 @@ int FlightManager::compareTimes(const std::string& time1, const std::string& tim
     }
 }
 
-// Đổi tên hàm và kiểu trả về
 std::vector<Flight*> FlightManager::getFlightsByRoute(
     const std::string& fromIATA,
     const std::string& toIATA) const 
@@ -469,102 +480,92 @@ std::vector<Flight*> FlightManager::getFlightsByRoute(
     RouteData** dataPtr = routeIndex_.find(routeKey);
     
     if (dataPtr && *dataPtr) {
-        return (*dataPtr)->allFlights; // Đổi allInstances -> allFlights
+        return (*dataPtr)->allFlights;
     }
     
-    return std::vector<Flight*>(); // Đổi
+    return std::vector<Flight*>();
 }
 
-// Đổi tên hàm và kiểu tham số
 std::vector<Flight*> FlightManager::filterByDate(
-    const std::vector<Flight*>& flights, // Đổi
+    const std::vector<Flight*>& flights,
     const std::string& date) const 
 {
-    std::vector<Flight*> results; // Đổi
+    std::vector<Flight*> results;
     
-    for (Flight* flight : flights) { // Đổi
-        if (flight && flight->getDepartureDate() == date) { // Đổi
-            results.push_back(flight); // Đổi
+    for (Flight* flight : flights) {
+        if (flight && flight->getDepartureDate() == date) {
+            results.push_back(flight);
         }
     }
     
     return results;
 }
 
-// Đổi tên hàm và kiểu tham số
 std::vector<Flight*> FlightManager::filterByAirline(
-    const std::vector<Flight*>& flights, // Đổi
+    const std::vector<Flight*>& flights,
     const std::string& airline) const 
 {
-    std::vector<Flight*> results; // Đổi
+    std::vector<Flight*> results;
     
-    for (Flight* flight : flights) { // Đổi
+    for (Flight* flight : flights) {
         if (!flight) continue;
         
-        // Đổi logic: Lấy Route từ Flight để check airline
         Route* route = findRouteById(flight->getRouteId()); 
         if (route && flight->getAirline() == airline) { 
-            results.push_back(flight); // Đổi
+            results.push_back(flight);
         }
     }
     
     return results;
 }
 
-// Đổi tên hàm và kiểu tham số
 std::vector<Flight*> FlightManager::filterByPriceRange(
-    const std::vector<Flight*>& flights, // Đổi
+    const std::vector<Flight*>& flights,
     int minPrice,
     int maxPrice) const 
 {
-    std::vector<Flight*> results; // Đổi
+    std::vector<Flight*> results;
     
-    for (Flight* flight : flights) { // Đổi
+    for (Flight* flight : flights) {
         if (!flight) continue;
         
-        int price = flight->getFareEconomy(); // Đổi
+        int price = flight->getFareEconomy();
         
         bool passesMin = (minPrice == 0 || price >= minPrice);
         bool passesMax = (maxPrice == 0 || price <= maxPrice);
         
         if (passesMin && passesMax) {
-            results.push_back(flight); // Đổi
+            results.push_back(flight);
         }
     }
     
     return results;
 }
 
-// Đổi tên hàm và kiểu tham số
 std::vector<Flight*> FlightManager::filterByPriceRangeAVL(
-    const std::vector<Flight*>& flights, // Đổi
+    const std::vector<Flight*>& flights,
     int minPrice,
     int maxPrice) const 
 {
     return filterByPriceRange(flights, minPrice, maxPrice);
 }
 
-// Đổi kiểu trả về
 std::vector<Flight*> FlightManager::searchFlights(
     const SearchCriteria& criteria) const 
 {
-    // Step 1: Get by route
-    std::vector<Flight*> results = // Đổi
+    std::vector<Flight*> results = 
         getFlightsByRoute(criteria.fromIATA, criteria.toIATA);
     
     if (results.empty()) return results;
     
-    // Step 2: Filter by date
     if (!criteria.date.empty()) {
         results = filterByDate(results, criteria.date);
     }
     
-    // Step 3: Filter by airline
     if (!criteria.airline.empty()) {
         results = filterByAirline(results, criteria.airline);
     }
     
-    // Step 4: Filter by price
     if (criteria.minPrice > 0 || criteria.maxPrice > 0) {
         if (criteria.useAVLForPrice) {
             results = filterByPriceRangeAVL(results, criteria.minPrice, criteria.maxPrice);

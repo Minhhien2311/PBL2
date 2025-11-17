@@ -29,7 +29,7 @@ public:
     // Constructor cho chế độ SỬA
     FlightDialog(FlightManager* flightManager,
                 AirportManager* airportManager,
-                const QString& instanceId,
+                const QString& flightId,
                 const QString& flightNumber,
                 const QString& airline,
                 const QString& fromIATA,
@@ -56,6 +56,7 @@ public:
     int getTotalCapacity() const;
     int getFareEconomy() const;
     int getFareBusiness() const;
+    QString getRouteId() const;
 
 private slots:
     void onAccept();
@@ -63,7 +64,7 @@ private slots:
 
 private:
     void setupUi(bool isEditMode);
-    void loadExistingRoutes();
+    void loadExistingRoutes(bool includeEmptyOption = true);
 
     FlightManager* flightManager_;
     AirportManager* airportManager_;

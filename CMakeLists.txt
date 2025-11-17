@@ -69,13 +69,13 @@ set_target_properties(pbl2 PROPERTIES
 )
 
 # Copy data/ only if build/data doesn't exist yet
-if(EXISTS "${CMAKE_SOURCE_DIR}/data" AND NOT EXISTS "${CMAKE_BINARY_DIR}/data")
-  add_custom_command(TARGET pbl2 POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-            "${CMAKE_SOURCE_DIR}/data"
-            "${CMAKE_BINARY_DIR}/data"
-    COMMENT "Initial copy: data/ -> build/data/")
-endif()
+# if(EXISTS "${CMAKE_SOURCE_DIR}/data" AND NOT EXISTS "${CMAKE_BINARY_DIR}/data")
+#   add_custom_command(TARGET pbl2 POST_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E copy_directory
+#             "${CMAKE_SOURCE_DIR}/data"
+#             "${CMAKE_BINARY_DIR}/data"
+#     COMMENT "Initial copy: data/ -> build/data/")
+# endif()
 
 # ===== Bundle Qt DLL =====
 if(WIN32)

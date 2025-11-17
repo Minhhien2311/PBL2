@@ -33,10 +33,10 @@ FlightDialog::FlightDialog(FlightManager* flightManager,
       isEditMode_(false)
 {
     setupUi(false);
-    loadExistingRoutes();
+    loadExistingRoutes(true);
 }
 
-// Constructor cho SỬA
+// FlightDialog.cpp - Constructor EDIT mode (dòng 33-97)
 FlightDialog::FlightDialog(FlightManager* flightManager,
                           AirportManager* airportManager,
                           const QString& flightId,
@@ -60,29 +60,39 @@ FlightDialog::FlightDialog(FlightManager* flightManager,
 {
     setupUi(true);
     
-    // Load danh sách tuyến bay trước
-    loadExistingRoutes();
+    // ✅ SỬA: Load routes KHÔNG có placeholder
+    loadExistingRoutes(false);  // ← THAY ĐỔI: false = không thêm "-- Chọn tuyến bay --"
     
-    // Tìm và chọn tuyến bay hiện tại
-    QString currentRoute = QString("%1 → %2 (%3)").arg(fromIATA, toIATA);
+    // ✅ SỬA: Tìm và chọn route bằng routeId thay vì text
+    QString currentRouteId = fromIATA + "-" + toIATA;  // ← VD: "HAN-SGN"
+    
     for (int i = 0; i < flightRouteCombo_->count(); ++i) {
-        if (flightRouteCombo_->itemText(i).contains(fromIATA) && 
-            flightRouteCombo_->itemText(i).contains(toIATA)) {
+        QString itemRouteId = flightRouteCombo_->itemData(i).toString();  // ← So sánh bằng DATA, không phải TEXT
+        if (itemRouteId == currentRouteId) {
             flightRouteCombo_->setCurrentIndex(i);
             break;
         }
     }
+    
+    // ✅ KIỂM TRA: Nếu vẫn không tìm thấy, log warning
+    if (flightRouteCombo_->currentIndex() == -1 || 
+        flightRouteCombo_->currentData().toString().isEmpty()) {
+        qWarning() << "Warning: Could not find route" << currentRouteId 
+                   << "in combo box. Available routes:";
+        for (int i = 0; i < flightRouteCombo_->count(); ++i) {
+            qWarning() << "  -" << flightRouteCombo_->itemData(i).toString() 
+                      << ":" << flightRouteCombo_->itemText(i);
+        }
+    }
+    
+    // Trigger event để cập nhật fromCombo_ và toCombo_
+    onFlightRouteChanged();  // ← Cập nhật điểm đi/điểm đến
     
     // Set hãng hàng không
     airlineCombo_->setCurrentText(airline);
 
     // Set số hiệu (có thể sửa)
     flightNumberEdit_->setText(flightNumber);
-    
-    // Set thông tin hiển thị
-    airlineCombo_->setCurrentText(airline);
-    fromCombo_->setSelectedIATA(fromIATA.toStdString());
-    toCombo_->setSelectedIATA(toIATA.toStdString());
     
     // Set lịch trình
     departureDateEdit_->setDate(QDate::fromString(depDate, "dd/MM/yyyy"));
@@ -95,7 +105,6 @@ FlightDialog::FlightDialog(FlightManager* flightManager,
     fareEconomySpin_->setValue(fareEconomy);
     fareBusinessSpin_->setValue(fareBusiness);
 }
-
 void FlightDialog::setupUi(bool isEditMode)
 {
     setWindowTitle(isEditMode ? "Sửa chuyến bay" : "Thêm chuyến bay mới");
@@ -194,11 +203,17 @@ void FlightDialog::setupUi(bool isEditMode)
     flightRouteCombo_ = new QComboBox();
     fromCombo_ = new AirportComboBox(airportManager_);
     toCombo_ = new AirportComboBox(airportManager_);
+
     airlineCombo_ = new QComboBox();
     std::vector<std::string> airlines = Helpers::loadAirlinesFromFile("C:/PBL2/data/airlines.txt");
     for (const std::string& airline : airlines) {
         airlineCombo_->addItem(QString::fromStdString(airline));
     }
+    if (!isEditMode) {
+        airlineCombo_->insertItem(0, "-- Chọn hãng hàng không --", "");
+        airlineCombo_->setCurrentIndex(0);  // ← Set về placeholder
+    }
+    
     flightNumberEdit_ = new QLineEdit();
     flightNumberEdit_->setPlaceholderText("VD: VN123");
 
@@ -231,6 +246,7 @@ void FlightDialog::setupUi(bool isEditMode)
         // MODE CHỈNH SỬA - TẤT CẢ ĐỀU SỬA ĐƯỢC
         
         // 1. Chọn tuyến bay (CÓ THỂ SỬA)
+        flightRouteCombo_->removeItem(0);   // Xoá mục "-- Chọn tuyến bay --"
         routeLayout->addRow("Chọn tuyến:", flightRouteCombo_);
         
         // 2. Điểm đi (chỉ hiển thị, tự động cập nhật theo tuyến)
@@ -383,9 +399,11 @@ void FlightDialog::setupUi(bool isEditMode)
 }
 
 // DÒNG 388 - loadExistingFlights() - NÊN ĐỔI THÀNH loadExistingRoutes()
-void FlightDialog::loadExistingRoutes() {
+void FlightDialog::loadExistingRoutes(bool includeEmptyOption) {
     flightRouteCombo_->clear();
-    flightRouteCombo_->addItem("-- Chọn tuyến bay --", "");
+    if (includeEmptyOption) {
+        flightRouteCombo_->addItem("-- Chọn tuyến bay --", "");
+    }
 
     const std::vector<Route*>& routes = flightManager_->getAllRoutes();
     
@@ -512,4 +530,8 @@ int FlightDialog::getFareEconomy() const {
 
 int FlightDialog::getFareBusiness() const {
     return fareBusinessSpin_->value();
+}
+
+QString FlightDialog::getRouteId() const {
+    return flightRouteCombo_->currentData().toString();
 }
