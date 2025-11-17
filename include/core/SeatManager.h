@@ -34,8 +34,8 @@ private:
     
 public:
     // Constructor và Destructor
-    explicit SeatManager(const std::string& seatStatusPath = "data/seat_maps.txt",
-                         const std::string& seatConfigPath = "data/seat_config.txt");
+    explicit SeatManager(const std::string& seatStatusPath = "C:/PBL2/data/seat_maps.txt",
+                         const std::string& seatConfigPath = "C:/PBL2/data/seat_config.txt");
     
     ~SeatManager();
     

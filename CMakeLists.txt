@@ -38,7 +38,7 @@ file(GLOB_RECURSE ENTITY_SOURCES  "src/entities/*.cpp")
 file(GLOB_RECURSE UTILS_SOURCES   "src/utils/*.cpp")
 
 # ===== Executable chính =====
-add_executable(pbl2 WIN32
+add_executable(pbl2
     ${UI_SOURCES}
     ${CORE_SOURCES}
     ${ENTITY_SOURCES}

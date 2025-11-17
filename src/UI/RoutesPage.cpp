@@ -320,6 +320,8 @@ void RoutesPage::onAddRoute()
     }
 }
 
+// RoutesPage.cpp
+
 void RoutesPage::onEditRoute()
 {
     QModelIndexList selected = tableView_->selectionModel()->selectedRows();
@@ -330,14 +332,56 @@ void RoutesPage::onEditRoute()
 
     int row = selected.first().row();
     QString routeId = model_->item(row, 0)->text();
-    QString fromIATA = model_->item(row, 1)->text();
-    QString toIATA = model_->item(row, 2)->text();
+    
+    // ✅ LẤY IATA CODE từ model (không phải display name)
+    // Giả sử cột 1, 2 là display name, cần parse IATA
+    // Hoặc lưu IATA trong data role
+    Route* currentRoute = flightManager_->findRouteById(routeId.toStdString());
+    if (!currentRoute) {
+        QMessageBox::critical(this, "Lỗi", "Không tìm thấy tuyến bay.");
+        return;
+    }
+    
+    QString fromIATA = QString::fromStdString(currentRoute->getDepartureAirport());
+    QString toIATA = QString::fromStdString(currentRoute->getArrivalAirport());
 
     RouteDialog dialog(airportManager_, routeId, fromIATA, toIATA, this);
     
     if (dialog.exec() == QDialog::Accepted) {
         QString newFrom = dialog.getFromIATA();
         QString newTo = dialog.getToIATA();
+        
+        // === VALIDATION LAYER 1: UI Check ===
+        
+        // ✅ Check 1: Điểm đi và đến phải khác nhau
+        if (newFrom == newTo) {
+            QMessageBox::warning(this, "Dữ liệu không hợp lệ", 
+                "Điểm đi và điểm đến phải khác nhau!");
+            return;
+        }
+        
+        // ✅ Check 2: Tính ID mới
+        QString newRouteId = newFrom + "-" + newTo;
+        
+        // ✅ Check 3: Nếu không thay đổi gì
+        if (newRouteId == routeId) {
+            QMessageBox::information(this, "Không có thay đổi", 
+                "Thông tin tuyến bay không thay đổi.");
+            return;
+        }
+        
+        // ✅ Check 4: Kiểm tra trùng với route khác
+        Route* existingRoute = flightManager_->findRouteById(newRouteId.toStdString());
+        if (existingRoute != nullptr) {
+            QMessageBox::warning(this, "Tuyến bay đã tồn tại", 
+                QString("Tuyến bay <b>%1</b> đã tồn tại!<br><br>"
+                       "Không thể sửa tuyến <b>%2</b> thành <b>%3</b><br><br>"
+                       "Vui lòng chọn điểm đi/đến khác.")
+                    .arg(newRouteId, routeId, newRouteId));
+            return;
+        }
+        
+        // === VALIDATION PASSED - Thực hiện update ===
         
         bool success = flightManager_->updateRoute(
             routeId.toStdString(),
@@ -346,17 +390,18 @@ void RoutesPage::onEditRoute()
         );
         
         if (success) {
-            QMessageBox::information(this, "Thành công", 
-                QString("Đã cập nhật tuyến bay:\n\n"
-                       "Mã tuyến: %1\n"
-                       "Hãng: %2\n"
-                       "Lộ trình: %3 → %4")
-                    .arg(routeId, newFrom, newTo));
+            QMessageBox::information(this, "Cập nhật thành công", 
+                QString("Đã cập nhật tuyến bay:<br><br>"
+                       "<b>Cũ:</b> %1 (%2 → %3)<br>"
+                       "<b>Mới:</b> %4 (%5 → %6)")
+                    .arg(routeId, fromIATA, toIATA)
+                    .arg(newRouteId, newFrom, newTo));
             refreshTable();
         } else {
-            QMessageBox::critical(this, "Thất bại", 
-                "Không thể cập nhật tuyến bay.\n\n"
-                "Vui lòng thử lại.");
+            // Nếu vẫn thất bại (không nên xảy ra vì đã validate)
+            QMessageBox::critical(this, "Cập nhật thất bại", 
+                "Không thể cập nhật tuyến bay.<br><br>"
+                "Vui lòng thử lại hoặc liên hệ hỗ trợ.");
         }
     }
 }
@@ -381,20 +426,19 @@ void RoutesPage::onDeleteRoute()
         QMessageBox::No);
 
     if (reply == QMessageBox::Yes) {
+        // ✅ SỬA: Gọi deleteRoute() thay vì deleteFlight()
         bool success = flightManager_->deleteRoute(routeId.toStdString());
         
         if (success) {
-            QMessageBox::information(this, "✅ Xóa thành công", 
-                QString("Đã xóa tuyến bay: <b>%1</b><br><br>"
-                       "Dữ liệu đã được cập nhật.")
-                    .arg(routeId));
+            QMessageBox::information(this, "Xóa thành công", 
+                QString("Đã xóa tuyến bay <b>%1</b>").arg(routeId));
             refreshTable();
         } else {
-            QMessageBox::critical(this, "❌ Xóa thất bại", 
+            QMessageBox::critical(this, "Xóa thất bại", 
                 QString("Không thể xóa tuyến bay <b>%1</b>.<br><br>"
                        "Có thể do:<br>"
                        "• Tuyến đang có chuyến bay hoạt động<br>"
-                       "• Lỗi lưu dữ liệu")
+                       "• Lỗi hệ thống")
                     .arg(routeId));
         }
     }

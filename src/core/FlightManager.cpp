@@ -9,7 +9,7 @@
 FlightManager::FlightManager(const std::string& routesFilePath, const std::string& flightsFilePath) 
     : routesFilePath_(routesFilePath), flightsFilePath_(flightsFilePath), seatManager_(nullptr) {
     
-    seatManager_ = new SeatManager("data/seat_maps.txt", "data/seat_config.txt");
+    seatManager_ = new SeatManager("C:/PBL2/data/seat_maps.txt", "C:/PBL2/data/seat_config.txt");
     
     this->loadRoutesFromFile(routesFilePath);
     this->loadFlightsFromFile(flightsFilePath);
@@ -317,37 +317,73 @@ bool FlightManager::saveAllData() {
 }
 
 // --- Update and Delete Functions ---
+// FlightManager.cpp
 
 bool FlightManager::updateRoute(const std::string& routeId,
                                 const std::string& newDeparture, 
                                 const std::string& newDestination) {
-    Route* route = findRouteById(routeId);
-    if (!route) return false;
+    // === STEP 1: Validate input ===
+    if (newDeparture.empty() || newDestination.empty()) {
+        return false;
+    }
     
+    // === STEP 2: Tìm route hiện tại ===
+    Route* oldRoute = findRouteById(routeId);
+    if (!oldRoute) return false;
+    
+    // === STEP 3: Tính ID mới ===
+    std::string newRouteId = newDeparture + "-" + newDestination;
+    
+    // === STEP 4: Kiểm tra trùng lặp ===
+    
+    // Case 1: Nếu KHÔNG THAY ĐỔI gì → Chấp nhận (không cần update)
+    if (newRouteId == routeId) {
+        return true;  // ← Thành công nhưng không làm gì
+    }
+    
+    // Case 2: Nếu THAY ĐỔI → Kiểm tra ID mới có trùng không
+    Route* existingRoute = findRouteById(newRouteId);
+    if (existingRoute != nullptr) {
+        // ID mới đã tồn tại ở route KHÁC
+        return false;
+    }
+    
+    // === STEP 5: Thực hiện update ===
     Route* newRoute = new Route(newDeparture, newDestination);
     
     for (int i = 0; i < allRoutes.size(); i++) {
         if (allRoutes[i]->getRouteId() == routeId) {
+            // Xóa ID cũ khỏi hash table
             routeIdTable.remove(routeId);
+            
+            // Thay thế route
             delete allRoutes[i];
             allRoutes[i] = newRoute;
+            
+            // Thêm ID mới vào hash table
             routeIdTable.insert(newRoute->getRouteId(), newRoute);
-            saveRoutesToFiles(routesFilePath_);
+            
+            // ✅ KHÔNG lưu file ngay (theo chiến lược lazy write)
+            
             return true;
         }
     }
     
+    // Cleanup nếu không tìm thấy route
     delete newRoute;
     return false;
 }
 
+// Tương tự cho deleteRoute(), updateFlight(), deleteFlight()
 bool FlightManager::deleteRoute(const std::string& routeId) {
     for (int i = 0; i < allRoutes.size(); i++) {
         if (allRoutes[i]->getRouteId() == routeId) {
             routeIdTable.remove(routeId);
             delete allRoutes[i];
             allRoutes.erase(allRoutes.begin() + i);
-            saveRoutesToFiles(routesFilePath_);
+            
+            // ✅ BỎ: saveRoutesToFiles(routesFilePath_);
+            
             return true;
         }
     }
@@ -360,12 +396,9 @@ bool FlightManager::updateFlight(const std::string& flightId,
     if (!oldFlight) return false;
     
     std::string oldRouteId = oldFlight->getRouteId();
-    
     *oldFlight = updatedFlight;
-    
     updateFlightInRouteIndex(oldFlight, oldRouteId);
     
-    saveFlightsToFiles(flightsFilePath_);
     return true;
 }
 
@@ -375,13 +408,11 @@ bool FlightManager::deleteFlight(const std::string& flightId) {
             Flight* flightToDelete = allFlights[i];
             
             removeFlightFromRouteIndex(flightToDelete);
-            
             flightIdTable.remove(flightId);
-            
             delete flightToDelete;
             allFlights.erase(allFlights.begin() + i);
             
-            saveFlightsToFiles(flightsFilePath_);
+            // ✅ BỎ: saveFlightsToFiles(flightsFilePath_);
             
             return true;
         }

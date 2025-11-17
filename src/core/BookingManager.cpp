@@ -273,7 +273,8 @@ bool BookingManager::changeBooking(FlightManager& flightManager,
                              SeatManager& seatManager,
                              const std::string& bookingId,
                              const std::string& newFlightId, // <-- Đã đổi
-                             const std::string& newSeatNumber) {
+                             const std::string& newSeatNumber,
+                             BookingClass newClass) {
     // Step 1: Find and validate booking
     Booking* booking = findBookingById(bookingId);
     if (!booking || booking->getStatus() != BookingStatus::Issued) {
@@ -293,6 +294,11 @@ bool BookingManager::changeBooking(FlightManager& flightManager,
     std::string oldFlightId = booking->getFlightId(); // <-- Đã đổi
     std::string oldSeatId = booking->getSeatID();
     Flight* oldFlight = flightManager.findFlightById(oldFlightId); // <-- Đã đổi
+
+    // ✅ THÊM: Calculate new fare based on class
+    int newBaseFare = (newClass == BookingClass::Economy) 
+                     ? newFlight->getFareEconomy() 
+                     : newFlight->getFareBusiness();
     
     // BOOK NEW SEAT FIRST (Step 4)
     if (!seatManager.loadSeatMapFor(newFlight)) { // <-- Đã đổi
@@ -332,6 +338,9 @@ bool BookingManager::changeBooking(FlightManager& flightManager,
     booking->setFlightId(newFlightId); // <-- Đã đổi
     booking->setSeatId(newSeatNumber);
     booking->setStatus(BookingStatus::Changed);
+    // ✅ THÊM: Update class and fare
+    booking->setClass(newClass);
+    booking->setBaseFare(newBaseFare);
     
     // Step 7: Save booking changes to file
     if (!saveDataToFiles(bookingsFilePath_)) {

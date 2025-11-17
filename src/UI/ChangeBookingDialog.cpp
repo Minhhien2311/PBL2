@@ -448,6 +448,11 @@ void ChangeBookingDialog::onConfirmClicked()
         QMessageBox::warning(this, "Lỗi", "Vui lòng chọn chuyến bay và ghế.");
         return;
     }
+
+    // ✅ THÊM: Get selected class
+    BookingClass selectedClass = economyRadio_->isChecked() 
+                                ? BookingClass::Economy 
+                                : BookingClass::Business;
     
     // Confirm change
     auto reply = QMessageBox::question(this, "Xác nhận đổi vé",
@@ -470,7 +475,8 @@ void ChangeBookingDialog::onConfirmClicked()
         *seatManager,
         currentBooking_->getBookingId(),
         selectedNewFlight_->getFlightId(),
-        selectedSeatId_.toStdString()
+        selectedSeatId_.toStdString(),
+        selectedClass
     );
     
     if (success) {

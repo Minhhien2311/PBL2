@@ -133,16 +133,34 @@ bool SeatManager::confirmSelection() {
     return bookSeat(seatId);
 }
 
+// SeatManager.cpp - Line 136
+
 bool SeatManager::bookSeat(const std::string& seatId) {
+    // ✅ THÊM: Debug log
+    std::cout << "[DEBUG] bookSeat() called for seat: " << seatId 
+              << " on flight: " << currentFlightId_ << std::endl;
+    
     for (int i = 0; i < activeSeatMap_.size(); i++) {
         if (activeSeatMap_[i]->getId() == seatId) {
+            // ✅ THÊM: Log status hiện tại
+            std::string statusStr = (activeSeatMap_[i]->getStatus() == SeatStatus::Available) 
+                                    ? "Available" : "Booked";
+            std::cout << "[DEBUG] Seat " << seatId << " current status: " << statusStr << std::endl;
+            
             if (activeSeatMap_[i]->getStatus() == SeatStatus::Available) {
                 activeSeatMap_[i]->setStatus(SeatStatus::Booked);
+                std::cout << "[DEBUG] Seat " << seatId << " marked as Booked" << std::endl;
                 return updateAndSaveChanges();
             }
+            
+            // ✅ THÊM: Log lỗi
+            std::cerr << "[ERROR] Seat " << seatId << " is already Booked!" << std::endl;
             return false;
         }
     }
+    
+    // ✅ THÊM: Log không tìm thấy
+    std::cerr << "[ERROR] Seat " << seatId << " not found in activeSeatMap_!" << std::endl;
     return false;
 }
 
@@ -163,37 +181,60 @@ bool SeatManager::saveChanges() {
     return updateAndSaveChanges();
 }
 
+// SeatManager.cpp - Line 166
+
 bool SeatManager::updateAndSaveChanges() {
-    if (currentFlightId_.empty()) return false;
+    // ✅ THÊM: Log bắt đầu
+    std::cout << "[DEBUG] updateAndSaveChanges() called" << std::endl;
+    std::cout << "[DEBUG] currentFlightId_: " << currentFlightId_ << std::endl;
+    std::cout << "[DEBUG] seatStatusFilePath_: " << seatStatusFilePath_ << std::endl;
     
-    // Read existing file
+    if (currentFlightId_.empty()) {
+        std::cerr << "[ERROR] currentFlightId_ is empty!" << std::endl;
+        return false;
+    }
+    
+    // ✅ THÊM: Log đọc file
     std::vector<std::string> allLines;
     std::ifstream inFile(seatStatusFilePath_);
     if (inFile.is_open()) {
+        std::cout << "[DEBUG] Reading existing file..." << std::endl;
         std::string line;
         while (std::getline(inFile, line)) {
             allLines.push_back(line);
         }
         inFile.close();
+        std::cout << "[DEBUG] Read " << allLines.size() << " lines" << std::endl;
+    } else {
+        std::cout << "[DEBUG] File not found, will create new" << std::endl;
     }
     
     // Build booked seats string
     std::ostringstream bookedSeats;
     bool first = true;
+    int bookedCount = 0;  // ✅ THÊM: Đếm số ghế booked
+    
     for (int i = 0; i < activeSeatMap_.size(); i++) {
         if (activeSeatMap_[i]->getStatus() == SeatStatus::Booked) {
             if (!first) bookedSeats << ",";
             bookedSeats << activeSeatMap_[i]->getId();
             first = false;
+            bookedCount++;  // ✅ THÊM
         }
     }
     
+    // ✅ THÊM: Log số ghế booked
+    std::cout << "[DEBUG] Found " << bookedCount << " booked seats" << std::endl;
+    std::cout << "[DEBUG] Booked seats string: " << bookedSeats.str() << std::endl;
+    
     std::string newLine = currentFlightId_ + "|" + bookedSeats.str();
+    std::cout << "[DEBUG] New line: " << newLine << std::endl;
     
     // Update or add line
     bool found = false;
     for (size_t i = 0; i < allLines.size(); i++) {
         if (allLines[i].find(currentFlightId_ + "|") == 0) {
+            std::cout << "[DEBUG] Updating existing line " << i << std::endl;
             allLines[i] = newLine;
             found = true;
             break;
@@ -201,17 +242,35 @@ bool SeatManager::updateAndSaveChanges() {
     }
     
     if (!found) {
+        std::cout << "[DEBUG] Adding new line for flight" << std::endl;
         allLines.push_back(newLine);
     }
     
+    // ✅ THÊM: Log trước khi ghi file
+    std::cout << "[DEBUG] Opening file for writing: " << seatStatusFilePath_ << std::endl;
+    
     // Write back
     std::ofstream outFile(seatStatusFilePath_);
-    if (!outFile.is_open()) return false;
+    if (!outFile.is_open()) {
+        // ✅ THÊM: Log lỗi chi tiết
+        std::cerr << "[ERROR] Cannot open file for writing: " << seatStatusFilePath_ << std::endl;
+        std::cerr << "[ERROR] Possible reasons:" << std::endl;
+        std::cerr << "  - File is locked by another process" << std::endl;
+        std::cerr << "  - No write permission" << std::endl;
+        std::cerr << "  - Directory does not exist" << std::endl;
+        std::cerr << "  - Disk is full" << std::endl;
+        return false;
+    }
+    
+    std::cout << "[DEBUG] Writing " << allLines.size() << " lines to file..." << std::endl;
     
     for (const auto& line : allLines) {
         outFile << line << "\n";
     }
     outFile.close();
+    
+    // ✅ THÊM: Log thành công
+    std::cout << "[DEBUG] File saved successfully!" << std::endl;
     
     return true;
 }
