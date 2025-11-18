@@ -48,6 +48,7 @@ FlightDialog::FlightDialog(FlightManager* flightManager,
                           const QString& depTime,
                           const QString& arrDate,
                           const QString& arrTime,
+                          int availableSeats,
                           int totalCapacity,
                           int fareEconomy,
                           int fareBusiness,
@@ -518,6 +519,11 @@ QString FlightDialog::getArrivalDate() const {
 
 QString FlightDialog::getArrivalTime() const {
     return arrivalTimeEdit_->time().toString("HH:mm");
+}
+
+int FlightDialog::getAvailableSeats() const {
+    // Giả sử available seats = total capacity lúc tạo chuyến bay mới
+    return totalCapacitySpin_->value();
 }
 
 int FlightDialog::getTotalCapacity() const {

@@ -148,16 +148,18 @@ void BookingDialog::setupUi()
         if (p) {
             // ✅ Auto-fill thông tin
             passengerNameEdit_->setText(QString::fromStdString(p->getFullName()));
+            dateOfBirthEdit_->setText(QString::fromStdString(p->getDateOfBirth()));
             passengerPhoneEdit_->setText(QString::fromStdString(p->getPhoneNumber()));
-            passportNumberEdit_->setText(QString::fromStdString(p->getPassportNumber()));
             
             // Thông báo nhẹ (không dùng QMessageBox để không làm gián đoạn)
             passengerNameEdit_->setStyleSheet("QLineEdit { background: #E8F5E9; }");  // Màu xanh nhạt
+            dateOfBirthEdit_->setStyleSheet("QLineEdit { background: #E8F5E9; }");
             passengerPhoneEdit_->setStyleSheet("QLineEdit { background: #E8F5E9; }");
             
             // Reset style sau 2 giây
             QTimer::singleShot(2000, this, [this]() {
                 passengerNameEdit_->setStyleSheet("");
+                dateOfBirthEdit_->setStyleSheet("");
                 passengerPhoneEdit_->setStyleSheet("");
             });
             
@@ -174,16 +176,16 @@ void BookingDialog::setupUi()
     passengerNameEdit_ = new QLineEdit(contentWidget);
     passengerNameEdit_->setPlaceholderText("Nhập họ tên đầy đủ");
     formLayout->addRow("Họ và tên:", passengerNameEdit_);
+
+    // Ngày sinh (tùy chọn)
+    dateOfBirthEdit_ = new QLineEdit(contentWidget);
+    dateOfBirthEdit_->setPlaceholderText("Nhập ngày sinh");
+    formLayout->addRow("Ngày sinh:", dateOfBirthEdit_);
     
     // Số điện thoại (tùy chọn)
     passengerPhoneEdit_ = new QLineEdit(contentWidget);
     passengerPhoneEdit_->setPlaceholderText("Nhập số điện thoại");
     formLayout->addRow("Số điện thoại:", passengerPhoneEdit_);
-    
-    // Số hộ chiếu (tùy chọn)
-    passportNumberEdit_ = new QLineEdit(contentWidget);
-    passportNumberEdit_->setPlaceholderText("Nhập số hộ chiếu (nếu có)");
-    formLayout->addRow("Số hộ chiếu:", passportNumberEdit_);
     
     contentLayout->addWidget(passengerGroup);
     
@@ -330,8 +332,8 @@ void BookingDialog::setupUi()
         
         // ✅ THÊM: Lưu/cập nhật thông tin passenger
         QString fullName = passengerNameEdit_->text().trimmed();
+        QString dayOfBirth = dateOfBirthEdit_->text().trimmed();
         QString phoneNumber = passengerPhoneEdit_->text().trimmed();
-        QString passportNumber = passportNumberEdit_->text().trimmed();
         
         // Nếu không có tên → Hỏi user
         if (fullName.isEmpty()) {
@@ -355,10 +357,7 @@ void BookingDialog::setupUi()
             passengerId.toStdString(),
             fullName.toStdString(),
             "01/01/1990",  // ← Giá trị mặc định (có thể thêm field nhập ngày sinh sau)
-            Gender::Male,  // ← Giá trị mặc định (có thể thêm combobox chọn giới tính sau)
-            phoneNumber.toStdString(),
-            passportNumber.toStdString(),
-            "Việt Nam"     // ← Giá trị mặc định
+            phoneNumber.toStdString()
         );
         
         if (!passenger) {
@@ -469,14 +468,14 @@ QString BookingDialog::getPassengerName() const
     return passengerNameEdit_->text().trimmed();
 }
 
+QString BookingDialog::getDateOfBirth() const
+{
+    return dateOfBirthEdit_->text().trimmed();
+}
+
 QString BookingDialog::getPassengerPhone() const
 {
     return passengerPhoneEdit_->text().trimmed();
-}
-
-QString BookingDialog::getPassportNumber() const
-{
-    return passportNumberEdit_->text().trimmed();
 }
 
 BookingClass BookingDialog::getSelectedClass() const

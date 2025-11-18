@@ -216,6 +216,7 @@ bool FlightManager::createNewFlight(const std::string& routeId,
                                     const std::string& departureTime,
                                     const std::string& arrivalDate,
                                     const std::string& arrivalTime,
+                                    int availableSeats,
                                     int totalCapacity,
                                     int fareEconomy,
                                     int fareBusiness) {
@@ -227,7 +228,7 @@ bool FlightManager::createNewFlight(const std::string& routeId,
 
     Flight* newFlight = new Flight(
         routeId, airline, flightNumber, departureDate, departureTime, 
-        arrivalDate, arrivalTime, totalCapacity, fareEconomy, fareBusiness
+        arrivalDate, arrivalTime,  availableSeats, totalCapacity, fareEconomy, fareBusiness
     );
     
     this->allFlights.push_back(newFlight);

@@ -6,6 +6,7 @@
 #include "entities/Flight.h" // Cần để đọc dữ liệu
 #include "AirportComboBox.h"
 #include "RouteDialog.h"
+#include "BoldItemDelegate.h"
 #include <string>
 
 #include <QVBoxLayout>
@@ -59,8 +60,6 @@ void RoutesPage::setupUi()
         "QLineEdit { background:white; border:1px solid #608bc1; border-radius:4px; height:26px; padding-left:6px; }"
         "QPushButton.SearchBtn { background:#4478BD; color:white; border-radius:6px; height:24px; font-weight:600; }"
         "QTableView { background:white; border:0px solid #d4dce5; }"
-        "QTableView::item:hover { background-color:#EAF2F8; color:#123B7A; }"
-        "QTableView::item:selected { background-color:#4478BD; color:white; font-weight:600; }"
         "QHeaderView::section { background:#d5e2f2; padding:6px; border:1px solid #c2cfe2; }"
         "TableTitle { font-size: 18px; }"
     );
@@ -203,27 +202,29 @@ void RoutesPage::setupUi()
     mainLayout->addWidget(tableHeader);
 
     // ====== BẢNG ======
+    QWidget *tableBox = new QWidget(this);
+    QVBoxLayout *tblWrap = new QVBoxLayout(tableBox);
+    tblWrap->setContentsMargins(24, 6, 24, 0);
+
     tableView_ = new QTableView(this);
+    tableView_->setItemDelegate(new BoldItemDelegate(this));
+    
+    // --- CẤU HÌNH GIAO DIỆN BẢNG (Giống SearchBookPage) ---
     tableView_->setSelectionBehavior(QAbstractItemView::SelectRows);
     tableView_->setSelectionMode(QAbstractItemView::SingleSelection);
     tableView_->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    
+    tableView_->verticalHeader()->setVisible(false); // Tắt cột số mặc định xấu
+    tableView_->setAlternatingRowColors(true);       // Màu xen kẽ
+    tableView_->setShowGrid(false);                  // Tắt lưới
+    
+    // --- XỬ LÝ SCROLLBAR ---
+    tableView_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff); // Tắt thanh ngang
     tableView_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    tableView_->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    // tableView_->setFrameShape(QFrame::NoFrame);                       // Bỏ viền
 
-    tableView_->verticalHeader()->setVisible(true);
-    tableView_->verticalHeader()->setMinimumWidth(32);
-    tableView_->verticalHeader()->setDefaultSectionSize(30);
-    tableView_->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-
-    tableView_->horizontalHeader()->setStretchLastSection(false);
-    tableView_->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-
-    QWidget *tableWrapper = new QWidget(this);
-    QVBoxLayout *tableWrapLayout = new QVBoxLayout(tableWrapper);
-    tableWrapLayout->setContentsMargins(24, 10, 24, 0);
-    tableWrapLayout->addWidget(tableView_);
-
-    mainLayout->addWidget(tableWrapper, 1);
+    tblWrap->addWidget(tableView_);
+    mainLayout->addWidget(tableBox, 1);
 
     // ====== CRUD BAR ======
     QWidget *crudBar = new QWidget(this);
@@ -255,11 +256,29 @@ void RoutesPage::setupUi()
 
 void RoutesPage::setupModel()
 {
-    model_ = new QStandardItemModel(0, 3, this);
+    // Tăng lên 4 cột: STT, ID, Điểm đi, Điểm đến
+    model_ = new QStandardItemModel(0, 4, this);
     model_->setHorizontalHeaderLabels({
-        "ID tuyến (FlightId)", "Điểm đi (IATA)", "Điểm đến (IATA)"
+        "STT", 
+        "ID tuyến (FlightId)", 
+        "Điểm đi", 
+        "Điểm đến"
     });
     tableView_->setModel(model_);
+
+    // --- CẤU HÌNH HEADER ---
+    QHeaderView *header = tableView_->horizontalHeader();
+
+    // 1. Mặc định co theo nội dung
+    header->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+    // 2. Cột STT (0): Cố định nhỏ
+    header->setSectionResizeMode(0, QHeaderView::Fixed);
+    tableView_->setColumnWidth(0, 50);
+
+    // 3. Chọn cột cuối cùng ("Điểm đến") làm LÒ XO (Stretch) để lấp đầy bảng
+    // Hoặc bạn có thể chọn cột "Điểm đi" (cột 2) tùy thích.
+    header->setSectionResizeMode(3, QHeaderView::Stretch); 
 }
 
 void RoutesPage::setupConnections()
@@ -274,21 +293,31 @@ void RoutesPage::setupConnections()
 void RoutesPage::refreshTable()
 {
     model_->removeRows(0, model_->rowCount());
-
     const std::vector<Route*>& routes = flightManager_->getAllRoutes();
     
     for (int i = 0; i < routes.size(); ++i) {
         Route* route = routes[i];
         if (route) {
             QList<QStandardItem *> rowItems;
-            rowItems << new QStandardItem(QString::fromStdString(route->getRouteId()))
-                   << new QStandardItem(QString::fromStdString(airportManager_->getDisplayName(route->getDepartureAirport())))
-                   << new QStandardItem(QString::fromStdString(airportManager_->getDisplayName(route->getArrivalAirport())));
+            
+            // 0. STT
+            rowItems << new QStandardItem(QString::number(i + 1)); 
+            
+            // 1. ID
+            rowItems << new QStandardItem(QString::fromStdString(route->getRouteId()));
+            
+            // 2. Điểm đi
+            rowItems << new QStandardItem(QString::fromStdString(airportManager_->getDisplayName(route->getDepartureAirport())));
+            
+            // 3. Điểm đến
+            rowItems << new QStandardItem(QString::fromStdString(airportManager_->getDisplayName(route->getArrivalAirport())));
+            
+            // Canh giữa tất cả
+            for (auto* item : rowItems) item->setTextAlignment(Qt::AlignCenter);
+            
             model_->appendRow(rowItems);
         }
     }
-
-    // ← CẬP NHẬT STATUS
     statusLabel_->setText(QString("Hiển thị tất cả %1 tuyến bay").arg(routes.size()));
 }
 
@@ -331,7 +360,7 @@ void RoutesPage::onEditRoute()
     }
 
     int row = selected.first().row();
-    QString routeId = model_->item(row, 0)->text();
+    QString routeId = model_->item(row, 1)->text();
     
     // ✅ LẤY IATA CODE từ model (không phải display name)
     // Giả sử cột 1, 2 là display name, cần parse IATA
@@ -414,7 +443,7 @@ void RoutesPage::onDeleteRoute()
         return;
     }
 
-    QString routeId = model_->item(selected.first().row(), 0)->text();
+    QString routeId = model_->item(selected.first().row(), 1)->text();
 
     auto reply = QMessageBox::question(this, "⚠️ Xác nhận xóa tuyến bay", 
         QString("Bạn có chắc chắn muốn xóa tuyến bay <b>%1</b>?<br><br>"
@@ -456,12 +485,10 @@ void RoutesPage::onSearchByRoute()
             "• Điểm đến");
         return;
     }
-
-    const std::vector<Route*>& allRoutes = flightManager_->getAllRoutes();
     
     model_->removeRows(0, model_->rowCount());
-    
     int count = 0;
+    const std::vector<Route*>& allRoutes = flightManager_->getAllRoutes();
     
     for (Route* route : allRoutes) {
         if (route) {
@@ -469,12 +496,18 @@ void RoutesPage::onSearchByRoute()
             bool matchTo = toIATA.empty() || (route->getArrivalAirport() == toIATA);
             
             if (matchFrom && matchTo) {
-                QList<QStandardItem*> rowItems;
-                rowItems << new QStandardItem(QString::fromStdString(route->getRouteId()))
-                        << new QStandardItem(QString::fromStdString(airportManager_->getDisplayName(route->getDepartureAirport())))
-                        << new QStandardItem(QString::fromStdString(airportManager_->getDisplayName(route->getArrivalAirport())));
-                model_->appendRow(rowItems);
                 count++;
+                QList<QStandardItem*> rowItems;
+                
+                // STT (Dùng biến count)
+                rowItems << new QStandardItem(QString::number(count));
+                
+                rowItems << new QStandardItem(QString::fromStdString(route->getRouteId()));
+                rowItems << new QStandardItem(QString::fromStdString(airportManager_->getDisplayName(route->getDepartureAirport())));
+                rowItems << new QStandardItem(QString::fromStdString(airportManager_->getDisplayName(route->getArrivalAirport())));
+                
+                for (auto* item : rowItems) item->setTextAlignment(Qt::AlignCenter);
+                model_->appendRow(rowItems);
             }
         }
     }

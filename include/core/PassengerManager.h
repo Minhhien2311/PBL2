@@ -24,10 +24,7 @@ public:
         const std::string& id,           // CCCD
         const std::string& fullName,
         const std::string& dateOfBirth,
-        Gender gender,
-        const std::string& phoneNumber,
-        const std::string& passportNumber,
-        const std::string& nationality
+        const std::string& phoneNumber
     );
     
     Passenger* findPassengerById(const std::string& id);
@@ -35,9 +32,7 @@ public:
     bool updatePassenger(
         const std::string& id,
         const std::string& fullName,
-        const std::string& phoneNumber,
-        const std::string& passportNumber,
-        const std::string& nationality
+        const std::string& phoneNumber
     );
     
     // Persistence

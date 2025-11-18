@@ -11,6 +11,7 @@
 #include "BookingDialog.h"
 #include "AirportComboBox.h"
 #include "utils/Helpers.h"
+#include "BoldItemDelegate.h"
 #include <string>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -89,8 +90,6 @@ void SearchBookPage::setupUi()
         "QPushButton.SearchBtn { background:#4478BD; color:white; border-radius:6px; "
             "height:24px; font-weight:600; }"
         "QTableView { background:white; border:0px; }"
-        "QTableView::item:hover { background-color:#EAF2F8; color:#123B7A; }"
-        "QTableView::item:selected { background-color:#4478BD; color:white; font-weight:600; }"
         "QHeaderView::section { background:#d5e2f2; padding:6px; border:1px solid #c2cfe2; }"
     );
 
@@ -257,7 +256,7 @@ void SearchBookPage::setupUi()
     // ================== TIÊU ĐỀ BẢNG + STATUS ==================
     QWidget *tableHeader = new QWidget(this);
     QHBoxLayout *thLayout = new QHBoxLayout(tableHeader);
-    thLayout->setContentsMargins(24, 0, 24, 0);
+    thLayout->setContentsMargins(24, 0, 18, 0);
     thLayout->setSpacing(10);
 
     QLabel *tblTitle = new QLabel("📋 Kết quả tìm kiếm", this);
@@ -276,23 +275,22 @@ void SearchBookPage::setupUi()
     // ================== BẢNG ==================
     QWidget *tableBox = new QWidget(this);
     QVBoxLayout *tblWrap = new QVBoxLayout(tableBox);
-    tblWrap->setContentsMargins(24, 6, 24, 0);
+    tblWrap->setContentsMargins(24, 6, 18, 0);
 
     tableView_ = new QTableView(this);
-    tableView_->setSelectionBehavior(QAbstractItemView::SelectRows);  // chọn nguyên hàng
-    tableView_->setSelectionMode(QAbstractItemView::SingleSelection); // chọn 1 chuyến
+    tableView_->setItemDelegate(new BoldItemDelegate(this));
+
+    // --- Cấu hình cơ bản ---
+    tableView_->setSelectionBehavior(QAbstractItemView::SelectRows);
+    tableView_->setSelectionMode(QAbstractItemView::SingleSelection);
     tableView_->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    tableView_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    tableView_->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    tableView_->verticalHeader()->setVisible(false);
+    tableView_->setAlternatingRowColors(true);
+    tableView_->setShowGrid(false); 
 
-    // Bật STT giống FlightsPage
-    tableView_->verticalHeader()->setVisible(true);
-    tableView_->verticalHeader()->setMinimumWidth(32);
-    tableView_->verticalHeader()->setDefaultSectionSize(30);
-    tableView_->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-
-    // Header ngang giãn đều – tránh lỗi dồn trái
-    tableView_->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    // QUAN TRỌNG: Tắt hẳn scrollbar ngang (ép không cho hiện)
+    tableView_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    tableView_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
 
     tblWrap->addWidget(tableView_);
     mainLayout->addWidget(tableBox, 1);
@@ -320,18 +318,32 @@ void SearchBookPage::setupUi()
 void SearchBookPage::setupModel()
 {
     // 8 cột thông tin chuyến bay
-    model_ = new QStandardItemModel(0, 8, this);
+    // 1. Tạo Model và Header Labels
+    model_ = new QStandardItemModel(0, 9, this);
     model_->setHorizontalHeaderLabels({
-        "Mã Chuyến",          // flightId
-        "Số hiệu",
-        "Ngày khởi hành",
-        "Giờ khởi hành",
-        "Ngày hạ cánh (dự kiến)",
-        "Giờ hạ cánh (dự kiến)",
-        "Hãng hàng không",
-        "Giá từ"
+        "STT", "Mã Chuyến", "Mã tuyến", "Hãng hàng không", "Số hiệu",
+        "Ngày khởi hành", "Giờ khởi hành", "Ghế trống", "Giá từ"
     });
+
+    // 2. Gán model
     tableView_->setModel(model_);
+
+    // 3. CẤU HÌNH HEADER (QUAN TRỌNG)
+    QHeaderView *header = tableView_->horizontalHeader();
+
+    // A. Mặc định cho tất cả co sát theo nội dung chữ
+    header->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+    // B. Cột STT (0): Cố định nhỏ
+    header->setSectionResizeMode(0, QHeaderView::Fixed);
+    tableView_->setColumnWidth(0, 50); // Tăng lên 50 xíu cho số 100 đỡ bị che
+
+    // C. Cột Hãng hàng không (3): LÀM LÒ XO (Stretch)
+    header->setSectionResizeMode(3, QHeaderView::Stretch);
+    header->setSectionResizeMode(7, QHeaderView::Stretch);
+    header->setSectionResizeMode(8, QHeaderView::Stretch);
+    
+    // Lưu ý: KHÔNG setColumnWidth cho cột Stretch (nó tự tính)
 }
 
 void SearchBookPage::setupConnections()
@@ -346,28 +358,28 @@ void SearchBookPage::fillTable(const std::vector<Flight*>& flights)
     model_->removeRows(0, model_->rowCount());
 
     for (int i = 0; i < flights.size(); ++i) {
-        Flight* inst = flights[i];
-        if (!inst) continue;
-
-        // Lấy thông tin hãng hàng không từ Flight
-        // QString airline = "N/A";
         Flight* flight = flights[i];
 
         if (!flight) continue;
         QString airline = QString::fromStdString(flight->getAirline());
 
         // Format số tiền với dấu chấm phân cách hàng nghìn
-        QString priceFormatted = formatVietnamCurrency(inst->getFareEconomy());
+        QString priceFormatted = formatVietnamCurrency(flight->getFareEconomy());
 
         QList<QStandardItem*> row;
-        row << new QStandardItem(QString::fromStdString(inst->getFlightId()))
-            << new QStandardItem(QString::fromStdString(inst->getFlightNumber()))
-            << new QStandardItem(QString::fromStdString(inst->getDepartureDate()))
-            << new QStandardItem(QString::fromStdString(inst->getDepartureTime()))
-            << new QStandardItem(QString::fromStdString(inst->getArrivalDate()))
-            << new QStandardItem(QString::fromStdString(inst->getArrivalTime()))
+        row << new QStandardItem(QString::number(i + 1))
+            << new QStandardItem(QString::fromStdString(flight->getFlightId()))
+            << new QStandardItem(QString::fromStdString(flight->getRouteId()))
             << new QStandardItem(airline)
+            << new QStandardItem(QString::fromStdString(flight->getFlightNumber()))
+            << new QStandardItem(QString::fromStdString(flight->getDepartureDate()))
+            << new QStandardItem(QString::fromStdString(flight->getDepartureTime()))
+            << new QStandardItem(QString::number(flight->getAvailableSeats()) + "/" + QString::number(flight->getTotalCapacity()))
             << new QStandardItem(priceFormatted);
+        // Canh giữa tất cả các cột
+        for (QStandardItem *item : row) {
+        item->setTextAlignment(Qt::AlignCenter);
+    }
         model_->appendRow(row);
     }
 }

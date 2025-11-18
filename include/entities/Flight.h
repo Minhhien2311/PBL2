@@ -18,6 +18,7 @@ private:
     std::string arrivalTime;    // Định dạng "HH:MM"
 
     // --- Capacity info ---
+    int availableSeats;     // Số ghế còn trống
     int totalCapacity;          // Tổng số ghế
 
     // --- Giá vé ---
@@ -37,6 +38,7 @@ public:
                     const std::string& arrivalDate,
                     const std::string& arrivalTime,
                     int totalCapacity,
+                    int availableSeats,
                     int fareEconomy,
                     int fareBusiness);
 
@@ -49,6 +51,7 @@ public:
     const std::string& getDepartureTime() const;
     const std::string& getArrivalDate() const;
     const std::string& getArrivalTime() const;
+    int getAvailableSeats() const;
     int getTotalCapacity() const;
     
     double getFareEconomy() const;
@@ -58,6 +61,7 @@ public:
     void setFareEconomy(double fare);
     void setFareBusiness(double fare);
     void setAirline(const std::string& airline);
+    void setAvailableSeats(int seats);
 
     // --- Đọc/Ghi file cấu hình ---
     // Chuyển đổi đối tượng thành 1 dòng string để lưu vào file.

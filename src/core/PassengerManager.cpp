@@ -58,10 +58,7 @@ Passenger* PassengerManager::createOrUpdatePassenger(
     const std::string& id,
     const std::string& fullName,
     const std::string& dateOfBirth,
-    Gender gender,
-    const std::string& phoneNumber,
-    const std::string& passportNumber,
-    const std::string& nationality)
+    const std::string& phoneNumber)
 {
     // Check if passenger already exists
     Passenger* existing = findPassengerById(id);
@@ -70,18 +67,13 @@ Passenger* PassengerManager::createOrUpdatePassenger(
         // Update existing passenger
         existing->setFullName(fullName);
         existing->setPhoneNumber(phoneNumber);
-        existing->setPassportNumber(passportNumber);
-        existing->setNationality(nationality);
         
         std::cout << "[INFO] Updated passenger " << id << std::endl;
         return existing;
     }
     
     // Create new passenger
-    Passenger* newPassenger = new Passenger(
-        id, fullName, dateOfBirth, gender, 
-        phoneNumber, passportNumber, nationality
-    );
+    Passenger* newPassenger = new Passenger( id, fullName, dateOfBirth, phoneNumber );
     
     allPassengers_.push_back(newPassenger);
     passengerIdTable_.insert(id, newPassenger);
@@ -98,17 +90,13 @@ Passenger* PassengerManager::findPassengerById(const std::string& id) {
 bool PassengerManager::updatePassenger(
     const std::string& id,
     const std::string& fullName,
-    const std::string& phoneNumber,
-    const std::string& passportNumber,
-    const std::string& nationality)
+    const std::string& phoneNumber)
 {
     Passenger* p = findPassengerById(id);
     if (!p) return false;
     
     p->setFullName(fullName);
     p->setPhoneNumber(phoneNumber);
-    p->setPassportNumber(passportNumber);
-    p->setNationality(nationality);
     
     return true;
 }

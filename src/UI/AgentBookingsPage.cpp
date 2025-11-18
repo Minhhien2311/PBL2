@@ -13,6 +13,7 @@
 #include "BookingDetailsDialog.h" // Dialog xem chi tiết
 #include "ChangeBookingDialog.h"  // Dialog đổi vé
 #include "AirportComboBox.h"
+#include "BoldItemDelegate.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -31,6 +32,24 @@
 #include <QDialog>
 #include <QGroupBox>
 #include <QTextEdit>
+
+// Helper function format tiền (giống SearchBookPage)
+namespace {
+    QString formatVietnamCurrency(int price) {
+        QString priceStr = QString::number(price);
+        QString result;
+        int count = 0;
+        for (int i = priceStr.length() - 1; i >= 0; --i) {
+            if (count == 3) {
+                result.prepend('.');
+                count = 0;
+            }
+            result.prepend(priceStr[i]);
+            count++;
+        }
+        return result + " VNĐ";
+    }
+}
 
 // <--- CẬP NHẬT CONSTRUCTOR: Nhận cả 3 manager
 AgentBookingsPage::AgentBookingsPage(BookingManager* bkManager,
@@ -67,8 +86,6 @@ void AgentBookingsPage::setupUi()
         "QPushButton.SearchBtn { background:#4478BD; color:white; border-radius:6px; "
         "height:24px; font-weight:600; }"
         "QTableView { background:white; border:0px; }"
-        "QTableView::item:hover { background-color:#EAF2F8; color:#123B7A; }"
-        "QTableView::item:selected { background-color:#4478BD; color:white; font-weight:600; }"
         "QHeaderView::section { background:#d5e2f2; padding:6px; border:1px solid #c2cfe2; }"
         "tableTitle { font-size: 18px; font-weight: 600; }"
     );
@@ -192,7 +209,7 @@ void AgentBookingsPage::setupUi()
     // ================== TIÊU ĐỀ BẢNG + STATUS ==================
     auto *tableHeader = new QWidget(this);
     auto *thLayout = new QHBoxLayout(tableHeader);
-    thLayout->setContentsMargins(24, 0, 24, 0);
+    thLayout->setContentsMargins(24, 0, 18, 0);
     thLayout->setSpacing(10);
 
     auto *tblTitle = new QLabel("📋 Kết quả tìm kiếm", this);
@@ -212,22 +229,24 @@ void AgentBookingsPage::setupUi()
     // ================== BẢNG ==================
     auto *tableBox = new QWidget(this);
     auto *tblWrap = new QVBoxLayout(tableBox);
-    tblWrap->setContentsMargins(24, 6, 24, 0);
+    tblWrap->setContentsMargins(24, 6, 18, 0);
 
     tableView_ = new QTableView(this);
+    tableView_->setItemDelegate(new BoldItemDelegate(this));
+    
+    // --- CẤU HÌNH GIAO DIỆN BẢNG ---
     tableView_->setSelectionBehavior(QAbstractItemView::SelectRows);
     tableView_->setSelectionMode(QAbstractItemView::SingleSelection);
     tableView_->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    tableView_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    tableView_->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    tableView_->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    
+    tableView_->verticalHeader()->setVisible(false); // Tắt header dọc mặc định (số 1,2,3 xấu của Qt)
+    tableView_->setAlternatingRowColors(true);       // Màu dòng xen kẽ
+    tableView_->setShowGrid(false);                  // Tắt lưới mặc định
 
-
-    // bật STT giống dashboard/routes
-    tableView_->verticalHeader()->setVisible(true);
-    tableView_->verticalHeader()->setMinimumWidth(32);
-    tableView_->verticalHeader()->setDefaultSectionSize(30);
-
+    // --- XỬ LÝ SCROLLBAR TRIỆT ĐỂ (Giống SearchBookPage) ---
+    tableView_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff); // Cấm thanh ngang
+    tableView_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);    // Thanh dọc tự động
+    
     tblWrap->addWidget(tableView_);
     mainLayout->addWidget(tableBox, 1);
 
@@ -263,12 +282,36 @@ void AgentBookingsPage::setupUi()
 
 void AgentBookingsPage::setupModel()
 {
-    model_ = new QStandardItemModel(0, 7, this);
+    // Tăng lên 8 cột (Thêm STT vào đầu)
+    model_ = new QStandardItemModel(0, 8, this);
+    
     model_->setHorizontalHeaderLabels({
-        "Mã Đặt chỗ", "Mã Chuyến", "CCCD hành khách", 
-        "Ngày giờ đặt", "Hạng vé", "Giá vé", "Trạng thái"
+        "STT",              // Cột 0
+        "Mã Đặt chỗ",       // Cột 1
+        "Mã Chuyến",        // Cột 2
+        "CCCD Khách",       // Cột 3
+        "Ngày giờ đặt",     // Cột 4
+        "Hạng vé",          // Cột 5
+        "Giá vé",           // Cột 6
+        "Trạng thái"        // Cột 7
     });
+
     tableView_->setModel(model_);
+
+    // --- CẤU HÌNH HEADER (Logic co giãn) ---
+    QHeaderView *header = tableView_->horizontalHeader();
+
+    // 1. Mặc định tất cả co theo nội dung chữ
+    header->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+    // 2. Chọn Cột làm LÒ XO (Stretch)
+    // Ở đây ta chọn cột "Ngày giờ đặt" (Cột 4) hoặc "Mã Đặt chỗ" (Cột 1) để giãn ra
+    // Chọn Cột 4 (Ngày giờ đặt) làm lò xo nhìn sẽ cân đối nhất
+    header->setSectionResizeMode(QHeaderView::Stretch);
+
+    // 3. Cố định cột STT (Cột 0) không cho giãn
+    header->setSectionResizeMode(0, QHeaderView::Fixed);
+    tableView_->setColumnWidth(0, 50);
 }
 
 void AgentBookingsPage::setupConnections()
@@ -301,35 +344,9 @@ void AgentBookingsPage::refreshTable()
     std::vector<Booking*> agentBookings = bookingManager_->getBookingsByAgentId(currentAgentId);
 
     // 3. Hiển thị các booking
-    for (int i = 0; i < agentBookings.size(); ++i) {
-        Booking* booking = agentBookings[i];
-        
-        if (booking) {
-            QList<QStandardItem *> rowItems;
-            rowItems << new QStandardItem(QString::fromStdString(booking->getBookingId()));
-            rowItems << new QStandardItem(QString::fromStdString(booking->getFlightId()));
-            rowItems << new QStandardItem(QString::fromStdString(booking->getPassengerId()));
-            rowItems << new QStandardItem(QString::fromStdString(booking->getBookingDate()));
-
-            // Hạng vé
-            QString classStr = (booking->getClass() == BookingClass::Economy) 
-                              ? "Hạng phổ thông" : "Thương gia";
-            rowItems << new QStandardItem(classStr);
-            rowItems << new QStandardItem(QString::number(booking->getBaseFare()));
-
-            // Trạng thái
-            QString statusStr;
-            if (booking->getStatus() == BookingStatus::Issued) {
-                statusStr = "Đang giữ chỗ";
-            } else if (booking->getStatus() == BookingStatus::Cancelled) {
-                statusStr = "Đã hủy";
-            } else {
-                statusStr = "Đã đổi";
-            }
-            rowItems << new QStandardItem(statusStr);
-
-            model_->appendRow(rowItems);
-        }
+    // Hiển thị
+    for (Booking* booking : agentBookings) {
+        displayBooking(booking);
     }
 
     statusLabel_->setText(
@@ -478,19 +495,35 @@ void AgentBookingsPage::displayBooking(Booking* booking)
 {
     if (!booking) return;
     
+    // Tính số thứ tự dựa trên số dòng hiện có
+    int stt = model_->rowCount() + 1;
+
     QList<QStandardItem*> rowItems;
+    
+    // 0. STT
+    rowItems << new QStandardItem(QString::number(stt));
+    
+    // 1. Mã Đặt chỗ
     rowItems << new QStandardItem(QString::fromStdString(booking->getBookingId()));
+    
+    // 2. Mã Chuyến
     rowItems << new QStandardItem(QString::fromStdString(booking->getFlightId()));
+    
+    // 3. CCCD
     rowItems << new QStandardItem(QString::fromStdString(booking->getPassengerId()));
+    
+    // 4. Ngày giờ đặt
     rowItems << new QStandardItem(QString::fromStdString(booking->getBookingDate()));
     
-    // Hạng vé
+    // 5. Hạng vé
     QString classStr = (booking->getClass() == BookingClass::Economy) 
-                      ? "Hạng phổ thông" : "Thương gia";
+                      ? "Phổ thông" : "Thương gia";
     rowItems << new QStandardItem(classStr);
-    rowItems << new QStandardItem(QString::number(booking->getBaseFare()));
     
-    // Trạng thái
+    // 6. Giá vé (Format đẹp)
+    rowItems << new QStandardItem(formatVietnamCurrency(booking->getBaseFare()));
+
+    // 7. Trạng thái
     QString statusStr;
     if (booking->getStatus() == BookingStatus::Issued) {
         statusStr = "Đang giữ chỗ";
@@ -500,6 +533,11 @@ void AgentBookingsPage::displayBooking(Booking* booking)
         statusStr = "Đã đổi";
     }
     rowItems << new QStandardItem(statusStr);
+    
+    // CANH GIỮA TẤT CẢ
+    for (QStandardItem *item : rowItems) {
+        item->setTextAlignment(Qt::AlignCenter);
+    }
     
     model_->appendRow(rowItems);
 }

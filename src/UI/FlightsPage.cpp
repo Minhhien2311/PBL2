@@ -6,6 +6,7 @@
 #include "utils/Helpers.h"
 #include "FlightDialog.h"
 #include "AirportComboBox.h"
+#include "BoldItemDelegate.h"
 #include <string>
 
 #include <QComboBox>
@@ -21,6 +22,26 @@
 #include <QMessageBox>
 #include <QDateEdit> 
 #include <QCalendarWidget> 
+
+// Helper function để format tiền tệ Việt Nam
+namespace {
+    QString formatVietnamCurrency(int price) {
+        QString priceStr = QString::number(price);
+        QString result;
+        int count = 0;
+        
+        for (int i = priceStr.length() - 1; i >= 0; --i) {
+            if (count == 3) {
+                result.prepend('.');
+                count = 0;
+            }
+            result.prepend(priceStr[i]);
+            count++;
+        }
+        
+        return result + " VNĐ";
+    }
+}
 
 // (Hàm helper này có thể được chuyển ra 1 file util chung)
 QWidget* createSearchGroup_Flights(const QString& title, QLineEdit*& edit, QPushButton*& button, const QString& buttonText)
@@ -64,8 +85,6 @@ void FlightsPage::setupUi()
         "QDateEdit { background:white; border:1px solid #608bc1; border-radius:4px; height:26px; padding-left:6px; }"
         "QPushButton.SearchBtn { background:#4478BD; color:white; border-radius:6px; height:24px; font-weight:600; }"
         "QTableView { background:white; border:0px solid #d4dce5; }"
-        "QTableView::item:hover { background-color:#EAF2F8; color:#123B7A; }"
-        "QTableView::item:selected { background-color:#4478BD; color:white; font-weight:600; }"
         "QHeaderView::section { background:#d5e2f2; padding:6px; border:1px solid #c2cfe2; }"
         "TableTitle { font-size: 18px; }"
     );
@@ -272,28 +291,29 @@ void FlightsPage::setupUi()
     mainLayout->addWidget(tableHeader);
 
     // ========== BẢNG ==========
+    QWidget *tableBox = new QWidget(this);
+    QVBoxLayout *tblWrap = new QVBoxLayout(tableBox);
+    tblWrap->setContentsMargins(24, 6, 24, 0);
+
     tableView_ = new QTableView(this);
+    tableView_->setItemDelegate(new BoldItemDelegate(this));
+    
+    // --- STYLE CHUẨN ---
     tableView_->setSelectionBehavior(QAbstractItemView::SelectRows);
     tableView_->setSelectionMode(QAbstractItemView::SingleSelection);
     tableView_->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    
+    tableView_->verticalHeader()->setVisible(false); // Ẩn header dọc
+    tableView_->setAlternatingRowColors(true);
+    tableView_->setShowGrid(false);
+
+    // --- TẮT SCROLLBAR NGANG ---
+    tableView_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     tableView_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    tableView_->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    tableView_->setFrameShape(QFrame::NoFrame);
 
-    // bật STT giống dashboard/routes
-    tableView_->verticalHeader()->setVisible(true);
-    tableView_->verticalHeader()->setMinimumWidth(32);
-    tableView_->verticalHeader()->setDefaultSectionSize(30);
-    tableView_->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-
-    tableView_->horizontalHeader()->setStretchLastSection(true);
-
-    // bọc để có lề 24px
-    QWidget *tableWrapper = new QWidget(this);
-    QVBoxLayout *tableWrapLayout = new QVBoxLayout(tableWrapper);
-    tableWrapLayout->setContentsMargins(24, 10, 24, 0);
-    tableWrapLayout->addWidget(tableView_);
-
-    mainLayout->addWidget(tableWrapper, 1);
+    tblWrap->addWidget(tableView_);
+    mainLayout->addWidget(tableBox, 1);
 
     // ========== CRUD BAR ==========
     QWidget *crudBar = new QWidget(this);
@@ -325,12 +345,34 @@ void FlightsPage::setupUi()
 
 void FlightsPage::setupModel()
 {
-    model_ = new QStandardItemModel(0, 8, this);
+    // Thêm STT vào đầu -> Tổng 9 cột
+    model_ = new QStandardItemModel(0, 9, this);
     model_->setHorizontalHeaderLabels({
-        "ID chuyến", "Mã tuyến", "Hãng hàng không", "Số hiệu", "Ngày khởi hành", "Giờ khởi hành",
-        "Ngày hạ cánh", "Giờ hạ cánh", "Ghế trống"
+        "STT",              // 0
+        "Mã chuyến",        // 1
+        "Mã tuyến",         // 2
+        "Hãng hàng không",  // 3 (Sẽ Stretch)
+        "Số hiệu",          // 4
+        "Ngày khởi hành",   // 5
+        "Giờ khởi hành",    // 6
+        "Ghế trống",        // 7
+        "Giá từ"            // 8
     });
     tableView_->setModel(model_);
+
+    QHeaderView *header = tableView_->horizontalHeader();
+    
+    // 1. Mặc định co gọn
+    header->setSectionResizeMode(QHeaderView::ResizeToContents);
+
+    // 2. STT cố định
+    header->setSectionResizeMode(0, QHeaderView::Fixed);
+    tableView_->setColumnWidth(0, 50);
+
+    // 3. Hãng hàng không (Cột 3) làm LÒ XO
+    header->setSectionResizeMode(3, QHeaderView::Stretch);
+    header->setSectionResizeMode(7, QHeaderView::Stretch);
+    header->setSectionResizeMode(8, QHeaderView::Stretch);
 }
 
 void FlightsPage::setupConnections()
@@ -348,7 +390,6 @@ void FlightsPage::setupConnections()
 void FlightsPage::refreshTable()
 {
     model_->removeRows(0, model_->rowCount());
-
     const std::vector<Flight*>& flights = flightManager_->getAllFlights();
     SeatManager* seatManager = flightManager_->getSeatManager();
     
@@ -356,22 +397,43 @@ void FlightsPage::refreshTable()
         Flight* flight = flights[i];
         if (flight) { 
             seatManager->loadSeatMapFor(flight);
-            int availableSeats = seatManager->getAvailableSeats();
             
+            QString priceFormatted = formatVietnamCurrency(flight->getFareEconomy());
+
             QList<QStandardItem *> rowItems;
-            rowItems << new QStandardItem(QString::fromStdString(flight->getFlightId()))
-                   << new QStandardItem(QString::fromStdString(flight->getRouteId()))
-                   << new QStandardItem(QString::fromStdString(flight->getAirline()))
-                   << new QStandardItem(QString::fromStdString(flight->getFlightNumber()))
-                   << new QStandardItem(QString::fromStdString(flight->getDepartureDate()))
-                   << new QStandardItem(QString::fromStdString(flight->getDepartureTime()))
-                   << new QStandardItem(QString::fromStdString(flight->getArrivalDate()))
-                   << new QStandardItem(QString::fromStdString(flight->getArrivalTime()))
-                   << new QStandardItem(QString::number(availableSeats) + " / " + QString::number(flight->getTotalCapacity()));
+            
+            // 0. STT
+            rowItems << new QStandardItem(QString::number(i + 1));
+            
+            // 1. ID Chuyến
+            rowItems << new QStandardItem(QString::fromStdString(flight->getFlightId()));
+            
+            // 2. Mã tuyến
+            rowItems << new QStandardItem(QString::fromStdString(flight->getRouteId()));
+            
+            // 3. Hãng hàng không
+            rowItems << new QStandardItem(QString::fromStdString(flight->getAirline()));
+            
+            // 4. Số hiệu
+            rowItems << new QStandardItem(QString::fromStdString(flight->getFlightNumber()));
+            
+            // 5,6. Khởi hành
+            rowItems << new QStandardItem(QString::fromStdString(flight->getDepartureDate()));
+            rowItems << new QStandardItem(QString::fromStdString(flight->getDepartureTime()));
+            
+            // 7. Ghế
+            int available = seatManager->getAvailableSeats();
+            rowItems << new QStandardItem(QString::number(available) + " / " + QString::number(flight->getTotalCapacity()));
+
+            // 8. Giá vé
+            rowItems << new QStandardItem(priceFormatted);
+            
+            // Canh giữa
+            for (auto* item : rowItems) item->setTextAlignment(Qt::AlignCenter);
+
             model_->appendRow(rowItems);
         }
     }
-    
     statusLabel_->setText(QString("Hiển thị tất cả %1 chuyến bay").arg(flights.size()));
 }
 
@@ -401,6 +463,7 @@ void FlightsPage::onAddFlight()
             depTime.toStdString() + ":00",  // Thêm giây
             arrDate.toStdString(),
             arrTime.toStdString() + ":00",
+            totalCapacity,  // Giả sử lúc tạo mới, availableSeats = totalCapacity
             totalCapacity,
             fareEconomy,
             fareBusiness
@@ -448,11 +511,17 @@ void FlightsPage::onEditFlight()
     }
 
     int row = selected.first().row();
-    QString flightId = model_->item(row, 0)->text();
+    QString flightId = model_->item(row, 1)->text();
     
     Flight* flight = flightManager_->findFlightById(flightId.toStdString());
     if (!flight) {
         QMessageBox::critical(this, "Lỗi", "Không tìm thấy chuyến bay.");
+        return;
+    }
+
+    if (flight->getAvailableSeats() < flight->getTotalCapacity()) {
+        QMessageBox::warning(this, "Sửa chuyến bay không khả dụng", 
+            "Chuyến bay đã có hành khách đặt chỗ.");
         return;
     }
     
@@ -469,6 +538,7 @@ void FlightsPage::onEditFlight()
                        QString::fromStdString(flight->getDepartureTime()),
                        QString::fromStdString(flight->getArrivalDate()),
                        QString::fromStdString(flight->getArrivalTime()),
+                       flight->getAvailableSeats(),
                        flight->getTotalCapacity(),
                        flight->getFareEconomy(),
                        flight->getFareBusiness(),
@@ -484,6 +554,7 @@ void FlightsPage::onEditFlight()
             (dialog.getDepartureTime() + ":00").toStdString(),
             dialog.getArrivalDate().toStdString(),
             (dialog.getArrivalTime() + ":00").toStdString(),
+            dialog.getAvailableSeats(),
             dialog.getTotalCapacity(),
             dialog.getFareEconomy(),
             dialog.getFareBusiness()
@@ -511,7 +582,7 @@ void FlightsPage::onDeleteFlight()
         return;
     }
 
-    QString flightId = model_->item(selected.first().row(), 0)->text();
+    QString flightId = model_->item(selected.first().row(), 1)->text();
 
     auto reply = QMessageBox::question(this, "⚠️ Xác nhận xóa chuyến bay", 
         QString("Bạn có chắc chắn muốn xóa chuyến bay <b>%1</b>?<br><br>"
@@ -549,26 +620,56 @@ void FlightsPage::onSearchById()
     Flight* flight = flightManager_->findFlightById(flightId.toStdString());
     
     if (!flight) {
-        statusLabel_->setText(QString("Không tìm thấy chuyến bay mã <b>%1</b>").arg(flightId));
+        // Xóa bảng nếu không tìm thấy
+        model_->removeRows(0, model_->rowCount());
+        statusLabel_->setText(QString("❌ Không tìm thấy chuyến bay mã <b>%1</b>").arg(flightId));
         return;
     }
 
+    // Reset bảng
     model_->removeRows(0, model_->rowCount());
     
     SeatManager* seatManager = flightManager_->getSeatManager();
     seatManager->loadSeatMapFor(flight);
     int availableSeats = seatManager->getAvailableSeats();
+    QString priceFormatted = formatVietnamCurrency(flight->getFareEconomy());
     
     QList<QStandardItem*> rowItems;
-    rowItems << new QStandardItem(QString::fromStdString(flight->getFlightId()))
-           << new QStandardItem(QString::fromStdString(flight->getAirline()))
-           << new QStandardItem(QString::fromStdString(flight->getFlightNumber()))
-           << new QStandardItem(QString::fromStdString(flightManager_->findFlightById(flight->getFlightId())->getAirline()))
-           << new QStandardItem(QString::fromStdString(flight->getDepartureDate()))
-           << new QStandardItem(QString::fromStdString(flight->getDepartureTime()))
-           << new QStandardItem(QString::fromStdString(flight->getArrivalDate()))
-           << new QStandardItem(QString::fromStdString(flight->getArrivalTime()))
-           << new QStandardItem(QString::number(availableSeats) + " / " + QString::number(flight->getTotalCapacity()));
+    
+    // --- BẮT ĐẦU KHỚP CỘT VỚI SETUPMODEL ---
+    
+    // 0. STT (Vì tìm theo ID chỉ ra 1 kết quả nên STT luôn là 1)
+    rowItems << new QStandardItem("1");
+
+    // 1. ID Chuyến
+    rowItems << new QStandardItem(QString::fromStdString(flight->getFlightId()));
+    
+    // 2. Mã tuyến
+    rowItems << new QStandardItem(QString::fromStdString(flight->getRouteId()));
+    
+    // 3. Hãng hàng không (Cột này sẽ Stretch)
+    rowItems << new QStandardItem(QString::fromStdString(flight->getAirline()));
+    
+    // 4. Số hiệu
+    rowItems << new QStandardItem(QString::fromStdString(flight->getFlightNumber()));
+    
+    // 5. Ngày khởi hành
+    rowItems << new QStandardItem(QString::fromStdString(flight->getDepartureDate()));
+    
+    // 6. Giờ khởi hành
+    rowItems << new QStandardItem(QString::fromStdString(flight->getDepartureTime()));
+    
+    // 7. Ghế trống
+    rowItems << new QStandardItem(QString::number(availableSeats) + " / " + QString::number(flight->getTotalCapacity()));
+
+    // 8. Giá vé
+    rowItems << new QStandardItem(priceFormatted);
+
+    // --- CANH GIỮA TOÀN BỘ ---
+    for (QStandardItem *item : rowItems) {
+        item->setTextAlignment(Qt::AlignCenter);
+    }
+
     model_->appendRow(rowItems);
 
     statusLabel_->setText(QString("✅ Tìm thấy 1 chuyến bay với mã <b>%1</b>").arg(flightId));
@@ -578,6 +679,7 @@ void FlightsPage::onSearchFilter()
 {
     FlightManager::SearchCriteria criteria;
     
+    // Lấy dữ liệu từ UI
     criteria.fromIATA = fromSearchCombo_->getSelectedIATA();
     criteria.toIATA = toSearchCombo_->getSelectedIATA();
     
@@ -587,43 +689,78 @@ void FlightsPage::onSearchFilter()
         return;
     }
     
+    // Lấy ngày (nếu user chọn)
     QDate selectedDate = dateSearchEdit_->date();
+    // Kiểm tra nếu ngày hợp lệ và không phải ngày quá khứ mặc định
     if (selectedDate.isValid() && selectedDate > QDate::currentDate().addDays(-1)) {
         criteria.date = selectedDate.toString("dd/MM/yyyy").toStdString();
     }
     
+    // Lấy hãng bay
     if (airlineFilterCombo_->currentIndex() > 0) {
         criteria.airline = airlineFilterCombo_->currentData().toString().toStdString();
     }
     
+    // Gọi Manager tìm kiếm
     auto results = flightManager_->searchFlights(criteria);
     
+    // Xóa dữ liệu cũ
     model_->removeRows(0, model_->rowCount());
     
     SeatManager* seatManager = flightManager_->getSeatManager();
     
+    // Biến đếm số thứ tự
+    int stt = 1;
+
     for (Flight* inst : results) {
         if (inst) {
             seatManager->loadSeatMapFor(inst);
             int availableSeats = seatManager->getAvailableSeats();
+            QString priceFormatted = formatVietnamCurrency(inst->getFareEconomy());
             
             QList<QStandardItem*> rowItems;
-            rowItems << new QStandardItem(QString::fromStdString(inst->getFlightId()))
-                   << new QStandardItem(QString::fromStdString(inst->getAirline()))
-                   << new QStandardItem(QString::fromStdString(inst->getFlightNumber()))
-                   << new QStandardItem(QString::fromStdString(inst->getDepartureDate()))
-                   << new QStandardItem(QString::fromStdString(inst->getDepartureTime()))
-                   << new QStandardItem(QString::fromStdString(inst->getArrivalDate()))
-                   << new QStandardItem(QString::fromStdString(inst->getArrivalTime()))
-                   << new QStandardItem(QString::number(availableSeats) + " / " + QString::number(inst->getTotalCapacity()));
+            
+            // --- BẮT ĐẦU KHỚP CỘT ---
+            
+            // 0. STT (Tăng dần)
+            rowItems << new QStandardItem(QString::number(stt++));
+            
+            // 1. ID
+            rowItems << new QStandardItem(QString::fromStdString(inst->getFlightId()));
+            
+            // 2. Mã tuyến
+            rowItems << new QStandardItem(QString::fromStdString(inst->getRouteId()));
+            
+            // 3. Hãng
+            rowItems << new QStandardItem(QString::fromStdString(inst->getAirline()));
+            
+            // 4. Số hiệu
+            rowItems << new QStandardItem(QString::fromStdString(inst->getFlightNumber()));
+            
+            // 5. Ngày đi
+            rowItems << new QStandardItem(QString::fromStdString(inst->getDepartureDate()));
+            
+            // 6. Giờ đi
+            rowItems << new QStandardItem(QString::fromStdString(inst->getDepartureTime()));
+            
+            // 7. Ghế
+            rowItems << new QStandardItem(QString::number(availableSeats) + " / " + QString::number(inst->getTotalCapacity()));
+
+            // 8. Giá vé
+            rowItems << new QStandardItem(priceFormatted);
+            
+            // --- CANH GIỮA ---
+            for (QStandardItem *item : rowItems) {
+                item->setTextAlignment(Qt::AlignCenter);
+            }
+
             model_->appendRow(rowItems);
         }
     }
     
-    statusLabel_->setText(QString("🔍 Tìm thấy %1 chuyến bay").arg(results.size()));
-    
+    // Cập nhật nhãn trạng thái
     if (results.empty()) {
-        statusLabel_->setText("Không tìm thấy chuyến bay phù hợp với các tiêu chí đã chọn.");
+        statusLabel_->setText("❌ Không tìm thấy chuyến bay phù hợp.");
     } else {
         statusLabel_->setText(QString("✅ Tìm thấy %1 chuyến bay phù hợp.").arg(results.size()));
     }

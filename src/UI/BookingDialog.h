@@ -33,8 +33,8 @@ public:
     // Lấy thông tin đã nhập
     QString getPassengerId() const;
     QString getPassengerName() const;
+    QString getDateOfBirth() const;
     QString getPassengerPhone() const;
-    QString getPassportNumber() const;
     BookingClass getSelectedClass() const;
     QString getSelectedSeatId() const;
 
@@ -51,8 +51,8 @@ private:
     // Form fields
     QLineEdit* passengerIdEdit_;      // CCCD/ID
     QLineEdit* passengerNameEdit_;    // Họ tên
+    QLineEdit* dateOfBirthEdit_;       // Ngày sinh
     QLineEdit* passengerPhoneEdit_;   // Số điện thoại
-    QLineEdit* passportNumberEdit_;   // Số hộ chiếu
     QRadioButton* economyRadio_;
     QRadioButton* businessRadio_;
     

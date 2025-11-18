@@ -3,22 +3,12 @@
 
 #include <string>
 
-enum class Gender {
-    Male,
-    Female
-};
-
 class Passenger {
 private:
     std::string id;             // Mã định danh
     std::string fullName;       // Họ tên đầy đủ
     std::string dateOfBirth;    // Khuyến nghị: "yyyy-mm-dd"
-    Gender      gender;         // Giới tính (enum class)
     std::string phoneNumber;    // Số điện thoại liên hệ
-
-    std::string passportNumber; // Số hộ chiếu (nếu là nội địa có thể để trống/CCCD)
-    std::string nationality;    // Quốc tịch
-
 public:
     // Không cho phép tạo đối tượng rỗng.
     Passenger() = delete;
@@ -26,10 +16,7 @@ public:
     Passenger(const std::string& id,
               const std::string& name,
               const std::string& dob,
-              Gender gender,
-              const std::string& phone,
-              const std::string& passport,
-              const std::string& nation);
+              const std::string& phone);
 
     // Destructor mặc định là đủ dùng vì lớp không quản lý tài nguyên động.
     ~Passenger() = default;
@@ -38,7 +25,6 @@ public:
     const std::string& getId()            const;
     const std::string& getFullName()      const;
     const std::string& getDateOfBirth()   const;
-    Gender             getGender()        const; // enum trả theo giá trị
     const std::string& getPhoneNumber()   const;
     const std::string& getPassportNumber()const;
     const std::string& getNationality()   const;
@@ -47,8 +33,6 @@ public:
     // Cho phép cập nhật thông tin hành khách nếu có sai sót khi nhập liệu.
     void setFullName(const std::string& name);
     void setPhoneNumber(const std::string& phone);
-    void setPassportNumber(const std::string& passport);
-    void setNationality(const std::string& nation);
     
     // --- Đọc/Ghi file ---
     // Chuyển đổi đối tượng thành 1 dòng string để lưu vào file.

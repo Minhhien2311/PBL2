@@ -38,6 +38,7 @@ public:
                 const QString& depTime,
                 const QString& arrDate,
                 const QString& arrTime,
+                int availableSeats,
                 int totalCapacity,
                 int fareEconomy,
                 int fareBusiness,
@@ -54,6 +55,7 @@ public:
     QString getArrivalDate() const;
     QString getArrivalTime() const;
     int getTotalCapacity() const;
+    int getAvailableSeats() const;
     int getFareEconomy() const;
     int getFareBusiness() const;
     QString getRouteId() const;

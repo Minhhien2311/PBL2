@@ -97,6 +97,12 @@ Booking* BookingManager::createNewBooking( FlightManager& flightManager,
     // BƯỚC 1: Kiểm tra các đầu vào cơ bản
     if (flightId.empty() || passengerId.empty() || baseFare < 0) return nullptr; // <-- Đã đổi
 
+    Flight* flight = flightManager.findFlightById(flightId);
+    if (flight->getAvailableSeats() == 0) {
+        std::cerr << "Lỗi Booking: Chuyến bay đã hết chỗ." << std::endl;
+        return nullptr;
+    }
+
     // BƯỚC 2: Kiểm tra SeatManager
     const Seat* selectedSeat = seatManager.getSelectedSeat();
     if (selectedSeat == nullptr) {
@@ -112,6 +118,8 @@ Booking* BookingManager::createNewBooking( FlightManager& flightManager,
         std::cerr << "Lỗi Booking: Không thể xác nhận ghế với SeatManager (ví dụ: lỗi file)." << std::endl;
         return nullptr; // Không tạo booking nếu không xác nhận được ghế
     }
+
+    flight->setAvailableSeats(flight->getAvailableSeats() - 1); // Cập nhật số ghế trống
 
     // BƯỚC 4: Tạo đối tượng Booking mới
     // (Bỏ qua logic cũ `instance->bookSeats(...)` vì SeatManager đã xử lý)
@@ -184,6 +192,8 @@ bool BookingManager::cancelBooking(FlightManager& flightManager, SeatManager& se
             }
         }
     }
+
+    flight->setAvailableSeats(flight->getAvailableSeats() + 1); // Cập nhật số ghế trống
     
     // Step 6: Update booking status
     booking->setStatus(BookingStatus::Cancelled);

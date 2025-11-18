@@ -13,6 +13,7 @@ Flight::Flight(const std::string& routeId, // <-- Đã đổi
                const std::string& departureTime,
                const std::string& arrivalDate,
                const std::string& arrivalTime,
+               int availableSeats,
                int totalCapacity,
                int fareEconomy,
                int fareBusiness)
@@ -24,6 +25,7 @@ Flight::Flight(const std::string& routeId, // <-- Đã đổi
       departureTime(departureTime), 
       arrivalDate(arrivalDate),     
       arrivalTime(arrivalTime),     
+      availableSeats(totalCapacity),
       totalCapacity(totalCapacity),
       fareEconomy(fareEconomy),
       fareBusiness(fareBusiness) {}
@@ -37,6 +39,9 @@ const std::string& Flight::getDepartureDate() const { return departureDate; }
 const std::string& Flight::getDepartureTime() const { return departureTime; }
 const std::string& Flight::getArrivalDate() const { return arrivalDate; }
 const std::string& Flight::getArrivalTime() const { return arrivalTime; }
+int Flight::getAvailableSeats() const {
+    return availableSeats;
+}
 
 int Flight::getTotalCapacity() const {
     return totalCapacity;
@@ -57,6 +62,10 @@ void Flight::setAirline(const std::string& airline) {
     this->airline = airline;
 }
 
+void Flight::setAvailableSeats(int seats) {
+    this->availableSeats = seats;
+}
+
 // --- Đọc/Ghi file cấu hình ---
 
 // Chuyển đổi đối tượng thành một dòng string, ngăn cách bởi dấu '|'.
@@ -69,6 +78,7 @@ std::string Flight::toRecordLine() const {
            this->departureTime + "|" + 
            this->arrivalDate + "|" +   
            this->arrivalTime + "|" +   
+           std::to_string(this->availableSeats) + "|" +
            std::to_string(this->totalCapacity) + "|" +
            std::to_string(this->fareEconomy) + "|" +
            std::to_string(this->fareBusiness);
@@ -110,8 +120,12 @@ Flight Flight::fromRecordLine(const std::string& line) {
     start = end + 1;
     end = line.find('|', start);
 
-    int totalCap = std::stoi(line.substr(start, end - start));
+    int availableSeats = std::stoi(line.substr(start, end - start));
     start = end + 1;
+    end = line.find('|', start);
+
+    int totalCapacity = std::stoi(line.substr(start, end - start));
+    start = end + 1;    
     end = line.find('|', start);
 
     double fareEco = std::stod(line.substr(start, end - start));
@@ -121,7 +135,7 @@ Flight Flight::fromRecordLine(const std::string& line) {
     double fareBus = std::stod(line.substr(start, end - start));
 
     // Dùng constructor mới
-    Flight flight(routeId, airline, flightNumber, depDate, depTime, arrDate, arrTime, totalCap, fareEco, fareBus);
+    Flight flight(routeId, airline, flightNumber, depDate, depTime, arrDate, arrTime, availableSeats, totalCapacity, fareEco, fareBus);
 
     // Ghi đè ID
     flight.overrideIdForLoad(id);

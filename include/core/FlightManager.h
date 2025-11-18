@@ -67,7 +67,8 @@ public:
                          const std::string& departureDate,  
                          const std::string& departureTime,  
                          const std::string& arrivalDate,    
-                         const std::string& arrivalTime,    
+                         const std::string& arrivalTime, 
+                         int availableSeats,
                          int totalCapacity,
                          int fareEconomy,
                          int fareBusiness);
