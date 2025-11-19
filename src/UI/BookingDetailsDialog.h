@@ -3,12 +3,14 @@
 
 #include <QDialog>
 
-class QLabel;
 class Booking;
 class FlightManager;
 class AccountManager;
+class PassengerManager;
+class QLabel;
+class QGroupBox;
+class QFrame;
 
-// Dialog hiển thị chi tiết đầy đủ của một booking
 class BookingDetailsDialog : public QDialog
 {
     Q_OBJECT
@@ -17,19 +19,23 @@ public:
     explicit BookingDetailsDialog(Booking* booking, 
                                  FlightManager* flightManager,
                                  AccountManager* accountManager,
+                                 PassengerManager* passengerManager,
                                  QWidget *parent = nullptr);
 
 private:
     void setupUi();
-    
+    QGroupBox* createBookingInfoGroup();
+    QGroupBox* createFlightInfoGroup();
+    QGroupBox* createPassengerInfoGroup();
+    QFrame* createSeparator();
+
+private:
     Booking* booking_;
     FlightManager* flightManager_;
     AccountManager* accountManager_;
+    PassengerManager* passengerManager_;
     
-    // Các label hiển thị thông tin
     QLabel* bookingIdLabel_;
-    QLabel* flightInfoLabel_;
-    QLabel* passengerInfoLabel_;
     QLabel* bookingDateLabel_;
     QLabel* classLabel_;
     QLabel* fareLabel_;

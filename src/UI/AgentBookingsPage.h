@@ -8,6 +8,7 @@ class BookingManager;
 class FlightManager;  
 class AccountManager; 
 class AirportManager;
+class PassengerManager;  // Thêm dòng này
 class QTableView;
 class QStandardItemModel;
 class QLineEdit;      
@@ -22,11 +23,12 @@ class AgentBookingsPage : public QWidget
     Q_OBJECT
 
 public:
-    // <--- CẬP NHẬT CONSTRUCTOR: Nhận thêm 2 manager
+    // Thêm PassengerManager vào constructor
     explicit AgentBookingsPage(BookingManager* bkManager,
                                FlightManager* flManager,
                                AccountManager* accManager,
                                AirportManager* airportManager,
+                               PassengerManager* passengerManager,  // Thêm tham số mới
                                QWidget *parent = nullptr);
 
 public slots:
@@ -53,6 +55,7 @@ private:
     FlightManager* flightManager_;   
     AccountManager* accountManager_; 
     AirportManager* airportManager_;
+    PassengerManager* passengerManager_;  // Thêm thành viên mới
 
     // --- UI Components ---
     QLineEdit* bookingIdSearchEdit_;   // Dòng tìm theo Mã Đặt chỗ
