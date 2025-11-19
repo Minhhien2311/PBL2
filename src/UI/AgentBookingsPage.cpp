@@ -1,6 +1,5 @@
 #include "AgentBookingsPage.h"
-
-// Includes
+#include "core/PassengerManager.h"
 #include "core/BookingManager.h"
 #include "core/FlightManager.h"
 #include "core/AccountManager.h"
@@ -10,8 +9,8 @@
 #include "entities/Account.h"
 #include "entities/Flight.h"
 #include "entities/Seat.h"
-#include "BookingDetailsDialog.h" // Dialog xem chi tiết
-#include "ChangeBookingDialog.h"  // Dialog đổi vé
+#include "BookingDetailsDialog.h"
+#include "ChangeBookingDialog.h"
 #include "AirportComboBox.h"
 #include "BoldItemDelegate.h"
 #include "PageRefresher.h"
@@ -28,7 +27,7 @@
 #include <QStandardItemModel>
 #include <QHeaderView>
 #include <QMessageBox>
-#include <QCalendarWidget> // Để set lịch popup
+#include <QCalendarWidget>
 #include <QString>
 #include <QDialog>
 #include <QGroupBox>
@@ -52,21 +51,23 @@ namespace {
     }
 }
 
-// <--- CẬP NHẬT CONSTRUCTOR: Nhận cả 3 manager
 AgentBookingsPage::AgentBookingsPage(BookingManager* bkManager,
                                      FlightManager* flManager,
                                      AccountManager* accManager,
                                      AirportManager* airportManager,
+                                     PassengerManager* passengerManager,  // Thêm tham số
                                      QWidget *parent)
     : QWidget(parent),
       bookingManager_(bkManager),
       flightManager_(flManager),
       accountManager_(accManager),
-      airportManager_(airportManager)
+      airportManager_(airportManager),
+      passengerManager_(passengerManager)  // Khởi tạo thành viên mới
 {
     Q_ASSERT(bookingManager_ != nullptr);
     Q_ASSERT(flightManager_ != nullptr);
     Q_ASSERT(accountManager_ != nullptr);
+    Q_ASSERT(passengerManager_ != nullptr);  // Thêm assert
 
     setupUi();
     setupModel();
@@ -453,8 +454,8 @@ void AgentBookingsPage::onViewDetailsClicked()
         return;
     }
     
-    // 4. Hiển thị dialog chi tiết
-    BookingDetailsDialog dialog(booking, flightManager_, accountManager_, this);
+    // 4. Hiển thị dialog chi tiết - SỬA DÒNG NÀY
+    BookingDetailsDialog dialog(booking, flightManager_, accountManager_, passengerManager_, this);
     dialog.exec();
 }
 

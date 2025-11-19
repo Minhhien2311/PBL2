@@ -172,7 +172,7 @@ AgentInterface::AgentInterface(AccountManager* accManager,
     // Create pages and store references for refreshing
     dashboardPage_ = new DashboardPage(accountManager_, reportManager_, this);
     searchBookPage_ = new SearchBookPage(flightManager_, bookingManager_, accountManager_, airportManager_, passengerManager_, this);
-    agentBookingsPage_ = new AgentBookingsPage(bookingManager_, flightManager_, accountManager_, airportManager_, this);
+    agentBookingsPage_ = new AgentBookingsPage(bookingManager_, flightManager_, accountManager_, airportManager_, passengerManager_, this);
     ticketsReportPage_ = new AgentTicketsReportPage(accountManager_, bookingManager_, reportManager_, this);
     revenueReportPage_ = new AgentRevenueReportPage(accountManager_, bookingManager_, reportManager_, this);
     

@@ -2,13 +2,16 @@
 #define BOOKINGDETAILSDIALOG_H
 
 #include <QDialog>
+#include <QLayout>
 
-class QLabel;
 class Booking;
 class FlightManager;
 class AccountManager;
+class PassengerManager;
+class QLabel;
+class QFrame;
+class QGridLayout;
 
-// Dialog hiển thị chi tiết đầy đủ của một booking
 class BookingDetailsDialog : public QDialog
 {
     Q_OBJECT
@@ -17,23 +20,26 @@ public:
     explicit BookingDetailsDialog(Booking* booking, 
                                  FlightManager* flightManager,
                                  AccountManager* accountManager,
+                                 PassengerManager* passengerManager,
                                  QWidget *parent = nullptr);
 
 private:
     void setupUi();
-    
+    QFrame* createInfoFrame(const QString& title, QLayout* contentLayout);
+    QGridLayout* createBookingInfoLayout();
+    QGridLayout* createFlightInfoLayout();
+    QGridLayout* createPassengerInfoLayout();
+    void addInfoRow(QGridLayout* layout, int row, 
+                   const QString& labelText, 
+                   const QString& valueText, 
+                   bool valueBold = false,
+                   const QString& valueColor = "");
+
+private:
     Booking* booking_;
     FlightManager* flightManager_;
     AccountManager* accountManager_;
-    
-    // Các label hiển thị thông tin
-    QLabel* bookingIdLabel_;
-    QLabel* flightInfoLabel_;
-    QLabel* passengerInfoLabel_;
-    QLabel* bookingDateLabel_;
-    QLabel* classLabel_;
-    QLabel* fareLabel_;
-    QLabel* statusLabel_;
+    PassengerManager* passengerManager_;
 };
 
 #endif // BOOKINGDETAILSDIALOG_H
