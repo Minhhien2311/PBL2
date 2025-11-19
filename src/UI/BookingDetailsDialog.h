@@ -2,14 +2,15 @@
 #define BOOKINGDETAILSDIALOG_H
 
 #include <QDialog>
+#include <QLayout>
 
 class Booking;
 class FlightManager;
 class AccountManager;
 class PassengerManager;
 class QLabel;
-class QGroupBox;
 class QFrame;
+class QGridLayout;
 
 class BookingDetailsDialog : public QDialog
 {
@@ -24,22 +25,21 @@ public:
 
 private:
     void setupUi();
-    QGroupBox* createBookingInfoGroup();
-    QGroupBox* createFlightInfoGroup();
-    QGroupBox* createPassengerInfoGroup();
-    QFrame* createSeparator();
+    QFrame* createInfoFrame(const QString& title, QLayout* contentLayout);
+    QGridLayout* createBookingInfoLayout();
+    QGridLayout* createFlightInfoLayout();
+    QGridLayout* createPassengerInfoLayout();
+    void addInfoRow(QGridLayout* layout, int row, 
+                   const QString& labelText, 
+                   const QString& valueText, 
+                   bool valueBold = false,
+                   const QString& valueColor = "");
 
 private:
     Booking* booking_;
     FlightManager* flightManager_;
     AccountManager* accountManager_;
     PassengerManager* passengerManager_;
-    
-    QLabel* bookingIdLabel_;
-    QLabel* bookingDateLabel_;
-    QLabel* classLabel_;
-    QLabel* fareLabel_;
-    QLabel* statusLabel_;
 };
 
 #endif // BOOKINGDETAILSDIALOG_H
