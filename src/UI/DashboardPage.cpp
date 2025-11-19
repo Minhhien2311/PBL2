@@ -2,6 +2,7 @@
 #include "core/AccountManager.h"
 #include "core/ReportManager.h"
 #include "entities/Account.h"
+#include "PageRefresher.h"
 
 #include <QLabel>
 #include <QTableView>
@@ -51,6 +52,16 @@ void DashboardPage::setupUi()
     title->setObjectName("DashboardTitle");
     title->setProperty("class", "SectionTitle");
     topBarLayout->addWidget(title);
+
+    // THÊM nút refresh
+    QPushButton* refreshBtn = PageRefresher::createRefreshButton(topBar);
+    connect(refreshBtn, &QPushButton::clicked, this, &DashboardPage::refreshPage);
+
+    QHBoxLayout* titleRow = new QHBoxLayout();
+    titleRow->addWidget(title);
+    titleRow->addStretch();
+    titleRow->addWidget(refreshBtn);
+    topBarLayout->addLayout(titleRow);
 
     // 4 card nằm ngang, sát nhau
     QHBoxLayout *statsLayout = new QHBoxLayout();
@@ -329,10 +340,8 @@ void DashboardPage::refreshData()
     // --- [HẾT CHỖ NỐI API] ---
 }
 
-/**
- * @brief Refresh page when shown or when user changes
- */
 void DashboardPage::refreshPage() {
-    // Call existing refreshData() to reload stats for current user
-    refreshData();
+    PageRefresher::executeRefresh([this]() {
+        refreshData();
+    });
 }

@@ -12,6 +12,7 @@
 #include "AirportComboBox.h"
 #include "utils/Helpers.h"
 #include "BoldItemDelegate.h"
+#include "PageRefresher.h"
 #include <string>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -453,7 +454,7 @@ void SearchBookPage::onBookClicked()
     }
 
     // Lấy flightId từ cột 0
-    QString flightId = model_->itemFromIndex(selected.first().siblingAtColumn(0))->text();
+    QString flightId = model_->itemFromIndex(selected.first().siblingAtColumn(1))->text();
     
     // Lấy thông tin chuyến bay
     Flight* flight = flightManager_->findFlightById(flightId.toStdString());
@@ -490,14 +491,8 @@ void SearchBookPage::loadAllFlights()
 }
 
 void SearchBookPage::refreshPage() {
-    // Clear all search filters
-    fromSearchCombo_->setCurrentIndex(0);
-    toSearchCombo_->setCurrentIndex(0);
-    dateSearchEdit_->clear();
-    airlineFilterCombo_->setCurrentIndex(0);
-    priceMinEdit_->clear();
-    priceMaxEdit_->clear();
-    
-    // ← SỬA: Load tất cả chuyến bay thay vì xóa bảng
-    loadAllFlights();
+    PageRefresher::clearSearchFields(this);
+    PageRefresher::executeRefresh([this]() {
+        loadAllFlights();
+    });
 }

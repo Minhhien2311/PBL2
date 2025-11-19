@@ -2,6 +2,7 @@
 #define DASHBOARDPAGE_H
 
 #include <QWidget>
+#include <QPushButton>
 
 class QTableView;
 class QStandardItemModel;
@@ -37,6 +38,7 @@ private:
 
     QTableView *flightsTable_;
     QStandardItemModel *flightsModel_;
+    QPushButton* refreshBtn_;
 };
 
 #endif // DASHBOARDPAGE_H

@@ -7,6 +7,7 @@
 #include "FlightDialog.h"
 #include "AirportComboBox.h"
 #include "BoldItemDelegate.h"
+#include "PageRefresher.h"
 #include <string>
 
 #include <QComboBox>
@@ -435,6 +436,13 @@ void FlightsPage::refreshTable()
         }
     }
     statusLabel_->setText(QString("Hiển thị tất cả %1 chuyến bay").arg(flights.size()));
+}
+
+void FlightsPage::refreshPage() {
+    PageRefresher::clearSearchFields(this);
+    PageRefresher::executeRefresh([this]() {
+        refreshTable();
+    });
 }
 
 // === XỬ LÝ CRUD ===

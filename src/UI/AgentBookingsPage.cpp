@@ -14,6 +14,7 @@
 #include "ChangeBookingDialog.h"  // Dialog đổi vé
 #include "AirportComboBox.h"
 #include "BoldItemDelegate.h"
+#include "PageRefresher.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -366,8 +367,8 @@ void AgentBookingsPage::onCancelBookingClicked()
     // Lấy Booking ID (cột 0) và Trạng thái (cột 6)
     // Note: Column indices match setupModel() header order:
     // 0=Mã Đặt chỗ, 1=Mã Chuyến, 2=Mã hành khách, 3=Ngày đặt, 4=Hạng vé, 5=Giá vé, 6=Trạng thái
-    QModelIndex idIndex = selected.first().siblingAtColumn(0);
-    QModelIndex statusIndex = selected.first().siblingAtColumn(6);  // Status column
+    QModelIndex idIndex = selected.first().siblingAtColumn(1);
+    QModelIndex statusIndex = selected.first().siblingAtColumn(7);  // Status column
     
     QString bookingId = model_->data(idIndex).toString();
     QString status = model_->data(statusIndex).toString();
@@ -441,7 +442,7 @@ void AgentBookingsPage::onViewDetailsClicked()
     }
     
     // 2. Lấy Booking ID từ cột đầu tiên
-    QModelIndex idIndex = selected.first().siblingAtColumn(0);
+    QModelIndex idIndex = selected.first().siblingAtColumn(1);
     QString bookingId = model_->data(idIndex).toString();
     
     // 3. Tìm booking từ BookingManager
@@ -467,8 +468,8 @@ void AgentBookingsPage::onChangeBookingClicked()
     }
     
     // Get Booking ID and Status
-    QString bookingId = model_->data(selected.first().siblingAtColumn(0)).toString();
-    QString status = model_->data(selected.first().siblingAtColumn(6)).toString();
+    QString bookingId = model_->data(selected.first().siblingAtColumn(1)).toString();
+    QString status = model_->data(selected.first().siblingAtColumn(7)).toString();
     
     // 2. Validate status is Issued
     if (status != "Đang giữ chỗ") {
@@ -648,10 +649,8 @@ void AgentBookingsPage::onSearchByPassengerId()
 }
 
 void AgentBookingsPage::refreshPage() {
-    // Clear search fields
-    bookingIdSearchEdit_->clear();
-    passengerIdSearchEdit_->clear();
-    
-    // Reload table with current user's bookings
-    refreshTable();
+    PageRefresher::clearSearchFields(this);
+    PageRefresher::executeRefresh([this]() {
+        refreshTable();
+    });
 }

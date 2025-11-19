@@ -3,6 +3,7 @@
 #include "core/AccountManager.h"
 #include "core/BookingManager.h"
 #include "entities/Booking.h"
+#include "PageRefresher.h"
 
 #include <QDate>
 #include <QDateTime>
@@ -135,7 +136,7 @@ void AgentRevenueReportPage::setupUI()
     
     mainLayout->addWidget(chartContainer, 1);
 
-    connect(refreshBtn, &QPushButton::clicked, this, &AgentRevenueReportPage::updateData);
+    connect(refreshBtn, &QPushButton::clicked, this, &AgentRevenueReportPage::refreshPage);
 }
 
 QFrame* AgentRevenueReportPage::createRevenueBox(const QString& title, const QString& value)
@@ -321,11 +322,14 @@ void AgentRevenueReportPage::updateChart()
     chartView_->update();
 }
 
+void AgentRevenueReportPage::refreshPage() {
+    PageRefresher::executeRefresh([this]() {
+        updateData();
+    });
+}
+
 void AgentRevenueReportPage::showEvent(QShowEvent *event)
 {
-    // 1. Tự động gọi hàm làm mới dữ liệu mỗi khi trang được hiển thị
-    updateData();
-    
-    // 2. Gọi hàm của lớp cha
+    refreshPage();  // Use unified refresh method
     QWidget::showEvent(event);
 }

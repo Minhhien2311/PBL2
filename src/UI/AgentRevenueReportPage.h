@@ -24,6 +24,9 @@ public:
 protected:
     void showEvent(QShowEvent *event) override;
 
+public slots:
+    void refreshPage();
+    
 private:
     void setupUI();
     QFrame* createRevenueBox(const QString& title, const QString& value);

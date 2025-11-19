@@ -50,7 +50,7 @@ AgentInterface::AgentInterface(AccountManager* accManager,
 
     // Sidebar
     sidebar_ = new QFrame(this);
-    sidebar_->setFixedWidth(220);
+    sidebar_->setFixedWidth(180);
     sidebar_->setStyleSheet("background-color: #133e87;");
 
     auto *sideLay = new QVBoxLayout(sidebar_);
@@ -222,9 +222,6 @@ void AgentInterface::setupConnections()
     connect(stack_, &QStackedWidget::currentChanged, this, &AgentInterface::onPageChanged);
 }
 
-/**
- * @brief Handle user login/logout - refresh all pages
- */
 void AgentInterface::onUserChanged() {
     // Refresh all pages when user changes
     if (dashboardPage_) {
@@ -244,11 +241,7 @@ void AgentInterface::onUserChanged() {
     // }
 }
 
-/**
- * @brief Handle page switching - refresh current page
- */
 void AgentInterface::onPageChanged(int index) {
-    // Get current page and refresh it
     QWidget* currentPage = stack_->widget(index);
     
     if (currentPage == dashboardPage_) {
@@ -257,9 +250,10 @@ void AgentInterface::onPageChanged(int index) {
         agentBookingsPage_->refreshPage();
     } else if (currentPage == searchBookPage_) {
         searchBookPage_->refreshPage();
+    } else if (currentPage == ticketsReportPage_) {
+        // THÊM nếu page này có refreshPage()
+        // ticketsReportPage_->refreshPage();
+    } else if (currentPage == revenueReportPage_) {
+        revenueReportPage_->refreshPage();  // Đã có showEvent() nhưng vẫn gọi để đồng nhất
     }
-    // else if (currentPage == agentReportPage_) {
-    //     agentReportPage_->updateTicketsChart();
-    //     agentReportPage_->updateRevenueChart();
-    // }
 }

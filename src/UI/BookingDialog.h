@@ -2,9 +2,9 @@
 #define BOOKINGDIALOG_H
 
 #include <QDialog>
-
 #include "entities/Booking.h"
 
+// Forward declarations
 class QLineEdit;
 class QComboBox;
 class QLabel;
@@ -12,6 +12,8 @@ class QGridLayout;
 class QWidget;
 class QRadioButton;
 class QButtonGroup;
+class QStackedWidget;
+class QPushButton;
 class Flight;
 class FlightManager;
 class BookingManager;
@@ -30,7 +32,6 @@ public:
                           PassengerManager* passengerManager,
                           QWidget *parent = nullptr);
     
-    // Lấy thông tin đã nhập
     QString getPassengerId() const;
     QString getPassengerName() const;
     QString getDateOfBirth() const;
@@ -38,30 +39,56 @@ public:
     BookingClass getSelectedClass() const;
     QString getSelectedSeatId() const;
 
+private slots:
+    void onNextClicked();
+    void onBackClicked();
+    void onConfirmClicked();
+    void onCancelClicked();
+    void onClassChanged();
+
 private:
     void setupUi();
-    void renderSeatMap();
+    void setupProgressHeader();
+    void setupPage1_FlightInfo();
+    void setupPage2_PassengerInfo();
+    void setupPage3_SeatSelection();
     
+    void renderSeatMap();
+    void updateStepIndicator();
+    void updateFareDisplay();
+
     Flight* flight_;
     FlightManager* flightManager_;
     BookingManager* bookingManager_;
     AccountManager* accountManager_;
     PassengerManager* passengerManager_;
     
-    // Form fields
-    QLineEdit* passengerIdEdit_;      // CCCD/ID
-    QLineEdit* passengerNameEdit_;    // Họ tên
-    QLineEdit* dateOfBirthEdit_;       // Ngày sinh
-    QLineEdit* passengerPhoneEdit_;   // Số điện thoại
+    QStackedWidget* stackedWidget_;
+    
+    QLabel* step1Label_;
+    QLabel* step2Label_;
+    QLabel* step3Label_;
+    QWidget* line1_;
+    QWidget* line2_;
+
+    QPushButton* backBtn_;
+    QPushButton* nextBtn_;
+    QPushButton* confirmBtn_;
+    QPushButton* cancelBtn_;
+
+    QLineEdit* passengerIdEdit_;
+    QLineEdit* passengerNameEdit_;
+    QLineEdit* dateOfBirthEdit_;
+    QLineEdit* passengerPhoneEdit_;
+    
     QRadioButton* economyRadio_;
     QRadioButton* businessRadio_;
+    QLabel* fareLabel_;
+    QWidget* seatMapContainer_;
+    QGridLayout* seatMapLayout_;
+    QString selectedSeatId_;
     
-    QLabel* fareLabel_;               // Hiển thị giá vé
-    
-    // Seat selection
-    QWidget* seatMapContainer_;       // Container cho sơ đồ ghế
-    QGridLayout* seatMapLayout_;      // Layout cho sơ đồ ghế
-    QString selectedSeatId_;          // ID ghế đã chọn
+    QLabel* selectedSeatDisplayLabel_;
 };
 
 #endif // BOOKINGDIALOG_H

@@ -7,6 +7,7 @@
 #include "AirportComboBox.h"
 #include "RouteDialog.h"
 #include "BoldItemDelegate.h"
+#include "PageRefresher.h"
 #include <string>
 
 #include <QVBoxLayout>
@@ -97,7 +98,7 @@ void RoutesPage::setupUi()
     topLayout->addLayout(headerRow);
 
     // Kết nối nút refresh
-    connect(refreshButton, &QPushButton::clicked, this, &RoutesPage::refreshTable);
+    connect(refreshButton, &QPushButton::clicked, this, &RoutesPage::refreshPage);
 
     // ========== KHUNG TÌM KIẾM TUYẾN BAY ==========
     QWidget* searchBox = new QWidget;
@@ -284,7 +285,6 @@ void RoutesPage::setupModel()
 void RoutesPage::setupConnections()
 {
     connect(searchByRouteBtn_, &QPushButton::clicked, this, &RoutesPage::onSearchByRoute);
-
     connect(addButton_, &QPushButton::clicked, this, &RoutesPage::onAddRoute);
     connect(editButton_, &QPushButton::clicked, this, &RoutesPage::onEditRoute);
     connect(deleteButton_, &QPushButton::clicked, this, &RoutesPage::onDeleteRoute);
@@ -319,6 +319,12 @@ void RoutesPage::refreshTable()
         }
     }
     statusLabel_->setText(QString("Hiển thị tất cả %1 tuyến bay").arg(routes.size()));
+}
+
+void RoutesPage::refreshPage() {
+    PageRefresher::executeRefresh([this]() {
+        refreshTable();
+    });
 }
 
 void RoutesPage::onAddRoute()

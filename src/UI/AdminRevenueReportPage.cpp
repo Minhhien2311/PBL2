@@ -2,6 +2,7 @@
 #include "core/ReportManager.h"
 #include "core/AccountManager.h"
 #include "core/BookingManager.h"
+#include "PageRefresher.h"
 
 #include <QDate>     
 #include <QVBoxLayout>
@@ -133,7 +134,7 @@ void AdminRevenueReportPage::setupUI()
     
     mainLayout->addWidget(chartContainer, 1);
 
-    connect(refreshBtn, &QPushButton::clicked, this, &AdminRevenueReportPage::updateData);
+    connect(refreshBtn, &QPushButton::clicked, this, &AdminRevenueReportPage::refreshPage);
 }
 
 QFrame* AdminRevenueReportPage::createRevenueBox(const QString& title, const QString& value)
@@ -326,4 +327,10 @@ void AdminRevenueReportPage::updateChart()
     chart_->setMargins(QMargins(6, 20, 20, 20));
     chartView_->setChart(chart_);
     chartView_->update();
+}
+
+void AdminRevenueReportPage::refreshPage() {
+    PageRefresher::executeRefresh([this]() {
+        updateData();
+    });
 }

@@ -15,6 +15,13 @@ class AirportManager;
 
 class AdminTicketsReportPage;
 class AdminRevenueReportPage;
+class FlightRulesPage;
+class PromotionsPage;
+class AgentListPage;
+class RoutesPage;
+class FlightsPage;
+class DashboardPage;
+class AccountsPage;
 
 class AdminInterface : public QWidget
 {
@@ -54,12 +61,15 @@ private:
     QPushButton* logoutBtn_;
 
     // Các trang
-    // DashboardPage* dashboardPage_;
-    // RoutesPage* routesPage_;
-    // FlightsPage* flightsPage_;
-    // AccountsPage* accountsPage_;
-    // AdminTicketsReportPage* ticketsReportPage_;  // Mới
-    // AdminRevenueReportPage* revenueReportPage_;  // Mới
+    DashboardPage* dashboardPage_;
+    RoutesPage* routesPage_;
+    FlightsPage* flightsPage_;
+    AccountsPage* accountsPage_;
+    AdminTicketsReportPage* ticketsReportPage_;  // Mới
+    AdminRevenueReportPage* revenueReportPage_;  // Mới
+    FlightRulesPage* flightRulesPage_;            // Mới
+    PromotionsPage* promotionsPage_;              // Mới
+    AgentListPage* agentListPage_;                // Mới
 
 signals:
     void logoutClicked();

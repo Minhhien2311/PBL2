@@ -28,6 +28,7 @@ private slots:
     void onEditRoute();
     void onDeleteRoute();
     void refreshTable();
+    void refreshPage();  // New method to refresh when page shown or user changed
 
 private:
     void setupUi();

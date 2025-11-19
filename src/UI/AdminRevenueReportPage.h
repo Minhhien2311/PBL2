@@ -20,7 +20,9 @@ public:
                                     ReportManager* rm,
                                     QWidget* parent = nullptr);
     ~AdminRevenueReportPage();
-
+public slots:
+    void refreshPage();
+    
 private:
     void setupUI();
     QFrame* createRevenueBox(const QString& title, const QString& value);

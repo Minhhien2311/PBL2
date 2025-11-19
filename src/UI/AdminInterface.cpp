@@ -8,12 +8,14 @@
 #include "FlightRulesPage.h"         // Tạo mới - placeholder
 #include "PromotionsPage.h"          // Tạo mới - placeholder
 #include "AgentListPage.h"           // Tạo mới - placeholder
+#include "PageRefresher.h"
 
 #include "core/AccountManager.h"
 #include "core/FlightManager.h"
 #include "core/BookingManager.h"
 #include "core/ReportManager.h"
 #include "core/AirportManager.h"
+#include "core/PassengerManager.h"
 
 #include <QStackedWidget>
 #include <QPushButton>
@@ -41,7 +43,7 @@ AdminInterface::AdminInterface(AccountManager* accManager,
 
     // Sidebar
     sidebar_ = new QFrame(this);
-    sidebar_->setFixedWidth(250);  // Tăng chiều rộng một chút
+    sidebar_->setFixedWidth(180);  // Tăng chiều rộng một chút
     sidebar_->setStyleSheet("background-color: #133e87;");
 
     auto *sideLay = new QVBoxLayout(sidebar_);

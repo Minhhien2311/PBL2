@@ -3,6 +3,7 @@
 #include "core/AccountManager.h"
 #include "core/BookingManager.h"
 #include "entities/AccountAgent.h"
+#include "PageRefresher.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
