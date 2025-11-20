@@ -9,6 +9,7 @@ class QPushButton;
 class AirportComboBox;
 class AirportManager;
 class QComboBox;
+class QLabel;
 
 class RouteDialog : public QDialog
 {
@@ -44,6 +45,8 @@ private:
     AirportComboBox* toCombo_;
     QPushButton* saveButton_;
     QPushButton* cancelButton_;
+public:
+    QLabel* statusLabel_;
 };
 
 #endif // ROUTEDIALOG_H

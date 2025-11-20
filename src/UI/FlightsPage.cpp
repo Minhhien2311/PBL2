@@ -82,11 +82,8 @@ void FlightsPage::setupUi()
         "QWidget { background: #F2F6FD; }"
         "QLabel.PageTitle { color:#123B7A; font-weight:700; font-size:17px; }"
         "QLabel.SectionTitle { color:#123B7A; font-weight:700; font-size:16px; }"
+        "QPushButton.SearchBtn { background:#4478BD; color:white; border-radius:6px; height:30px; font-weight:600; }"
         "QLineEdit { background:white; border:1px solid #608bc1; border-radius:4px; height:26px; padding-left:6px; }"
-        "QDateEdit { background:white; border:1px solid #608bc1; border-radius:4px; height:26px; padding-left:6px; }"
-        "QPushButton.SearchBtn { background:#4478BD; color:white; border-radius:6px; height:24px; font-weight:600; }"
-        "QTableView { background:white; border:0px solid #d4dce5; }"
-        "QHeaderView::section { background:#d5e2f2; padding:6px; border:1px solid #c2cfe2; }"
         "TableTitle { font-size: 18px; }"
     );
 
@@ -99,27 +96,40 @@ void FlightsPage::setupUi()
     QVBoxLayout *topLayout = new QVBoxLayout(topBar);
     topLayout->setContentsMargins(24, 20, 24, 16);   // giống RoutesPage
     topLayout->setSpacing(16);
+    topLayout->addStretch();
 
-    // === Hàng 1: Tiêu đề + Nút Tải lại (DI CHUYỂN LÊN ĐÂY) ===
+    // === Hàng 1: Nút Tải lại (DI CHUYỂN LÊN ĐÂY) ===
     QHBoxLayout* headerRow = new QHBoxLayout();
     headerRow->setSpacing(10);
 
-    QLabel* title = new QLabel("Tìm chuyến bay", this);
-    title->setProperty("class", "PageTitle");
-    headerRow->addWidget(title);
-    headerRow->addStretch();
+    // ← NÚT TẢI LẠI (góc phải trên)
+    QPushButton* refreshButton = new QPushButton("Làm mới trang", topBar);
+    
+    // [QUAN TRỌNG] Set Icon (Bạn thay đường dẫn file ảnh vào đây)
+    // Lưu ý: Nên dùng icon có màu #133e87 để đồng bộ với chữ
+    refreshButton->setIcon(QIcon("C:/PBL2/assets/icons/reload.png")); // Đường dẫn icon")); 
+    refreshButton->setIconSize(QSize(14, 14)); // Kích thước icon
 
-    // ← NÚT TẢI LẠI (di chuyển từ dưới lên đây)
-    QPushButton* refreshButton = new QPushButton("🔄 Tải lại tất cả", topBar);
     refreshButton->setStyleSheet(
-        "QPushButton { background:#5886C0; color:white; border:none; "
-        "border-radius:6px; height:32px; padding:0 16px; font-weight:600; }"
-        "QPushButton:hover { background:#466a9a; }"
+        "QPushButton {"
+        "   background: transparent;"  /* Nền trong suốt (ghi đè nền xanh global) */
+        "   color: #133e87;"           /* Màu chữ xanh (ghi đè chữ trắng global) */
+        "   font-weight: bold;"         /* Chữ đậm hơn */
+        "   font-size: 13px;"
+        "   border: none;"             /* Bỏ viền (ghi đè viền global) */
+        "   text-align: left;"         /* Căn trái để icon và chữ nằm gọn */
+        "   padding: 0px;"             /* Reset padding để nút gọn gàng hơn */
+        "}"
+        "QPushButton:hover {"
+        "   background: transparent;"  /* Giữ nguyên nền trong suốt hoặc thêm màu nhạt nếu thích */
+        "   text-decoration: underline;"         /* Gạch chân khi hover */
+        "}"
     );
+    
     refreshButton->setCursor(Qt::PointingHandCursor);
-    refreshButton->setMinimumWidth(140);
+    // refreshButton->setMinimumWidth(140); // Có thể bỏ dòng này để nút tự co theo chữ
+    
     headerRow->addWidget(refreshButton);
-
     topLayout->addLayout(headerRow);
 
     // Kết nối nút refresh
@@ -129,45 +139,44 @@ void FlightsPage::setupUi()
     QHBoxLayout* searchRowLayout = new QHBoxLayout();
     searchRowLayout->setSpacing(16);
 
-    // ========== BOX 1: TRA CỨU NHANH ==========
+    // ========== BOX 1: TRA CỨU NHANH (XẾP DỌC) ==========
     QWidget* quickSearchBox = new QWidget;
+    
+    // 1. Sử dụng QVBoxLayout để xếp các phần tử từ trên xuống dưới
     QVBoxLayout* qsLayout = new QVBoxLayout(quickSearchBox);
-    qsLayout->setContentsMargins(12, 12, 12, 12);
-    qsLayout->setSpacing(8);
+    qsLayout->setContentsMargins(15, 15, 15, 15); // Padding xung quanh
+    qsLayout->setSpacing(10); // Khoảng cách giữa Title - Input - Button
     
     quickSearchBox->setStyleSheet(
-        "QWidget { background: white; border: 1px solid #c2cfe2; border-radius: 6px; }"
+        "QWidget { background: white; border: 1px solid #133e87; border-radius: 6px; }"
     );
+    quickSearchBox->setMinimumWidth(250);
 
-    QLabel* qsTitle = new QLabel("⚡ Tra cứu nhanh theo ID chuyến bay");
-    qsTitle->setStyleSheet("font-weight: 600; color: #123B7A; font-size: 14px; background: transparent; border: none;");
-    qsLayout->addWidget(qsTitle);
-
-    // ← NÚT TÌM KIẾM CÙNG HÀNG VỚI INPUT
-    QHBoxLayout* qsRow = new QHBoxLayout();
-    qsRow->setSpacing(10);
-    
+    // 3. Ô Input (Nằm giữa)
     idSearchEdit_ = new QLineEdit;
-    idSearchEdit_->setPlaceholderText("Nhập ID chuyến bay (VD: VN123_20112025_0600)");
-    idSearchEdit_->setMinimumHeight(36);
-    qsRow->addWidget(idSearchEdit_, 1);
+    idSearchEdit_->setPlaceholderText("VD: FI-000001");
+    // Không setFixedWith để nó tự giãn theo chiều rộng của box (do tiêu đề quy định)
+    qsLayout->addWidget(idSearchEdit_);
 
-    searchByIdBtn_ = new QPushButton("Tìm kiếm");  // ← Bỏ emoji
+    // 4. Nút Tìm kiếm (Nằm dưới cùng)
+    searchByIdBtn_ = new QPushButton("Tìm kiếm nhanh bằng ID");
     searchByIdBtn_->setProperty("class", "SearchBtn");
-    searchByIdBtn_->setMinimumHeight(36);
-    searchByIdBtn_->setMinimumWidth(110);
+    searchByIdBtn_->setMinimumHeight(34);
     searchByIdBtn_->setCursor(Qt::PointingHandCursor);
     searchByIdBtn_->setStyleSheet(
         "QPushButton { background:#4478BD; color:white; font-weight:600; "
-        "border-radius:6px; padding: 0 16px; }"
+        "border-radius:6px; }" // Border radius đồng bộ
         "QPushButton:hover { background:#365a9e; }"
     );
-    qsRow->addWidget(searchByIdBtn_);
+    // Button mặc định sẽ giãn full chiều ngang trong QVBoxLayout, đúng ý bạn muốn
+    qsLayout->addWidget(searchByIdBtn_);
 
-    qsLayout->addLayout(qsRow);
-    qsLayout->addStretch();
+    // 5. Xử lý Layout cha
+    // Set Policy Maximum để box co lại vừa khít nội dung, không giãn ra vô tận
+    quickSearchBox->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
-    searchRowLayout->addWidget(quickSearchBox, 1);
+    // Add vào layout cha, căn trái (hoặc giữa tùy ý)
+    searchRowLayout->addWidget(quickSearchBox, 0, Qt::AlignLeft);
 
     // ========== BOX 2: TÌM KIẾM NÂNG CAO ==========
     QWidget* advancedSearchBox = new QWidget;
@@ -176,7 +185,7 @@ void FlightsPage::setupUi()
     asLayout->setSpacing(10);
     
     advancedSearchBox->setStyleSheet(
-        "QWidget { background: white; border: 1px solid #c2cfe2; border-radius: 6px; }"
+        "QWidget { background: white; border: 1px solid #133e87; border-radius: 6px; }"
     );
 
     QLabel* asTitle = new QLabel("🔎 Tìm kiếm nâng cao theo nhiều tiêu chí");
@@ -194,7 +203,6 @@ void FlightsPage::setupUi()
     fromLabel->setStyleSheet("background: transparent; border: none; color: #123B7A;");  // ← Bỏ viền
     col1->addWidget(fromLabel);
     fromSearchCombo_ = new AirportComboBox(airportManager_);
-    fromSearchCombo_->setMinimumHeight(36);
     col1->addWidget(fromSearchCombo_);
     filterRowLayout->addLayout(col1, 1);
 
@@ -205,7 +213,6 @@ void FlightsPage::setupUi()
     toLabel->setStyleSheet("background: transparent; border: none; color: #123B7A;");  // ← Bỏ viền
     col2->addWidget(toLabel);
     toSearchCombo_ = new AirportComboBox(airportManager_);
-    toSearchCombo_->setMinimumHeight(36);
     col2->addWidget(toSearchCombo_);
     filterRowLayout->addLayout(col2, 1);
 
@@ -222,7 +229,6 @@ void FlightsPage::setupUi()
     QDate oneDayAgo = QDate::currentDate().addDays(-1);
     dateSearchEdit_->setMinimumDate(oneDayAgo);
     dateSearchEdit_->clear();
-    dateSearchEdit_->setMinimumHeight(36);
     col3->addWidget(dateSearchEdit_);
     filterRowLayout->addLayout(col3, 1);
 
@@ -239,13 +245,13 @@ void FlightsPage::setupUi()
         airlineFilterCombo_->addItem(QString::fromStdString(airline), 
                                       QString::fromStdString(airline));
     }
-    airlineFilterCombo_->setMinimumHeight(36);
+
     col4->addWidget(airlineFilterCombo_);
     filterRowLayout->addLayout(col4, 1);
 
     // === Cột 5: Nút tìm kiếm (CÙNG HÀNG) ===
     QVBoxLayout* col5 = new QVBoxLayout();
-    col5->setSpacing(6);
+    col5->setSpacing(4);
     // Thêm label trống để căn nút với các input khác
     QLabel* emptyLabel = new QLabel(" ");  // ← Label trống để căn chỉnh
     emptyLabel->setStyleSheet("background: transparent; border: none;");
@@ -253,8 +259,8 @@ void FlightsPage::setupUi()
     
     searchFilterBtn_ = new QPushButton("Tìm kiếm");  // ← Bỏ emoji
     searchFilterBtn_->setProperty("class", "SearchBtn");
-    searchFilterBtn_->setMinimumHeight(36);
     searchFilterBtn_->setMinimumWidth(110);
+    searchFilterBtn_->setMinimumHeight(36);
     searchFilterBtn_->setCursor(Qt::PointingHandCursor);
     searchFilterBtn_->setStyleSheet(
         "QPushButton { background:#4472C4; color:white; font-weight:600; "
@@ -271,32 +277,56 @@ void FlightsPage::setupUi()
     topLayout->addLayout(searchRowLayout);
     mainLayout->addWidget(topBar);
 
-    // ========== TIÊU ĐỀ BẢNG + STATUS ==========
+    // ========== STATUS + CRUD BAR (GỘP CHUNG 1 HÀNG) ==========
     QWidget *tableHeader = new QWidget(this);
     QHBoxLayout *tableHeaderLayout = new QHBoxLayout(tableHeader);
-    tableHeaderLayout->setContentsMargins(24, 0, 24, 0);
+    // Giữ nguyên margin header cũ
+    tableHeaderLayout->setContentsMargins(24, 0, 24, 0); 
     tableHeaderLayout->setSpacing(10);
 
-    QLabel* tableTitle = new QLabel("📋 Kết quả tìm kiếm", this);
-    tableTitle->setProperty("class", "SectionTitle");
-    tableTitle->setObjectName("TableTitle");
-    tableHeaderLayout->addWidget(tableTitle);
-
-    // Status label (hiển thị số lượng kết quả)
+    // 1. Status Label
     statusLabel_ = new QLabel("", this);
-    statusLabel_->setStyleSheet("color: #123B7A; font-size: 12px;");
+    statusLabel_->setStyleSheet("color: #123B7A; font-size: 13px; font-weight: 650;");
     tableHeaderLayout->addWidget(statusLabel_);
-    
+
+    // 2. Lò xo đẩy các nút sang phải
     tableHeaderLayout->addStretch();
 
+    // 3. Các nút CRUD
+    addButton_ = new QPushButton("Thêm chuyến", this);
+    editButton_ = new QPushButton("Sửa chuyến", this);
+    deleteButton_ = new QPushButton("Xóa chuyến", this);
+
+    // Style gọn nhẹ (Ghost style) để vừa vặn trên 1 hàng
+    QString crudStyle =
+        "QPushButton { background:transparent; color: #133e87; border:1px solid #133e87; "
+        "border-radius:6px; height:20px; padding:4px 10px; font-weight:600; }"
+        "QPushButton:hover { background:#466a9a; color: white; }";
+
+    addButton_->setStyleSheet(crudStyle);
+    editButton_->setStyleSheet(crudStyle);
+    deleteButton_->setStyleSheet(crudStyle);
+
+    // Add trực tiếp vào layout header
+    tableHeaderLayout->addWidget(addButton_);
+    tableHeaderLayout->addWidget(editButton_);
+    tableHeaderLayout->addWidget(deleteButton_);
+
+    // Add Header vào Main Layout
     mainLayout->addWidget(tableHeader);
 
     // ========== BẢNG ==========
     QWidget *tableBox = new QWidget(this);
+
     QVBoxLayout *tblWrap = new QVBoxLayout(tableBox);
-    tblWrap->setContentsMargins(24, 6, 24, 0);
+    
+    tblWrap->setContentsMargins(24, 10, 18, 20);
 
     tableView_ = new QTableView(this);
+    tableView_->setObjectName("TableView");
+    tableView_->setStyleSheet(
+        "#TableView { background: white; border: 1px solid #133e87; }"
+    );
     tableView_->setItemDelegate(new BoldItemDelegate(this));
     
     // --- STYLE CHUẨN ---
@@ -311,37 +341,9 @@ void FlightsPage::setupUi()
     // --- TẮT SCROLLBAR NGANG ---
     tableView_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     tableView_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    tableView_->setFrameShape(QFrame::NoFrame);
 
     tblWrap->addWidget(tableView_);
     mainLayout->addWidget(tableBox, 1);
-
-    // ========== CRUD BAR ==========
-    QWidget *crudBar = new QWidget(this);
-    QHBoxLayout *crudLayout = new QHBoxLayout(crudBar);
-    crudLayout->setContentsMargins(24, 16, 24, 20);
-    crudLayout->setSpacing(16);
-
-    addButton_ = new QPushButton("Thêm chuyến");
-    editButton_ = new QPushButton("Sửa chuyến");
-    deleteButton_ = new QPushButton("Xóa chuyến");
-
-    QString crudStyle =
-        "QPushButton { background:#5886C0; color:white; border:none; "
-        "border-radius:10px; height:40px; padding:0 36px; font-weight:600; }"
-        "QPushButton:hover { background:#466a9a; }";
-
-    addButton_->setStyleSheet(crudStyle);
-    editButton_->setStyleSheet(crudStyle);
-    deleteButton_->setStyleSheet(crudStyle);
-
-    crudLayout->addStretch();
-    crudLayout->addWidget(addButton_);
-    crudLayout->addWidget(editButton_);
-    crudLayout->addWidget(deleteButton_);
-    crudLayout->addStretch();
-
-    mainLayout->addWidget(crudBar);
 }
 
 void FlightsPage::setupModel()
@@ -436,6 +438,7 @@ void FlightsPage::refreshTable()
         }
     }
     statusLabel_->setText(QString("Hiển thị tất cả %1 chuyến bay").arg(flights.size()));
+    statusLabel_->setStyleSheet("color: #123B7A; font-size: 13px; font-weight: 650;");
 }
 
 void FlightsPage::refreshPage() {
@@ -514,7 +517,8 @@ void FlightsPage::onEditFlight()
 {
     QModelIndexList selected = tableView_->selectionModel()->selectedRows();
     if (selected.isEmpty()) {
-        QMessageBox::warning(this, "Lỗi", "Vui lòng chọn một chuyến bay để sửa.");
+        statusLabel_->setText("Vui lòng chọn một chuyến bay để sửa.");
+        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
         return;
     }
 
@@ -523,13 +527,14 @@ void FlightsPage::onEditFlight()
     
     Flight* flight = flightManager_->findFlightById(flightId.toStdString());
     if (!flight) {
-        QMessageBox::critical(this, "Lỗi", "Không tìm thấy chuyến bay.");
+        statusLabel_->setText("Không tìm thấy chuyến bay!");
+        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
         return;
     }
 
     if (flight->getAvailableSeats() < flight->getTotalCapacity()) {
-        QMessageBox::warning(this, "Sửa chuyến bay không khả dụng", 
-            "Chuyến bay đã có hành khách đặt chỗ.");
+        statusLabel_->setText("Chuyến bay đã có hành khách đặt chỗ, không thể sửa.");
+        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
         return;
     }
     
@@ -586,7 +591,8 @@ void FlightsPage::onDeleteFlight()
 {
     QModelIndexList selected = tableView_->selectionModel()->selectedRows();
     if (selected.isEmpty()) {
-        QMessageBox::warning(this, "Lỗi", "Vui lòng chọn một chuyến bay để xóa.");
+        statusLabel_->setText("Vui lòng chọn một chuyến bay để xóa.");
+        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
         return;
     }
 
@@ -621,7 +627,8 @@ void FlightsPage::onSearchById()
     QString flightId = idSearchEdit_->text().trimmed();
     
     if (flightId.isEmpty()) {
-        QMessageBox::warning(this, "Thiếu dữ liệu", "Vui lòng nhập ID chuyến bay.");
+        statusLabel_->setText("Vui lòng nhập mã chuyến bay để tìm kiếm!");
+        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
         return;
     }
 
@@ -630,7 +637,8 @@ void FlightsPage::onSearchById()
     if (!flight) {
         // Xóa bảng nếu không tìm thấy
         model_->removeRows(0, model_->rowCount());
-        statusLabel_->setText(QString("❌ Không tìm thấy chuyến bay mã <b>%1</b>").arg(flightId));
+        statusLabel_->setText(QString("Không tìm thấy chuyến bay mã <b>%1</b>!").arg(flightId));
+        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
         return;
     }
 
@@ -668,7 +676,7 @@ void FlightsPage::onSearchById()
     rowItems << new QStandardItem(QString::fromStdString(flight->getDepartureTime()));
     
     // 7. Ghế trống
-    rowItems << new QStandardItem(QString::number(availableSeats) + " / " + QString::number(flight->getTotalCapacity()));
+    rowItems << new QStandardItem(QString::number(flight->getAvailableSeats()) + " / " + QString::number(flight->getTotalCapacity()));
 
     // 8. Giá vé
     rowItems << new QStandardItem(priceFormatted);
@@ -680,7 +688,8 @@ void FlightsPage::onSearchById()
 
     model_->appendRow(rowItems);
 
-    statusLabel_->setText(QString("✅ Tìm thấy 1 chuyến bay với mã <b>%1</b>").arg(flightId));
+    statusLabel_->setText(QString("Tìm thấy 1 chuyến bay với mã <b>%1</b>").arg(flightId));
+    statusLabel_->setStyleSheet("color: #2E7D32; font-size: 13px; font-weight: 650;");
 }
 
 void FlightsPage::onSearchFilter()
@@ -692,9 +701,8 @@ void FlightsPage::onSearchFilter()
     criteria.toIATA = toSearchCombo_->getSelectedIATA();
     
     if (criteria.fromIATA.empty() || criteria.toIATA.empty()) {
-        QMessageBox::warning(this, "Thiếu dữ liệu", 
-            "Vui lòng chọn cả điểm đi và điểm đến.");
-        return;
+        statusLabel_->setText("Vui lòng chọn cả điểm đi và điểm đến!");
+        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
     }
     
     // Lấy ngày (nếu user chọn)
@@ -768,8 +776,10 @@ void FlightsPage::onSearchFilter()
     
     // Cập nhật nhãn trạng thái
     if (results.empty()) {
-        statusLabel_->setText("❌ Không tìm thấy chuyến bay phù hợp.");
+        statusLabel_->setText("Không tìm thấy chuyến bay phù hợp.");
+        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
     } else {
-        statusLabel_->setText(QString("✅ Tìm thấy %1 chuyến bay phù hợp.").arg(results.size()));
+        statusLabel_->setText(QString("Tìm thấy %1 chuyến bay phù hợp.").arg(results.size()));
+        statusLabel_->setStyleSheet("color: #2E7D32; font-size: 13px; font-weight: 650;");
     }
 }

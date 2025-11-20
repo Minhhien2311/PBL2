@@ -90,8 +90,6 @@ void SearchBookPage::setupUi()
             "border-radius:4px; height:26px; padding-left:6px; }"
         "QPushButton.SearchBtn { background:#4478BD; color:white; border-radius:6px; "
             "height:24px; font-weight:600; }"
-        "QTableView { background:white; border:0px; }"
-        "QHeaderView::section { background:#d5e2f2; padding:6px; border:1px solid #c2cfe2; }"
     );
 
     auto *mainLayout = new QVBoxLayout(this);
@@ -103,27 +101,39 @@ void SearchBookPage::setupUi()
     QVBoxLayout *topLayout = new QVBoxLayout(topBar);
     topLayout->setContentsMargins(24, 20, 24, 10);
     topLayout->setSpacing(14);
+    topLayout->addStretch();
 
-    // === Hàng 1: Tiêu đề + Nút Tải lại (GIỐNG FLIGHTSPAGE) ===
+    // === Hàng 1: Nút Tải lại ===
     QHBoxLayout* headerRow = new QHBoxLayout();
     headerRow->setSpacing(10);
 
-    QLabel* title = new QLabel("Tìm chuyến bay để đặt vé", this);
-    title->setProperty("class", "PageTitle");
-    headerRow->addWidget(title);
-    headerRow->addStretch();
+    QPushButton* refreshButton = new QPushButton("Làm mới trang", topBar);
+    
+    // [QUAN TRỌNG] Set Icon (Bạn thay đường dẫn file ảnh vào đây)
+    // Lưu ý: Nên dùng icon có màu #133e87 để đồng bộ với chữ
+    refreshButton->setIcon(QIcon("C:/PBL2/assets/icons/reload.png")); // Đường dẫn icon")); 
+    refreshButton->setIconSize(QSize(14, 14)); // Kích thước icon
 
-    // ← NÚT TẢI LẠI (góc phải trên)
-    QPushButton* refreshButton = new QPushButton("🔄 Tải lại tất cả", topBar);
     refreshButton->setStyleSheet(
-        "QPushButton { background:#5886C0; color:white; border:none; "
-        "border-radius:6px; height:32px; padding:0 16px; font-weight:600; }"
-        "QPushButton:hover { background:#466a9a; }"
+        "QPushButton {"
+        "   background: transparent;"  /* Nền trong suốt (ghi đè nền xanh global) */
+        "   color: #133e87;"           /* Màu chữ xanh (ghi đè chữ trắng global) */
+        "   font-weight: bold;"         /* Chữ đậm hơn */
+        "   font-size: 13px;"
+        "   border: none;"             /* Bỏ viền (ghi đè viền global) */
+        "   text-align: left;"         /* Căn trái để icon và chữ nằm gọn */
+        "   padding: 0px;"             /* Reset padding để nút gọn gàng hơn */
+        "}"
+        "QPushButton:hover {"
+        "   background: transparent;"  /* Giữ nguyên nền trong suốt hoặc thêm màu nhạt nếu thích */
+        "   text-decoration: underline;"         /* Gạch chân khi hover */
+        "}"
     );
+    
     refreshButton->setCursor(Qt::PointingHandCursor);
-    refreshButton->setMinimumWidth(140);
+    // refreshButton->setMinimumWidth(140); // Có thể bỏ dòng này để nút tự co theo chữ
+    
     headerRow->addWidget(refreshButton);
-
     topLayout->addLayout(headerRow);
 
     // Kết nối nút refresh
@@ -136,7 +146,7 @@ void SearchBookPage::setupUi()
     searchBoxLayout->setSpacing(10);
     
     searchBox->setStyleSheet(
-        "QWidget { background: white; border: 1px solid #c2cfe2; border-radius: 6px; }"
+        "QWidget { background: white; border: 1px solid #133e87; border-radius: 6px; }"
     );
 
     QLabel* searchTitle = new QLabel("🔎 Tìm kiếm chuyến bay theo nhiều tiêu chí");
@@ -254,31 +264,47 @@ void SearchBookPage::setupUi()
 
     mainLayout->addWidget(topBar);
 
-    // ================== TIÊU ĐỀ BẢNG + STATUS ==================
+    // ========== TIÊU ĐỀ BẢNG + STATUS + NÚT ĐẶT VÉ (GỘP CHUNG 1 HÀNG) ==========
     QWidget *tableHeader = new QWidget(this);
     QHBoxLayout *thLayout = new QHBoxLayout(tableHeader);
-    thLayout->setContentsMargins(24, 0, 18, 0);
+    // Giữ margin để căn lề chuẩn với bên trên
+    thLayout->setContentsMargins(24, 0, 24, 0);
     thLayout->setSpacing(10);
 
-    QLabel *tblTitle = new QLabel("📋 Kết quả tìm kiếm", this);
-    tblTitle->setProperty("class", "SectionTitle");
-    thLayout->addWidget(tblTitle);
-
-    // Status label (hiển thị số kết quả)
+    // 1. Status label
     statusLabel_ = new QLabel("", this);
-    statusLabel_->setStyleSheet("color: #123B7A; font-size: 12px;");
+    statusLabel_->setStyleSheet("color: #123B7A; font-size: 13px; font-weight: 650;");
     thLayout->addWidget(statusLabel_);
 
+    // 2. Lò xo đẩy nút sang phải
     thLayout->addStretch();
 
+    // 3. Nút Đặt vé
+    bookButton_ = new QPushButton("Đặt vé cho chuyến đã chọn", this);
+    bookButton_->setCursor(Qt::PointingHandCursor);
+
+    // Style gọn nhẹ (Ghost style) giống trang RoutesPage
+    QString btnStyle =
+        "QPushButton { background:transparent; color: #133e87; border:1px solid #133e87; "
+        "border-radius:6px; height:20px; padding:4px 10px; font-weight:600; }"
+        "QPushButton:hover { background:#466a9a; color: white; }";
+
+    bookButton_->setStyleSheet(btnStyle);
+
+    thLayout->addWidget(bookButton_);
+
+    // Add Header vào Main Layout
     mainLayout->addWidget(tableHeader);
 
     // ================== BẢNG ==================
     QWidget *tableBox = new QWidget(this);
     QVBoxLayout *tblWrap = new QVBoxLayout(tableBox);
-    tblWrap->setContentsMargins(24, 6, 18, 0);
+    tblWrap->setContentsMargins(24, 10, 18, 20);
 
     tableView_ = new QTableView(this);
+    tableView_->setStyleSheet(
+        "QTableView { background:white; border:0px solid #133e87; }"
+    );
     tableView_->setItemDelegate(new BoldItemDelegate(this));
 
     // --- Cấu hình cơ bản ---
@@ -295,25 +321,6 @@ void SearchBookPage::setupUi()
 
     tblWrap->addWidget(tableView_);
     mainLayout->addWidget(tableBox, 1);
-
-    // ================== NÚT ĐẶT VÉ DƯỚI ==================
-    QWidget *bottom = new QWidget(this);
-    QHBoxLayout *bottomLayout = new QHBoxLayout(bottom);
-    bottomLayout->setContentsMargins(24, 16, 24, 20);
-    bottomLayout->setSpacing(16);
-
-    bookButton_ = new QPushButton("Đặt vé cho chuyến đã chọn", this);
-    bookButton_->setStyleSheet(
-        "QPushButton { background:#5886C0; color:white; border:none; "
-        "border-radius:10px; height:40px; padding:0 36px; font-weight:600; }"
-        "QPushButton:hover { background:#466a9a; }"
-    );
-
-    bottomLayout->addStretch();
-    bottomLayout->addWidget(bookButton_);
-    bottomLayout->addStretch();
-
-    mainLayout->addWidget(bottom);
 }
 
 void SearchBookPage::setupModel()

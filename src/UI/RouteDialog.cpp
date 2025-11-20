@@ -10,6 +10,7 @@
 #include <QPushButton>
 #include <QComboBox>
 #include <QMessageBox>
+#include <QThread> // Required for QThread::msleep
 
 // Constructor cho THÊM MỚI
 RouteDialog::RouteDialog(AirportManager* airportManager, QWidget* parent)
@@ -91,12 +92,16 @@ void RouteDialog::setupUi(bool isEditMode)
 
     mainLayout->addLayout(formLayout);
 
+    statusLabel_ = new QLabel("", this);
+    statusLabel_->setStyleSheet("color: #d0342c; font-size: 13px; font-weight: 650;");
+    mainLayout->addWidget(statusLabel_);
+
     // Thông báo (nếu edit)
     if (isEditMode) {
         QLabel* noteLabel = new QLabel(
             QString("⚠️ <b>Lưu ý:</b> Đang sửa tuyến <b>%1</b>").arg(currentId_)
         );
-        noteLabel->setStyleSheet("color: #d97706; font-size: 12px;");
+        noteLabel->setStyleSheet("color: #d97706; font-size: 13px;");
         noteLabel->setWordWrap(true);
         mainLayout->addWidget(noteLabel);
     }
@@ -125,27 +130,32 @@ void RouteDialog::setupUi(bool isEditMode)
 
 void RouteDialog::onAccept()
 {
+    bool valid = true;
+    statusLabel_->setText("");
     // Validate
     std::string fromIATA = fromCombo_->getSelectedIATA();
     std::string toIATA = toCombo_->getSelectedIATA();
 
     if (fromIATA.empty()) {
-        QMessageBox::warning(this, "Thiếu dữ liệu", "Vui lòng chọn điểm đi.");
-        return;
+        statusLabel_->setText("Vui lòng chọn điểm đi!");
+        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
+        valid = false;
     }
 
     if (toIATA.empty()) {
-        QMessageBox::warning(this, "Thiếu dữ liệu", "Vui lòng chọn điểm đến.");
-        return;
+        statusLabel_->setText("Vui lòng chọn điểm đến!");
+        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
+        valid = false;
     }
 
     if (fromIATA == toIATA) {
-        QMessageBox::warning(this, "Dữ liệu không hợp lệ", 
-            "Điểm đi và điểm đến phải khác nhau.");
-        return;
+        statusLabel_->setText("Điểm đi và điểm đến phải khác nhau!");
+        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
+        valid = false;
     }
 
-    accept();
+    if (valid) accept();
+    else return;
 }
 
 QString RouteDialog::getFromIATA() const {

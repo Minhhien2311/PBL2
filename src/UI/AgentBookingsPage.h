@@ -62,7 +62,7 @@ private:
     QLineEdit* passengerIdSearchEdit_; // Dòng tìm theo CCCD hành khách
     QPushButton* searchButton_;        // Nút tìm theo Mã đặt chỗ
     QPushButton* searchByPassengerBtn_;// Nút tìm theo CCCD
-    QPushButton* refreshButton_;
+    QPushButton* refreshButton;
 
     QTableView* tableView_;
     QStandardItemModel* model_;

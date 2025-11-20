@@ -14,6 +14,8 @@
 #include "AirportComboBox.h"
 #include "BoldItemDelegate.h"
 #include "PageRefresher.h"
+#include <string>
+#include <iostream>
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -87,8 +89,6 @@ void AgentBookingsPage::setupUi()
         "border-radius:4px; height:26px; padding-left:6px; }"
         "QPushButton.SearchBtn { background:#4478BD; color:white; border-radius:6px; "
         "height:24px; font-weight:600; }"
-        "QTableView { background:white; border:0px; }"
-        "QHeaderView::section { background:#d5e2f2; padding:6px; border:1px solid #c2cfe2; }"
         "tableTitle { font-size: 18px; font-weight: 600; }"
     );
 
@@ -102,26 +102,40 @@ void AgentBookingsPage::setupUi()
     topLayout->setContentsMargins(24, 20, 24, 10);
     topLayout->setSpacing(10);
 
-    // === Hàng 1: Tiêu đề + Nút Tải lại ===
+    // === Hàng 1: Nút Tải lại ===
     QHBoxLayout* headerRow = new QHBoxLayout();
     headerRow->setSpacing(10);
 
-    auto *title = new QLabel("Tìm thông tin đặt chỗ", this);
-    title->setProperty("class", "PageTitle");
-    headerRow->addWidget(title);
     headerRow->addStretch();
 
     // ← NÚT TẢI LẠI (góc phải trên)
-    refreshButton_ = new QPushButton("🔄 Tải lại tất cả");
-    refreshButton_->setStyleSheet(
-        "QPushButton { background:#5886C0; color:white; border:none; "
-        "border-radius:6px; height:32px; padding:0 16px; font-weight:600; }"
-        "QPushButton:hover { background:#466a9a; }"
-    );
-    refreshButton_->setCursor(Qt::PointingHandCursor);
-    refreshButton_->setMinimumWidth(140);
-    headerRow->addWidget(refreshButton_);
+    QPushButton* refreshButton = new QPushButton("Làm mới trang", top);
+    
+    // [QUAN TRỌNG] Set Icon (Bạn thay đường dẫn file ảnh vào đây)
+    // Lưu ý: Nên dùng icon có màu #133e87 để đồng bộ với chữ
+    refreshButton->setIcon(QIcon("C:/PBL2/assets/icons/reload.png")); // Đường dẫn icon")); 
+    refreshButton->setIconSize(QSize(14, 14)); // Kích thước icon
 
+    refreshButton->setStyleSheet(
+        "QPushButton {"
+        "   background: transparent;"  /* Nền trong suốt (ghi đè nền xanh global) */
+        "   color: #133e87;"           /* Màu chữ xanh (ghi đè chữ trắng global) */
+        "   font-weight: bold;"         /* Chữ đậm hơn */
+        "   font-size: 13px;"
+        "   border: none;"             /* Bỏ viền (ghi đè viền global) */
+        "   text-align: left;"         /* Căn trái để icon và chữ nằm gọn */
+        "   padding: 0px;"             /* Reset padding để nút gọn gàng hơn */
+        "}"
+        "QPushButton:hover {"
+        "   background: transparent;"  /* Giữ nguyên nền trong suốt hoặc thêm màu nhạt nếu thích */
+        "   text-decoration: underline;"         /* Gạch chân khi hover */
+        "}"
+    );
+    
+    refreshButton->setCursor(Qt::PointingHandCursor);
+    // refreshButton->setMinimumWidth(140); // Có thể bỏ dòng này để nút tự co theo chữ
+    
+    headerRow->addWidget(refreshButton);
     topLayout->addLayout(headerRow);
 
     // ========== HÀNG TÌM KIẾM (2 BOX NGANG) ==========
@@ -135,7 +149,7 @@ void AgentBookingsPage::setupUi()
     box1Layout->setSpacing(8);
     
     searchBox1->setStyleSheet(
-        "QWidget { background: white; border: 1px solid #c2cfe2; border-radius: 6px; }"
+        "QWidget { background: white; border: 1px solid #133e87; border-radius: 6px; }"
     );
 
     QLabel* box1Title = new QLabel("🔍 Tra cứu theo mã đặt chỗ");
@@ -173,7 +187,7 @@ void AgentBookingsPage::setupUi()
     box2Layout->setSpacing(8);
     
     searchBox2->setStyleSheet(
-        "QWidget { background: white; border: 1px solid #c2cfe2; border-radius: 6px; }"
+        "QWidget { background: white; border: 1px solid #133e87; border-radius: 6px; }"
     );
 
     QLabel* box2Title = new QLabel("👤 Tra cứu theo CCCD khách hàng");
@@ -208,32 +222,58 @@ void AgentBookingsPage::setupUi()
     topLayout->addLayout(searchRowLayout);
     mainLayout->addWidget(top);
 
-    // ================== TIÊU ĐỀ BẢNG + STATUS ==================
+    // ================== STATUS + CÁC NÚT (GỘP CHUNG 1 HÀNG) ==================
     auto *tableHeader = new QWidget(this);
     auto *thLayout = new QHBoxLayout(tableHeader);
-    thLayout->setContentsMargins(24, 0, 18, 0);
+    // Căn lề 24px để thẳng hàng với nội dung bên trên
+    thLayout->setContentsMargins(24, 0, 24, 0);
     thLayout->setSpacing(10);
 
-    auto *tblTitle = new QLabel("📋 Kết quả tìm kiếm", this);
-    tblTitle->setObjectName("tableTitle");
-    tblTitle->setProperty("class", "SectionTitle");
-    thLayout->addWidget(tblTitle);
-
-    // Status label (hiển thị số kết quả)
+    // 1. Status label
     statusLabel_ = new QLabel("", this);
-    statusLabel_->setStyleSheet("color: #123B7A; font-size: 12px;");
+    statusLabel_->setStyleSheet("color: #123B7A; font-size: 13px; font-weight: 650;");
     thLayout->addWidget(statusLabel_);
 
+    // 2. Lò xo đẩy các nút sang phải
     thLayout->addStretch();
 
+    // 3. Các nút hành động
+    viewDetailsBtn_ = new QPushButton("Xem chi tiết vé", this);
+    cancelBookingBtn_ = new QPushButton("Hủy vé", this);
+    changeBookingBtn_ = new QPushButton("Đổi vé", this);
+
+    // Style gọn nhẹ (Ghost style)
+    QString btnStyle =
+        "QPushButton { background:transparent; color: #133e87; border:1px solid #133e87; "
+        "border-radius:6px; height:20px; padding:4px 10px; font-weight:600; }"
+        "QPushButton:hover { background:#466a9a; color: white; }";
+
+    viewDetailsBtn_->setStyleSheet(btnStyle);
+    cancelBookingBtn_->setStyleSheet(btnStyle);
+    changeBookingBtn_->setStyleSheet(btnStyle);
+    
+    // Set cursor
+    viewDetailsBtn_->setCursor(Qt::PointingHandCursor);
+    cancelBookingBtn_->setCursor(Qt::PointingHandCursor);
+    changeBookingBtn_->setCursor(Qt::PointingHandCursor);
+
+    // Add nút vào layout
+    thLayout->addWidget(viewDetailsBtn_);
+    thLayout->addWidget(changeBookingBtn_); // Thường "Đổi" để cạnh "Xem"
+    thLayout->addWidget(cancelBookingBtn_); // "Hủy" để ngoài cùng hoặc tùy ý bạn sắp xếp
+
+    // Add Header vào Main Layout
     mainLayout->addWidget(tableHeader);
 
     // ================== BẢNG ==================
     auto *tableBox = new QWidget(this);
     auto *tblWrap = new QVBoxLayout(tableBox);
-    tblWrap->setContentsMargins(24, 6, 18, 0);
+    tblWrap->setContentsMargins(24, 10, 18, 20);
 
     tableView_ = new QTableView(this);
+    tableView_->setStyleSheet(
+        "QTableView { background:white; border:0px solid #133e87; }"
+    );
     tableView_->setItemDelegate(new BoldItemDelegate(this));
     
     // --- CẤU HÌNH GIAO DIỆN BẢNG ---
@@ -251,34 +291,6 @@ void AgentBookingsPage::setupUi()
     
     tblWrap->addWidget(tableView_);
     mainLayout->addWidget(tableBox, 1);
-
-    // ================== NÚT DƯỚI ==================
-    auto *bottom = new QWidget(this);
-    auto *bottomLayout = new QHBoxLayout(bottom);
-    bottomLayout->setContentsMargins(24, 16, 24, 20);
-    bottomLayout->setSpacing(16);
-
-    QString blueBtn =
-        "QPushButton { background:#5886C0; color:white; border:none; "
-        "border-radius:10px; height:40px; padding:0 36px; font-weight:600; }"
-        "QPushButton:hover { background:#466a9a; }";
-
-    viewDetailsBtn_ = new QPushButton("Xem chi tiết vé");
-    viewDetailsBtn_->setStyleSheet(blueBtn);
-
-    cancelBookingBtn_ = new QPushButton("Hủy vé");
-    cancelBookingBtn_->setStyleSheet(blueBtn);
-
-    changeBookingBtn_ = new QPushButton("Đổi vé");
-    changeBookingBtn_->setStyleSheet(blueBtn);
-
-    bottomLayout->addStretch();
-    bottomLayout->addWidget(viewDetailsBtn_);
-    bottomLayout->addWidget(cancelBookingBtn_);
-    bottomLayout->addWidget(changeBookingBtn_);
-    bottomLayout->addStretch();
-
-    mainLayout->addWidget(bottom);
 }
 
 
@@ -323,7 +335,7 @@ void AgentBookingsPage::setupConnections()
     connect(searchByPassengerBtn_, &QPushButton::clicked, this, &AgentBookingsPage::onSearchByPassengerId);
     
     // Các nút khác
-    connect(refreshButton_, &QPushButton::clicked, this, &AgentBookingsPage::refreshTable);
+    connect(refreshButton, &QPushButton::clicked, this, &AgentBookingsPage::refreshTable);
     connect(cancelBookingBtn_, &QPushButton::clicked, this, &AgentBookingsPage::onCancelBookingClicked);
     connect(viewDetailsBtn_, &QPushButton::clicked, this, &AgentBookingsPage::onViewDetailsClicked);
     connect(changeBookingBtn_, &QPushButton::clicked, this, &AgentBookingsPage::onChangeBookingClicked);
@@ -450,7 +462,7 @@ void AgentBookingsPage::onViewDetailsClicked()
     Booking* booking = bookingManager_->findBookingById(bookingId.toStdString());
     
     if (!booking) {
-        QMessageBox::warning(this, "Lỗi", "Không tìm thấy thông tin đặt chỗ.");
+        std::cout << "Booking not found for ID: " << bookingId.toStdString() << std::endl;
         return;
     }
     
@@ -464,7 +476,8 @@ void AgentBookingsPage::onChangeBookingClicked()
     // 1. Get selected row
     QModelIndexList selected = tableView_->selectionModel()->selectedRows();
     if (selected.isEmpty()) {
-        QMessageBox::warning(this, "Lỗi", "Vui lòng chọn một vé để đổi.");
+        statusLabel_->setText("Vui lòng chọn một vé để đổi!");
+        statusLabel_->setStyleSheet("color: #C62828;"); // Màu đỏ
         return;
     }
     
@@ -474,14 +487,15 @@ void AgentBookingsPage::onChangeBookingClicked()
     
     // 2. Validate status is Issued
     if (status != "Đang giữ chỗ") {
-        QMessageBox::warning(this, "Lỗi", "Chỉ có thể đổi vé có trạng thái 'Đang giữ chỗ'.");
+        statusLabel_->setText("Chỉ có thể đổi vé có trạng thái 'Đang giữ chỗ'.");
+        statusLabel_->setStyleSheet("color: #C62828;"); // Màu đỏ
         return;
     }
     
     // 3. Find booking
     Booking* booking = bookingManager_->findBookingById(bookingId.toStdString());
     if (!booking) {
-        QMessageBox::warning(this, "Lỗi", "Không tìm thấy thông tin đặt chỗ.");
+        std::cout << "Booking not found for ID: " << bookingId.toStdString() << std::endl;
         return;
     }
     
@@ -550,8 +564,8 @@ void AgentBookingsPage::onSearchByBookingId()
     QString input = bookingIdSearchEdit_->text().trimmed();
     
     if (input.isEmpty()) {
-        QMessageBox::warning(this, "Thiếu dữ liệu", 
-            "Vui lòng nhập mã đặt chỗ cần tìm.");
+        statusLabel_->setText("Vui lòng nhập mã đặt chỗ cần tìm!");
+        statusLabel_->setStyleSheet("color: #C62828;"); // Màu đỏ
         return;
     }
     
@@ -560,7 +574,7 @@ void AgentBookingsPage::onSearchByBookingId()
     // Lấy thông tin Agent hiện tại
     Account* currentUser = accountManager_->getCurrentUser();
     if (!currentUser) {
-        QMessageBox::warning(this, "Lỗi", "Không thể xác định người dùng. Vui lòng đăng nhập lại.");
+        std::cout << "Không thể xác định người dùng. Vui lòng đăng nhập lại." << std::endl;
         return;
     }
     std::string currentAgentId = currentUser->getId();
@@ -572,18 +586,16 @@ void AgentBookingsPage::onSearchByBookingId()
     model_->removeRows(0, model_->rowCount());
     
     if (!booking) {
-        QMessageBox::information(this, "Không tìm thấy", 
-            QString("Không tìm thấy đặt chỗ với mã:\n%1\n\n"
-                   "Vui lòng kiểm tra lại mã đặt chỗ.")
-                .arg(input));
+        statusLabel_->setText("Không tìm thấy vé với mã " + input + "!");
+        statusLabel_->setStyleSheet("color: #C62828;"); // Màu đỏ
         return;
     }
     
     // Kiểm tra booking có thuộc về Agent này không
     if (booking->getAgentId() != currentAgentId) {
-        QMessageBox::warning(this, "Không có quyền truy cập", 
-            "Đặt chỗ này không thuộc về bạn.\n\n"
-            "Bạn chỉ có thể xem các đặt chỗ do chính bạn tạo.");
+        std::cout << "Booking ID " << bookingId << " does not belong to current agent." << std::endl;
+        statusLabel_->setText("Không tìm thấy vé với mã " + input + "!");
+        statusLabel_->setStyleSheet("color: #C62828;"); // Màu đỏ
         return;
     }
     
@@ -591,10 +603,8 @@ void AgentBookingsPage::onSearchByBookingId()
     displayBooking(booking);
 
     // ← THÊM: Cập nhật status
-    statusLabel_->setText("✅ Tìm thấy 1 đặt chỗ");
-    
-    QMessageBox::information(this, "Tìm thấy", 
-        QString("Đã tìm thấy đặt chỗ: %1").arg(input));
+    statusLabel_->setText("Tìm thấy 1 vé với mã " + input + "!");
+    statusLabel_->setStyleSheet("color: #2E7D32;"); // Màu xanh lá
 }
 
 // ========== 2. TÌM THEO CCCD KHÁCH HÀNG ==========
@@ -603,8 +613,8 @@ void AgentBookingsPage::onSearchByPassengerId()
     QString input = passengerIdSearchEdit_->text().trimmed();
     
     if (input.isEmpty()) {
-        QMessageBox::warning(this, "Thiếu dữ liệu", 
-            "Vui lòng nhập CCCD khách hàng cần tìm.");
+        statusLabel_->setText("Vui lòng nhập CCCD khách hàng cần tìm!");
+        statusLabel_->setStyleSheet("color: #C62828;"); // Màu đỏ
         return;
     }
     
@@ -613,7 +623,7 @@ void AgentBookingsPage::onSearchByPassengerId()
     // Lấy thông tin Agent hiện tại
     Account* currentUser = accountManager_->getCurrentUser();
     if (!currentUser) {
-        QMessageBox::warning(this, "Lỗi", "Không thể xác định người dùng. Vui lòng đăng nhập lại.");
+        std::cout << "Không thể xác định người dùng. Vui lòng đăng nhập lại." << std::endl;
         return;
     }
     std::string currentAgentId = currentUser->getId();
@@ -625,12 +635,8 @@ void AgentBookingsPage::onSearchByPassengerId()
     model_->removeRows(0, model_->rowCount());
     
     if (results.empty()) {
-        QMessageBox::information(this, "Không tìm thấy", 
-            QString("Không tìm thấy đặt chỗ nào cho CCCD:\n%1\n\n"
-                   "Có thể:\n"
-                   "• CCCD không đúng\n"
-                   "• Khách hàng này chưa đặt vé với bạn")
-                .arg(input));
+        statusLabel_->setText("Không tìm thấy vé với CCCD " + input + "!");
+        statusLabel_->setStyleSheet("color: #C62828;"); // Màu đỏ
         return;
     }
     
@@ -643,10 +649,10 @@ void AgentBookingsPage::onSearchByPassengerId()
     QString("🔍 Tìm thấy %1 đặt chỗ").arg(results.size())
     );
     
-    QMessageBox::information(this, "Kết quả tìm kiếm", 
-        QString("Tìm thấy %1 đặt chỗ cho CCCD:\n%2")
-            .arg(results.size())
-            .arg(input));
+    statusLabel_->setText(
+        QString("Tìm thấy %1 vé với CCCD %2").arg(results.size()).arg(input)
+    );
+    statusLabel_->setStyleSheet("color: #2E7D32;"); // Màu xanh lá
 }
 
 void AgentBookingsPage::refreshPage() {

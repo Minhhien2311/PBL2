@@ -35,6 +35,7 @@ private:
     QCheckBox *showPasswordCheck_;
     QPushButton *loginButton_;
     QLabel* forgotPasswordLabel_;
+    QLabel* NotiLabel;
 
     // <--- Sửa lỗi: Thêm con trỏ tới Manager
     AccountManager* accountManager_; 

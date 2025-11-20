@@ -11,6 +11,7 @@ class PassengerManager;
 class QLabel;
 class QFrame;
 class QGridLayout;
+class QGroupBox;
 
 class BookingDetailsDialog : public QDialog
 {
@@ -25,10 +26,10 @@ public:
 
 private:
     void setupUi();
-    QFrame* createInfoFrame(const QString& title, QLayout* contentLayout);
     QGridLayout* createBookingInfoLayout();
     QGridLayout* createFlightInfoLayout();
     QGridLayout* createPassengerInfoLayout();
+    QGroupBox* createInfoFrame(const QString& title, QLayout* contentLayout);
     void addInfoRow(QGridLayout* layout, int row, 
                    const QString& labelText, 
                    const QString& valueText, 

@@ -50,11 +50,11 @@ AgentInterface::AgentInterface(AccountManager* accManager,
 
     // Sidebar
     sidebar_ = new QFrame(this);
-    sidebar_->setFixedWidth(180);
+    sidebar_->setFixedWidth(200);
     sidebar_->setStyleSheet("background-color: #133e87;");
 
     auto *sideLay = new QVBoxLayout(sidebar_);
-    sideLay->setContentsMargins(16,20,16,16);
+    sideLay->setContentsMargins(0, 20, 0, 0);
     sideLay->setSpacing(8);
 
     // Thông tin user
@@ -82,20 +82,23 @@ AgentInterface::AgentInterface(AccountManager* accManager,
             background: transparent;
             border: none;
             text-align: left;
-            padding: 8px;
+            padding: 12px;
         }
         QPushButton:hover {
-            background-color: #6f99c6;
-            border-radius: 6px;
+            background-color: #daeeff;
+            color: #133e87; 
+            border-radius: 0px;
         }
         QPushButton:checked {
-            background-color: #6f99c6;
+            color: white;
+            border-left: 4px solid #daeeff;
+            border-radius: 0px;
         }
     )";
 
     // Header NGHIỆP VỤ
     auto *header1 = new QLabel("NGHIỆP VỤ", sidebar_);
-    header1->setStyleSheet("color: #6f99c6; font-weight: bold; background: transparent;");
+    header1->setStyleSheet("color: #6f99c6; font-weight: bold; background: transparent; margin-left: 20px;");
     menuLayout->addWidget(header1);
 
     // Các nút nghiệp vụ
@@ -117,7 +120,7 @@ AgentInterface::AgentInterface(AccountManager* accManager,
 
     // --- THỐNG KÊ ---
     auto *header2 = new QLabel("THỐNG KÊ", sidebar_);
-    header2->setStyleSheet("color: #6f99c6; font-weight: bold; background: transparent; margin-top: 10px;");
+    header2->setStyleSheet("color: #6f99c6; font-weight: bold; background: transparent; margin-top: 10px; margin-left: 20px;");
     menuLayout->addWidget(header2);
 
     // Thêm các nút thống kê
@@ -135,7 +138,7 @@ AgentInterface::AgentInterface(AccountManager* accManager,
 
     // Header TÀI KHOẢN
     auto *header3 = new QLabel("TÀI KHOẢN", sidebar_);
-    header3->setStyleSheet("color: #6f99c6; font-weight: bold; background: transparent;");
+    header3->setStyleSheet("color: #6f99c6; font-weight: bold; background: transparent; margin-left: 20px;");
     menuLayout->addWidget(header3);
 
     btnAccounts_ = new QPushButton("Thông tin tài khoản");
@@ -153,15 +156,17 @@ AgentInterface::AgentInterface(AccountManager* accManager,
         QPushButton {
             color: white;
             background: transparent;
-            border: 1px solid #6f99c6;
+            border: 2px solid #daeeff;
             border-radius: 6px;
             padding: 6px;
+            margin: 0px 20px 20px 20px; /* Margin: Top Right Bottom Left */
         }
         QPushButton:hover {
             background-color: #6f99c6;
             color: white;
         }
     )");
+
     sideLay->addWidget(logoutBtn_);
 
     root->addWidget(sidebar_);
