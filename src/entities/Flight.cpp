@@ -25,7 +25,7 @@ Flight::Flight(const std::string& routeId, // <-- Đã đổi
       departureTime(departureTime), 
       arrivalDate(arrivalDate),     
       arrivalTime(arrivalTime),     
-      availableSeats(totalCapacity),
+      availableSeats(availableSeats),
       totalCapacity(totalCapacity),
       fareEconomy(fareEconomy),
       fareBusiness(fareBusiness) {}
