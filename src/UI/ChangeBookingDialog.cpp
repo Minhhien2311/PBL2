@@ -302,7 +302,7 @@
 //     QHBoxLayout* bottomLayout = new QHBoxLayout(bottomBar);
 //     bottomLayout->setContentsMargins(0,8,0,0);
 
-//     QPushButton* cancelBtn = new QPushButton("Hủy đặt vé");
+//     QPushButton* cancelBtn = new QPushButton("Hủy đổi vé");
 //     cancelBtn->setStyleSheet(
 //         "QPushButton{ background:#b5c7d7; color:white; padding:8px 12px; border-radius:6px; font-weight:600; }"
 //         "QPushButton:hover{ background:#9eb2c4; }"
@@ -976,7 +976,7 @@
 
 //     bottomLayout->setContentsMargins(0, 10, 0, 0); // ĐÃ SỬA: Giảm margin top từ 20 xuống 10
 
-//     QPushButton* cancelBtn = new QPushButton("Hủy đặt vé");
+//     QPushButton* cancelBtn = new QPushButton("Hủy đổi vé");
 //     cancelBtn->setStyleSheet(
 //         "QPushButton { "
 //         "  background: #b5c7d7; "
@@ -1705,7 +1705,7 @@ void ChangeBookingDialog::setupUi()
     QHBoxLayout* bottomLayout = new QHBoxLayout(bottomBar);
     bottomLayout->setContentsMargins(0, 0, 0, 0);
 
-    QPushButton* cancelBtn = new QPushButton("Hủy đặt vé");
+    QPushButton* cancelBtn = new QPushButton("Hủy đổi vé");
     cancelBtn->setStyleSheet(
         "QPushButton { "
         "  background: #b5c7d7; "
