@@ -13,6 +13,7 @@
 #include <QMessageBox>
 #include <QApplication>
 #include <QSpacerItem>
+#include <QTimer>
 
 LoginPage::LoginPage(AccountManager* accManager, QWidget *parent)
     : QWidget(parent),
@@ -27,20 +28,25 @@ void LoginPage::setupUi()
 {
     // ---------- NỀN MÀU XANH RẤT NHẠT ----------
     this->setAutoFillBackground(true);
+    // Tinh chỉnh lại CSS một chút cho Input và Button đẹp hơn
     this->setStyleSheet(
         "QWidget { background: #ffffffff; }"
-        "#AppTitle { font-size: 26px; font-weight: 700; color: #133e87; background: transparent; }"
-        "#LoginBox { background: white; border: 1px solid #133e87; border-radius: 12px; }"
-        "#LoginHeader { background: transparent; font-size: 40px; font-weight: 600; color: #133e87; }"
-        "#LoginBoxTitle { font-size: 14px; font-weight: 600; color: #133e87; }"
-        "QLineEdit { height: 30px; background: #f5f8fb; border: 1px solid #133e87; border-radius: 3px; padding-left: 10px; }"
-        "QPushButton#LoginButton { background: #608bc1; color: white; height: 40px; border-radius: 3px; font-weight: 600; font-size: 12px; }"
+        "#AppTitle { font-size: 26px; font-weight: 750; color: #133e87; background: transparent; margin-top: 20px; margin-bottom: 20px; }"
+        "#LoginBox { background: white; border: 1.6px solid #133e87; border-radius: 12px; }"
+        "#LoginHeader { background: transparent; font-size: 40px; font-weight: 700; color: #133e87; }"
+        "#LoginBoxTitle { font-size: 18px; font-weight: 600; color: #133e87; }"
+        // Input: tăng chiều cao lên 36px cho dễ nhập
+        "QLineEdit { height: 36px; background: #f5f8fb; border: 1.2px solid #133e87; border-radius: 4px; padding-left: 10px; font-size: 13px; }"
+        "QLineEdit:focus { border: 1.5px solid #133e87; background: #ffffff; }"
+        // Button: tăng chiều cao, font chữ
+        "QPushButton#LoginButton { background: #608bc1; color: white; height: 30px; border-radius: 4px; font-weight: 650; font-size: 14px; }"
         "QPushButton#LoginButton:hover { background: #476c9a; }"
-        "QLabel#ForgotLabel { color: #133e87; }"
-        "QCheckBox { color: #133e87; }"
-        "QCheckBox::indicator { width: 12px; height: 12px; border-radius: 2px; }"
-        "QCheckBox::indicator:unchecked { border: 0.5px solid #133e87; background: white; }"
-        "QCheckBox::indicator:checked { border: 0.5px solid #133e87; background: #608bc1; }"
+        "QPushButton#LoginButton:pressed { background: #365a9e; }"
+        "QLabel#ForgotLabel { color: #133e87; font-size: 13px; }"
+        "QCheckBox { color: #133e87; font-size: 13px; spacing: 8px; }"
+        "QCheckBox::indicator { width: 10px; height: 10px; border-radius: 10px; font-weight: 550; }"
+        "QCheckBox::indicator:unchecked { border: 1.2px solid #133e87; background: white; }"
+        "QCheckBox::indicator:checked { border: 1.2px solid #133e87; background: #608bc1; }"
     );
 
     // ---------- LAYOUT GỐC: căn giữa ngang ----------
@@ -51,35 +57,32 @@ void LoginPage::setupUi()
     // ---------- CỘT CHÍNH ----------
     QVBoxLayout *mainLayout = new QVBoxLayout();
     mainLayout->setAlignment(Qt::AlignCenter);
-    mainLayout->setSpacing(50);
+    mainLayout->setSpacing(30); // Khoảng cách giữa tiêu đề to và box đăng nhập
 
-    // Tiêu đề
+    // Tiêu đề App
     QLabel *appTitle = new QLabel("PHẦN MỀM QUẢN LÝ BÁN VÉ MÁY BAY", this);
     appTitle->setObjectName("AppTitle");
     appTitle->setAlignment(Qt::AlignCenter);
     mainLayout->addWidget(appTitle);
 
     // ---------- HỘP ĐĂNG NHẬP ----------
-    // Hộp ngoài: bo góc, có viền xanh
     QFrame *loginBox = new QFrame(this);
     loginBox->setObjectName("LoginBox");
-    loginBox->setFixedSize(460, 360);
+    loginBox->setFixedSize(460, 400); // Tăng chiều cao lên xíu cho thoáng (360 -> 400)
     loginBox->setFrameShape(QFrame::StyledPanel);
 
     // layout của hộp
     QVBoxLayout *boxLayout = new QVBoxLayout(loginBox);
-    boxLayout->setContentsMargins(0, 0, 0, 12);       // để header dính mép trên
+    boxLayout->setContentsMargins(0, 0, 0, 15);       
     boxLayout->setSpacing(0);
 
     // ---------- HEADER TRẮNG BÊN TRONG ----------
-    // ở ảnh 1: phần "Đăng nhập" nằm trong 1 thanh trên cùng có đường kẻ dưới
     QWidget *header = new QWidget(loginBox);
     header->setObjectName("LoginHeader");
     header->setFixedHeight(58);
 
     QVBoxLayout *headerLayout = new QVBoxLayout(header);
-    // left top right bottom    
-    headerLayout->setContentsMargins(0, 10, 0, 10);  // <-- 10px trên dưới
+    headerLayout->setContentsMargins(0, 10, 0, 10); 
     headerLayout->setSpacing(0);
 
     QLabel *title = new QLabel("Đăng nhập", header);
@@ -87,8 +90,7 @@ void LoginPage::setupUi()
     title->setAlignment(Qt::AlignCenter);
     headerLayout->addWidget(title);
 
-
-    // đường kẻ ngang
+    // Đường kẻ ngang
     QFrame *line = new QFrame(loginBox);
     line->setFrameShape(QFrame::HLine);
     line->setFrameShadow(QFrame::Plain);
@@ -97,87 +99,67 @@ void LoginPage::setupUi()
     boxLayout->addWidget(header);
     boxLayout->addWidget(line);
 
-    // ---------- PHẦN NỘI DUNG FORM ----------
+    // ---------- PHẦN NỘI DUNG FORM (QUAN TRỌNG NHẤT) ----------
     QWidget *content = new QWidget(loginBox);
     QVBoxLayout *contentLayout = new QVBoxLayout(content);
-    contentLayout->setContentsMargins(36, 22, 36, 0);
-    contentLayout->setSpacing(14);
+    
+    // THỦ THUẬT CĂN THẲNG HÀNG:
+    // Set margin trái phải là 45px. Tất cả các widget bên trong sẽ tự động cách lề 45px.
+    // Input và Button sẽ tự giãn ra cho đầy phần còn lại -> Bằng nhau chằn chặn.
+    contentLayout->setContentsMargins(45, 36, 45, 10); 
+    contentLayout->setSpacing(15); // Khoảng cách giữa các ô input
 
-    // Username
+    // 1. Username
     usernameEdit_ = new QLineEdit(content);
     usernameEdit_->setPlaceholderText("Username");
-    usernameEdit_->setFixedWidth(350);
-    // contentLayout->addWidget(usernameEdit_);
-    {
-        QHBoxLayout *row = new QHBoxLayout();
-        row->addStretch();
-        row->addWidget(usernameEdit_);
-        row->addStretch();
-        contentLayout->addLayout(row);
-    }
+    // Bỏ setFixedWidth -> Để layout tự co giãn
+    contentLayout->addWidget(usernameEdit_);
 
-    // Password
+    // 2. Password
     passwordEdit_ = new QLineEdit(content);
     passwordEdit_->setPlaceholderText("Password");
     passwordEdit_->setEchoMode(QLineEdit::Password);
-    passwordEdit_->setFixedWidth(350);
-    
-    {
-        QHBoxLayout *row = new QHBoxLayout();
-        row->addStretch();
-        row->addWidget(passwordEdit_);
-        row->addStretch();
-        contentLayout->addLayout(row);
-    }
+    contentLayout->addWidget(passwordEdit_);
 
+    // 3. Thông báo lỗi (Ẩn/Hiện)
     NotiLabel = new QLabel("", content);
-    NotiLabel->setStyleSheet("color: #ff5757; font-weight: 650; background: transparent; margin-left: 12px;");
+    // Style: Chữ đỏ, in đậm
+    NotiLabel->setStyleSheet("color: #d32f2f; font-weight: 600; font-size: 12px;");
+    NotiLabel->setWordWrap(true); // Tự xuống dòng nếu lỗi dài
+    NotiLabel->setVisible(false); // Mặc định ẩn
     contentLayout->addWidget(NotiLabel);
 
-    // Checkbox hiển thị mật khẩu — căn thẳng với ô nhập
-    QHBoxLayout *checkRow = new QHBoxLayout();
-    checkRow->setContentsMargins(0, 0, 0, 0);
-
-    // giống input: stretch nhỏ bên trái
-    checkRow->addSpacing(10);
-
+    // 4. Checkbox hiển thị mật khẩu
     showPasswordCheck_ = new QCheckBox("Hiển thị mật khẩu", content);
-    checkRow->addWidget(showPasswordCheck_);
+    showPasswordCheck_->setCursor(Qt::PointingHandCursor);
+    // Checkbox tự động nằm bên trái (AlignLeft mặc định của QVBoxLayout)
+    contentLayout->addWidget(showPasswordCheck_);
 
-    checkRow->addStretch();
-    contentLayout->addLayout(checkRow);
+    // Khoảng cách nhỏ trước nút bấm
+    contentLayout->addSpacing(8);
 
-
-    // Nút đăng nhập
+    // 5. Nút đăng nhập
     loginButton_ = new QPushButton("Đăng nhập", content);
     loginButton_->setObjectName("LoginButton");
-    loginButton_->setFixedWidth(180);
-    loginButton_->setFixedHeight(32);
-    {
-        QHBoxLayout *row = new QHBoxLayout();
-        row->setContentsMargins(0, 20, 0, 0); // thêm 20px phía trên nút
-        row->addStretch();
-        row->addWidget(loginButton_);
-        row->addStretch();
-        contentLayout->addLayout(row);
-    }
+    loginButton_->setCursor(Qt::PointingHandCursor);
+    contentLayout->addWidget(loginButton_);
 
-    // "Quên mật khẩu?"
-    // Dùng HTML để tạo một cái link
+    // 6. "Quên mật khẩu?"
     forgotPasswordLabel_ = new QLabel(R"(<a href="#">Quên mật khẩu?</a>)", content);
-
-    // Báo cho QLabel biết là phải xử lý việc nhấn vào link
     forgotPasswordLabel_->setTextInteractionFlags(Qt::TextBrowserInteraction);
-
     forgotPasswordLabel_->setObjectName("ForgotLabel");
-    forgotPasswordLabel_->setAlignment(Qt::AlignCenter);
-    forgotPasswordLabel_->setStyleSheet("QLabel#ForgotLabel { color: #133e87; text-decoration: underline; }");
+    forgotPasswordLabel_->setAlignment(Qt::AlignCenter); // Giữ căn giữa cho dòng này
+    forgotPasswordLabel_->setCursor(Qt::PointingHandCursor);
+    forgotPasswordLabel_->setStyleSheet("QLabel#ForgotLabel { color: #133e87; text-decoration: none; font-size: 13px; } QLabel#ForgotLabel:hover { text-decoration: underline; }");
+    
     contentLayout->addWidget(forgotPasswordLabel_);
 
     contentLayout->addStretch();
+
+    // Thêm content vào box layout
     boxLayout->addWidget(content);
 
-    // căn giữa hộp trong main
+    // Căn giữa hộp trong layout chính
     mainLayout->addWidget(loginBox, 0, Qt::AlignHCenter);
     mainLayout->addStretch();
 
@@ -191,12 +173,22 @@ void LoginPage::setupConnections()
     connect(loginButton_, &QPushButton::clicked, this, &LoginPage::onLoginClicked);
     connect(showPasswordCheck_, &QCheckBox::toggled, this, &LoginPage::onShowPasswordToggled);
     connect(forgotPasswordLabel_, &QLabel::linkActivated, this, &LoginPage::onForgotPasswordClicked);
+    // Thêm: Nhấn Enter ở ô pass cũng login luôn cho tiện
+    connect(passwordEdit_, &QLineEdit::returnPressed, this, &LoginPage::onLoginClicked);
 }
 
 void LoginPage::onLoginClicked()
 {
     QString username = usernameEdit_->text();
     QString password = passwordEdit_->text();
+    
+    // Clear thông báo lỗi cũ
+    NotiLabel->setText("");
+
+    if (username.isEmpty() || password.isEmpty()) {
+        NotiLabel->setText("Vui lòng nhập đầy đủ thông tin.");
+        return;
+    }
 
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
@@ -210,7 +202,9 @@ void LoginPage::onLoginClicked()
         
         emit loginSuccess(role, "fake_token");
     } else {
-        NotiLabel->setText("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
+        NotiLabel->setText("Tên đăng nhập hoặc mật khẩu không đúng!");
+        NotiLabel->setVisible(true);
+        QTimer::singleShot(5000, NotiLabel, &QWidget::hide);
     }
 
     QApplication::restoreOverrideCursor();
