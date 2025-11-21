@@ -206,7 +206,8 @@ void ChangeBookingDialog::setupUi()
     // flight info
     flightInfoText_ = new QTextEdit(step2Container_);
     flightInfoText_->setReadOnly(true);
-    flightInfoText_->setMinimumHeight(80);
+    flightInfoText_->setFixedHeight(55);
+
     flightInfoText_->setStyleSheet("background:#FAFBFF; border:1px solid #e6f0fb; border-radius:6px; padding:8px; font-size:13px;");
     s2->addWidget(flightInfoText_);
 
@@ -256,10 +257,33 @@ void ChangeBookingDialog::setupUi()
     frameLayout->addWidget(scrollArea);
     s2->addWidget(seatMapFrame, 1);
 
-    // legend & selected display
-    legendLabel_ = new QLabel("Chú thích:  Hạng phổ thông (xanh)  Hạng thương gia (vàng)  Không thể chọn (đỏ)  Đã đặt (xám)");
-    legendLabel_->setStyleSheet("color:#666; font-size:12px;");
-    s2->addWidget(legendLabel_);
+    QHBoxLayout* legendLayout = new QHBoxLayout();
+    legendLayout->setAlignment(Qt::AlignCenter);
+    legendLayout->setSpacing(15);
+
+auto addLegend = [&](QString color, QString text) {
+    QHBoxLayout* itemLayout = new QHBoxLayout();
+    itemLayout->setSpacing(5);
+
+    QLabel* box = new QLabel();
+    box->setFixedSize(14, 14);
+    box->setStyleSheet("background:" + color + "; border:none; border-radius:2px;");
+
+    QLabel* lbl = new QLabel(text);
+    lbl->setStyleSheet("font-size:11px; color:#555;");
+
+    itemLayout->addWidget(box);
+    itemLayout->addWidget(lbl);
+    legendLayout->addLayout(itemLayout);
+};
+
+addLegend("#90EE90", "Hạng phổ thông");
+addLegend("#FFD700", "Hạng thương gia");
+addLegend("#FF6B6B", "Không thể chọn");
+addLegend("#D3D3D3", "Đã đặt");
+
+s2->addLayout(legendLayout);
+
 
     selectedSeatDisplayLabel_ = new QLabel("Hiện chưa chọn ghế");
     selectedSeatDisplayLabel_->setAlignment(Qt::AlignCenter);
