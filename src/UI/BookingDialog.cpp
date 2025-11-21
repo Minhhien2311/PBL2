@@ -78,7 +78,7 @@ BookingDialog::BookingDialog(Flight* flight,
 void BookingDialog::setupUi()
 {
     auto *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setContentsMargins(50, 0, 50, 20);
     mainLayout->setSpacing(0);
     
     setupProgressHeader();
@@ -93,11 +93,12 @@ void BookingDialog::setupUi()
     
     mainLayout->addWidget(stackedWidget_);
     
+    // SỬA Ở ĐÂY
     // Footer
     auto *footerWidget = new QWidget(this);
     footerWidget->setStyleSheet("background-color: #FFFFFF; border: none;");
     auto *footerLayout = new QHBoxLayout(footerWidget);
-    footerLayout->setContentsMargins(40, 20, 40, 20); // Đã sửa để căn lề 40px
+    footerLayout->setContentsMargins(0, 0, 0, 0); // Đã sửa để căn lề 40px
 
     // --- CẤU HÌNH CÁC NÚT (Sửa style cho backBtn/nextBtn/confirmBtn) ---
     // Nút Hủy đặt vé (cố định bên trái)
@@ -191,14 +192,14 @@ void BookingDialog::setupProgressHeader() {
     QHBoxLayout* layout = new QHBoxLayout(header);
     layout->setAlignment(Qt::AlignCenter);
     layout->setSpacing(0);
-    layout->setContentsMargins(0, 15, 0, 10);
+    layout->setContentsMargins(0, 20, 0, 10);
 
     auto createLabel = [](const QString& text) {
         QLabel* lbl = new QLabel(text);
-        lbl->setFixedSize(30, 30);
+        lbl->setFixedSize(20, 20);
         lbl->setAlignment(Qt::AlignCenter);
         lbl->setStyleSheet(
-            "border-radius: 15px; "
+            "border-radius: 10px; "
             "font-weight: bold; "
             "font-size: 14px; "
             "background-color: white; "
@@ -210,7 +211,7 @@ void BookingDialog::setupProgressHeader() {
     // Create connecting lines
     auto createLine = []() {
         QWidget* line = new QWidget;
-        line->setFixedSize(100, 3);
+        line->setFixedSize(120, 3);
         line->setStyleSheet("background-color: #FFFFFF;");
         return line;
     };
@@ -237,17 +238,17 @@ void BookingDialog::updateStepIndicator() {
         "background-color: #74cc00; "
         "color: white; "
         "border: none; "
-        "border-radius: 15px; "
+        "border-radius: 10px; "
         "font-weight: bold; "
-        "font-size: 14px;";
+        "font-size: 12.5px;";
     
     QString inactiveStyle = 
         "background-color: #cbdceb; "
         "color: white; "
         "border: none; "
-        "border-radius: 15px; "
+        "border-radius: 10px; "
         "font-weight: bold; "
-        "font-size: 14px;";
+        "font-size: 12.5px;";
     
     QString lineActive = "background-color: #74cc00;";
     QString lineInactive = "background-color: #cbdceb;";
@@ -284,7 +285,7 @@ void BookingDialog::setupPage1_FlightInfo() {
     page->setStyleSheet("background-color: #FFFFFF; border: none;");
     
     QVBoxLayout* layout = new QVBoxLayout(page);
-    layout->setContentsMargins(40, 20, 40, 20);
+    layout->setContentsMargins(0, 20, 0, 20);
     layout->setSpacing(25);
 
     QLabel* title = new QLabel("Xác nhận thông tin chuyến bay");
@@ -360,7 +361,7 @@ void BookingDialog::setupPage2_PassengerInfo() {
     page->setStyleSheet("background-color: #FFFFFF; border: none;");
     
     QVBoxLayout* layout = new QVBoxLayout(page);
-    layout->setContentsMargins(50, 20, 50, 20);
+    layout->setContentsMargins(0, 20, 0, 20);
     layout->setSpacing(25);
 
     QLabel* title = new QLabel("Nhập thông tin hành khách");
@@ -379,7 +380,7 @@ void BookingDialog::setupPage2_PassengerInfo() {
     QFormLayout* form = new QFormLayout(formContainer);
     form->setSpacing(20);
     form->setLabelAlignment(Qt::AlignLeft);
-    form->setContentsMargins(30, 10, 30, 10);
+    form->setContentsMargins(0, 10, 0, 10);
 
     QString inputStyle = 
         "QLineEdit { "
@@ -466,7 +467,7 @@ void BookingDialog::setupPage3_SeatSelection() {
     page->setStyleSheet("background-color: #FFFFFF; border: none;");
     
     QVBoxLayout* layout = new QVBoxLayout(page);
-    layout->setContentsMargins(30, 20, 30, 20);
+    layout->setContentsMargins(0, 20, 0, 20);
     layout->setSpacing(15);
 
     // --- 1. TIÊU ĐỀ ---

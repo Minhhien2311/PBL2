@@ -71,11 +71,6 @@ void AdminTicketsReportPage::setupUI()
     topBarLayout->setContentsMargins(24, 16, 24, 12);
     topBarLayout->setSpacing(12);
 
-    // --- Hàng 1: Tiêu đề ---
-    QLabel* pageTitle = new QLabel("Thống kê đặt vé", topBar);
-    pageTitle->setProperty("class", "PageTitle");
-    topBarLayout->addWidget(pageTitle);
-
     // --- Hàng 2: KHUNG CHỌN KHOẢNG THỜI GIAN (BO VIỀN TRẮNG) ---
     QWidget* dateBox = new QWidget;
     QVBoxLayout* dateBoxLayout = new QVBoxLayout(dateBox);

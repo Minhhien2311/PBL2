@@ -12,6 +12,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QFrame>
+#include <QGroupBox> 
 
 namespace {
     QString formatVietnamCurrency(int price) {
@@ -46,25 +47,27 @@ BookingDetailsDialog::BookingDetailsDialog(Booking* booking,
     Q_ASSERT(booking_ != nullptr);
     Q_ASSERT(flightManager_ != nullptr);
     Q_ASSERT(passengerManager_ != nullptr);
+    Q_ASSERT(accountManager_ != nullptr);
+
+    setWindowTitle("Chi tiết đặt chỗ");
+    setFixedWidth(700);
     
-    setWindowTitle("Chi tiết thông tin đặt chỗ");
-    setMinimumWidth(500);  // Giảm từ 600 xuống 500
-    setMaximumWidth(650);  // Giảm từ 800 xuống 650
-    
-    // Style tổng thể với nền trắng đơn giản
     setStyleSheet(
         "QDialog { background: white; }"
         "QLabel { border: none; }"
     );
     
     setupUi();
+
+    // Tự động điều chỉnh kích thước dựa trên nội dung
+    adjustSize();
 }
 
 void BookingDetailsDialog::setupUi()
 {
     auto *mainLayout = new QVBoxLayout(this);
-    mainLayout->setSpacing(20);  // Giảm spacing
-    mainLayout->setContentsMargins(25, 20, 25, 20);  // Giảm margins
+    mainLayout->setSpacing(20); 
+    mainLayout->setContentsMargins(50, 20, 50, 20); 
     
     // Tiêu đề chính
     auto *titleLabel = new QLabel("Chi tiết thông tin đặt chỗ", this);
@@ -72,10 +75,9 @@ void BookingDetailsDialog::setupUi()
         "QLabel {"
         "   color: #123B7A;"
         "   font-weight: bold;"
-        "   font-size: 20px;"  // Giảm từ 24px xuống 20px
+        "   font-size: 20px;" 
         "   background: transparent;"
         "   border: none;"
-        "   margin-bottom: 5px;"
         "}"
     );
     titleLabel->setAlignment(Qt::AlignCenter);
@@ -93,22 +95,21 @@ void BookingDetailsDialog::setupUi()
     auto *passengerFrame = createInfoFrame("Thông tin hành khách", createPassengerInfoLayout());
     mainLayout->addWidget(passengerFrame);
 
-    // Nút đóng
-    auto *buttonLayout = new QHBoxLayout();
-    buttonLayout->addStretch();
-    
+    // Nút Đóng (Full Width)
+    mainLayout->addSpacing(10);
+
     auto *closeButton = new QPushButton("Đóng", this);
+    closeButton->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    
     closeButton->setStyleSheet(
         "QPushButton {"
-        "   background: #4472C4;"
+        "   background: #608bc1;"
         "   color: white;"
         "   border: none;"
         "   border-radius: 6px;"
-        "   height: 36px;"
-        "   padding: 0 35px;"
+        "   height: 20px;" 
         "   font-weight: bold;"
-        "   font-size: 14px;"
-        "   min-width: 100px;"
+        "   font-size: 13px;"
         "}"
         "QPushButton:hover {"
         "   background: #365a9e;"
@@ -117,60 +118,48 @@ void BookingDetailsDialog::setupUi()
     closeButton->setCursor(Qt::PointingHandCursor);
     connect(closeButton, &QPushButton::clicked, this, &QDialog::accept);
     
-    buttonLayout->addWidget(closeButton);
-    buttonLayout->addStretch();
-    
-    mainLayout->addLayout(buttonLayout);
+    mainLayout->addWidget(closeButton);
 }
 
-QFrame* BookingDetailsDialog::createInfoFrame(const QString& title, QLayout* contentLayout)
+QGroupBox* BookingDetailsDialog::createInfoFrame(const QString& title, QLayout* contentLayout)
 {
-    auto *frame = new QFrame(this);
-    frame->setStyleSheet(
-        "QFrame {"
-        "   background: #F8FAFF;"
-        "   border: 2px solid #94B8E8;"  // Viền xanh rõ hơn
-        "   border-radius: 8px;"
+    auto *groupBox = new QGroupBox(title, this);
+    
+    // Thiết lập kiểu dáng cho QGroupBox
+    groupBox->setStyleSheet(
+        "QGroupBox {"
+        "   background: white;"
+        "   border: 1px solid #608bc1;"
+        "   border-radius: 6px;"
+        "   margin-top: 10px;" 
+        "   font-size: 13px;"
+        "   font-weight: bold;" // <-- Dòng này sẽ làm tiêu đề in đậm chắc chắn
+        "}"
+        "QGroupBox::title {"
+        "   font-weight: 650;"
+        "   subcontrol-origin: margin;"
+        "   subcontrol-position: top left;"
+        "   left: 15px;" 
+        "   padding: 0 8px;"
+        "   color: #1E4B8C;" 
+        "   background-color: white;" 
         "}"
     );
     
-    auto *frameLayout = new QVBoxLayout(frame);
-    frameLayout->setContentsMargins(15, 15, 15, 15);
+    auto *frameLayout = new QVBoxLayout(groupBox);
+    frameLayout->setContentsMargins(30, 15, 30, 12); 
     frameLayout->setSpacing(8);
     
-    // Tiêu đề phần
-    auto *titleLabel = new QLabel(title, this);
-    titleLabel->setStyleSheet(
-        "QLabel {"
-        "   color: #1E4B8C;"
-        "   font-weight: bold;"
-        "   font-size: 16px;"  // Giảm từ 18px xuống 16px
-        "   background: transparent;"
-        "   border: none;"
-        "   margin-bottom: 5px;"
-        "}"
-    );
-    frameLayout->addWidget(titleLabel);
-    
-    // Đường phân cách nhỏ dưới tiêu đề
-    auto *separator = new QFrame(this);
-    separator->setFrameShape(QFrame::HLine);
-    separator->setFrameShadow(QFrame::Sunken);
-    separator->setStyleSheet("background-color: #94B8E8; color: #94B8E8;");
-    separator->setMaximumHeight(1);
-    frameLayout->addWidget(separator);
-    
-    // Nội dung
     frameLayout->addLayout(contentLayout);
     
-    return frame;
+    return groupBox;
 }
 
 QGridLayout* BookingDetailsDialog::createBookingInfoLayout()
 {
     auto *layout = new QGridLayout();
-    layout->setVerticalSpacing(8);   // Giảm spacing
-    layout->setHorizontalSpacing(20); // Giảm spacing
+    layout->setVerticalSpacing(8);  
+    layout->setHorizontalSpacing(20); 
     
     int row = 0;
     
@@ -205,25 +194,21 @@ QGridLayout* BookingDetailsDialog::createBookingInfoLayout()
 QGridLayout* BookingDetailsDialog::createFlightInfoLayout()
 {
     auto *layout = new QGridLayout();
-    layout->setVerticalSpacing(8);   // Giảm spacing
-    layout->setHorizontalSpacing(20); // Giảm spacing
+    layout->setVerticalSpacing(8);  
+    layout->setHorizontalSpacing(20); 
     
     int row = 0;
     
-    // Lấy thông tin chuyến bay
     Flight* flight = flightManager_->findFlightById(booking_->getFlightId());
     if (flight) {
         Route* route = flightManager_->findRouteById(flight->getRouteId());
         
-        // Số hiệu chuyến bay
         addInfoRow(layout, row++, "Số hiệu chuyến bay", 
                    QString::fromStdString(flight->getFlightNumber()), true, "#1E4B8C");
         
-        // Hãng bay
         addInfoRow(layout, row++, "Hãng bay", 
                    QString::fromStdString(flight->getAirline()), false, "#2A5A8A");
         
-        // Lộ trình
         if (route) {
             QString routeStr = QString("%1 → %2")
                 .arg(QString::fromStdString(route->getDepartureAirport()))
@@ -233,13 +218,11 @@ QGridLayout* BookingDetailsDialog::createFlightInfoLayout()
             addInfoRow(layout, row++, "Lộ trình", "Không xác định", false, "#C62828");
         }
         
-        // Thời gian khởi hành
         QString departureStr = QString("%1 %2")
             .arg(QString::fromStdString(flight->getDepartureDate()))
             .arg(QString::fromStdString(flight->getDepartureTime()));
         addInfoRow(layout, row++, "Thời gian khởi hành", departureStr, false, "#2A5A8A");
         
-        // Thời gian hạ cánh (dự kiến)
         QString arrivalStr = QString("%1 %2")
             .arg(QString::fromStdString(flight->getArrivalDate()))
             .arg(QString::fromStdString(flight->getArrivalTime()));
@@ -255,32 +238,26 @@ QGridLayout* BookingDetailsDialog::createFlightInfoLayout()
 QGridLayout* BookingDetailsDialog::createPassengerInfoLayout()
 {
     auto *layout = new QGridLayout();
-    layout->setVerticalSpacing(8);   // Giảm spacing
-    layout->setHorizontalSpacing(20); // Giảm spacing
+    layout->setVerticalSpacing(8); 
+    layout->setHorizontalSpacing(20); 
     
     int row = 0;
     
-    // Lấy thông tin hành khách từ PassengerManager
     Passenger* passenger = passengerManager_->findPassengerById(booking_->getPassengerId());
     
     if (passenger) {
-        // CCCD hành khách
         addInfoRow(layout, row++, "CCCD hành khách", 
                    QString::fromStdString(passenger->getId()), true, "#1E4B8C");
         
-        // Họ và tên
         addInfoRow(layout, row++, "Họ và tên", 
                    QString::fromStdString(passenger->getFullName()), false, "#2A5A8A");
         
-        // Ngày sinh
         addInfoRow(layout, row++, "Ngày sinh", 
                    QString::fromStdString(passenger->getDateOfBirth()), false, "#2A5A8A");
         
-        // Số điện thoại
         addInfoRow(layout, row++, "Số điện thoại", 
                    QString::fromStdString(passenger->getPhoneNumber()), false, "#2A5A8A");
     } else {
-        // Fallback: chỉ hiển thị ID nếu không tìm thấy thông tin đầy đủ
         addInfoRow(layout, row++, "CCCD hành khách", 
                    QString::fromStdString(booking_->getPassengerId()), true, "#1E4B8C");
         
@@ -298,26 +275,29 @@ void BookingDetailsDialog::addInfoRow(QGridLayout* layout, int row,
                                      bool valueBold,
                                      const QString& valueColor)
 {
-    // Label (nhãn) - Màu xanh đậm và in đậm
+    // Label (nhãn)
     auto *label = new QLabel(labelText, this);
     label->setStyleSheet(
         "QLabel {"
-        "   color: #1E4B8C;"
-        "   font-weight: bold;"
-        "   font-size: 13px;"  // Giảm từ 14px xuống 13px
+        "   color: #133e87;"
+        "   font-weight: 600;" // Label bên trái giữ nguyên độ đậm vừa phải
+        "   font-size: 12px;" 
         "   background: transparent;"
         "   border: none;"
         "}"
     );
     layout->addWidget(label, row, 0);
     
-    // Value (giá trị) - Màu xanh với các cấp độ khác nhau
+    // Value (giá trị)
     auto *value = new QLabel(valueText, this);
     
+    // [SỬA Ở ĐÂY] Đổi "500" thành "bold" để in đậm rõ ràng
+    QString fontWeight = valueBold ? "bold" : "normal";
+
     QString style = "QLabel {"
                    "   color: " + valueColor + ";"
-                   "   font-weight: " + (valueBold ? "bold" : "normal") + ";"
-                   "   font-size: 13px;"  // Giảm từ 14px xuống 13px
+                   "   font-weight: " + fontWeight + ";" 
+                   "   font-size: 12px;" 
                    "   background: transparent;"
                    "   border: none;"
                    "}";

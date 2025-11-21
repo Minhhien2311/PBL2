@@ -1,6 +1,5 @@
 #include "RoutesPage.h"
-
-// <--- Sửa lỗi: Include manager và các thư viện cần thiết
+#include <iostream>
 #include "core/FlightManager.h"
 #include "core/AirportManager.h"
 #include "entities/Flight.h" // Cần để đọc dữ liệu
@@ -8,6 +7,7 @@
 #include "RouteDialog.h"
 #include "BoldItemDelegate.h"
 #include "PageRefresher.h"
+#include "RouteDialog.h"
 #include <string>
 
 #include <QVBoxLayout>
@@ -21,6 +21,7 @@
 #include <QStandardItemModel>
 #include <QHeaderView>
 #include <QMessageBox>
+#include <QThread> // Required for QThread::msleep
 
 QWidget* createSearchGroup_Routes(const QString& title, QLineEdit*& edit, QPushButton*& button, const QString& buttonText)
 {
@@ -60,8 +61,6 @@ void RoutesPage::setupUi()
         "QLabel.SectionTitle { color:#123B7A; font-weight:700; font-size:16px; }"
         "QLineEdit { background:white; border:1px solid #608bc1; border-radius:4px; height:26px; padding-left:6px; }"
         "QPushButton.SearchBtn { background:#4478BD; color:white; border-radius:6px; height:24px; font-weight:600; }"
-        "QTableView { background:white; border:0px solid #d4dce5; }"
-        "QHeaderView::section { background:#d5e2f2; padding:6px; border:1px solid #c2cfe2; }"
         "TableTitle { font-size: 18px; }"
     );
 
@@ -69,32 +68,45 @@ void RoutesPage::setupUi()
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
 
-    // ====== TOP BAR: tiêu đề + dải tìm kiếm ======
+    // ====== TOP BAR: NÚT TẢI LẠI ======
     QWidget *topBar = new QWidget(this);
     QVBoxLayout *topLayout = new QVBoxLayout(topBar);
     topLayout->setContentsMargins(24, 20, 24, 16);
     topLayout->setSpacing(16);
+    topLayout->addStretch();
 
-    // === Hàng 1: Tiêu đề + Nút Tải lại (DI CHUYỂN LÊN ĐÂY) ===
+    // === Hàng 1: Nút Tải lại ===
     QHBoxLayout* headerRow = new QHBoxLayout();
     headerRow->setSpacing(10);
 
-    QLabel* title = new QLabel("Tìm tuyến bay", this);
-    title->setProperty("class", "PageTitle");
-    headerRow->addWidget(title);
-    headerRow->addStretch();
+    // NÚT TẢI LẠI (góc phải trên)
+    QPushButton* refreshButton = new QPushButton("Làm mới trang", topBar);
+    
+    // [QUAN TRỌNG] Set Icon (Bạn thay đường dẫn file ảnh vào đây)
+    // Lưu ý: Nên dùng icon có màu #133e87 để đồng bộ với chữ
+    refreshButton->setIcon(QIcon("C:/PBL2/assets/icons/reload.png")); // Đường dẫn icon")); 
+    refreshButton->setIconSize(QSize(14, 14)); // Kích thước icon
 
-    // ← NÚT TẢI LẠI (di chuyển từ dưới lên đây)
-    QPushButton* refreshButton = new QPushButton("🔄 Tải lại tất cả", topBar);
     refreshButton->setStyleSheet(
-        "QPushButton { background:#5886C0; color:white; border:none; "
-        "border-radius:6px; height:32px; padding:0 16px; font-weight:600; }"
-        "QPushButton:hover { background:#466a9a; }"
+        "QPushButton {"
+        "   background: transparent;"  /* Nền trong suốt (ghi đè nền xanh global) */
+        "   color: #133e87;"           /* Màu chữ xanh (ghi đè chữ trắng global) */
+        "   font-weight: bold;"         /* Chữ đậm hơn */
+        "   font-size: 13px;"
+        "   border: none;"             /* Bỏ viền (ghi đè viền global) */
+        "   text-align: left;"         /* Căn trái để icon và chữ nằm gọn */
+        "   padding: 0px;"             /* Reset padding để nút gọn gàng hơn */
+        "}"
+        "QPushButton:hover {"
+        "   background: transparent;"  /* Giữ nguyên nền trong suốt hoặc thêm màu nhạt nếu thích */
+        "   text-decoration: underline;"         /* Gạch chân khi hover */
+        "}"
     );
+    
     refreshButton->setCursor(Qt::PointingHandCursor);
-    refreshButton->setMinimumWidth(140);
+    // refreshButton->setMinimumWidth(140); // Có thể bỏ dòng này để nút tự co theo chữ
+    
     headerRow->addWidget(refreshButton);
-
     topLayout->addLayout(headerRow);
 
     // Kết nối nút refresh
@@ -107,7 +119,7 @@ void RoutesPage::setupUi()
     searchBoxLayout->setSpacing(10);
     
     searchBox->setStyleSheet(
-        "QWidget { background: white; border: 1px solid #c2cfe2; border-radius: 6px; }"
+        "QWidget { background: white; border: 1px solid #133e87; border-radius: 6px; }"
     );
 
     QLabel* searchTitle = new QLabel("🔎 Tìm kiếm tuyến bay");
@@ -121,9 +133,6 @@ void RoutesPage::setupUi()
     // === Cột 1: Điểm đi ===
     QVBoxLayout* col1 = new QVBoxLayout();
     col1->setSpacing(6);
-    QLabel* fromLabel = new QLabel("Từ");
-    fromLabel->setStyleSheet("background: transparent; border: none; color: #123B7A;");
-    col1->addWidget(fromLabel);
     fromSearchCombo_ = new AirportComboBox(airportManager_);
     fromSearchCombo_->setMinimumHeight(36);
     col1->addWidget(fromSearchCombo_);
@@ -132,9 +141,6 @@ void RoutesPage::setupUi()
     // === Mũi tên giữa ===
     QVBoxLayout* arrowCol = new QVBoxLayout();
     arrowCol->setSpacing(6);
-    QLabel* emptyArrowLabel = new QLabel(" ");
-    emptyArrowLabel->setStyleSheet("background: transparent; border: none;");
-    arrowCol->addWidget(emptyArrowLabel);
     
     QLabel* arrowLabel = new QLabel("→");
     arrowLabel->setAlignment(Qt::AlignCenter);
@@ -149,9 +155,6 @@ void RoutesPage::setupUi()
     // === Cột 2: Điểm đến ===
     QVBoxLayout* col2 = new QVBoxLayout();
     col2->setSpacing(6);
-    QLabel* toLabel = new QLabel("Đến");
-    toLabel->setStyleSheet("background: transparent; border: none; color: #123B7A;");
-    col2->addWidget(toLabel);
     toSearchCombo_ = new AirportComboBox(airportManager_);
     toSearchCombo_->setMinimumHeight(36);
     col2->addWidget(toSearchCombo_);
@@ -160,9 +163,6 @@ void RoutesPage::setupUi()
     // === Cột 3: Nút tìm kiếm (CÙNG HÀNG) ===
     QVBoxLayout* col4 = new QVBoxLayout();
     col4->setSpacing(6);
-    QLabel* emptyLabel = new QLabel(" ");
-    emptyLabel->setStyleSheet("background: transparent; border: none;");
-    col4->addWidget(emptyLabel);
     
     searchByRouteBtn_ = new QPushButton("Tìm kiếm");
     searchByRouteBtn_->setProperty("class", "SearchBtn");
@@ -182,32 +182,55 @@ void RoutesPage::setupUi()
     topLayout->addWidget(searchBox);
     mainLayout->addWidget(topBar);
 
-    // ========== TIÊU ĐỀ BẢNG + STATUS ==========
+    // ========== STATUS + CRUD BAR (GỘP CHUNG) ==========
     QWidget *tableHeader = new QWidget(this);
     QHBoxLayout *tableHeaderLayout = new QHBoxLayout(tableHeader);
-    tableHeaderLayout->setContentsMargins(24, 0, 24, 0);
+    // Giữ nguyên margin để căn lề khớp với các phần trên
+    tableHeaderLayout->setContentsMargins(24, 0, 24, 0); 
     tableHeaderLayout->setSpacing(10);
 
-    QLabel* tableTitle = new QLabel("📋 Kết quả tìm kiếm", this);
-    tableTitle->setObjectName("TableTitle");
-    tableTitle->setProperty("class", "SectionTitle");
-    tableHeaderLayout->addWidget(tableTitle);
-
-    // ← THÊM STATUS LABEL
+    // 1. Status Label
     statusLabel_ = new QLabel("", this);
-    statusLabel_->setStyleSheet("color: #123B7A; font-size: 12px;");
+    statusLabel_->setStyleSheet("color: #123B7A; font-size: 13px; font-weight: 650;");
     tableHeaderLayout->addWidget(statusLabel_);
 
-    tableHeaderLayout->addStretch();
+    // 2. Lò xo đẩy các nút sang phải (Quan trọng để thẳng hàng đẹp)
+    tableHeaderLayout->addStretch(); 
 
+    // 3. Các nút CRUD (Bên phải)
+    // Khởi tạo nút
+    addButton_ = new QPushButton("Thêm tuyến", this);
+    editButton_ = new QPushButton("Sửa tuyến", this);
+    deleteButton_ = new QPushButton("Xóa tuyến", this);
+
+    // Style giữ nguyên như bạn yêu cầu
+    QString crudStyle =
+        "QPushButton { background:transparent; color: #133e87; border:1px solid #133e87; "
+        "border-radius:6px; height:20px; padding:4px 10px; font-weight:600; }"
+        "QPushButton:hover { background:#466a9a; color: white; }"; // Thêm color white khi hover cho rõ
+
+    addButton_->setStyleSheet(crudStyle);
+    editButton_->setStyleSheet(crudStyle);
+    deleteButton_->setStyleSheet(crudStyle);
+
+    // Add trực tiếp vào layout header, không cần layout phụ
+    tableHeaderLayout->addWidget(addButton_);
+    tableHeaderLayout->addWidget(editButton_);
+    tableHeaderLayout->addWidget(deleteButton_);
+
+    // Add Header vào Main Layout
     mainLayout->addWidget(tableHeader);
 
     // ====== BẢNG ======
     QWidget *tableBox = new QWidget(this);
+
     QVBoxLayout *tblWrap = new QVBoxLayout(tableBox);
-    tblWrap->setContentsMargins(24, 6, 24, 0);
+    tblWrap->setContentsMargins(24, 10, 18, 20);
 
     tableView_ = new QTableView(this);
+    tableView_->setStyleSheet(
+        "QTableView { background: white; border: 1px solid #133e87; border-radius: 6px; }"
+    );
     tableView_->setItemDelegate(new BoldItemDelegate(this));
     
     // --- CẤU HÌNH GIAO DIỆN BẢNG (Giống SearchBookPage) ---
@@ -222,37 +245,9 @@ void RoutesPage::setupUi()
     // --- XỬ LÝ SCROLLBAR ---
     tableView_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff); // Tắt thanh ngang
     tableView_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    // tableView_->setFrameShape(QFrame::NoFrame);                       // Bỏ viền
 
     tblWrap->addWidget(tableView_);
     mainLayout->addWidget(tableBox, 1);
-
-    // ====== CRUD BAR ======
-    QWidget *crudBar = new QWidget(this);
-    QHBoxLayout *crudLayout = new QHBoxLayout(crudBar);
-    crudLayout->setContentsMargins(24, 16, 24, 20);
-    crudLayout->setSpacing(16);
-
-    addButton_ = new QPushButton("Thêm tuyến");
-    editButton_ = new QPushButton("Sửa tuyến");
-    deleteButton_ = new QPushButton("Xóa tuyến");
-
-    QString crudStyle =
-        "QPushButton { background:#5886C0; color:white; border:none; "
-        "border-radius:10px; height:40px; padding:0 36px; font-weight:600; }"
-        "QPushButton:hover { background:#466a9a; }";
-
-    addButton_->setStyleSheet(crudStyle);
-    editButton_->setStyleSheet(crudStyle);
-    deleteButton_->setStyleSheet(crudStyle);
-
-    crudLayout->addStretch();
-    crudLayout->addWidget(addButton_);
-    crudLayout->addWidget(editButton_);
-    crudLayout->addWidget(deleteButton_);
-    crudLayout->addStretch();
-
-    mainLayout->addWidget(crudBar);
 }
 
 void RoutesPage::setupModel()
@@ -270,16 +265,16 @@ void RoutesPage::setupModel()
     // --- CẤU HÌNH HEADER ---
     QHeaderView *header = tableView_->horizontalHeader();
 
-    // 1. Mặc định co theo nội dung
-    header->setSectionResizeMode(QHeaderView::ResizeToContents);
 
-    // 2. Cột STT (0): Cố định nhỏ
+    // 1. Cột STT (0): Cố định nhỏ
     header->setSectionResizeMode(0, QHeaderView::Fixed);
     tableView_->setColumnWidth(0, 50);
 
-    // 3. Chọn cột cuối cùng ("Điểm đến") làm LÒ XO (Stretch) để lấp đầy bảng
+    // 2. Chọn cột cuối cùng ("Điểm đến") làm LÒ XO (Stretch) để lấp đầy bảng
     // Hoặc bạn có thể chọn cột "Điểm đi" (cột 2) tùy thích.
-    header->setSectionResizeMode(3, QHeaderView::Stretch); 
+    header->setSectionResizeMode(1, QHeaderView::Stretch);
+    header->setSectionResizeMode(2, QHeaderView::Stretch);
+    header->setSectionResizeMode(3, QHeaderView::Stretch);
 }
 
 void RoutesPage::setupConnections()
@@ -319,6 +314,7 @@ void RoutesPage::refreshTable()
         }
     }
     statusLabel_->setText(QString("Hiển thị tất cả %1 tuyến bay").arg(routes.size()));
+    statusLabel_->setStyleSheet("color: #123B7A; font-size: 13px; font-weight: 650;");
 }
 
 void RoutesPage::refreshPage() {
@@ -341,27 +337,24 @@ void RoutesPage::onAddRoute()
         );
         
         if (success) {
-            QMessageBox::information(this, "Thành công", 
-                QString("Đã thêm tuyến bay mới:\n\n"
-                       "Từ: %1 → Đến: %2")
-                    .arg(fromIATA, toIATA));
+            std::cout << "Thêm tuyến bay thành công: " 
+                 << fromIATA.toStdString() << " -> " 
+                 << toIATA.toStdString() << std::endl;
             refreshTable();
         } else {
-            QMessageBox::critical(this, "Thất bại", 
-                "Không thể thêm tuyến bay.\n\n"
-                "Có thể do:\n"
-                "• Tuyến bay đã tồn tại");
+            std::cout << "Thêm tuyến bay thất bại (có thể đã tồn tại): " 
+                 << fromIATA.toStdString() << " -> " 
+                 << toIATA.toStdString() << std::endl;
         }
     }
 }
-
-// RoutesPage.cpp
 
 void RoutesPage::onEditRoute()
 {
     QModelIndexList selected = tableView_->selectionModel()->selectedRows();
     if (selected.isEmpty()) {
-        QMessageBox::warning(this, "Lỗi", "Vui lòng chọn một tuyến bay để sửa.");
+        statusLabel_->setText("Vui lòng chọn một tuyến bay để sửa.");
+        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
         return;
     }
 
@@ -408,11 +401,8 @@ void RoutesPage::onEditRoute()
         // ✅ Check 4: Kiểm tra trùng với route khác
         Route* existingRoute = flightManager_->findRouteById(newRouteId.toStdString());
         if (existingRoute != nullptr) {
-            QMessageBox::warning(this, "Tuyến bay đã tồn tại", 
-                QString("Tuyến bay <b>%1</b> đã tồn tại!<br><br>"
-                       "Không thể sửa tuyến <b>%2</b> thành <b>%3</b><br><br>"
-                       "Vui lòng chọn điểm đi/đến khác.")
-                    .arg(newRouteId, routeId, newRouteId));
+            QMessageBox::warning(this, "Dữ liệu không hợp lệ", 
+                "Tuyến bay này đã tồn tại!");
             return;
         }
         
@@ -425,18 +415,15 @@ void RoutesPage::onEditRoute()
         );
         
         if (success) {
-            QMessageBox::information(this, "Cập nhật thành công", 
-                QString("Đã cập nhật tuyến bay:<br><br>"
-                       "<b>Cũ:</b> %1 (%2 → %3)<br>"
-                       "<b>Mới:</b> %4 (%5 → %6)")
-                    .arg(routeId, fromIATA, toIATA)
-                    .arg(newRouteId, newFrom, newTo));
+            std::cout << "Cập nhật tuyến bay thành công: " 
+                 << routeId.toStdString() << " -> " 
+                 << newRouteId.toStdString() << std::endl;
             refreshTable();
         } else {
             // Nếu vẫn thất bại (không nên xảy ra vì đã validate)
-            QMessageBox::critical(this, "Cập nhật thất bại", 
-                "Không thể cập nhật tuyến bay.<br><br>"
-                "Vui lòng thử lại hoặc liên hệ hỗ trợ.");
+            std::cout << "Cập nhật tuyến bay thất bại: " 
+                 << routeId.toStdString() << " -> " 
+                 << newRouteId.toStdString() << std::endl; 
         }
     }
 }
@@ -445,7 +432,8 @@ void RoutesPage::onDeleteRoute()
 {
     QModelIndexList selected = tableView_->selectionModel()->selectedRows();
     if (selected.isEmpty()) {
-        QMessageBox::warning(this, "Lỗi", "Vui lòng chọn một tuyến bay để xóa.");
+        statusLabel_->setText("Vui lòng chọn một tuyến bay để xóa.");
+        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
         return;
     }
 
@@ -465,16 +453,12 @@ void RoutesPage::onDeleteRoute()
         bool success = flightManager_->deleteRoute(routeId.toStdString());
         
         if (success) {
-            QMessageBox::information(this, "Xóa thành công", 
-                QString("Đã xóa tuyến bay <b>%1</b>").arg(routeId));
+            std::cout << "Xóa tuyến bay thành công: " 
+                 << routeId.toStdString() << std::endl;
             refreshTable();
         } else {
-            QMessageBox::critical(this, "Xóa thất bại", 
-                QString("Không thể xóa tuyến bay <b>%1</b>.<br><br>"
-                       "Có thể do:<br>"
-                       "• Tuyến đang có chuyến bay hoạt động<br>"
-                       "• Lỗi hệ thống")
-                    .arg(routeId));
+            std::cout << "Xóa tuyến bay thất bại: " 
+                 << routeId.toStdString() << std::endl;
         }
     }
 }
@@ -485,10 +469,8 @@ void RoutesPage::onSearchByRoute()
     std::string toIATA = toSearchCombo_->getSelectedIATA();
     
     if (fromIATA.empty() && toIATA.empty()) {
-        QMessageBox::warning(this, "Thiếu dữ liệu", 
-            "Vui lòng chọn ít nhất một tiêu chí tìm kiếm:\n"
-            "• Điểm đi\n"
-            "• Điểm đến");
+        statusLabel_->setText("Vui lòng chọn điểm đi và điểm đến để tìm kiếm.");
+        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
         return;
     }
     
@@ -519,7 +501,8 @@ void RoutesPage::onSearchByRoute()
     }
 
     // ← CẬP NHẬT STATUS
-    statusLabel_->setText(QString("🔍 Tìm thấy tuyến bay"));
+    statusLabel_->setText(QString("Tìm thấy tuyến bay!"));
+    statusLabel_->setStyleSheet("color: #2E7D32; font-size: 13px; font-weight: 650;");
 
     // QString criteria;
     // if (!fromIATA.empty()) criteria += QString("Từ: <b>%1</b>").arg(QString::fromStdString(fromIATA));
@@ -529,9 +512,7 @@ void RoutesPage::onSearchByRoute()
     // }
 
     if (count == 0) {
-        statusLabel_->setText(QString("❌ Không tìm thấy tuyến bay phù hợp"));
+        statusLabel_->setText(QString("Không tìm thấy tuyến bay phù hợp!"));
+        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
     }
-    // else {
-    //     statusLabel_->setText(QString("✅ Tìm thấy %1 tuyến bay khớp với <br>%2").arg(count).arg(criteria));
-    // }
 }

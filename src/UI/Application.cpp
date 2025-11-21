@@ -42,40 +42,54 @@ Application::Application(AccountManager* accManager,
     // --- QSS giao diện ---
         QString qss = R"(
             /* === STYLE CƠ BẢN === */
-            QWidget { background: #FFFFFF; color: #333; }
-            QMainWindow { background: #FFFFFF; }
-            QFrame#Sidebar { background:#0E3B7C; }
+            QWidget { background: white; color: #333; font-family: 'Segoe UI'; }
+            QMainWindow { background: white; }
+            QFrame#Sidebar { background: #133e87; }
             QLabel#AppTitle { color:#123B7A; font-weight:700; font-size:24px; }
             QFrame#LoginBox { border: 1px solid #C9D6EB; border-radius: 8px; background: white; color: #333; }
+            
+            /* === [SỬA] STYLE SIDEBAR LIST (FULL WIDTH HOVER) === */
+            QListWidget { 
+                border: none; 
+                color: white; 
+                background: transparent; 
+                outline: 0;   /* Bỏ nét đứt khi chọn */
+                padding: 0px; /* Bỏ padding của khung để item tràn sát lề */
+            }
+            QListWidget::item { 
+                padding: 8px 15px;  /* padding top-bottom 8px, left-right 15px */ 
+                margin: 0px;  /* QUAN TRỌNG: Để hover full chiều ngang */
+                border: none;
+            }
+            QListWidget::item:selected, QListWidget::item:hover { 
+                background: #1C4E99; 
+                border: none; /* Bỏ border radius hoặc set 0 để vuông vức full dòng */
+            }
             
             /* === STYLE BUTTON, LINEEDIT (Lấy từ global) === */
             QPushButton { 
                 border:1px solid #7AA0D4; 
                 border-radius:8px; 
-                padding:8px 14px; 
+                padding:6px 10px; 
                 background:#5B86C6; 
                 color:white; 
-                font-weight:600; 
+                font-weight:600;
             }
             QPushButton:hover { background:#6B97D8; }
             
             QLineEdit, QComboBox, QDateEdit, QTimeEdit, QSpinBox { 
                 border:1px solid #C9D6EB; 
                 border-radius:8px; 
-                padding:6px 10px; 
+                padding:4px 10px; 
                 background:white; 
                 color: #333; 
                 height: 30px; /* Thêm chiều cao chuẩn */
             }
             QLineEdit::placeholder { color: #999; }
 
-            /* === STYLE LIST/TABLE (GOM LẠI) === */
-            QListWidget { border:none; color:white; background:transparent; }
-            QListWidget::item { padding:8px 10px; }
-            QListWidget::item:selected { background:#1C4E99; border-radius:6px; }
-            
+            /* === STYLE TABLE (GOM LẠI) === */
             QTableView {
-                border: 1px solid #C9D6EB;
+                border: 1px solid #133e87; /* Viền ngoài bảng */
                 gridline-color: transparent; /* cố gắng ẩn grid mặc định */
                 background: white;
                 outline: 0; /* <--- QUAN TRỌNG: Tắt viền nét đứt/xanh khi click vào ô */
@@ -89,18 +103,82 @@ Application::Application(AccountManager* accManager,
 
             /* Header có đường phân cách */
             QHeaderView::section {
-                border-bottom: 1px solid #C9D6EB;
+            background-color: #133e87;  /* Màu nền: Xanh đậm */
+            color: white;               /* Màu chữ: Trắng */
+            padding: 8px; 
+            border: none; 
+            border-right: 1px solid #daeeff;  /* (Tùy chọn) Đường kẻ ngăn cách giữa các cột */
+            font-weight: 600; 
+        }
+
+            /* === STYLE CHO INPUT, COMBOBOX, DATEEDIT === */
+            /* Áp dụng chung cho các ô nhập liệu để đồng bộ chiều cao và viền */
+            QLineEdit, QComboBox, QDateEdit, QTimeEdit, QSpinBox { 
+                border: 1px solid #608bc1;   /* Màu viền xám xanh nhạt giống ảnh */
+                border-radius: 6px;          /* Bo góc */
+                padding: 4px 10px;           /* Khoảng cách chữ với viền */
+                background: white; 
+                color: #333; 
+                height: 30px;                /* Chiều cao cố định chuẩn cho toàn app */
+                font-size: 13px;
             }
 
-            QHeaderView::section { 
-                background-color: #EBF1F9; 
-                padding: 8px; 
-                border: none; 
-                font-weight: 600; 
-                color: #123B7A; 
+            /* Hiệu ứng khi di chuột vào hoặc đang nhập liệu: Viền xanh đậm hơn */
+            QLineEdit:focus, QComboBox:focus, QDateEdit:focus, QSpinBox:focus,
+            QLineEdit:hover, QComboBox:hover, QDateEdit:hover, QSpinBox:hover {
+                border: 1.5px solid #4472C4;
+            }
+
+            /* === RIÊNG CHO COMBOBOX & DATEEDIT (Phần nút bấm bên phải) === */
+            QComboBox::drop-down, QDateEdit::drop-down {
+                subcontrol-origin: padding;
+                subcontrol-position: top right;
+                width: 30px;                 /* Độ rộng vùng bấm nút mũi tên */
+                border-left-width: 0px;      /* Không kẻ vạch ngăn cách */
+                border-top-right-radius: 6px;
+                border-bottom-right-radius: 6px;
+                background: transparent;
+            }
+
+            /* Mũi tên trỏ xuống */
+            QComboBox::down-arrow, QDateEdit::down-arrow {
+                image: url(C:/PBL2/assets/icons/down-arrow.png);
+                width: 12px;
+                height: 12px;
+            }
+            QComboBox::down-arrow:hover, QDateEdit::down-arrow:hover {
+                image: url(C:/PBL2/assets/icons/down-arrow-hover.png);
+            }
+
+            /* === [SỬA] STYLE CHO LIST SỔ XUỐNG CỦA COMBOBOX === */
+            QComboBox QAbstractItemView {
+                /* Đổi màu viền thành xám nhạt (trùng màu viền input) để xóa cảm giác khung xanh bao quanh scrollbar */
+                border: 1px solid #608bc1; 
+                
+                border-radius: 4px;
+                background-color: white;
+                
+                outline: 0px;            /* Bỏ đường nét đứt khi chọn */
+                padding: 0px;            /* [QUAN TRỌNG] Bỏ padding khung cha */
+                margin: 0px;
             }
             
-            /* === THÊM: STYLE HOVER/SELECTED === */
+            /* [THÊM MỚI] Style cho từng dòng item bên trong Dropdown */
+            QComboBox QAbstractItemView::item {
+                margin: 0px;       /* [QUAN TRỌNG] Để hover tràn hết chiều ngang */
+                padding: 6px 10px; /* Khoảng cách chữ */
+                border: none;
+            }
+
+            /* [THÊM MỚI] Màu khi hover vào item trong dropdown */
+            QComboBox QAbstractItemView::item:hover,
+            QComboBox QAbstractItemView::item:selected {
+                background-color: #EAF2F8; /* Màu nền xanh nhạt */
+                color: #123B7A;            /* Màu chữ xanh đậm */
+                border: none;
+            }
+            
+            /* === THÊM: STYLE HOVER/SELECTED CHO TABLE === */
             QTableView::item:hover,
             QListView::item:hover {
                 background-color: #EAF2F8;
@@ -112,6 +190,10 @@ Application::Application(AccountManager* accManager,
             QListView::item:selected {
                 background-color: #EAF2F8;
                 color: black;
+            }
+
+            QScrollArea {
+                border: none; /* Tránh bị 2 lớp viền nếu bảng nằm trong scrollarea khác */
             }
             
             /* * ========================================

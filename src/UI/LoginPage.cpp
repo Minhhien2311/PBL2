@@ -121,6 +121,7 @@ void LoginPage::setupUi()
     passwordEdit_->setPlaceholderText("Password");
     passwordEdit_->setEchoMode(QLineEdit::Password);
     passwordEdit_->setFixedWidth(350);
+    
     {
         QHBoxLayout *row = new QHBoxLayout();
         row->addStretch();
@@ -129,12 +130,16 @@ void LoginPage::setupUi()
         contentLayout->addLayout(row);
     }
 
+    NotiLabel = new QLabel("", content);
+    NotiLabel->setStyleSheet("color: #ff5757; font-weight: 650; background: transparent; margin-left: 12px;");
+    contentLayout->addWidget(NotiLabel);
+
     // Checkbox hiển thị mật khẩu — căn thẳng với ô nhập
     QHBoxLayout *checkRow = new QHBoxLayout();
     checkRow->setContentsMargins(0, 0, 0, 0);
 
     // giống input: stretch nhỏ bên trái
-    checkRow->addSpacing(20);        // thử 58–62 để thẳng hẳn
+    checkRow->addSpacing(10);
 
     showPasswordCheck_ = new QCheckBox("Hiển thị mật khẩu", content);
     checkRow->addWidget(showPasswordCheck_);
@@ -205,8 +210,7 @@ void LoginPage::onLoginClicked()
         
         emit loginSuccess(role, "fake_token");
     } else {
-        QMessageBox::warning(this, "Đăng nhập thất bại",
-                             "Username hoặc Password không chính xác.");
+        NotiLabel->setText("Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.");
     }
 
     QApplication::restoreOverrideCursor();

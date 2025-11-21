@@ -65,20 +65,36 @@ void AdminRevenueReportPage::setupUI()
     QHBoxLayout* headerRow = new QHBoxLayout();
     headerRow->setSpacing(10);
 
-    QLabel* pageTitle = new QLabel("Báo cáo doanh thu", topBar);
-    pageTitle->setProperty("class", "PageTitle");
-    headerRow->addWidget(pageTitle);
     headerRow->addStretch();
 
-    QPushButton* refreshBtn = new QPushButton("🔄 Làm mới", topBar);
-    refreshBtn->setStyleSheet(
-        "QPushButton { background:#5886C0; color:white; border:none; "
-        "border-radius:6px; height:32px; padding:0 16px; font-weight:600; }"
-        "QPushButton:hover { background:#466a9a; }"
-    );
-    refreshBtn->setCursor(Qt::PointingHandCursor);
-    headerRow->addWidget(refreshBtn);
+    // ← NÚT TẢI LẠI (góc phải trên)
+    QPushButton* refreshButton = new QPushButton("Làm mới trang", topBar);
+    
+    // [QUAN TRỌNG] Set Icon (Bạn thay đường dẫn file ảnh vào đây)
+    // Lưu ý: Nên dùng icon có màu #133e87 để đồng bộ với chữ
+    refreshButton->setIcon(QIcon("C:/PBL2/assets/icons/reload.png")); // Đường dẫn icon")); 
+    refreshButton->setIconSize(QSize(14, 14)); // Kích thước icon
 
+    refreshButton->setStyleSheet(
+        "QPushButton {"
+        "   background: transparent;"  /* Nền trong suốt (ghi đè nền xanh global) */
+        "   color: #133e87;"           /* Màu chữ xanh (ghi đè chữ trắng global) */
+        "   font-weight: bold;"         /* Chữ đậm hơn */
+        "   font-size: 13px;"
+        "   border: none;"             /* Bỏ viền (ghi đè viền global) */
+        "   text-align: left;"         /* Căn trái để icon và chữ nằm gọn */
+        "   padding: 0px;"             /* Reset padding để nút gọn gàng hơn */
+        "}"
+        "QPushButton:hover {"
+        "   background: transparent;"  /* Giữ nguyên nền trong suốt hoặc thêm màu nhạt nếu thích */
+        "   text-decoration: underline;"         /* Gạch chân khi hover */
+        "}"
+    );
+    
+    refreshButton->setCursor(Qt::PointingHandCursor);
+    // refreshButton->setMinimumWidth(140); // Có thể bỏ dòng này để nút tự co theo chữ
+    
+    headerRow->addWidget(refreshButton);
     topBarLayout->addLayout(headerRow);
 
     QHBoxLayout* statsLayout = new QHBoxLayout();
@@ -134,7 +150,7 @@ void AdminRevenueReportPage::setupUI()
     
     mainLayout->addWidget(chartContainer, 1);
 
-    connect(refreshBtn, &QPushButton::clicked, this, &AdminRevenueReportPage::refreshPage);
+    connect(refreshButton, &QPushButton::clicked, this, &AdminRevenueReportPage::refreshPage);
 }
 
 QFrame* AdminRevenueReportPage::createRevenueBox(const QString& title, const QString& value)

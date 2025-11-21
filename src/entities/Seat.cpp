@@ -48,18 +48,16 @@ std::pair<int, int> Seat::getCoordinates() const {
     
     try {
         std::string numPart = id.substr(1);
-        std::cerr << "[DEBUG] Parsing seat ID: " << id 
-                  << " → col=" << col << ", numPart=" << numPart << std::endl;
+        
         int row = std::stoi(numPart) - 1;  // Row from number (convert to 0-based)
+        
         if (row < 0 || col < 0) return {-1, -1};
         return {row, col};
     } catch (const std::exception& e) {
-        std::cerr << "[ERROR] Failed to parse seat ID: " << id 
-                  << " — reason: " << e.what() << std::endl;
+        // Nếu lỗi parse số, trả về invalid coordinate mà không in lỗi ra console
         return {-1, -1}; 
     }
 }
-
 std::string Seat::coordinatesToId(const std::pair<int, int>& coords) {
     char colChar = 'A' + coords.first;
     return colChar + std::to_string(coords.second + 1);

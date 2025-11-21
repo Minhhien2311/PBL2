@@ -13,7 +13,7 @@ public:
     
     // @brief Refresh page with standardized behavior
     static QPushButton* createRefreshButton(QWidget* parent, 
-                                           const QString& text = "🔄 Tải lại tất cả");
+                                           const QString& text = "Làm mới trang");
     // @brief Execute a standardized refresh operation
     static void executeRefresh(std::function<void()> callback);
 

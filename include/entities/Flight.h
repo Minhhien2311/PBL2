@@ -30,6 +30,7 @@ public:
     Flight() = delete;
 
     // Constructor
+    // SAI THỨ TỰ NHẬN THAM SỐ
     explicit Flight(const std::string& routeId,
                     const std::string& airline,
                     const std::string& flightNumber,

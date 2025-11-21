@@ -32,6 +32,15 @@ FlightDialog::FlightDialog(FlightManager* flightManager,
       airportManager_(airportManager),
       isEditMode_(false)
 {
+    setWindowTitle("Thêm chuyến bay");
+    setFixedWidth(700);
+    setMinimumHeight(630);
+    
+    setStyleSheet(
+        "QDialog { background: white; }"
+        "QLabel { border: none; }"
+    );
+
     setupUi(false);
     loadExistingRoutes(true);
 }
@@ -59,6 +68,10 @@ FlightDialog::FlightDialog(FlightManager* flightManager,
       isEditMode_(true),
       currentFlightId_(flightId)
 {
+    setWindowTitle("Sửa chuyến bay");
+    setFixedWidth(700);
+    setMinimumHeight(630);
+
     setupUi(true);
     
     // ✅ SỬA: Load routes KHÔNG có placeholder
@@ -106,294 +119,171 @@ FlightDialog::FlightDialog(FlightManager* flightManager,
     fareEconomySpin_->setValue(fareEconomy);
     fareBusinessSpin_->setValue(fareBusiness);
 }
+
 void FlightDialog::setupUi(bool isEditMode)
 {
+    // --- THIẾT LẬP CHUNG (Giữ nguyên) ---
     setWindowTitle(isEditMode ? "Sửa chuyến bay" : "Thêm chuyến bay mới");
-    setMinimumWidth(650);
-    setMinimumHeight(600);
     
     setStyleSheet(
-        "QDialog { background: #F2F6FD; }"
-        "QLabel { color: #123B7A; font-weight: 600; }"
+        "QDialog { background: white; }"
+        "QLabel { color: #133e87; font-weight: 600; font-size: 12px; border: none; }"
         "QLineEdit, QComboBox, QDateEdit, QTimeEdit, QSpinBox { "
-        "  background: white; "
-        "  border: 1px solid #608bc1; "
-        "  border-radius: 4px; "
-        "  height: 32px; "
-        "  padding-left: 8px; "
-        "}"
-        "QLineEdit:read-only { background: #f0f0f0; color: #666; }"
-        "QComboBox:disabled { background: #f0f0f0; color: #666; }"
-        "QGroupBox { "
-        "  border: 1px solid #c2cfe2; "
-        "  border-radius: 6px; "
-        "  margin-top: 10px; "
-        "  font-weight: 600; "
-        "  color: #123B7A; "
-        "}"
-        "QGroupBox::title { "
-        "  subcontrol-origin: margin; "
-        "  subcontrol-position: top left; "
-        "  padding: 0 5px; "
-        "  background: #F2F6FD; "
-        "}"
-        "QPushButton { "
-        "  background: #5886C0; "
-        "  color: white; "
-        "  border: none; "
-        "  border-radius: 6px; "
-        "  height: 40px; "
-        "  padding: 0 24px; "
-        "  font-weight: 600; "
-        "}"
-        "QPushButton:hover { background: #466a9a; }"
-        "QPushButton#cancelBtn { "
-        "  background: #999; "
-        "  color: white; "
-        "}"
-        "QPushButton#cancelBtn:hover { background: #777; }"
-        "QScrollArea { border: none; background: transparent; }"
-        "QScrollBar:vertical { "
-        "  border: none; "
-        "  background: #E8EEF7; "
-        "  width: 10px; "
-        "  margin: 0; "
-        "}"
-        "QScrollBar::handle:vertical { "
-        "  background: #5886C0; "
-        "  border-radius: 5px; "
-        "  min-height: 20px; "
-        "}"
-        "QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical { "
-        "  height: 0px; "
-        "}"
+        "   background: white; border: 1px solid #608bc1; border-radius: 4px; height: 20px; "
+        "   padding-left: 8px; font-size: 12px; color: #1E4B8C; }"
+        "QLineEdit:focus, QComboBox:focus, QSpinBox:focus { border: 2px solid #1E4B8C; }"
+        "QLineEdit:read-only, QComboBox:disabled { background: #f5f7fa; color: #666; border: 1px solid #cbd5e0; }"
+        "QGroupBox { background: white; border: 1px solid #608bc1; border-radius: 6px; margin-top: 12px; font-size: 13px; font-weight: bold; }"
+        "QGroupBox::title { font-weight: 650; subcontrol-origin: margin; subcontrol-position: top left; left: 15px; padding: 0 8px; color: #1E4B8C; background-color: white; }"
     );
 
     auto* mainLayout = new QVBoxLayout(this);
-    mainLayout->setSpacing(0);
-    mainLayout->setContentsMargins(0, 0, 0, 0);
+    mainLayout->setSpacing(15);
+    mainLayout->setContentsMargins(40, 20, 40, 20);
 
-    // Tiêu đề (cố định)
-    QWidget* headerWidget = new QWidget();
-    headerWidget->setStyleSheet("background: #F2F6FD;");
-    auto* headerLayout = new QVBoxLayout(headerWidget);
-    headerLayout->setContentsMargins(24, 24, 24, 12);
-    
-    QLabel* titleLabel = new QLabel(isEditMode ? "Chỉnh sửa thông tin chuyến bay" : "Nhập thông tin chuyến bay mới");
-    titleLabel->setStyleSheet("font-size: 16px; font-weight: 700; color: #123B7A;");
-    headerLayout->addWidget(titleLabel);
-    
-    mainLayout->addWidget(headerWidget);
+    // Header
+    auto *titleLabel = new QLabel(isEditMode ? "Chỉnh sửa thông tin chuyến bay" : "Nhập thông tin chuyến bay mới", this);
+    titleLabel->setStyleSheet("color: #123B7A; font-weight: bold; font-size: 20px; background: transparent;");
+    titleLabel->setAlignment(Qt::AlignCenter);
+    mainLayout->addWidget(titleLabel);
 
-    // Scroll Area cho nội dung
+    // Scroll Area
     QScrollArea* scrollArea = new QScrollArea();
     scrollArea->setWidgetResizable(true);
-    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    scrollArea->setFrameShape(QFrame::NoFrame);
+    scrollArea->setStyleSheet("QScrollArea { background: white; } QWidget { background: white; }");
     
     QWidget* scrollContent = new QWidget();
     auto* contentLayout = new QVBoxLayout(scrollContent);
-    contentLayout->setSpacing(20);
-    contentLayout->setContentsMargins(24, 12, 24, 24);
+    contentLayout->setSpacing(15);
+    contentLayout->setContentsMargins(5, 5, 5, 5);
 
-    // ========== NHÓM 1: THÔNG TIN TUYẾN BAY ==========
-    QGroupBox* routeGroup = new QGroupBox("📍 Thông tin tuyến bay");
+    // ========== NHÓM 1: THÔNG TIN TUYẾN BAY (Đã bỏ from/to combo) ==========
+    QGroupBox* routeGroup = new QGroupBox("Thông tin tuyến bay");
     auto* routeLayout = new QFormLayout(routeGroup);
-    routeLayout->setSpacing(12);
+    routeLayout->setContentsMargins(30, 20, 30, 15);
+    routeLayout->setSpacing(10);
+    routeLayout->setLabelAlignment(Qt::AlignLeft);
 
-    // Tạo các widget trước
     flightRouteCombo_ = new QComboBox();
-    fromCombo_ = new AirportComboBox(airportManager_);
-    toCombo_ = new AirportComboBox(airportManager_);
-
     airlineCombo_ = new QComboBox();
+    flightNumberEdit_ = new QLineEdit();
+    flightNumberEdit_->setPlaceholderText("VD: VN123");
+
+    // Load Airline
     std::vector<std::string> airlines = Helpers::loadAirlinesFromFile("C:/PBL2/data/airlines.txt");
     for (const std::string& airline : airlines) {
         airlineCombo_->addItem(QString::fromStdString(airline));
     }
+
+    routeLayout->addRow("Chọn tuyến:", flightRouteCombo_);
+    routeLayout->addRow("Hãng hàng không:", airlineCombo_);
+    routeLayout->addRow("Số hiệu chuyến bay:", flightNumberEdit_);
+
     if (!isEditMode) {
         airlineCombo_->insertItem(0, "-- Chọn hãng hàng không --", "");
-        airlineCombo_->setCurrentIndex(0);  // ← Set về placeholder
-    }
-    
-    flightNumberEdit_ = new QLineEdit();
-    flightNumberEdit_->setPlaceholderText("VD: VN123");
-
-    if (!isEditMode) {
-        // MODE THÊM MỚI
+        airlineCombo_->setCurrentIndex(0);
         flightRouteCombo_->addItem("-- Chọn tuyến bay --", "");
-        
-        // Thứ tự: 1. Chọn tuyến
-        routeLayout->addRow("Chọn tuyến:", flightRouteCombo_);
-        
-        // 2. Điểm đi (disabled)
-        fromCombo_->setEnabled(false);
-        routeLayout->addRow("Điểm đi:", fromCombo_);
-        
-        // 3. Điểm đến (disabled)
-        toCombo_->setEnabled(false);
-        routeLayout->addRow("Điểm đến:", toCombo_);
-
-        // 4. Hãng hàng không (có thể sửa)
-        airlineCombo_->setEnabled(true);
-        routeLayout->addRow("Hãng hàng không:", airlineCombo_);
-        
-        // 5. Số hiệu chuyến bay
-        routeLayout->addRow("Số hiệu chuyến bay:", flightNumberEdit_);
-        
-        connect(flightRouteCombo_, QOverload<int>::of(&QComboBox::currentIndexChanged),
-                this, &FlightDialog::onFlightRouteChanged);
-        
     } else {
-        // MODE CHỈNH SỬA - TẤT CẢ ĐỀU SỬA ĐƯỢC
-        
-        // 1. Chọn tuyến bay (CÓ THỂ SỬA)
-        flightRouteCombo_->removeItem(0);   // Xoá mục "-- Chọn tuyến bay --"
-        routeLayout->addRow("Chọn tuyến:", flightRouteCombo_);
-        
-        // 2. Điểm đi (chỉ hiển thị, tự động cập nhật theo tuyến)
-        fromCombo_->setEnabled(false);
-        routeLayout->addRow("Điểm đi:", fromCombo_);
-        
-        // 3. Điểm đến (chỉ hiển thị, tự động cập nhật theo tuyến)
-        toCombo_->setEnabled(false);
-        routeLayout->addRow("Điểm đến:", toCombo_);
-        
-        // 4. Hãng hàng không (CÓ THỂ SỬA)
-        routeLayout->addRow("Hãng hàng không:", airlineCombo_);
-        
-        // 5. Số hiệu (CÓ THỂ SỬA)
-        routeLayout->addRow("Số hiệu chuyến bay:", flightNumberEdit_);
-        
-        // Kết nối sự kiện thay đổi tuyến bay
-        connect(flightRouteCombo_, QOverload<int>::of(&QComboBox::currentIndexChanged),
-                this, &FlightDialog::onFlightRouteChanged);
+        flightRouteCombo_->removeItem(0);
     }
 
+    connect(flightRouteCombo_, QOverload<int>::of(&QComboBox::currentIndexChanged),
+            this, &FlightDialog::onFlightRouteChanged);
+    
     contentLayout->addWidget(routeGroup);
 
-    // ========== NHÓM 2: LỊCH TRÌNH BAY (CÓ THỂ SỬA) ==========
-    QGroupBox* scheduleGroup = new QGroupBox("🕒 Lịch trình bay");
+    // ========== NHÓM 2: LỊCH TRÌNH BAY (Giữ nguyên) ==========
+    QGroupBox* scheduleGroup = new QGroupBox("Lịch trình bay");
     auto* scheduleLayout = new QFormLayout(scheduleGroup);
-    scheduleLayout->setSpacing(12);
-
+    scheduleLayout->setContentsMargins(30, 20, 30, 15);
+    scheduleLayout->setSpacing(10);
+    
     departureDateEdit_ = new QDateEdit();
     departureDateEdit_->setCalendarPopup(true);
     departureDateEdit_->setDisplayFormat("dd/MM/yyyy");
     departureDateEdit_->setDate(QDate::currentDate().addDays(1));
-    departureDateEdit_->setMinimumDate(QDate::currentDate());
-    scheduleLayout->addRow("Ngày khởi hành:", departureDateEdit_);
-
-    // Giờ khởi hành - NHẬP TAY
+    
     departureTimeEdit_ = new QTimeEdit();
     departureTimeEdit_->setDisplayFormat("HH:mm");
     departureTimeEdit_->setTime(QTime(6, 0));
     departureTimeEdit_->setButtonSymbols(QAbstractSpinBox::NoButtons);
-    departureTimeEdit_->setAlignment(Qt::AlignLeft);
-    scheduleLayout->addRow("Giờ khởi hành:", departureTimeEdit_);
 
     arrivalDateEdit_ = new QDateEdit();
     arrivalDateEdit_->setCalendarPopup(true);
     arrivalDateEdit_->setDisplayFormat("dd/MM/yyyy");
     arrivalDateEdit_->setDate(QDate::currentDate().addDays(1));
-    arrivalDateEdit_->setMinimumDate(QDate::currentDate());
-    scheduleLayout->addRow("Ngày hạ cánh:", arrivalDateEdit_);
 
-    // Giờ hạ cánh - NHẬP TAY
     arrivalTimeEdit_ = new QTimeEdit();
     arrivalTimeEdit_->setDisplayFormat("HH:mm");
     arrivalTimeEdit_->setTime(QTime(8, 0));
     arrivalTimeEdit_->setButtonSymbols(QAbstractSpinBox::NoButtons);
-    arrivalTimeEdit_->setAlignment(Qt::AlignLeft);
-    scheduleLayout->addRow("Giờ hạ cánh:", arrivalTimeEdit_);
+
+    QHBoxLayout* depLayout = new QHBoxLayout();
+    depLayout->addWidget(departureDateEdit_, 6);
+    depLayout->addWidget(departureTimeEdit_, 4);
+    scheduleLayout->addRow("Khởi hành:", depLayout);
+
+    QHBoxLayout* arrLayout = new QHBoxLayout();
+    arrLayout->addWidget(arrivalDateEdit_, 6);
+    arrLayout->addWidget(arrivalTimeEdit_, 4);
+    scheduleLayout->addRow("Hạ cánh:", arrLayout);
 
     contentLayout->addWidget(scheduleGroup);
 
-    // ========== NHÓM 3: THÔNG TIN GIÁ VÀ SỨC CHỨA (CÓ THỂ SỬA) ==========
-    QGroupBox* priceGroup = new QGroupBox("💺 Sức chứa & Giá vé");
+    // ========== NHÓM 3: SỨC CHỨA & GIÁ VÉ (Giữ nguyên) ==========
+    QGroupBox* priceGroup = new QGroupBox("Sức chứa & Giá vé");
     auto* priceLayout = new QFormLayout(priceGroup);
-    priceLayout->setSpacing(12);
+    priceLayout->setContentsMargins(30, 20, 30, 15);
+    priceLayout->setSpacing(10);
 
     totalCapacitySpin_ = new QSpinBox();
     totalCapacitySpin_->setRange(50, 500);
     totalCapacitySpin_->setValue(180);
     totalCapacitySpin_->setSuffix(" ghế");
-    totalCapacitySpin_->setButtonSymbols(QAbstractSpinBox::NoButtons);
-    priceLayout->addRow("Tổng số ghế:", totalCapacitySpin_);
-
+    
     fareEconomySpin_ = new QSpinBox();
     fareEconomySpin_->setRange(500000, 10000000);
     fareEconomySpin_->setValue(1500000);
     fareEconomySpin_->setSingleStep(100000);
     fareEconomySpin_->setSuffix(" VNĐ");
-    fareEconomySpin_->setButtonSymbols(QAbstractSpinBox::NoButtons);
-    priceLayout->addRow("Giá vé Phổ thông:", fareEconomySpin_);
 
     fareBusinessSpin_ = new QSpinBox();
     fareBusinessSpin_->setRange(1000000, 20000000);
     fareBusinessSpin_->setValue(3000000);
     fareBusinessSpin_->setSingleStep(100000);
     fareBusinessSpin_->setSuffix(" VNĐ");
-    fareBusinessSpin_->setButtonSymbols(QAbstractSpinBox::NoButtons);
-    priceLayout->addRow("Giá vé Thương gia:", fareBusinessSpin_);
 
+    priceLayout->addRow("Tổng số ghế:", totalCapacitySpin_);
+    priceLayout->addRow("Giá vé Phổ thông:", fareEconomySpin_);
+    priceLayout->addRow("Giá vé Thương gia:", fareBusinessSpin_);
     contentLayout->addWidget(priceGroup);
 
-    // Thông báo (nếu edit)
     if (isEditMode) {
-        QLabel* noteLabel = new QLabel(
-            QString("⚠️ <b>Lưu ý:</b> Đang sửa chuyến bay <b>%1</b>").arg(currentFlightId_)
-        );
-        noteLabel->setStyleSheet("color: #d97706; font-size: 12px;");
-        noteLabel->setWordWrap(true);
+        QLabel* noteLabel = new QLabel(QString("⚠️ Đang sửa chuyến bay: %1").arg(currentFlightId_));
+        noteLabel->setStyleSheet("color: #C62828; font-style: italic; margin-left: 10px;");
+        noteLabel->setAlignment(Qt::AlignCenter);
         contentLayout->addWidget(noteLabel);
     }
 
-    contentLayout->addStretch();
-    
     scrollArea->setWidget(scrollContent);
     mainLayout->addWidget(scrollArea);
 
-    // Nút bấm (cố định ở dưới)
-    QWidget* footerWidget = new QWidget();
-    footerWidget->setStyleSheet("background: #F2F6FD; border-top: 1px solid #c2cfe2;");
-    auto* footerLayout = new QHBoxLayout(footerWidget);
-    footerLayout->setContentsMargins(24, 12, 24, 12);
-    footerLayout->setSpacing(12);
+    // Footer Buttons
+    auto* buttonLayout = new QHBoxLayout();
+    buttonLayout->setSpacing(15);
 
-    saveButton_ = new QPushButton(isEditMode ? "💾 Lưu thay đổi" : "➕ Thêm chuyến");
-    saveButton_->setStyleSheet(
-        "QPushButton { "
-        "  background: #5886C0; "
-        "  color: white; "
-        "  border: none; "
-        "  border-radius: 6px; "
-        "  height: 40px; "
-        "  padding: 0 24px; "
-        "  font-weight: 600; "
-        "}"
-        "QPushButton:hover { background: #466a9a; }"
-    );
+    saveButton_ = new QPushButton(isEditMode ? "Lưu thay đổi" : "Thêm chuyến bay");
+    saveButton_->setCursor(Qt::PointingHandCursor);
+    saveButton_->setStyleSheet("QPushButton { background: #608bc1; color: white; border: none; border-radius: 6px; height: 35px; font-weight: bold; font-size: 13px; } QPushButton:hover { background: #365a9e; }");
+
+    cancelButton_ = new QPushButton("Hủy bỏ");
+    cancelButton_->setCursor(Qt::PointingHandCursor);
+    cancelButton_->setStyleSheet("QPushButton { background: #E0E0E0; color: #333; border: none; border-radius: 6px; height: 35px; font-weight: bold; font-size: 13px; } QPushButton:hover { background: #BDBDBD; }");
     
-    cancelButton_ = new QPushButton("Hủy");
-    cancelButton_->setObjectName("cancelBtn");
-    cancelButton_->setStyleSheet(
-        "QPushButton { "
-        "  background: #999; "
-        "  color: white; "
-        "  border: none; "
-        "  border-radius: 6px; "
-        "  height: 40px; "
-        "  padding: 0 24px; "
-        "  font-weight: 600; "
-        "}"
-        "QPushButton:hover { background: #777; }"
-    );
-
-    footerLayout->addStretch();
-    footerLayout->addWidget(saveButton_);      // Nút Lưu/Thêm BÊN TRÁI
-    footerLayout->addWidget(cancelButton_);    // Nút Hủy BÊN PHẢI
-
-    mainLayout->addWidget(footerWidget);
+    buttonLayout->addWidget(cancelButton_, 1);
+    buttonLayout->addWidget(saveButton_, 2);
+    mainLayout->addLayout(buttonLayout);
 
     connect(saveButton_, &QPushButton::clicked, this, &FlightDialog::onAccept);
     connect(cancelButton_, &QPushButton::clicked, this, &QDialog::reject);
@@ -424,28 +314,21 @@ void FlightDialog::onFlightRouteChanged()
 {
     QString selectedFlightId = flightRouteCombo_->currentData().toString();
     
-    // Reset các trường khi chọn "-- Chọn tuyến bay --"
+    // Nếu user chọn "-- Chọn tuyến bay --" hoặc rỗng
     if (selectedFlightId.isEmpty()) {
         if (!isEditMode_) {
             flightNumberEdit_->clear();
         }
-        airlineCombo_->setCurrentText("--");
-        fromCombo_->setCurrentIndex(0);
-        toCombo_->setCurrentIndex(0);
+        airlineCombo_->setCurrentText("--"); // Reset hãng nếu cần
         return;
     }
     
-    Route* route = flightManager_->findRouteById(selectedFlightId.toStdString());
-    if (!route) return;
-    
-    // Tự động cập nhật thông tin tuyến
+    // Nếu ở mode thêm mới, có thể muốn clear số hiệu để nhập cái mới
     if (!isEditMode_) {
-        flightNumberEdit_->clear(); // Ở mode thêm, xóa số hiệu để user tự nhập
+        flightNumberEdit_->clear();
     }
-    // Ở mode edit, GIỮ NGUYÊN số hiệu đã nhập
     
-    fromCombo_->setSelectedIATA(route->getDepartureAirport());
-    toCombo_->setSelectedIATA(route->getArrivalAirport());
+    // Không cần set fromCombo/toCombo nữa vì đã xóa khỏi UI
 }
 
 void FlightDialog::onAccept()
@@ -497,12 +380,28 @@ QString FlightDialog::getAirline() const {
     return airlineCombo_->currentText();
 }
 
+// Lấy điểm ĐI trực tiếp từ Route ID đang chọn
 QString FlightDialog::getFromIATA() const {
-    return QString::fromStdString(fromCombo_->getSelectedIATA());
+    QString routeId = flightRouteCombo_->currentData().toString();
+    if (routeId.isEmpty()) return "";
+
+    Route* route = flightManager_->findRouteById(routeId.toStdString());
+    if (route) {
+        return QString::fromStdString(route->getDepartureAirport());
+    }
+    return "";
 }
 
+// Lấy điểm ĐẾN trực tiếp từ Route ID đang chọn
 QString FlightDialog::getToIATA() const {
-    return QString::fromStdString(toCombo_->getSelectedIATA());
+    QString routeId = flightRouteCombo_->currentData().toString();
+    if (routeId.isEmpty()) return "";
+
+    Route* route = flightManager_->findRouteById(routeId.toStdString());
+    if (route) {
+        return QString::fromStdString(route->getArrivalAirport());
+    }
+    return "";
 }
 
 QString FlightDialog::getDepartureDate() const {
