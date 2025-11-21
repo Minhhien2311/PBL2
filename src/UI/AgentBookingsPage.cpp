@@ -541,14 +541,25 @@ void AgentBookingsPage::displayBooking(Booking* booking)
 
     // 7. Trạng thái
     QString statusStr;
+    QColor statusColor;
+
     if (booking->getStatus() == BookingStatus::Issued) {
         statusStr = "Đang giữ chỗ";
+        statusColor = QColor("#2E7D32"); // Xanh lá đậm
     } else if (booking->getStatus() == BookingStatus::Cancelled) {
         statusStr = "Đã hủy";
+        statusColor = QColor("#C62828"); // Đỏ đậm
     } else {
         statusStr = "Đã đổi";
+        statusColor = QColor("#F57C00"); // Cam đậm (cho trạng thái khác)
     }
-    rowItems << new QStandardItem(statusStr);
+
+    // Tạo item và set màu
+    QStandardItem* statusItem = new QStandardItem(statusStr);
+    statusItem->setForeground(statusColor);
+    statusItem->setTextAlignment(Qt::AlignCenter); // Căn giữa cho đẹp (tùy chọn)
+
+    rowItems << statusItem;
     
     // CANH GIỮA TẤT CẢ
     for (QStandardItem *item : rowItems) {
