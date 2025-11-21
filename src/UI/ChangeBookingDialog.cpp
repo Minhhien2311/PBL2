@@ -15,421 +15,447 @@
 #include <QPushButton>
 #include <QRadioButton>
 #include <QMessageBox>
-#include <QTableView>
-#include <QHeaderView>
-#include <QStandardItemModel>
 #include <QScrollArea>
-#include <QStackedWidget>
-#include <QScreen>
-#include <QGuiApplication>
 #include <QButtonGroup>
-#include <QDebug>
-#include <QDateTime>
 #include <QFrame>
-#include <QScrollBar>
+#include <QDebug>
 
+// Ensure base style contains transparent border so hover border becomes visible
 const QString ChangeBookingDialog::SEAT_BASE_STYLE =
-    "QPushButton { border: none; border-radius: 3px; }";
+    "QPushButton { border: 2px solid transparent; border-radius: 3px; }";
 
+// include base style into each seat style so hover border works correctly
 const QString ChangeBookingDialog::BUSINESS_AVAILABLE_STYLE =
     ChangeBookingDialog::SEAT_BASE_STYLE +
-    "QPushButton { background: #FFD700; } QPushButton:hover { background: #FFC700; border: 2px solid #FF6B35; }";
+    "QPushButton { background: #FFD740; } "
+    "QPushButton:hover { background: #FFCA28; border: 2px solid #FF6B35; }";
 
 const QString ChangeBookingDialog::ECONOMY_AVAILABLE_STYLE =
     ChangeBookingDialog::SEAT_BASE_STYLE +
-    "QPushButton { background: #90EE90; } QPushButton:hover { background: #7FD87F; border: 2px solid #FF6B35; }";
+    "QPushButton { background: #A5D6A7; } "
+    "QPushButton:hover { background: #81C784; border: 2px solid #FF6B35; }";
 
 const QString ChangeBookingDialog::BOOKED_STYLE =
     ChangeBookingDialog::SEAT_BASE_STYLE +
-    "QPushButton { background: #D3D3D3; }";
+    "QPushButton { background: #BDBDBD; }";
 
 const QString ChangeBookingDialog::LOCKED_STYLE =
     ChangeBookingDialog::SEAT_BASE_STYLE +
-    "QPushButton { background: #FF6B6B; }";
+    "QPushButton { background: #EF5350; }";
 
-const QString ChangeBookingDialog::SELECTED_STYLE_SUFFIX = " border: 2px solid #FF6B35;";
+const QString ChangeBookingDialog::SELECTED_STYLE_SUFFIX =
+    " border: 2px solid #1E88E5;";
 
 namespace {
-    QString dotFormat(int v) {
-        QString s = QString::number(v);
-        int pos = s.length() - 3;
-        while (pos > 0) {
-            s.insert(pos, '.');
-            pos -= 3;
-        }
-        return s;
+QString dotFormat(int v) {
+    QString s = QString::number(v);
+    int pos = s.length() - 3;
+    while (pos > 0) {
+        s.insert(pos, '.');
+        pos -= 3;
     }
+    return s;
+}
 }
 
-ChangeBookingDialog::ChangeBookingDialog(Booking* currentBooking,
-                                         BookingManager* bookingManager,
-                                         FlightManager* flightManager,
-                                         QWidget *parent)
+ChangeBookingDialog::ChangeBookingDialog(
+        Booking* currentBooking,
+        BookingManager* bookingManager,
+        FlightManager* flightManager,
+        QWidget *parent)
     : QDialog(parent),
       currentBooking_(currentBooking),
       bookingManager_(bookingManager),
       flightManager_(flightManager),
       currentFlight_(nullptr),
       selectedNewFlight_(nullptr),
-      currentStep_(1),
-      selectedSeatId_("")
+      currentStep_(1)
 {
-    Q_ASSERT(currentBooking_ != nullptr);
-    Q_ASSERT(bookingManager_ != nullptr);
-    Q_ASSERT(flightManager_ != nullptr);
-
     setWindowTitle("Đổi đặt chỗ");
-    // responsive sizing similar BookingDialog
-    setMinimumSize(700, 560);
-    QRect sg = QGuiApplication::primaryScreen()->availableGeometry();
-    setMaximumHeight(static_cast<int>(sg.height() * 0.92));
-    setupUi();
-    setupConnections();
+    setMinimumSize(800, 650);
 
-    // load current flight for reference
     currentFlight_ = flightManager_->findFlightById(currentBooking_->getFlightId());
 
+    setupUi();
+    setupConnections();
     showStep(1);
 }
 
 void ChangeBookingDialog::setupUi()
 {
-    // overall layout
-    auto *mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(40, 8, 40, 12);
-    mainLayout->setSpacing(10);
+    auto* mainLayout = new QVBoxLayout(this);
+    mainLayout->setContentsMargins(24, 12, 24, 12);
+    mainLayout->setSpacing(6);
 
-    // progress header (2 steps) - centered like BookingDialog
+    // ---------- header: step indicator ----------
     QWidget* header = new QWidget(this);
-    header->setFixedHeight(64);
-    header->setStyleSheet("background: transparent;");
+    header->setFixedHeight(72);
     QHBoxLayout* headerLayout = new QHBoxLayout(header);
     headerLayout->setAlignment(Qt::AlignCenter);
-    headerLayout->setContentsMargins(0, 12, 0, 8);
+    headerLayout->setContentsMargins(0, 8, 0, 8);
     headerLayout->setSpacing(6);
 
-    auto createStepLabel = [](const QString& txt, bool active)->QLabel* {
-        QLabel* lbl = new QLabel(txt);
-        lbl->setFixedSize(28, 28);
-        lbl->setAlignment(Qt::AlignCenter);
-        if (active) {
-            lbl->setStyleSheet("background-color: #74cc00; color: white; border-radius: 14px; font-weight: bold;");
-        } else {
-            lbl->setStyleSheet("background-color: #cbdceb; color: white; border-radius: 14px; font-weight: bold;");
-        }
-        return lbl;
-    };
+    QLabel* stepCircle1 = new QLabel("1", header);
+    stepCircle1->setObjectName("stepCircle1");
+    stepCircle1->setFixedSize(32, 32);
+    stepCircle1->setAlignment(Qt::AlignCenter);
+    stepCircle1->setStyleSheet("background:#7BC043; color:white; border-radius:16px; font-weight:700;");
 
-    QLabel* st1 = createStepLabel("1", true);
-    QLabel* line = new QLabel;
-    line->setFixedSize(120, 4);
-    line->setStyleSheet("background-color: #cbdceb; border-radius:2px;");
-    QLabel* st2 = createStepLabel("2", false);
+    QLabel* stepLine = new QLabel(header);
+    stepLine->setObjectName("stepLine");
+    stepLine->setFixedSize(160, 6);
+    stepLine->setStyleSheet("background:#E3F2FD; border-radius:3px;");
 
-    headerLayout->addWidget(st1);
-    headerLayout->addWidget(line);
-    headerLayout->addWidget(st2);
+    QLabel* stepCircle2 = new QLabel("2", header);
+    stepCircle2->setObjectName("stepCircle2");
+    stepCircle2->setFixedSize(32, 32);
+    stepCircle2->setAlignment(Qt::AlignCenter);
+    stepCircle2->setStyleSheet("background:#E3F2FD; color:white; border-radius:16px; font-weight:700;");
+
+    headerLayout->addWidget(stepCircle1);
+    headerLayout->addWidget(stepLine);
+    headerLayout->addWidget(stepCircle2);
+
     mainLayout->addWidget(header);
 
-    // Stacked widget style: we will simply hide/show two containers
-    QWidget* body = new QWidget(this);
-    QVBoxLayout* bodyLayout = new QVBoxLayout(body);
-    bodyLayout->setContentsMargins(0,0,0,0);
-    bodyLayout->setSpacing(12);
-
-    // ====== STEP 1: nhập ID chuyến ======
-    step1Container_ = new QWidget(body);
-    step1Container_->setStyleSheet("background:white; border:1px solid #BFCFE0; border-radius:8px;");
+    // ---------- body ----------
+    // Step1 container
+    step1Container_ = new QWidget(this);
     QVBoxLayout* s1 = new QVBoxLayout(step1Container_);
-    s1->setContentsMargins(16,16,16,16);
-    s1->setSpacing(12);
+    s1->setContentsMargins(12, 8, 12, 8);
+    s1->setSpacing(8);
 
-    QLabel* t1 = new QLabel("Bước 1: Nhập ID chuyến bay thay thế");
-    t1->setStyleSheet("font-size:16px; font-weight:700; color:#1565C0;");
-    s1->addWidget(t1);
+    QLabel* title1 = new QLabel("Chọn chuyến bay mới");
+    title1->setStyleSheet("font-size:18px; font-weight:700; color:#1565C0;");
+    title1->setAlignment(Qt::AlignCenter);
+    s1->addWidget(title1);
 
-    QHBoxLayout* idRow = new QHBoxLayout();
-    QLabel* idLabel = new QLabel("ID chuyến:");
-    idLabel->setMinimumWidth(90);
+    // input row
+    QHBoxLayout* inputRow = new QHBoxLayout();
+    inputRow->setSpacing(8);
+    QLabel* lblId = new QLabel("Nhập mã chuyến bay:");
     flightIdEdit_ = new QLineEdit();
-    flightIdEdit_->setPlaceholderText("VD: FL12345");
-    flightIdEdit_->setMinimumWidth(320);
-    searchBtn_ = new QPushButton("Tìm");
-    searchBtn_->setStyleSheet("QPushButton { background:#608bc1; color:white; padding:8px 14px; border-radius:6px; font-weight:600; }"
-                              "QPushButton:hover { background:#1565C0; }");
+    flightIdEdit_->setPlaceholderText("FI-XXXXX");
+    flightIdEdit_->setFixedWidth(300);
+    searchBtn_ = new QPushButton("Tìm kiếm");
+    searchBtn_->setStyleSheet(
+        "QPushButton { background:#1E88E5; color:white; padding:8px 14px; border-radius:6px; }"
+        "QPushButton:hover { background:#4e7eb5; }"
+        "QPushButton:pressed { background:#3c6aa3; }"
+    );
 
-    idRow->addWidget(idLabel);
-    idRow->addWidget(flightIdEdit_);
-    idRow->addWidget(searchBtn_);
-    idRow->addStretch();
-    s1->addLayout(idRow);
+    inputRow->addWidget(lblId);
+    inputRow->addWidget(flightIdEdit_);
+    inputRow->addWidget(searchBtn_);
+    inputRow->addStretch();
+    s1->addLayout(inputRow);
 
-    // result table (single row)
-    resultTable_ = new QTableView(step1Container_);
-    resultTable_->setMinimumHeight(160);
-    resultTable_->verticalHeader()->setVisible(false);
-    resultModel_ = new QStandardItemModel(0,5,this);
-    resultModel_->setHorizontalHeaderLabels({"STT","Mã chuyến","Hãng","Số hiệu","Ngày/giờ"});
-    resultTable_->setModel(resultModel_);
-    resultTable_->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    resultTable_->setSelectionBehavior(QAbstractItemView::SelectRows);
-    resultTable_->setSelectionMode(QAbstractItemView::SingleSelection);
-    s1->addWidget(resultTable_);
+    // info frame (grid) raised higher
+    QFrame* infoFrame = new QFrame();
+    infoFrame->setObjectName("infoFrame");
+    infoFrame->setStyleSheet("#infoFrame{ border:1px solid #BFD7ED; border-radius:8px; background:white; }");
+    infoFrame->setFixedHeight(140);
 
-    QHBoxLayout* s1BtnRow = new QHBoxLayout();
-    s1BtnRow->addStretch();
-    QPushButton* cancelBtn = new QPushButton("Hủy", step1Container_);
-    cancelBtn->setStyleSheet("QPushButton { background: #b5c7d7; color:white; padding:8px 12px; border-radius:6px; font-weight:600; }"
-                             "QPushButton:hover { background:#8c9aa6; }");
-    step1NextBtn_ = new QPushButton("Trang sau", step1Container_);
-    step1NextBtn_->setStyleSheet("QPushButton { background:#608bc1; color:white; padding:8px 14px; border-radius:6px; font-weight:600; }"
-                                "QPushButton:hover { background:#1565C0; }");
+    s1->addSpacing(4);
+    s1->addWidget(infoFrame, 0, Qt::AlignTop);
+
+    QGridLayout* infoGrid = new QGridLayout(infoFrame);
+    infoGrid->setContentsMargins(12, 8, 12, 8);
+    infoGrid->setHorizontalSpacing(18);
+    infoGrid->setVerticalSpacing(6);
+
+    QStringList leftLabels = {
+        "Lộ trình bay", "Hãng hàng không", "Số hiệu chuyến bay",
+        "Ngày khởi hành", "Giờ khởi hành", "Ngày hạ cánh", "Giờ hạ cánh"
+    };
+
+    for (int i = 0; i < leftLabels.size(); ++i) {
+        QLabel* l = new QLabel(leftLabels[i]);
+        l->setStyleSheet("font-weight:600; color:#1E3D58;");
+        QLabel* v = new QLabel("-");
+        v->setObjectName(QString("finfo_%1").arg(i));
+        v->setStyleSheet("color:#1E3D58;");
+        infoGrid->addWidget(l, i, 0, Qt::AlignLeft);
+        infoGrid->addWidget(v, i, 1, Qt::AlignLeft);
+    }
+
+    // next button
+    QHBoxLayout* step1Btns = new QHBoxLayout();
+    step1Btns->addStretch();
+    step1NextBtn_ = new QPushButton("Trang sau");
     step1NextBtn_->setEnabled(false);
-    s1BtnRow->addWidget(cancelBtn);
-    s1BtnRow->addSpacing(8);
-    s1BtnRow->addWidget(step1NextBtn_);
-    s1->addLayout(s1BtnRow);
+    step1NextBtn_->setStyleSheet(
+        "QPushButton { background:#1E88E5; color:white; padding:8px 14px; border-radius:6px; }"
+        "QPushButton:hover { background:#4e7eb5; }"
+        "QPushButton:pressed { background:#3c6aa3; }"
+    );
+    step1Btns->addWidget(step1NextBtn_);
+    s1->addLayout(step1Btns);
 
-    bodyLayout->addWidget(step1Container_);
-
-    // ====== STEP 2: Chọn hạng + seat map (theo BookingDialog) ======
-    step2Container_ = new QWidget(body);
-    step2Container_->setStyleSheet("background:white; border:1px solid #BFCFE0; border-radius:8px;");
+    // Step2 container -----------------------------------------
+    step2Container_ = new QWidget(this);
     QVBoxLayout* s2 = new QVBoxLayout(step2Container_);
-    s2->setContentsMargins(16,16,16,16);
-    s2->setSpacing(10);
+    s2->setContentsMargins(12,8,12,8);
+    s2->setSpacing(8);
 
-    QLabel* t2 = new QLabel("Bước 2: Chọn hạng và ghế");
-    t2->setStyleSheet("font-size:16px; font-weight:700; color:#1565C0;");
-    s2->addWidget(t2);
+    QLabel* title2 = new QLabel("Chọn ghế ngồi");
+    title2->setAlignment(Qt::AlignCenter);
+    title2->setStyleSheet("font-size:18px; font-weight:700; color:#1565C0;");
+    s2->addWidget(title2);
 
-    // flight info
-    flightInfoText_ = new QTextEdit(step2Container_);
-    flightInfoText_->setReadOnly(true);
-    flightInfoText_->setFixedHeight(55);
-
-    flightInfoText_->setStyleSheet("background:#FAFBFF; border:1px solid #e6f0fb; border-radius:6px; padding:8px; font-size:13px;");
-    s2->addWidget(flightInfoText_);
-
-    // class selector (reuse BookingDialog style)
-    QFrame* classFrame = new QFrame(step2Container_);
-    classFrame->setStyleSheet("#classFrame { background:white; border:1px solid #608bc1; border-radius:8px; }");
+    // class selector
+    QFrame* classFrame = new QFrame();
+    classFrame->setStyleSheet("border:1px solid #90CAF9; border-radius:8px; padding:8px; background:white;");
     QHBoxLayout* classLayout = new QHBoxLayout(classFrame);
-    classLayout->setContentsMargins(12,10,12,10);
-    classLayout->setSpacing(12);
-    QLabel* lblClass = new QLabel("Chọn hạng vé:");
-    lblClass->setStyleSheet("font-weight:bold; color:#1565C0;");
+    classLayout->setContentsMargins(12,6,12,6);
+    classLayout->setSpacing(18);
+
+    QLabel* classLabel = new QLabel("Chọn hạng vé:");
+    classLabel->setStyleSheet("font-weight:700; color:#1565C0;");
+
     economyRadio_ = new QRadioButton("Hạng phổ thông");
+    economyRadio_->setObjectName("ecoRadio");
     businessRadio_ = new QRadioButton("Hạng thương gia");
-    economyRadio_->setChecked(true);
-    QButtonGroup* grp = new QButtonGroup(this);
-    grp->addButton(economyRadio_);
-    grp->addButton(businessRadio_);
-    fareLabel_ = new QLabel();
-    fareLabel_->setStyleSheet("font-size:15px; font-weight:bold; color:#74cc00;");
-    classLayout->addWidget(lblClass);
+    businessRadio_->setObjectName("busRadio");
+
+    QString radioStyle = R"(
+        QRadioButton::indicator {
+            width:18px; height:18px;
+            border-radius:4px;
+            border: 1px solid #90CAF9;
+            background:white;
+        }
+        QRadioButton#ecoRadio::indicator:checked {
+            background:#A5D6A7;
+            border:1px solid #7CBF73;
+        }
+        QRadioButton#busRadio::indicator:checked {
+            background:#FFD740;
+            border:1px solid #FFCA28;
+        }
+    )";
+    economyRadio_->setStyleSheet(radioStyle);
+    businessRadio_->setStyleSheet(radioStyle);
+
+    QButtonGroup* classGrp = new QButtonGroup(this);
+    classGrp->addButton(economyRadio_);
+    classGrp->addButton(businessRadio_);
+
+    fareLabel_ = new QLabel("0 VNĐ");
+    fareLabel_->setStyleSheet("font-weight:700; color:#43A047;"); // default eco
+
+    classLayout->addWidget(classLabel);
     classLayout->addWidget(economyRadio_);
     classLayout->addWidget(businessRadio_);
     classLayout->addStretch();
     classLayout->addWidget(fareLabel_);
     s2->addWidget(classFrame);
 
-    // seat map wrapper: frame + scroll area (copy BookingDialog layout)
-    QFrame* seatMapFrame = new QFrame(step2Container_);
-    seatMapFrame->setObjectName("SeatMapFrame");
-    seatMapFrame->setStyleSheet("#SeatMapFrame { background:white; border:1px solid #608bc1; border-radius:8px; }");
-    QVBoxLayout* frameLayout = new QVBoxLayout(seatMapFrame);
-    frameLayout->setContentsMargins(10,10,10,10);
-
-    QScrollArea* scrollArea = new QScrollArea(seatMapFrame);
-    scrollArea->setWidgetResizable(true);
-    scrollArea->setAlignment(Qt::AlignCenter);
-    scrollArea->setStyleSheet("background: transparent; border: none;");
-    scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-    scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
-
+    // seat map scroll
     seatMapContainer_ = new QWidget;
     seatMapLayout_ = new QGridLayout(seatMapContainer_);
     seatMapLayout_->setSpacing(6);
+    seatMapLayout_->setContentsMargins(10,10,10,10);
     seatMapLayout_->setAlignment(Qt::AlignCenter);
-    seatMapLayout_->setContentsMargins(6,6,6,6);
-    scrollArea->setWidget(seatMapContainer_);
-    frameLayout->addWidget(scrollArea);
-    s2->addWidget(seatMapFrame, 1);
 
-    QHBoxLayout* legendLayout = new QHBoxLayout();
-    legendLayout->setAlignment(Qt::AlignCenter);
-    legendLayout->setSpacing(15);
+    QScrollArea* scroll = new QScrollArea;
+    scroll->setWidget(seatMapContainer_);
+    scroll->setWidgetResizable(true);
+    scroll->setStyleSheet("border:none;");
+    s2->addWidget(scroll, 1);
 
-auto addLegend = [&](QString color, QString text) {
-    QHBoxLayout* itemLayout = new QHBoxLayout();
-    itemLayout->setSpacing(5);
+    // legend
+    QHBoxLayout* legend = new QHBoxLayout();
+    legend->setSpacing(20);
+    legend->setAlignment(Qt::AlignCenter);
 
-    QLabel* box = new QLabel();
-    box->setFixedSize(14, 14);
-    box->setStyleSheet("background:" + color + "; border:none; border-radius:2px;");
+    auto addLegend = [&](QString color, QString text){
+        QLabel* box = new QLabel;
+        box->setFixedSize(14,14);
+        box->setStyleSheet("background:" + color + "; border-radius:3px;");
+        QLabel* lab = new QLabel(text);
+        QHBoxLayout* h = new QHBoxLayout();
+        h->addWidget(box);
+        h->addWidget(lab);
+        QWidget* w = new QWidget;
+        w->setLayout(h);
+        legend->addWidget(w);
+    };
 
-    QLabel* lbl = new QLabel(text);
-    lbl->setStyleSheet("font-size:11px; color:#555;");
+    addLegend("#A5D6A7", "Hạng phổ thông");
+    addLegend("#FFD740", "Hạng thương gia");
+    addLegend("#EF5350", "Không thể chọn");
+    addLegend("#BDBDBD", "Đã đặt");
+    s2->addLayout(legend);
 
-    itemLayout->addWidget(box);
-    itemLayout->addWidget(lbl);
-    legendLayout->addLayout(itemLayout);
-};
-
-addLegend("#90EE90", "Hạng phổ thông");
-addLegend("#FFD700", "Hạng thương gia");
-addLegend("#FF6B6B", "Không thể chọn");
-addLegend("#D3D3D3", "Đã đặt");
-
-s2->addLayout(legendLayout);
-
-
-    selectedSeatDisplayLabel_ = new QLabel("Hiện chưa chọn ghế");
+    selectedSeatDisplayLabel_ = new QLabel("Hiện tại chưa chọn ghế");
     selectedSeatDisplayLabel_->setAlignment(Qt::AlignCenter);
     selectedSeatDisplayLabel_->setStyleSheet("font-weight:700; color:#1565C0;");
     s2->addWidget(selectedSeatDisplayLabel_);
 
     priceDiffLabel_ = new QLabel("");
     priceDiffLabel_->setAlignment(Qt::AlignCenter);
-    priceDiffLabel_->setStyleSheet("font-weight:700;");
     s2->addWidget(priceDiffLabel_);
 
-    // buttons: back + confirm
-    QHBoxLayout* s2Btns = new QHBoxLayout();
-    s2Btns->addStretch();
-    backBtn_ = new QPushButton("Trang trước", step2Container_);
-    backBtn_->setStyleSheet("QPushButton { background: white; color: #608bc1; border:1px solid #608bc1; padding:8px 12px; border-radius:6px; font-weight:600; }"
-                            "QPushButton:hover { background:#eaf3ff; }");
-    confirmBtn_ = new QPushButton("Xác nhận đổi vé", step2Container_);
-    confirmBtn_->setStyleSheet("QPushButton { background:#608bc1; color:white; padding:8px 14px; border-radius:6px; font-weight:600; }"
-                               "QPushButton:hover { background:#1565C0; }");
+    // bottom bar
+    QWidget* bottomBar = new QWidget(this);
+    QHBoxLayout* bottomLayout = new QHBoxLayout(bottomBar);
+    bottomLayout->setContentsMargins(0,8,0,0);
+
+    QPushButton* cancelBtn = new QPushButton("Hủy đặt vé");
+    cancelBtn->setStyleSheet(
+        "QPushButton{ background:#b5c7d7; color:white; padding:8px 12px; border-radius:6px; font-weight:600; }"
+        "QPushButton:hover{ background:#9eb2c4; }"
+        "QPushButton:pressed{ background:#8ba1b5; }"
+    );
+
+    connect(cancelBtn, &QPushButton::clicked, this, &QDialog::reject);
+
+    backBtn_ = new QPushButton("Trang trước");
+    backBtn_->setStyleSheet(
+        "QPushButton { background:white; color:#608bc1; border:1px solid #608bc1; padding:8px 12px; border-radius:6px; }"
+        "QPushButton:hover { background:#d7eaff; }"
+    );
+    backBtn_->hide();
+
+    confirmBtn_ = new QPushButton("Xác nhận đổi vé");
+    confirmBtn_->setStyleSheet(
+        "QPushButton { background:#608bc1; color:white; padding:8px 14px; border-radius:6px; font-weight:600; }"
+        "QPushButton:hover { background:#4e7eb5; }"
+    );
     confirmBtn_->setEnabled(false);
-    s2Btns->addWidget(backBtn_);
-    s2Btns->addSpacing(8);
-    s2Btns->addWidget(confirmBtn_);
-    s2Btns->addStretch();
-    s2->addLayout(s2Btns);
+    confirmBtn_->hide();
 
-    bodyLayout->addWidget(step2Container_);
+    step1NextBtn_->setParent(bottomBar);
+
+    bottomLayout->addWidget(cancelBtn);
+    bottomLayout->addStretch();
+    bottomLayout->addWidget(backBtn_);
+    bottomLayout->addWidget(step1NextBtn_);
+    bottomLayout->addWidget(confirmBtn_);
+
+    mainLayout->addWidget(step1Container_, 1);
+    mainLayout->addWidget(step2Container_, 1);
+    mainLayout->addWidget(bottomBar);
+
     step2Container_->hide();
-
-    mainLayout->addWidget(body);
-
-    // connect cancel
-    connect(cancelBtn, &QPushButton::clicked, this, &ChangeBookingDialog::reject);
 }
 
 void ChangeBookingDialog::setupConnections()
 {
     connect(searchBtn_, &QPushButton::clicked, this, &ChangeBookingDialog::onSearchByIdClicked);
     connect(step1NextBtn_, &QPushButton::clicked, this, &ChangeBookingDialog::onSelectFoundFlight);
-    connect(resultTable_, &QTableView::doubleClicked, this, &ChangeBookingDialog::onSelectFoundFlight);
+
     connect(backBtn_, &QPushButton::clicked, this, &ChangeBookingDialog::onBackToStep1);
     connect(economyRadio_, &QRadioButton::toggled, this, &ChangeBookingDialog::onClassChanged);
     connect(businessRadio_, &QRadioButton::toggled, this, &ChangeBookingDialog::onClassChanged);
     connect(confirmBtn_, &QPushButton::clicked, this, &ChangeBookingDialog::onConfirmClicked);
-
-    connect(resultTable_->selectionModel(), &QItemSelectionModel::selectionChanged, this,
-            [this](const QItemSelection&, const QItemSelection&){
-                step1NextBtn_->setEnabled(!resultTable_->selectionModel()->selectedRows().isEmpty());
-            });
 }
 
 QString ChangeBookingDialog::formatWithDot(int v) const { return dotFormat(v); }
 
-// ================= Step1 =================
 void ChangeBookingDialog::onSearchByIdClicked()
 {
-    resultModel_->removeRows(0, resultModel_->rowCount());
     QString id = flightIdEdit_->text().trimmed();
     if (id.isEmpty()) {
-        QMessageBox::warning(this, "Lỗi", "Vui lòng nhập ID chuyến bay.");
+        QMessageBox::warning(this, "Lỗi", "Vui lòng nhập mã chuyến bay.");
         return;
     }
 
     Flight* f = flightManager_->findFlightById(id.toStdString());
     if (!f) {
-        QMessageBox::information(this, "Không tìm thấy", "Không tìm thấy chuyến có ID này.");
+        QMessageBox::warning(this, "Lỗi", "Không tìm thấy chuyến bay.");
         return;
     }
 
-    QList<QStandardItem*> row;
-    row << new QStandardItem("1")
-        << new QStandardItem(QString::fromStdString(f->getFlightId()))
-        << new QStandardItem(QString::fromStdString(f->getAirline()))
-        << new QStandardItem(QString::fromStdString(f->getFlightNumber()))
-        << new QStandardItem(QString::fromStdString(f->getDepartureDate()) + " " + QString::fromStdString(f->getDepartureTime()));
-    for (auto &it : row) it->setTextAlignment(Qt::AlignCenter);
-    resultModel_->appendRow(row);
-    resultTable_->selectRow(0);
+    selectedNewFlight_ = f;
+
+    QStringList values = {
+        QString::fromStdString(f->getRouteId()),
+        QString::fromStdString(f->getAirline()),
+        QString::fromStdString(f->getFlightNumber()),
+        QString::fromStdString(f->getDepartureDate()),
+        QString::fromStdString(f->getDepartureTime()),
+        QString::fromStdString(f->getArrivalDate()),
+        QString::fromStdString(f->getArrivalTime())
+    };
+
+    for (int i = 0; i < values.size(); ++i) {
+        QLabel* v = this->findChild<QLabel*>(QString("finfo_%1").arg(i));
+        if (v) v->setText(values[i]);
+    }
+
+    step1NextBtn_->setEnabled(true);
 }
 
-// select & go step2
 void ChangeBookingDialog::onSelectFoundFlight()
 {
-    auto sel = resultTable_->selectionModel()->selectedRows();
-    if (sel.isEmpty()) {
-        QMessageBox::warning(this, "Lỗi", "Vui lòng chọn chuyến để tiếp tục.");
-        return;
-    }
-    QString id = resultModel_->item(sel.first().row(), 1)->text();
-    selectedNewFlight_ = flightManager_->findFlightById(id.toStdString());
-    if (!selectedNewFlight_) {
-        QMessageBox::warning(this, "Lỗi", "Không thể tải chuyến đã chọn.");
-        return;
-    }
-
-    // fill flight info
-    flightInfoText_->setText(QString("Mã chuyến: %1\nSố hiệu: %2\nNgày: %3 %4\nHãng: %5")
-                             .arg(QString::fromStdString(selectedNewFlight_->getFlightId()))
-                             .arg(QString::fromStdString(selectedNewFlight_->getFlightNumber()))
-                             .arg(QString::fromStdString(selectedNewFlight_->getDepartureDate()))
-                             .arg(QString::fromStdString(selectedNewFlight_->getDepartureTime()))
-                             .arg(QString::fromStdString(selectedNewFlight_->getAirline()))
-                             );
+    if (!selectedNewFlight_) return;
 
     economyRadio_->setChecked(true);
+
     renderSeatMap();
     updatePriceDifference();
+
     showStep(2);
 }
 
 void ChangeBookingDialog::showStep(int step)
 {
     currentStep_ = step;
-    step1Container_->setVisible(step == 1);
-    step2Container_->setVisible(step == 2);
+
+    QLabel* step1 = findChild<QLabel*>("stepCircle1");
+    QLabel* step2 = findChild<QLabel*>("stepCircle2");
+    QLabel* line  = findChild<QLabel*>("stepLine");
+
+    if (step == 1) {
+        step1Container_->show();
+        step2Container_->hide();
+
+        step1->setStyleSheet("background:#7BC043; color:white; border-radius:16px; font-weight:700;");
+        line->setStyleSheet("background:#E3F2FD; border-radius:3px;");
+        step2->setStyleSheet("background:#E3F2FD; color:white; border-radius:16px; font-weight:700;");
+
+        step1NextBtn_->show();
+        backBtn_->hide();
+        confirmBtn_->hide();
+    }
+    else {
+        step1Container_->hide();
+        step2Container_->show();
+
+        step1->setStyleSheet("background:#7BC043; color:white; border-radius:16px; font-weight:700;");
+        line->setStyleSheet("background:#7BC043; border-radius:3px;");
+        step2->setStyleSheet("background:#7BC043; color:white; border-radius:16px; font-weight:700;");
+
+        step1NextBtn_->hide();
+        backBtn_->show();
+        confirmBtn_->show();
+    }
 }
 
-// back
 void ChangeBookingDialog::onBackToStep1()
 {
-    selectedSeatId_.clear();
-    confirmBtn_->setEnabled(false);
     showStep(1);
 }
 
-// ================= Step2: seat map (copy BookingDialog logic) =================
 void ChangeBookingDialog::onClassChanged()
 {
+    selectedSeatId_.clear();
+    selectedSeatDisplayLabel_->setText("Hiện tại chưa chọn ghế");
+    confirmBtn_->setEnabled(false);
+
     renderSeatMap();
     updatePriceDifference();
-    selectedSeatId_.clear();
-    selectedSeatDisplayLabel_->setText("Hiện chưa chọn ghế");
-    confirmBtn_->setEnabled(false);
 }
 
 void ChangeBookingDialog::renderSeatMap()
 {
-    // clear layout
-    QLayoutItem* item;
-    while ((item = seatMapLayout_->takeAt(0)) != nullptr) {
-        if (item->widget()) item->widget()->deleteLater();
-        delete item;
+    while (seatMapLayout_->count()) {
+        QLayoutItem* it = seatMapLayout_->takeAt(0);
+        if (it->widget()) it->widget()->deleteLater();
+        delete it;
     }
-    selectedSeatId_.clear();
-    confirmBtn_->setEnabled(false);
 
     if (!selectedNewFlight_) return;
 
@@ -438,7 +464,6 @@ void ChangeBookingDialog::renderSeatMap()
 
     if (!sm->loadSeatMapFor(selectedNewFlight_)) {
         QLabel* err = new QLabel("Không thể tải sơ đồ ghế");
-        err->setStyleSheet("color:red;");
         seatMapLayout_->addWidget(err, 0, 0);
         return;
     }
@@ -449,12 +474,11 @@ void ChangeBookingDialog::renderSeatMap()
     int cols = sm->getSeatColumns();
     BookingClass currentClass = economyRadio_->isChecked() ? BookingClass::Economy : BookingClass::Business;
 
-    // Add column headers A B C...
+    // Add column headers
     for (int col = 0; col < cols; ++col) {
         QLabel* header = new QLabel(QString(QChar('A' + col)));
         header->setAlignment(Qt::AlignCenter);
-        header->setFixedSize(26, 18);
-        header->setStyleSheet("font-weight:bold; color:#333;");
+        header->setStyleSheet("font-weight:700; color:#333;");
         seatMapLayout_->addWidget(header, 0, col + 1);
     }
 
@@ -465,47 +489,51 @@ void ChangeBookingDialog::renderSeatMap()
         int r, c;
         std::tie(r, c) = seat->getCoordinates();
 
-        // row label
         if (r != currentRow) {
             currentRow = r;
             QLabel* rLbl = new QLabel(QString::number(r + 1));
-            rLbl->setFixedSize(22, 22);
             rLbl->setAlignment(Qt::AlignCenter);
-            rLbl->setStyleSheet("font-weight:bold; color:#333;");
+            rLbl->setStyleSheet("font-weight:700; color:#333;");
             seatMapLayout_->addWidget(rLbl, layoutRow, 0);
         }
 
-        QPushButton* btn = new QPushButton;
-        btn->setFixedSize(26, 26);
+        QPushButton* btn = new QPushButton();
+        btn->setFixedSize(28, 28);
         btn->setCursor(Qt::PointingHandCursor);
-        btn->setFlat(true);
+
+        bool matchClass =
+            (currentClass == BookingClass::Economy  && seat->getType() == SeatType::Economy) ||
+            (currentClass == BookingClass::Business && seat->getType() == SeatType::Business);
+
+        QString seatCode = QString("%1%2").arg(QChar('A' + c)).arg(r + 1, 2, 10, QChar('0'));
 
         QString style;
         bool enable = false;
-        bool matchClass = (currentClass == BookingClass::Economy && seat->getType() == SeatType::Economy) ||
-                          (currentClass == BookingClass::Business && seat->getType() == SeatType::Business);
 
         if (seat->getStatus() == SeatStatus::Booked) {
             style = BOOKED_STYLE;
-            btn->setToolTip(QString("Ghế %1 (Đã đặt)").arg(QString::fromStdString(seat->getId())));
-        } else if (!matchClass) {
+            btn->setToolTip(seatCode + " (Đã đặt)");
+        }
+        else if (!matchClass) {
             style = LOCKED_STYLE;
-            btn->setToolTip("Khác hạng vé");
-        } else {
+            btn->setToolTip(seatCode + " (Khác hạng)");
+        }
+        else {
             enable = true;
-            style = (seat->getType() == SeatType::Business) ? BUSINESS_AVAILABLE_STYLE : ECONOMY_AVAILABLE_STYLE;
-            btn->setToolTip(QString("Ghế %1 (Trống)").arg(QString::fromStdString(seat->getId())));
+            style = (seat->getType() == SeatType::Business) ?
+                        BUSINESS_AVAILABLE_STYLE :
+                        ECONOMY_AVAILABLE_STYLE;
+
+            btn->setToolTip(seatCode + " (Trống)");
         }
 
-        btn->setStyleSheet(style);
         btn->setEnabled(enable);
+        btn->setStyleSheet(style);
         btn->setProperty("seatId", QString::fromStdString(seat->getId()));
         btn->setProperty("baseStyle", style);
 
         if (enable) {
-            connect(btn, &QPushButton::clicked, this, [this, btn]() {
-                QString sid = btn->property("seatId").toString();
-                // reset styles
+            connect(btn, &QPushButton::clicked, this, [this, btn, seatCode]() {
                 for (int i = 0; i < seatMapLayout_->count(); ++i) {
                     QWidget* w = seatMapLayout_->itemAt(i)->widget();
                     QPushButton* b = qobject_cast<QPushButton*>(w);
@@ -513,11 +541,11 @@ void ChangeBookingDialog::renderSeatMap()
                         b->setStyleSheet(b->property("baseStyle").toString());
                     }
                 }
-                // highlight selected
-                QString selStyle = btn->property("baseStyle").toString() + ChangeBookingDialog::SELECTED_STYLE_SUFFIX;
-                btn->setStyleSheet(selStyle);
-                selectedSeatId_ = sid;
-                selectedSeatDisplayLabel_->setText(QString("Bạn đã chọn ghế: <b style='color:#1565C0;'>%1</b>").arg(sid));
+
+                btn->setStyleSheet(btn->property("baseStyle").toString() + SELECTED_STYLE_SUFFIX);
+
+                selectedSeatId_ = btn->property("seatId").toString();
+                selectedSeatDisplayLabel_->setText("Bạn đã chọn ghế: " + seatCode);
                 confirmBtn_->setEnabled(true);
             });
         }
@@ -531,49 +559,47 @@ void ChangeBookingDialog::renderSeatMap()
 void ChangeBookingDialog::updatePriceDifference()
 {
     if (!selectedNewFlight_) return;
-    bool wantE = economyRadio_->isChecked();
-    int newFare = wantE ? selectedNewFlight_->getFareEconomy() : selectedNewFlight_->getFareBusiness();
+
+    bool eco = economyRadio_->isChecked();
+    int newFare = eco ? selectedNewFlight_->getFareEconomy() :
+                        selectedNewFlight_->getFareBusiness();
+
     int oldFare = currentBooking_->getBaseFare();
     int diff = newFare - oldFare;
 
-    fareLabel_->setText(QString("%1 VNĐ").arg(dotFormat(newFare)));
+    fareLabel_->setText(dotFormat(newFare) + " VNĐ");
+    fareLabel_->setStyleSheet(
+        eco
+        ? "font-weight:700; color:#43A047;"
+        : "font-weight:700; color:#FFB300;"
+    );
 
     if (diff > 0) {
-        priceDiffLabel_->setText(QString("Phí phát sinh: %1 VNĐ").arg(dotFormat(diff)));
-        priceDiffLabel_->setStyleSheet("color:#0051ff; font-weight:700;");
-    } else if (diff < 0) {
-        priceDiffLabel_->setText(QString("Hoàn trả: %1 VNĐ").arg(dotFormat(-diff)));
-        priceDiffLabel_->setStyleSheet("color:#ff2f2f; font-weight:700;");
-    } else {
-        priceDiffLabel_->setText("Không đổi giá");
-        priceDiffLabel_->setStyleSheet("color:#008a00; font-weight:700;");
+        priceDiffLabel_->setText("Phí phát sinh: " + dotFormat(diff) + " VNĐ");
+        priceDiffLabel_->setStyleSheet("color:#1E88E5; font-weight:700;");
+    }
+    else if (diff < 0) {
+        priceDiffLabel_->setText("Hoàn lại: " + dotFormat(-diff) + " VNĐ");
+        priceDiffLabel_->setStyleSheet("color:#D32F2F; font-weight:700;");
+    }
+    else {
+        priceDiffLabel_->setText("Không thay đổi giá");
+        priceDiffLabel_->setStyleSheet("color:#43A047; font-weight:700;");
     }
 }
 
-// confirm change
 void ChangeBookingDialog::onConfirmClicked()
 {
-    if (!selectedNewFlight_) {
-        QMessageBox::warning(this,"Lỗi","Chưa chọn chuyến.");
-        return;
-    }
-    if (selectedSeatId_.isEmpty()) {
-        QMessageBox::warning(this,"Lỗi","Chưa chọn ghế.");
+    if (!selectedNewFlight_ || selectedSeatId_.isEmpty()) {
+        QMessageBox::warning(this, "Lỗi", "Bạn chưa chọn ghế.");
         return;
     }
 
-    BookingClass bc = economyRadio_->isChecked() ? BookingClass::Economy : BookingClass::Business;
-
-    // confirm prompt
-    if (QMessageBox::question(this, "Xác nhận đổi vé",
-                              QString("Xác nhận đổi vé sang chuyến %1, ghế %2 ?")
-                              .arg(QString::fromStdString(selectedNewFlight_->getFlightNumber()))
-                              .arg(selectedSeatId_),
-                              QMessageBox::Yes | QMessageBox::No) == QMessageBox::No) {
-        return;
-    }
+    BookingClass bc = economyRadio_->isChecked() ?
+        BookingClass::Economy : BookingClass::Business;
 
     SeatManager* sm = flightManager_->getSeatManager();
+
     bool ok = bookingManager_->changeBooking(
         *flightManager_,
         *sm,
@@ -587,6 +613,6 @@ void ChangeBookingDialog::onConfirmClicked()
         QMessageBox::information(this, "Thành công", "Đổi vé thành công.");
         accept();
     } else {
-        QMessageBox::critical(this, "Thất bại", "Đổi vé thất bại. Vui lòng thử lại.");
+        QMessageBox::critical(this, "Thất bại", "Đổi vé thất bại.");
     }
 }

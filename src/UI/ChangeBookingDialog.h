@@ -29,15 +29,12 @@ public:
     ~ChangeBookingDialog() override = default;
 
 private slots:
-    // Step1
     void onSearchByIdClicked();
     void onSelectFoundFlight();
 
-    // Navigation
     void showStep(int step);
     void onBackToStep1();
 
-    // Step2
     void onClassChanged();
     void renderSeatMap();
     void updatePriceDifference();
@@ -48,17 +45,14 @@ private:
     void setupConnections();
     QString formatWithDot(int v) const;
 
-    // Data
     Booking* currentBooking_;
     BookingManager* bookingManager_;
     FlightManager* flightManager_;
     Flight* currentFlight_;
     Flight* selectedNewFlight_;
 
-    // UI/state
     int currentStep_;
 
-    // Step1 widgets
     QWidget* step1Container_;
     QLineEdit* flightIdEdit_;
     QPushButton* searchBtn_;
@@ -66,7 +60,6 @@ private:
     QTableView* resultTable_;
     QPushButton* step1NextBtn_;
 
-    // Step2 widgets
     QWidget* step2Container_;
     QTextEdit* flightInfoText_;
     QRadioButton* economyRadio_;
@@ -74,16 +67,13 @@ private:
     QLabel* fareLabel_;
     QWidget* seatMapContainer_;
     QGridLayout* seatMapLayout_;
-    QLabel* legendLabel_;
     QLabel* selectedSeatDisplayLabel_;
     QLabel* priceDiffLabel_;
     QPushButton* backBtn_;
     QPushButton* confirmBtn_;
 
-    // seat selection
     QString selectedSeatId_;
 
-    // Styles reused from BookingDialog
     static const QString SEAT_BASE_STYLE;
     static const QString BUSINESS_AVAILABLE_STYLE;
     static const QString ECONOMY_AVAILABLE_STYLE;
