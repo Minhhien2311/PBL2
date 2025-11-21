@@ -95,6 +95,7 @@ void SearchBookPage::setupUi()
     auto *mainLayout = new QVBoxLayout(this);
     mainLayout->setContentsMargins(0,0,0,0);
     mainLayout->setSpacing(0);
+    
 
     // ================== TOP BAR ==================
     QWidget *topBar = new QWidget(this);
@@ -192,16 +193,12 @@ void SearchBookPage::setupUi()
     toSearchCombo_->setMinimumHeight(36);
     filterLayout->addWidget(toSearchCombo_, 1, 1);
 
-    // Date picker
-    dateSearchEdit_ = new QDateEdit(this);
-    dateSearchEdit_->setCalendarPopup(true);
-    dateSearchEdit_->setDisplayFormat("dd/MM/yyyy");
-    dateSearchEdit_->setSpecialValueText("Tùy chọn");
-    QDate oneDayAgo = QDate::currentDate().addDays(-1);
-    dateSearchEdit_->setMinimumDate(oneDayAgo);
-    dateSearchEdit_->clear();
+    // Date picker (Dùng QLineEdit)
+    dateSearchEdit_ = new QLineEdit(this);
+    dateSearchEdit_->setPlaceholderText("dd/MM/yyyy"); // Gợi ý định dạng
     dateSearchEdit_->setMinimumHeight(36);
     filterLayout->addWidget(dateSearchEdit_, 1, 2);
+
 
     // Airline dropdown
     airlineFilterCombo_ = new QComboBox(this);
@@ -405,13 +402,20 @@ void SearchBookPage::onSearchClicked()
         return;
     }
     
-    // Date (optional) - chỉ filter nếu user chọn ngày cụ thể
-    QDate selectedDate = dateSearchEdit_->date();
-    if (selectedDate.isValid() && selectedDate > QDate::currentDate().addDays(-1)) {
-        // User đã chọn ngày → thêm vào criteria
-        criteria.date = selectedDate.toString("dd/MM/yyyy").toStdString();
+    // Date (optional) - chỉ filter nếu user chọn ngày cụ thể - Xử lý nhập text
+    QString dateText = dateSearchEdit_->text().trimmed();
+    if (!dateText.isEmpty()) {
+        // Ép kiểu chuỗi nhập vào thành QDate
+        QDate selectedDate = QDate::fromString(dateText, "dd/MM/yyyy");
+
+        if (selectedDate.isValid()) {
+            criteria.date = selectedDate.toString("dd/MM/yyyy").toStdString();
+        } else {
+            // Nếu nhập sai định dạng (ví dụ nhập chữ linh tinh)
+            QMessageBox::warning(this, "Lỗi ngày", "Vui lòng nhập ngày đúng định dạng: ngày/tháng/năm (ví dụ: 25/12/2025)");
+            return; // Dừng tìm kiếm
+        }
     }
-    // Nếu date = "Tùy chọn" (minimum date) → không filter theo ngày
     
     // Airline (optional)
     if (airlineFilterCombo_->currentIndex() > 0) {

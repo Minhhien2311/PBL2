@@ -45,7 +45,7 @@ private:
     QLineEdit* idSearchEdit_;
     AirportComboBox* fromSearchCombo_;
     AirportComboBox* toSearchCombo_;
-    QDateEdit* dateSearchEdit_; 
+    QLineEdit* dateSearchEdit_; 
     QComboBox* airlineFilterCombo_;  // ← THÊM dòng này
     QLabel* statusLabel_;             // ← THÊM dòng này
 
@@ -61,6 +61,7 @@ private:
     QPushButton* addButton_;
     QPushButton* editButton_;
     QPushButton* deleteButton_;
+    QPushButton* refreshButton;      // ← THÊM dòng này
 };
 
 #endif // FLIGHTSPAGE_H

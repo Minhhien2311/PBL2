@@ -9,6 +9,7 @@
 #include "PromotionsPage.h"          // Tạo mới - placeholder
 #include "AgentListPage.h"           // Tạo mới - placeholder
 #include "PageRefresher.h"
+#include "AdminBookingPage.h"       // Mới
 
 #include "core/AccountManager.h"
 #include "core/FlightManager.h"
@@ -29,13 +30,15 @@ AdminInterface::AdminInterface(AccountManager* accManager,
                                BookingManager* bkManager,
                                ReportManager* reportManager,
                                AirportManager* airportManager,
+                               PassengerManager* passengerManager,
                                QWidget* parent)
     : QWidget(parent),
       accountManager_(accManager),
       flightManager_(flManager),
       bookingManager_(bkManager),
       reportManager_(reportManager),
-      airportManager_(airportManager)
+      airportManager_(airportManager),
+      passengerManager_(passengerManager)
 {
     auto *root = new QHBoxLayout(this);
     root->setContentsMargins(0, 0, 0, 0);
@@ -96,24 +99,28 @@ AdminInterface::AdminInterface(AccountManager* accManager,
     btnDashboard_ = new QPushButton("Tổng quan");
     btnRoutes_    = new QPushButton("Quản lý tuyến bay");
     btnFlights_   = new QPushButton("Quản lý chuyến bay");
+    btnBookings_ = new QPushButton("Quản lý Đặt chỗ");
     btnFlightRules_ = new QPushButton("Quản lý luật bay");
     btnPromotions_ = new QPushButton("Quản lý khuyến mãi");
     
     btnDashboard_->setStyleSheet(btnStyle); 
     btnRoutes_->setStyleSheet(btnStyle); 
     btnFlights_->setStyleSheet(btnStyle);
+    btnBookings_->setStyleSheet(btnStyle);
     btnFlightRules_->setStyleSheet(btnStyle);
     btnPromotions_->setStyleSheet(btnStyle);
-    
+
     btnDashboard_->setCheckable(true); 
     btnRoutes_->setCheckable(true); 
     btnFlights_->setCheckable(true);
+    btnBookings_->setCheckable(true);
     btnFlightRules_->setCheckable(true);
     btnPromotions_->setCheckable(true);
     
     menuLayout->addWidget(btnDashboard_);
     menuLayout->addWidget(btnRoutes_);
     menuLayout->addWidget(btnFlights_);
+    menuLayout->addWidget(btnBookings_);
     menuLayout->addWidget(btnFlightRules_);
     menuLayout->addWidget(btnPromotions_);
 
@@ -181,12 +188,13 @@ AdminInterface::AdminInterface(AccountManager* accManager,
     stack_->addWidget(new DashboardPage(accountManager_, reportManager_, this)); // 0
     stack_->addWidget(new RoutesPage(flightManager_, airportManager_, this));   // 1
     stack_->addWidget(new FlightsPage(flightManager_, airportManager_, this));  // 2
-    stack_->addWidget(new FlightRulesPage(flightManager_, this));               // 3 - placeholder
-    stack_->addWidget(new PromotionsPage(this));                                // 4 - placeholder
-    stack_->addWidget(new AdminTicketsReportPage(accountManager_, bookingManager_, reportManager_, this)); // 5
-    stack_->addWidget(new AdminRevenueReportPage(accountManager_, bookingManager_, reportManager_, this)); // 6
-    stack_->addWidget(new AccountsPage(accountManager_, this));                 // 7
-    stack_->addWidget(new AgentListPage(accountManager_, this));                // 8 - placeholder
+    stack_->addWidget(new AdminBookingPage(bookingManager_, flightManager_, accountManager_, airportManager_, passengerManager_, this)); // 3
+    stack_->addWidget(new FlightRulesPage(flightManager_, this));               // 4 - placeholder
+    stack_->addWidget(new PromotionsPage(this));                                // 5 - placeholder
+    stack_->addWidget(new AdminTicketsReportPage(accountManager_, bookingManager_, reportManager_, this)); // 6
+    stack_->addWidget(new AdminRevenueReportPage(accountManager_, bookingManager_, reportManager_, this)); // 7
+    stack_->addWidget(new AccountsPage(accountManager_, this));                 // 8
+    stack_->addWidget(new AgentListPage(accountManager_, this));                // 9 - placeholder
 
     root->addWidget(stack_, 1);
 
@@ -204,6 +212,7 @@ void AdminInterface::setupConnections()
         btnDashboard_->setChecked(false);
         btnRoutes_->setChecked(false);
         btnFlights_->setChecked(false);
+        btnBookings_->setChecked(false);
         btnFlightRules_->setChecked(false);
         btnPromotions_->setChecked(false);
         btnTicketsReport_->setChecked(false);
@@ -218,12 +227,13 @@ void AdminInterface::setupConnections()
     connect(btnDashboard_, &QPushButton::clicked, [=](){ switchPage(btnDashboard_, 0); });
     connect(btnRoutes_, &QPushButton::clicked, [=](){ switchPage(btnRoutes_, 1); });
     connect(btnFlights_, &QPushButton::clicked, [=](){ switchPage(btnFlights_, 2); });
-    connect(btnFlightRules_, &QPushButton::clicked, [=](){ switchPage(btnFlightRules_, 3); });
-    connect(btnPromotions_, &QPushButton::clicked, [=](){ switchPage(btnPromotions_, 4); });
-    connect(btnTicketsReport_, &QPushButton::clicked, [=](){ switchPage(btnTicketsReport_, 5); });
-    connect(btnRevenueReport_, &QPushButton::clicked, [=](){ switchPage(btnRevenueReport_, 6); });
-    connect(btnAccounts_, &QPushButton::clicked, [=](){ switchPage(btnAccounts_, 7); });
-    connect(btnAgentList_, &QPushButton::clicked, [=](){ switchPage(btnAgentList_, 8); });
+    connect(btnBookings_, &QPushButton::clicked, [=](){ switchPage(btnBookings_, 3); });
+    connect(btnFlightRules_, &QPushButton::clicked, [=](){ switchPage(btnFlightRules_, 4); });
+    connect(btnPromotions_, &QPushButton::clicked, [=](){ switchPage(btnPromotions_, 5); });
+    connect(btnTicketsReport_, &QPushButton::clicked, [=](){ switchPage(btnTicketsReport_, 6); });
+    connect(btnRevenueReport_, &QPushButton::clicked, [=](){ switchPage(btnRevenueReport_, 7); });
+    connect(btnAccounts_, &QPushButton::clicked, [=](){ switchPage(btnAccounts_, 8); });
+    connect(btnAgentList_, &QPushButton::clicked, [=](){ switchPage(btnAgentList_, 9); });
 
     connect(logoutBtn_, &QPushButton::clicked, this, &AdminInterface::logoutClicked);
 }

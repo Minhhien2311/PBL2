@@ -1,4 +1,4 @@
-#include "AgentBookingsPage.h"
+#include "AdminBookingPage.h"
 #include "core/PassengerManager.h"
 #include "core/BookingManager.h"
 #include "core/FlightManager.h"
@@ -53,7 +53,7 @@ namespace {
     }
 }
 
-AgentBookingsPage::AgentBookingsPage(BookingManager* bkManager,
+AdminBookingPage::AdminBookingPage(BookingManager* bkManager,
                                      FlightManager* flManager,
                                      AccountManager* accManager,
                                      AirportManager* airportManager,
@@ -78,7 +78,7 @@ AgentBookingsPage::AgentBookingsPage(BookingManager* bkManager,
     refreshTable(); // Tải dữ liệu lần đầu
 }
 
-void AgentBookingsPage::setupUi()
+void AdminBookingPage::setupUi()
 {
     // style
     this->setStyleSheet(
@@ -133,7 +133,6 @@ void AgentBookingsPage::setupUi()
     );
     
     refreshButton->setCursor(Qt::PointingHandCursor);
-    // refreshButton->setMinimumWidth(140); // Có thể bỏ dòng này để nút tự co theo chữ
     
     headerRow->addWidget(refreshButton);
     topLayout->addLayout(headerRow);
@@ -294,7 +293,7 @@ void AgentBookingsPage::setupUi()
 }
 
 
-void AgentBookingsPage::setupModel()
+void AdminBookingPage::setupModel()
 {
     // Tăng lên 8 cột (Thêm STT vào đầu)
     model_ = new QStandardItemModel(0, 8, this);
@@ -328,47 +327,38 @@ void AgentBookingsPage::setupModel()
     tableView_->setColumnWidth(0, 50);
 }
 
-void AgentBookingsPage::setupConnections()
+void AdminBookingPage::setupConnections()
 {
     // 2 nút tìm kiếm
-    connect(searchButton_, &QPushButton::clicked, this, &AgentBookingsPage::onSearchByBookingId);
-    connect(searchByPassengerBtn_, &QPushButton::clicked, this, &AgentBookingsPage::onSearchByPassengerId);
+    connect(searchButton_, &QPushButton::clicked, this, &AdminBookingPage::onSearchByBookingId);
+    connect(searchByPassengerBtn_, &QPushButton::clicked, this, &AdminBookingPage::onSearchByPassengerId);
     
     // Các nút khác
-    connect(refreshButton, &QPushButton::clicked, this, &AgentBookingsPage::refreshPage);
-    connect(cancelBookingBtn_, &QPushButton::clicked, this, &AgentBookingsPage::onCancelBookingClicked);
-    connect(viewDetailsBtn_, &QPushButton::clicked, this, &AgentBookingsPage::onViewDetailsClicked);
-    connect(changeBookingBtn_, &QPushButton::clicked, this, &AgentBookingsPage::onChangeBookingClicked);
+    connect(refreshButton, &QPushButton::clicked, this, &AdminBookingPage::refreshPage);
+    connect(cancelBookingBtn_, &QPushButton::clicked, this, &AdminBookingPage::onCancelBookingClicked);
+    connect(viewDetailsBtn_, &QPushButton::clicked, this, &AdminBookingPage::onViewDetailsClicked);
+    connect(changeBookingBtn_, &QPushButton::clicked, this, &AdminBookingPage::onChangeBookingClicked);
 }
 
 // Hàm này tải (hoặc làm mới) TOÀN BỘ vé của Agent
-void AgentBookingsPage::refreshTable()
+void AdminBookingPage::refreshTable()
 {
     model_->removeRows(0, model_->rowCount());
 
-    // 1. Lấy ID của Agent đang đăng nhập
-    Account* currentUser = accountManager_->getCurrentUser();
-    if (!currentUser) {
-        // QMessageBox::warning(this, "Lỗi", "Không thể xác định người dùng. Vui lòng đăng nhập lại.");
-        return;
-    }
-    std::string currentAgentId = currentUser->getId();
-
-    // 2. Lấy danh sách booking của Agent này
-    std::vector<Booking*> agentBookings = bookingManager_->getBookingsByAgentId(currentAgentId);
+    // 2. Lấy toàn bộ danh sách booking 
+    std::vector<Booking*> allBookings = bookingManager_->getAllBookings();
 
     // 3. Hiển thị các booking
-    // Hiển thị
-    for (Booking* booking : agentBookings) {
+    for (Booking* booking : allBookings) {
         displayBooking(booking);
     }
 
     statusLabel_->setText(
-        QString("Hiển thị tất cả %1 đặt chỗ").arg(agentBookings.size())
+        QString("Hiển thị tất cả %1 đặt chỗ").arg(allBookings.size())
     );
 }
 
-void AgentBookingsPage::onCancelBookingClicked()
+void AdminBookingPage::onCancelBookingClicked()
 {
     // 1. Lấy hàng đang chọn
     QModelIndexList selected = tableView_->selectionModel()->selectedRows();
@@ -445,7 +435,7 @@ void AgentBookingsPage::onCancelBookingClicked()
     }
 }
 
-void AgentBookingsPage::onViewDetailsClicked()
+void AdminBookingPage::onViewDetailsClicked()
 {
     // 1. Lấy hàng đang chọn
     QModelIndexList selected = tableView_->selectionModel()->selectedRows();
@@ -471,7 +461,7 @@ void AgentBookingsPage::onViewDetailsClicked()
     dialog.exec();
 }
 
-void AgentBookingsPage::onChangeBookingClicked()
+void AdminBookingPage::onChangeBookingClicked()
 {
     // 1. Get selected row
     QModelIndexList selected = tableView_->selectionModel()->selectedRows();
@@ -507,7 +497,7 @@ void AgentBookingsPage::onChangeBookingClicked()
 }
 
 // ========== HÀM HELPER: HIỂN THỊ 1 BOOKING ==========
-void AgentBookingsPage::displayBooking(Booking* booking)
+void AdminBookingPage::displayBooking(Booking* booking)
 {
     if (!booking) return;
     
@@ -549,6 +539,9 @@ void AgentBookingsPage::displayBooking(Booking* booking)
         statusStr = "Đã đổi";
     }
     rowItems << new QStandardItem(statusStr);
+
+    // 8. Agent đặt vé
+    rowItems << new QStandardItem(QString::fromStdString(booking->getAgentId()));
     
     // CANH GIỮA TẤT CẢ
     for (QStandardItem *item : rowItems) {
@@ -559,7 +552,7 @@ void AgentBookingsPage::displayBooking(Booking* booking)
 }
 
 // ========== 1. TÌM THEO MÃ ĐẶT CHỖ ==========
-void AgentBookingsPage::onSearchByBookingId()
+void AdminBookingPage::onSearchByBookingId()
 {
     QString input = bookingIdSearchEdit_->text().trimmed();
     
@@ -571,14 +564,6 @@ void AgentBookingsPage::onSearchByBookingId()
     
     std::string bookingId = input.toStdString();
     
-    // Lấy thông tin Agent hiện tại
-    Account* currentUser = accountManager_->getCurrentUser();
-    if (!currentUser) {
-        std::cout << "Không thể xác định người dùng. Vui lòng đăng nhập lại." << std::endl;
-        return;
-    }
-    std::string currentAgentId = currentUser->getId();
-    
     // Tìm booking
     Booking* booking = bookingManager_->findBookingById(bookingId);
     
@@ -586,14 +571,6 @@ void AgentBookingsPage::onSearchByBookingId()
     model_->removeRows(0, model_->rowCount());
     
     if (!booking) {
-        statusLabel_->setText("Không tìm thấy vé với mã " + input + "!");
-        statusLabel_->setStyleSheet("color: #C62828;"); // Màu đỏ
-        return;
-    }
-    
-    // Kiểm tra booking có thuộc về Agent này không
-    if (booking->getAgentId() != currentAgentId) {
-        std::cout << "Booking ID " << bookingId << " does not belong to current agent." << std::endl;
         statusLabel_->setText("Không tìm thấy vé với mã " + input + "!");
         statusLabel_->setStyleSheet("color: #C62828;"); // Màu đỏ
         return;
@@ -608,7 +585,7 @@ void AgentBookingsPage::onSearchByBookingId()
 }
 
 // ========== 2. TÌM THEO CCCD KHÁCH HÀNG ==========
-void AgentBookingsPage::onSearchByPassengerId()
+void AdminBookingPage::onSearchByPassengerId()
 {
     QString input = passengerIdSearchEdit_->text().trimmed();
     
@@ -655,7 +632,7 @@ void AgentBookingsPage::onSearchByPassengerId()
     statusLabel_->setStyleSheet("color: #2E7D32;"); // Màu xanh lá
 }
 
-void AgentBookingsPage::refreshPage() {
+void AdminBookingPage::refreshPage() {
     PageRefresher::clearSearchFields(this);
     PageRefresher::executeRefresh([this]() {
         refreshTable();

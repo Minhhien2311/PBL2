@@ -21,8 +21,7 @@
 #include <QStandardItemModel>
 #include <QHeaderView>
 #include <QMessageBox>
-#include <QDateEdit> 
-#include <QCalendarWidget> 
+#include <QDateEdit>
 
 // Helper function để format tiền tệ Việt Nam
 namespace {
@@ -103,7 +102,7 @@ void FlightsPage::setupUi()
     headerRow->setSpacing(10);
 
     // ← NÚT TẢI LẠI (góc phải trên)
-    QPushButton* refreshButton = new QPushButton("Làm mới trang", topBar);
+    refreshButton = new QPushButton("Làm mới trang", topBar);
     
     // [QUAN TRỌNG] Set Icon (Bạn thay đường dẫn file ảnh vào đây)
     // Lưu ý: Nên dùng icon có màu #133e87 để đồng bộ với chữ
@@ -131,9 +130,6 @@ void FlightsPage::setupUi()
     
     headerRow->addWidget(refreshButton);
     topLayout->addLayout(headerRow);
-
-    // Kết nối nút refresh
-    connect(refreshButton, &QPushButton::clicked, this, &FlightsPage::refreshTable);
 
     // ========== HÀNG TÌM KIẾM (2 BOX NGANG) ==========
     QHBoxLayout* searchRowLayout = new QHBoxLayout();
@@ -220,15 +216,12 @@ void FlightsPage::setupUi()
     QVBoxLayout* col3 = new QVBoxLayout();
     col3->setSpacing(6);
     QLabel* dateLabel = new QLabel("Ngày khởi hành");
-    dateLabel->setStyleSheet("background: transparent; border: none; color: #123B7A;");  // ← Bỏ viền
+    dateLabel->setStyleSheet("background: transparent; border: none; color: #123B7A;");
     col3->addWidget(dateLabel);
-    dateSearchEdit_ = new QDateEdit(this);
-    dateSearchEdit_->setCalendarPopup(true);
-    dateSearchEdit_->setDisplayFormat("dd/MM/yyyy");
-    dateSearchEdit_->setSpecialValueText("Tùy chọn");
-    QDate oneDayAgo = QDate::currentDate().addDays(-1);
-    dateSearchEdit_->setMinimumDate(oneDayAgo);
-    dateSearchEdit_->clear();
+
+    dateSearchEdit_ = new QLineEdit(this);
+    dateSearchEdit_->setPlaceholderText("DD/MM/YYYY");
+
     col3->addWidget(dateSearchEdit_);
     filterRowLayout->addLayout(col3, 1);
 
@@ -383,6 +376,9 @@ void FlightsPage::setupConnections()
     // Kết nối các nút tìm kiếm
     connect(searchByIdBtn_, &QPushButton::clicked, this, &FlightsPage::onSearchById);
     connect(searchFilterBtn_, &QPushButton::clicked, this, &FlightsPage::onSearchFilter);
+
+    // Kết nối nút refresh
+    connect(refreshButton, &QPushButton::clicked, this, &FlightsPage::refreshPage);
 
     // Kết nối CRUD
     connect(addButton_, &QPushButton::clicked, this, &FlightsPage::onAddFlight);
@@ -705,11 +701,17 @@ void FlightsPage::onSearchFilter()
         statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
     }
     
-    // Lấy ngày (nếu user chọn)
-    QDate selectedDate = dateSearchEdit_->date();
-    // Kiểm tra nếu ngày hợp lệ và không phải ngày quá khứ mặc định
-    if (selectedDate.isValid() && selectedDate > QDate::currentDate().addDays(-1)) {
-        criteria.date = selectedDate.toString("dd/MM/yyyy").toStdString();
+    // Lấy ngày (xử lý nhập text)
+    QString dateText = dateSearchEdit_->text().trimmed();
+    if (!dateText.isEmpty()) {
+        QDate selectedDate = QDate::fromString(dateText, "dd/MM/yyyy");
+
+        if (selectedDate.isValid()) {
+            criteria.date = selectedDate.toString("dd/MM/yyyy").toStdString();
+        } else {
+            QMessageBox::warning(this, "Lỗi định dạng", "Ngày khởi hành không hợp lệ (dd/MM/yyyy)!");
+            return; // Dừng tìm kiếm nếu nhập sai
+        }
     }
     
     // Lấy hãng bay

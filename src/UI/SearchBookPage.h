@@ -58,7 +58,7 @@ private:
     // --- ô tìm kiếm ---
     AirportComboBox*  fromSearchCombo_;  // điểm đi
     AirportComboBox*  toSearchCombo_;    // điểm đến
-    QDateEdit*  dateSearchEdit_;         // ngày khởi hành
+    QLineEdit*  dateSearchEdit_;         // ngày khởi hành
     QComboBox* airlineFilterCombo_;      // hãng hàng không
     QLineEdit* priceMinEdit_;            // giá tối thiểu
     QLineEdit* priceMaxEdit_;            // giá tối đa

@@ -290,12 +290,13 @@ void Application::setupUi()
     // Khởi tạo các trang và "truyền" manager vào
     loginPage_ = new LoginPage(accountManager_, this); 
     
-    // Truyền cả 4 manager cho AdminInterface
+    // Truyền cả 7 manager cho AdminInterface
     adminInterface_ = new AdminInterface(accountManager_, 
                                          flightManager_, 
                                          bookingManager_,
                                          reportManager_,
                                          airportManager_,
+                                         passengerManager_,
                                          this);
     
     // Truyền cả 4 manager cho AgentInterface
