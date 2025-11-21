@@ -185,7 +185,7 @@ QGridLayout* BookingDetailsDialog::createBookingInfoLayout()
                         ? "Đang giữ chỗ" : 
                       (booking_->getStatus() == BookingStatus::Cancelled) ? "Đã hủy" : "Đã đổi";
     QString statusColor = (booking_->getStatus() == BookingStatus::Issued) 
-                          ? "#2E7D32" : "#C62828";
+                          ? "#2E7D32" : (booking_->getStatus() == BookingStatus::Cancelled) ? "#C62828" : "#F57C00";
     addInfoRow(layout, row++, "Trạng thái", statusStr, true, statusColor);
     
     return layout;
