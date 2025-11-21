@@ -72,6 +72,10 @@ private:
     QPushButton* backBtn_;
     QPushButton* confirmBtn_;
 
+    QLabel* step1Label_;
+    QWidget* line1_;
+    QLabel* step2Label_;
+
     QString selectedSeatId_;
 
     static const QString SEAT_BASE_STYLE;
