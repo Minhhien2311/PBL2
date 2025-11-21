@@ -71,6 +71,7 @@ public:
     // Lấy thông tin của người dùng đang đăng nhập. Con trỏ trỏ tới đối tượng Account (có thể là Admin hoặc Agent).
     // Trả về nullptr nếu chưa đăng nhập.
     Account* getCurrentUser() const;
+    std::string getCurrentUserName() const;
 
     // Kiểm tra xem đã có ai đăng nhập hay chưa.
     // true nếu 'currentUser' khác nullptr, ngược lại là false.

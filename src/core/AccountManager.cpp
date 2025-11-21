@@ -90,6 +90,13 @@ Account* AccountManager::getCurrentUser() const {
     return this->currentUser;
 }
 
+std::string AccountManager::getCurrentUserName() const {
+    if (this->currentUser) {
+        return this->currentUser->getFullName();
+    }
+    return "";
+}
+
 bool AccountManager::isLoggedIn() const {
     return this->currentUser != nullptr;
 }

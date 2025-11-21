@@ -7,6 +7,7 @@
 class QStackedWidget;
 class QPushButton;
 class QFrame;
+class QLabel;
 class AccountManager;
 class FlightManager;
 class BookingManager;
@@ -76,6 +77,8 @@ private:
     ReportManager* reportManager_;
     AirportManager* airportManager_;
     PassengerManager* passengerManager_;
+
+    QLabel* userNameLabel_;
 };
 
 #endif // AGENTINTERFACE_H

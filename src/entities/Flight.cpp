@@ -13,8 +13,8 @@ Flight::Flight(const std::string& routeId, // <-- Đã đổi
                const std::string& departureTime,
                const std::string& arrivalDate,
                const std::string& arrivalTime,
-               int availableSeats,
                int totalCapacity,
+               int availableSeats,
                int fareEconomy,
                int fareBusiness)
     : flightId(IdGenerator::generateFlightId()), // <-- Đã đổi
@@ -25,8 +25,8 @@ Flight::Flight(const std::string& routeId, // <-- Đã đổi
       departureTime(departureTime), 
       arrivalDate(arrivalDate),     
       arrivalTime(arrivalTime),     
-      availableSeats(availableSeats),
       totalCapacity(totalCapacity),
+      availableSeats(availableSeats),
       fareEconomy(fareEconomy),
       fareBusiness(fareBusiness) {}
 
@@ -78,8 +78,8 @@ std::string Flight::toRecordLine() const {
            this->departureTime + "|" + 
            this->arrivalDate + "|" +   
            this->arrivalTime + "|" +   
-           std::to_string(this->availableSeats) + "|" +
            std::to_string(this->totalCapacity) + "|" +
+           std::to_string(this->availableSeats) + "|" +
            std::to_string(this->fareEconomy) + "|" +
            std::to_string(this->fareBusiness);
 }
@@ -120,12 +120,12 @@ Flight Flight::fromRecordLine(const std::string& line) {
     start = end + 1;
     end = line.find('|', start);
 
-    int availableSeats = std::stoi(line.substr(start, end - start));
-    start = end + 1;
-    end = line.find('|', start);
-
     int totalCapacity = std::stoi(line.substr(start, end - start));
     start = end + 1;    
+    end = line.find('|', start);
+
+    int availableSeats = std::stoi(line.substr(start, end - start));
+    start = end + 1;
     end = line.find('|', start);
 
     double fareEco = std::stod(line.substr(start, end - start));
@@ -135,7 +135,7 @@ Flight Flight::fromRecordLine(const std::string& line) {
     double fareBus = std::stod(line.substr(start, end - start));
 
     // Dùng constructor mới
-    Flight flight(routeId, airline, flightNumber, depDate, depTime, arrDate, arrTime, availableSeats, totalCapacity, fareEco, fareBus);
+    Flight flight(routeId, airline, flightNumber, depDate, depTime, arrDate, arrTime, totalCapacity, availableSeats, fareEco, fareBus);
 
     // Ghi đè ID
     flight.overrideIdForLoad(id);

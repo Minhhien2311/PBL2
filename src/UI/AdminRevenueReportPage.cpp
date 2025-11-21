@@ -100,9 +100,9 @@ void AdminRevenueReportPage::setupUI()
     QHBoxLayout* statsLayout = new QHBoxLayout();
     statsLayout->setSpacing(16);
 
-    QFrame* box1 = createRevenueBox("TRONG NGÀY", "0 triệu VND");
-    QFrame* box2 = createRevenueBox("TRONG TUẦN", "0 triệu VND");
-    QFrame* box3 = createRevenueBox("TRONG THÁNG", "0 triệu VND");
+    QFrame* box1 = createRevenueBox("TRONG NGÀY", "0 triệu VNĐ");
+    QFrame* box2 = createRevenueBox("TRONG TUẦN", "0 triệu VNĐ");
+    QFrame* box3 = createRevenueBox("TRONG THÁNG", "0 triệu VNĐ");
 
     statsLayout->addWidget(box1);
     statsLayout->addWidget(box2);
@@ -215,20 +215,20 @@ void AdminRevenueReportPage::updateData()
     double weekRevenue = reportManager_->getThisWeekRevenue();
     double monthRevenue = reportManager_->getThisMonthRevenue();
 
-    // Chuyển đổi sang triệu VND
+    // Chuyển đổi sang triệu VNĐ
     todayRevenue /= 1000000;
     weekRevenue /= 1000000;
     monthRevenue /= 1000000;
 
     // Cập nhật các label
     if (dailyRevenueLabel_) {
-    dailyRevenueLabel_->setText(QString::number(todayRevenue, 'f', 1) + " triệu VND");
+    dailyRevenueLabel_->setText(QString::number(todayRevenue, 'f', 1) + " triệu VNĐ");
     }
     if (weeklyRevenueLabel_) {
-    weeklyRevenueLabel_->setText(QString::number(weekRevenue, 'f', 1) + " triệu VND");
+    weeklyRevenueLabel_->setText(QString::number(weekRevenue, 'f', 1) + " triệu VNĐ");
     }
     if (monthlyRevenueLabel_) {
-    monthlyRevenueLabel_->setText(QString::number(monthRevenue, 'f', 1) + " triệu VND");
+    monthlyRevenueLabel_->setText(QString::number(monthRevenue, 'f', 1) + " triệu VNĐ");
     }
 
     updateChart();
@@ -278,7 +278,7 @@ void AdminRevenueReportPage::updateChart()
     if (revenueInMillion > maxRevenueInMillion) {
         maxRevenueInMillion = revenueInMillion;
     }
-    qDebug() << categories[i] << ":" << revenueInMillion << "triệu VND";
+    qDebug() << categories[i] << ":" << revenueInMillion << "triệu VNĐ";
     }
 
     double yAxisMax = 1.0; // Mặc định trục Y
@@ -313,13 +313,13 @@ void AdminRevenueReportPage::updateChart()
     axisY->setRange(0, yAxisMax);
     // Cách 2: Chỉ số, riêng đơn vị
     axisY->setLabelFormat("%.1f");
-    axisY->setTitleText("Triệu VND");  // ← Title sẽ hiển thị ở giữa trục Y
+    axisY->setTitleText("Triệu VNĐ");  // ← Title sẽ hiển thị ở giữa trục Y
     QFont titleFont;
     titleFont.setPointSize(10);
     titleFont.setBold(true);
     axisY->setTitleFont(titleFont);  // ← Font cho title
     // axisY->setTitleBrush(QBrush(QColor(18, 59, 122)));  // ← Màu xanh đậm (tùy chọn)
-    // ← XÓA: axisY->setTitleText("Doanh thu (Triệu VND)");  // Không dùng title ở giữa
+    // ← XÓA: axisY->setTitleText("Doanh thu (triệu VNĐ)");  // Không dùng title ở giữa
     chart_->addAxis(axisY, Qt::AlignLeft);
     chartSeries_->attachAxis(axisY);
 

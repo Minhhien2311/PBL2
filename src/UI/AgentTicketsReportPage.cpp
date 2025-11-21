@@ -83,7 +83,7 @@ void AgentTicketsReportPage::setupUI()
     dateBoxLayout->setSpacing(6);
     
     dateBox->setStyleSheet(
-        "QWidget { background: white; border: 1px solid #c2cfe2; border-radius: 6px; }"
+        "QWidget { background: white; border: 1px solid #133e87; border-radius: 6px; }"
     );
 
     QLabel* dateBoxTitle = new QLabel("📅 Chọn khoảng thời gian cần thống kê");
@@ -98,6 +98,7 @@ void AgentTicketsReportPage::setupUI()
     dateRow->addWidget(fromLabel);
 
     startDate_ = new QDateEdit(QDate::currentDate().addDays(-30), dateBox);
+    startDate_->setStyleSheet("background: white; border: 1px solid #133e87; border-radius: 4px; padding-left: 6px;");
     startDate_->setCalendarPopup(true);
     startDate_->setDisplayFormat("dd/MM/yyyy");
     startDate_->setMinimumHeight(36);
@@ -109,13 +110,14 @@ void AgentTicketsReportPage::setupUI()
     dateRow->addWidget(toLabel);
 
     endDate_ = new QDateEdit(QDate::currentDate(), dateBox);
+    endDate_->setStyleSheet("background: white; border: 1px solid #133e87; border-radius: 4px; padding-left: 6px;");
     endDate_->setCalendarPopup(true);
     endDate_->setDisplayFormat("dd/MM/yyyy");
     endDate_->setMinimumHeight(36);
     endDate_->setMinimumWidth(160);
     dateRow->addWidget(endDate_, 1);
 
-    refreshBtn_ = new QPushButton("🔍 Truy vấn", dateBox);
+    refreshBtn_ = new QPushButton("Truy vấn", dateBox);
     refreshBtn_->setMinimumHeight(36);
     refreshBtn_->setMinimumWidth(100);
     refreshBtn_->setMaximumWidth(150);

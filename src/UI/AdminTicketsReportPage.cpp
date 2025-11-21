@@ -58,6 +58,7 @@ void AdminTicketsReportPage::setupUI()
         "QLabel.PageTitle { color:#123B7A; font-weight:700; font-size:17px; }"
         "QLabel.SectionTitle { color:#123B7A; font-weight:700; font-size:16px; }"
         "QFrame#StatCard { background: white; border:1px solid #0E3B7C; }"
+        "QDateEdit { background: white; border: 1px solid #133e87; border-radius: 4px; padding-left: 6px; }"
     );
 
     // === LAYOUT CHÍNH (0 margin để dính sidebar) ===
@@ -78,7 +79,7 @@ void AdminTicketsReportPage::setupUI()
     dateBoxLayout->setSpacing(6);
     
     dateBox->setStyleSheet(
-        "QWidget { background: white; border: 1px solid #c2cfe2; border-radius: 6px; }"
+        "QWidget { background: white; border: 1px solid #133e87; border-radius: 6px; }"
     );
 
     QLabel* dateBoxTitle = new QLabel("📅 Chọn khoảng thời gian cần thống kê");
@@ -90,10 +91,11 @@ void AdminTicketsReportPage::setupUI()
     dateRow->setSpacing(12);  // Khoảng cách đều giữa các phần tử
 
     QLabel* fromLabel = new QLabel("Từ ngày:");
-    fromLabel->setStyleSheet("background: transparent; border: none; color: #123B7A;");
+    fromLabel->setStyleSheet("background: transparent; border: none; color: #123B7A; font-weight:550;");
     dateRow->addWidget(fromLabel);
 
     startDate_ = new QDateEdit(QDate::currentDate().addDays(-30), dateBox);
+    startDate_->setStyleSheet("background: white; border: 1px solid #133e87; border-radius: 4px; padding-left: 6px;");
     startDate_->setCalendarPopup(true);
     startDate_->setDisplayFormat("dd/MM/yyyy");
     startDate_->setMinimumHeight(36);
@@ -101,17 +103,18 @@ void AdminTicketsReportPage::setupUI()
     dateRow->addWidget(startDate_, 1);  // ← THÊM stretch factor = 1
 
     QLabel* toLabel = new QLabel("Đến ngày:");
-    toLabel->setStyleSheet("background: transparent; border: none; color: #123B7A;");
+    toLabel->setStyleSheet("background: transparent; border: none; color: #123B7A; font-weight:550;");
     dateRow->addWidget(toLabel);
 
     endDate_ = new QDateEdit(QDate::currentDate(), dateBox);
+    endDate_->setStyleSheet("background: white; border: 1px solid #133e87; border-radius: 4px; padding-left: 6px;");
     endDate_->setCalendarPopup(true);
     endDate_->setDisplayFormat("dd/MM/yyyy");
     endDate_->setMinimumHeight(36);
     endDate_->setMinimumWidth(160);  // ← THAY ĐỔI: Từ fixedWidth sang minWidth
     dateRow->addWidget(endDate_, 1);  // ← THÊM stretch factor = 1
 
-    refreshBtn_ = new QPushButton("🔍 Truy vấn", dateBox);
+    refreshBtn_ = new QPushButton("Truy vấn", dateBox);
     refreshBtn_->setMinimumHeight(36);
     refreshBtn_->setMinimumWidth(100);  // ← GIẢM: Từ 120px xuống 100px
     refreshBtn_->setMaximumWidth(150);  // ← THÊM: Giới hạn chiều rộng tối đa
@@ -119,10 +122,9 @@ void AdminTicketsReportPage::setupUI()
     refreshBtn_->setStyleSheet(
         "QPushButton { background:#4478BD; color:white; font-weight:600; "
         "border-radius:6px; padding: 0 16px; }"
-        "QPushButton:hover { background:#365a9e; }"
+        "QPushButton:hover { background: #365a9e; }"
     );
     dateRow->addWidget(refreshBtn_);
-    // ← BỎ addStretch() để các phần tử tự giãn đều
 
     dateBoxLayout->addLayout(dateRow);
     topBarLayout->addWidget(dateBox);

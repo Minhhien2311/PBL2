@@ -54,16 +54,25 @@ AdminInterface::AdminInterface(AccountManager* accManager,
     sideLay->setSpacing(8);
 
     // Thông tin user
-    auto *userIcon = new QLabel("👤", sidebar_);
+    // 1. Khởi tạo Label
+    auto *userIcon = new QLabel(sidebar_);
+
+    // 2. Load ảnh từ đường dẫn
+    QPixmap pixmap("C:/PBL2/assets/icons/logo.png");
+    // 3. Resize ảnh cho nhỏ lại (ví dụ icon size 60x60 hoặc 40x40)
+    // Qt::KeepAspectRatio: Giữ tỉ lệ ảnh không bị méo
+    // Qt::SmoothTransformation: Làm mượt ảnh khi thu nhỏ
+    userIcon->setPixmap(pixmap.scaled(60, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation));
     userIcon->setAlignment(Qt::AlignCenter);
-    userIcon->setStyleSheet("font-size: 32px; color: white; background: transparent;");
-    auto *userName = new QLabel("Xin chào, Admin", sidebar_);
-    userName->setAlignment(Qt::AlignCenter);
-    userName->setStyleSheet("color: white; font-weight: 600; background: transparent;");
+
+    userNameLabel_ = new QLabel("Xin chào, Admin", sidebar_); // Khởi tạo biến thành viên
+    userNameLabel_->setAlignment(Qt::AlignCenter);
+    userNameLabel_->setStyleSheet("color: white; font-weight: 600; background: transparent;");
 
     sideLay->addWidget(userIcon);
-    sideLay->addWidget(userName);
-    sideLay->addSpacing(15);
+    sideLay->addWidget(userNameLabel_);
+
+    sideLay->addSpacing(12);
 
     // Menu sidebar
     auto *menuWidget = new QWidget(sidebar_);
@@ -77,7 +86,7 @@ AdminInterface::AdminInterface(AccountManager* accManager,
             background: transparent;
             border: none;
             text-align: left;
-            padding: 12px;
+            padding: 10px 20px; /* Padding: Top/Bottom Right/Left */
         }
         QPushButton:hover {
             background-color: #daeeff;
@@ -86,7 +95,7 @@ AdminInterface::AdminInterface(AccountManager* accManager,
         }
         QPushButton:checked {
             color: white;
-            border-left: 4px solid #daeeff;
+            border-left: 6px solid #99f0ff;
             border-radius: 0px;
         }
     )";
@@ -168,8 +177,7 @@ AdminInterface::AdminInterface(AccountManager* accManager,
         QPushButton {
             color: white;
             background: transparent;
-            border: 2px solid #daeeff;
-            border-radius: 6px;
+            border: 2px solid white;
             padding: 6px;
             margin: 0px 20px 20px 20px; /* Margin: Top Right Bottom Left */
         }
@@ -206,6 +214,8 @@ AdminInterface::AdminInterface(AccountManager* accManager,
 
 void AdminInterface::setupConnections()
 {
+    connect(accountManager_, &AccountManager::userLoggedIn, this, &AdminInterface::onUserChanged);
+
     auto switchPage = [this](QPushButton* btn, int index){
         stack_->setCurrentIndex(index);
         // Bỏ check tất cả các nút

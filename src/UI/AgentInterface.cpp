@@ -58,17 +58,25 @@ AgentInterface::AgentInterface(AccountManager* accManager,
     sideLay->setSpacing(8);
 
     // Thông tin user
-    auto *userIcon = new QLabel("👤", sidebar_);
-    userIcon->setAlignment(Qt::AlignCenter);
-    userIcon->setStyleSheet("font-size: 32px; color: white; background: transparent;");
+    // 1. Khởi tạo Label
+    auto *userIcon = new QLabel(sidebar_);
 
-    auto *userName = new QLabel("Xin chào, Đại lý", sidebar_);
-    userName->setAlignment(Qt::AlignCenter);
-    userName->setStyleSheet("color: white; font-weight: 600; background: transparent;");
+    // 2. Load ảnh từ đường dẫn
+    QPixmap pixmap("C:/PBL2/assets/icons/logo.png");
+    // 3. Resize ảnh cho nhỏ lại (ví dụ icon size 60x60 hoặc 40x40)
+    // Qt::KeepAspectRatio: Giữ tỉ lệ ảnh không bị méo
+    // Qt::SmoothTransformation: Làm mượt ảnh khi thu nhỏ
+    userIcon->setPixmap(pixmap.scaled(60, 60, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    userIcon->setAlignment(Qt::AlignCenter);
+
+    userNameLabel_ = new QLabel("Xin chào, ...", sidebar_); // Khởi tạo biến thành viên
+    userNameLabel_->setAlignment(Qt::AlignCenter);
+    userNameLabel_->setStyleSheet("color: white; font-weight: 600; background: transparent;");
 
     sideLay->addWidget(userIcon);
-    sideLay->addWidget(userName);
-    sideLay->addSpacing(15);
+    sideLay->addWidget(userNameLabel_);
+
+    sideLay->addSpacing(12);
 
     // --- Menu Sidebar ---
     auto *menuWidget = new QWidget(sidebar_);
@@ -82,7 +90,7 @@ AgentInterface::AgentInterface(AccountManager* accManager,
             background: transparent;
             border: none;
             text-align: left;
-            padding: 12px;
+            padding: 10px 20px; /* Padding: Top/Bottom Right/Left */
         }
         QPushButton:hover {
             background-color: #daeeff;
@@ -91,7 +99,7 @@ AgentInterface::AgentInterface(AccountManager* accManager,
         }
         QPushButton:checked {
             color: white;
-            border-left: 4px solid #daeeff;
+            border-left: 6px solid #99f0ff;
             border-radius: 0px;
         }
     )";
@@ -156,8 +164,7 @@ AgentInterface::AgentInterface(AccountManager* accManager,
         QPushButton {
             color: white;
             background: transparent;
-            border: 2px solid #daeeff;
-            border-radius: 6px;
+            border: 2px solid white;
             padding: 6px;
             margin: 0px 20px 20px 20px; /* Margin: Top Right Bottom Left */
         }
@@ -228,6 +235,11 @@ void AgentInterface::setupConnections()
 }
 
 void AgentInterface::onUserChanged() {
+    // Cập nhật lại tên hiển thị
+    if (userNameLabel_) {
+        QString name = QString::fromStdString(accountManager_->getCurrentUserName());
+        userNameLabel_->setText(QString("Xin chào, %1").arg(name));
+    }
     // Refresh all pages when user changes
     if (dashboardPage_) {
         dashboardPage_->refreshPage();

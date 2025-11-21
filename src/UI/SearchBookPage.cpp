@@ -337,16 +337,11 @@ void SearchBookPage::setupModel()
     QHeaderView *header = tableView_->horizontalHeader();
 
     // A. Mặc định cho tất cả co sát theo nội dung chữ
-    header->setSectionResizeMode(QHeaderView::ResizeToContents);
+    header->setSectionResizeMode(QHeaderView::Stretch);
 
     // B. Cột STT (0): Cố định nhỏ
     header->setSectionResizeMode(0, QHeaderView::Fixed);
     tableView_->setColumnWidth(0, 50); // Tăng lên 50 xíu cho số 100 đỡ bị che
-
-    // C. Cột Hãng hàng không (3): LÀM LÒ XO (Stretch)
-    header->setSectionResizeMode(3, QHeaderView::Stretch);
-    header->setSectionResizeMode(7, QHeaderView::Stretch);
-    header->setSectionResizeMode(8, QHeaderView::Stretch);
     
     // Lưu ý: KHÔNG setColumnWidth cho cột Stretch (nó tự tính)
 }
@@ -406,7 +401,7 @@ void SearchBookPage::onSearchClicked()
     QString dateText = dateSearchEdit_->text().trimmed();
     if (!dateText.isEmpty()) {
         // Ép kiểu chuỗi nhập vào thành QDate
-        QDate selectedDate = QDate::fromString(dateText, "dd/MM/yyyy");
+        QDate selectedDate = QDate::fromString(dateText, "DD/MM/YYYY");
 
         if (selectedDate.isValid()) {
             criteria.date = selectedDate.toString("dd/MM/yyyy").toStdString();

@@ -216,8 +216,8 @@ bool FlightManager::createNewFlight(const std::string& routeId,
                                     const std::string& departureTime,
                                     const std::string& arrivalDate,
                                     const std::string& arrivalTime,
-                                    int availableSeats,
                                     int totalCapacity,
+                                    int availableSeats,
                                     int fareEconomy,
                                     int fareBusiness) {
     if (findRouteById(routeId) == nullptr) return false;
@@ -228,7 +228,7 @@ bool FlightManager::createNewFlight(const std::string& routeId,
 
     Flight* newFlight = new Flight(
         routeId, airline, flightNumber, departureDate, departureTime, 
-        arrivalDate, arrivalTime,  availableSeats, totalCapacity, fareEconomy, fareBusiness
+        arrivalDate, arrivalTime,  totalCapacity, availableSeats, fareEconomy, fareBusiness
     );
     
     this->allFlights.push_back(newFlight);

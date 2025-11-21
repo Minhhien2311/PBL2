@@ -77,8 +77,10 @@ private:
     PromotionsPage* promotionsPage_;              // Mới
     AgentListPage* agentListPage_;                // Mới
 
+    QLabel* userNameLabel_;
 signals:
     void logoutClicked();
+    void onUserChanged();
 };
 
 #endif // ADMININTERFACE_H
