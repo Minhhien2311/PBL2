@@ -180,6 +180,7 @@ AdminInterface::AdminInterface(AccountManager* accManager,
             border: 2px solid white;
             padding: 6px;
             margin: 0px 20px 20px 20px; /* Margin: Top Right Bottom Left */
+            border-radius: 0px;
         }
         QPushButton:hover {
             background-color: #6f99c6;

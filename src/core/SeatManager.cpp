@@ -136,9 +136,6 @@ bool SeatManager::confirmSelection() {
 // SeatManager.cpp - Line 136
 
 bool SeatManager::bookSeat(const std::string& seatId) {
-    // ✅ THÊM: Debug log
-    std::cout << "[DEBUG] bookSeat() called for seat: " << seatId 
-              << " on flight: " << currentFlightId_ << std::endl;
     
     for (int i = 0; i < activeSeatMap_.size(); i++) {
         if (activeSeatMap_[i]->getId() == seatId) {
@@ -222,10 +219,6 @@ bool SeatManager::updateAndSaveChanges() {
             bookedCount++;  // ✅ THÊM
         }
     }
-    
-    // ✅ THÊM: Log số ghế booked
-    std::cout << "[DEBUG] Found " << bookedCount << " booked seats" << std::endl;
-    std::cout << "[DEBUG] Booked seats string: " << bookedSeats.str() << std::endl;
     
     std::string newLine = currentFlightId_ + "|" + bookedSeats.str();
     std::cout << "[DEBUG] New line: " << newLine << std::endl;
