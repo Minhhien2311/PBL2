@@ -323,9 +323,9 @@ void SearchBookPage::setupUi()
 
     // Style gọn nhẹ (Ghost style) giống trang RoutesPage
     QString btnStyle =
-        "QPushButton { background:transparent; color: #133e87; border:1px solid #133e87; "
-        "border-radius:6px; height:20px; padding:4px 10px; font-weight:600; }"
-        "QPushButton:hover { background:#466a9a; color: white; }";
+        "QPushButton { background: #27C93F; color: white; border:1px solid #1fab33; "
+        "border-radius:6px; height:20px; padding:4px 12px; font-weight:600; }"
+        "QPushButton:hover { background: #1fab33; color: white; }";
 
     bookButton_->setStyleSheet(btnStyle);
 

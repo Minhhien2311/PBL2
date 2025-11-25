@@ -507,3 +507,57 @@ std::string BookingManager::getChangeDeadline(
     
     return utils::DateTime::formatLocal(deadline, "%d/%m/%Y %H:%M");
 }
+
+int BookingManager::applyPromotion(const std::string& promoCode, int baseFare) {
+    if (promoCode.empty() || baseFare <= 0) return baseFare;
+    
+    std::ifstream file("C:/PBL2/data/promotions.txt");
+    if (!file.is_open()) return baseFare;
+    
+    std::string line, code, type;
+    double value;
+    bool isActive;
+    
+    while (std::getline(file, line)) {
+        if (line.empty()) continue;
+        
+        // Parse: CODE|Desc|TYPE|VALUE|Start|End|Active
+        size_t p1 = line.find('|');
+        size_t p2 = line.find('|', p1 + 1);
+        size_t p3 = line.find('|', p2 + 1);
+        size_t p4 = line.find('|', p3 + 1);
+        size_t p5 = line.find('|', p4 + 1);
+        size_t p6 = line.find('|', p5 + 1);
+        
+        if (p1 == std::string::npos || p6 == std::string::npos) continue;
+        
+        code = line.substr(0, p1);
+        type = line.substr(p2 + 1, p3 - p2 - 1);
+        value = std::stod(line.substr(p3 + 1, p4 - p3 - 1));
+        isActive = (line.substr(p6 + 1, 1) == "1");
+        
+        // So sánh mã (không phân biệt hoa thường)
+        std::string upperCode = code, upperInput = promoCode;
+        std::transform(upperCode.begin(), upperCode.end(), upperCode.begin(), ::toupper);
+        std::transform(upperInput.begin(), upperInput.end(), upperInput.begin(), ::toupper);
+        
+        if (upperCode == upperInput && isActive) {
+            file.close();
+            
+            // Tính discount
+            int discount = 0;
+            if (type == "PERCENT") {
+                discount = static_cast<int>(baseFare * (value / 100.0));
+            } else if (type == "AMOUNT") {
+                discount = static_cast<int>(value);
+            }
+            
+            // Đảm bảo không âm
+            int finalPrice = baseFare - discount;
+            return (finalPrice > 0) ? finalPrice : 0;
+        }
+    }
+    
+    file.close();
+    return baseFare; // Không tìm thấy hoặc hết hạn → trả về giá gốc
+}

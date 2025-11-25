@@ -86,6 +86,8 @@ public:
     // Lấy danh sách booking theo Flight ID (sẽ triển khai sau nếu cần) // <-- Đã đổi comment
     // std::vector<Booking*> getBookingsByFlightId(const std::string& flightId) const; // <-- Đã đổi tên hàm
 
+    int applyPromotion(const std::string& promoCode, int baseFare);
+
     // --- Lưu trữ ---
     bool saveDataToFiles(const std::string& bookingsFilePath) const;
     

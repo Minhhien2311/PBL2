@@ -45,6 +45,7 @@ private slots:
     void onConfirmClicked();
     void onCancelClicked();
     void onClassChanged();
+    void onApplyPromoClicked();
 
 private:
     void setupUi();
@@ -56,6 +57,10 @@ private:
     void renderSeatMap();
     void updateStepIndicator();
     void updateFareDisplay();
+
+    QLineEdit* promoCodeEdit_;
+    QPushButton* applyPromoBtn_;
+    QLabel* discountLabel_;
 
     Flight* flight_;
     FlightManager* flightManager_;

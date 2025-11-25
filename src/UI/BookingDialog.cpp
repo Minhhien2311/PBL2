@@ -528,7 +528,38 @@ void BookingDialog::setupPage3_SeatSelection() {
     
     layout->addWidget(classFrame);
 
-    // --- 3. KHUNG SƠ ĐỒ GHẾ (Đã sửa đổi: Wrapper Frame + ScrollArea) ---
+    // --- 3. KHUNG MÃ KHUYẾN MÃI ---
+    QFrame* promoFrame = new QFrame;
+    promoFrame->setStyleSheet("background: white; border: 1px solid #608bc1; border-radius: 8px;");
+
+    QHBoxLayout* promoLayout = new QHBoxLayout(promoFrame);
+    promoLayout->setContentsMargins(20, 12, 20, 12);
+
+    QLabel* lblPromo = new QLabel("Mã khuyến mãi");
+    lblPromo->setStyleSheet("font-weight: bold; font-size: 14px; color: #1565C0; border: none; background: transparent;");
+
+    promoCodeEdit_ = new QLineEdit;
+    promoCodeEdit_->setPlaceholderText("Nhập mã (VD: CHAOHE25)");
+    promoCodeEdit_->setFixedWidth(220);
+
+    applyPromoBtn_ = new QPushButton("Áp dụng");
+    applyPromoBtn_->setStyleSheet(
+        "QPushButton { background: #74cc00; color: white; border: none; border-radius: 4px; padding: 8px 12px; font-weight: 600; }"
+        "QPushButton:hover { background: #5ba300; }"
+    );
+
+    discountLabel_ = new QLabel("");
+    discountLabel_->setStyleSheet("font-size: 13px; font-weight: bold; color: #27C93F; background: transparent; border: none;");
+
+    promoLayout->addWidget(lblPromo);
+    promoLayout->addWidget(promoCodeEdit_);
+    promoLayout->addWidget(applyPromoBtn_);
+    promoLayout->addWidget(discountLabel_);
+
+    layout->addWidget(promoFrame);
+    connect(applyPromoBtn_, &QPushButton::clicked, this, &BookingDialog::onApplyPromoClicked);
+
+    // --- 4. KHUNG SƠ ĐỒ GHẾ (Đã sửa đổi: Wrapper Frame + ScrollArea) ---
     
     // A. Tạo Khung bao ngoài (Wrapper) - Chịu trách nhiệm hiển thị viền
     QFrame* seatMapFrame = new QFrame;
@@ -571,7 +602,7 @@ void BookingDialog::setupPage3_SeatSelection() {
     // Thêm Khung bao vào Layout chính (stretch = 1 để chiếm hết chỗ trống)
     layout->addWidget(seatMapFrame, 1);
 
-    // --- 4. CHÚ THÍCH (LEGEND) ---
+    // --- 5. CHÚ THÍCH (LEGEND) ---
     QHBoxLayout* legendLayout = new QHBoxLayout;
     legendLayout->setAlignment(Qt::AlignCenter);
     legendLayout->setSpacing(15);
@@ -613,6 +644,9 @@ void BookingDialog::onClassChanged() {
     renderSeatMap();
     selectedSeatId_.clear();
     selectedSeatDisplayLabel_->setText("Hiện tại chưa chọn ghế!");
+    
+    discountLabel_->setText("");
+    promoCodeEdit_->clear();
 }
 
 void BookingDialog::updateFareDisplay() {
@@ -850,6 +884,8 @@ void BookingDialog::onConfirmClicked() {
     
     BookingClass bookingClass = economyRadio_->isChecked() ? BookingClass::Economy : BookingClass::Business;
     int baseFare = (bookingClass == BookingClass::Economy) ? flight_->getFareEconomy() : flight_->getFareBusiness();
+    int finalFare = bookingManager_->applyPromotion( promoCodeEdit_->text().trimmed().toStdString(), baseFare);
+
     QString currentDateTime = QDateTime::currentDateTime().toString("dd/MM/yyyy HH:mm:ss");
 
     Booking* newBooking = new Booking(
@@ -859,7 +895,7 @@ void BookingDialog::onConfirmClicked() {
         selectedSeatId_.toStdString(),
         currentDateTime.toStdString(),
         bookingClass,
-        baseFare,
+        finalFare,
         BookingStatus::Issued
     );
 
@@ -887,6 +923,24 @@ void BookingDialog::onConfirmClicked() {
             .arg(baseFare));
 
     accept();
+}
+
+void BookingDialog::onApplyPromoClicked() {
+    int baseFare = economyRadio_->isChecked() ? 
+        flight_->getFareEconomy() : flight_->getFareBusiness();
+    
+    int finalFare = bookingManager_->applyPromotion(
+        promoCodeEdit_->text().trimmed().toStdString(), 
+        baseFare
+    );
+    
+    if (finalFare < baseFare) {
+        fareLabel_->setText(QString("%L1 VNĐ").arg(finalFare));
+        discountLabel_->setText(QString("Giảm %L1 VNĐ").arg(baseFare - finalFare));
+    } else {
+        QMessageBox::warning(this, "Lỗi", "Mã không hợp lệ hoặc đã hết hạn!");
+        discountLabel_->clear();
+    }
 }
 
 QString BookingDialog::getPassengerId() const { return passengerIdEdit_->text().trimmed(); }

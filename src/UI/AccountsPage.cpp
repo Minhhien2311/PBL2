@@ -134,7 +134,7 @@ void AccountsPage::setupUi()
     // Hàng 1
     infoGrid->addWidget(createFieldWidget("ID tài khoản", idEdit_), 0, 0);
     infoGrid->addWidget(createFieldWidget("Họ và tên", fullnameEdit_, true), 0, 1); // Có dấu *
-    infoGrid->addWidget(createFieldWidget("Tên tài khoản", userEdit_), 0, 2);
+    infoGrid->addWidget(createFieldWidget("Tên tài khoản", userEdit_, true), 0, 2);
 
     // Hàng 2
     infoGrid->addWidget(createFieldWidget("Chức vụ", roleEdit_), 1, 0);
@@ -296,9 +296,6 @@ void AccountsPage::onUpdateInfoClicked()
         // --- SỬA LỖI TẠI ĐÂY: Gọi trực tiếp không qua IF ---
         // Vì updateProfile trả về void, ta chỉ gọi nó để thực thi.
         accountManager_->updateProfile(id, newFull, newPhone, newEmail);
-        
-        // Mặc định thông báo thành công (vì logic cũ không có cơ chế báo lỗi từ hàm này)
-        QMessageBox::information(this, "Thành công", "Đã cập nhật thông tin.");
         
         // Khóa lại các ô
         fullnameEdit_->setReadOnly(true);
