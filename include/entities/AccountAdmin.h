@@ -1,21 +1,18 @@
-#ifndef ACCOUNT_ADMIN_H
-#define ACCOUNT_ADMIN_H
+#pragma once
 
 #include <string>
 #include "Account.h"
 
+// Tài khoản Admin, kế thừa từ Account
 class AccountAdmin : public Account {
 public:
-    AccountAdmin(const std::string& username,
-                 const std::string& passwordPlain,
-                 const std::string& fullName,
-                 const std::string& phone,
+    // --- Constructor ---
+    AccountAdmin() = default;
+    AccountAdmin(const std::string& username, const std::string& passwordPlain,
+                 const std::string& fullName, const std::string& phone,
                  const std::string& email);
 
-    AccountAdmin() = default;
-
-    static AccountAdmin fromRecordLine(const std::string& line);
+    // --- Đọc/Ghi file ---
     std::string toRecordLine() const;
+    static AccountAdmin fromRecordLine(const std::string& line);
 };
-
-#endif

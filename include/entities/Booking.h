@@ -1,50 +1,32 @@
-#ifndef BOOKING_H
-#define BOOKING_H
+#pragma once
 
 #include <string>
 
-// Hạng đặt chỗ
-enum class BookingClass {
-    Economy,
-    Business
-};
-
-enum BookingStatus {
-    Issued,
-    Cancelled,
-    Changed
-};
+enum class BookingClass { Economy, Business };
+enum BookingStatus { Issued, Cancelled, Changed };
 
 class Booking {
 private:
-    // Định danh & Liên kết
-    std::string bookingId;          // Khóa nội bộ duy nhất
-    std::string flightId;           // Chuyến bay cụ thể
-    std::string agentId;            // ID của Agent tạo booking
-    std::string passengerId;        // ID duy nhất của hành khác
-    std::string seatID;             // ID ghế được đặt
+    // --- Định danh ---
+    std::string bookingId;
+    std::string flightId;
+    std::string agentId;
+    std::string passengerId;
+    std::string seatID;
 
-    // Thông tin
-    std::string bookingDate;        // Ngày giờ tạo
+    // --- Thông tin vé ---
+    std::string bookingDate;
     BookingClass bookingClass;
-
-    // Chi tiết giá vé  
     int baseFare;       
-
-    // Trạng thái của vé này
     BookingStatus status;
 
 public:
+    // --- Constructor ---
     Booking() = default;
-
-    // Constructor
-    explicit Booking(const std::string& flightId,
-            const std::string& agentId,
-            const std::string& passengerId,
-            const std::string& seatID,
-            const std::string& bookingDate,
-            BookingClass bookingClass,
-            int baseFare, BookingStatus status = BookingStatus::Issued); 
+    explicit Booking(const std::string& flightId, const std::string& agentId,
+                     const std::string& passengerId, const std::string& seatID,
+                     const std::string& bookingDate, BookingClass bookingClass,
+                     int baseFare, BookingStatus status = BookingStatus::Issued); 
 
     // --- Getters ---
     const std::string& getBookingId() const;
@@ -70,5 +52,3 @@ public:
     static Booking fromRecordLine(const std::string& line);
     void overrideIdForLoad(const std::string& existingId);
 };
-
-#endif // BOOKING_H

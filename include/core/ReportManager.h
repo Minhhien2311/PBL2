@@ -1,5 +1,4 @@
-#ifndef REPORT_MANAGER_H
-#define REPORT_MANAGER_H
+#pragma once
 
 #include <string>
 #include <vector>
@@ -9,6 +8,7 @@ class AccountManager;
 class BookingManager;
 class AccountAgent;
 
+// Cấu trúc báo cáo
 struct AgentReport {
     std::string agentId;
     std::string agentName;
@@ -24,91 +24,93 @@ struct MonthlyTicketReport {
 };
 
 class ReportManager {
-private:
-    AccountManager& accountManager_;
-    BookingManager& bookingManager_;
-
-    // Hàm chuyển đổi an toàn
-    int safeStoi(const std::string& str, int defaultValue = 0) const;
-    // Hàm chuyển đổi định dạng ngày từ dd/mm/yyyy sang yyyy-mm-dd để so sánh
-    std::string convertDateFormat(const std::string& date) const;
-    // Hàm trích xuất phần ngày từ chuỗi datetime
-    std::string extractDatePart(const std::string& datetime) const;
-    // Hàm so sánh ngày
-    bool isDateInRange(const std::string& bookingDate, const std::string& startDate, const std::string& endDate) const;
-
 public:
+    // --- Constructor ---
     ReportManager(AccountManager& am, BookingManager& bm);
 
-    // --- Tổng quan (Admin) ---
+    // ==========================================
+    //  GLOBAL STATISTICS (ADMIN / TỔNG QUÁT)
+    // ==========================================
+    
+    // Tổng quan doanh thu & số lượng
     double getTotalRevenueAllAgents() const;
-    int countBookingsByStatus(BookingStatus status) const;
     int getTotalTicketsSold() const;
-    std::vector<AgentReport*>* generateFullAgentReport() const;
+    int countBookingsByStatus(BookingStatus status) const;
 
-    // --- Thống kê theo ngày cho Agent ---
-    double getDailyRevenue(const std::string& agentId) const;
-    int getDailyTicketsSold(const std::string& agentId) const;
-    int getDailyCancellations(const std::string& agentId) const;
-
-    // --- Thống kê theo khoảng ngày ---
-    int getTicketsSoldInRange(const std::string& startDate, const std::string& endDate) const;
-    double getRevenueInRange(const std::string& startDate, const std::string& endDate) const;
-
-    // --- Thống kê theo agent và khoảng ngày ---
-    int getTicketsSoldInRange(const std::string& agentId, const std::string& startDate, const std::string& endDate) const;
-    double getRevenueInRange(const std::string& agentId, const std::string& startDate, const std::string& endDate) const;
-
-    // --- Báo cáo theo agent và khoảng ngày (Admin view) ---
-    std::vector<AgentReport*>* generateAgentReportInRange(const std::string& startDate, const std::string& endDate) const;
-
-    // --- Báo cáo theo tháng (Admin view) ---
-    // === SỬA: Trả về by value thay vì con trỏ ===
-    std::vector<int> getMonthlyTicketsByAgent(const std::string& agentId, int year) const;
-
-    // --- Các hàm mới cho thống kê doanh thu ---
+    // Doanh thu theo thời gian thực (Toàn hệ thống)
     double getTodayRevenue() const;
     double getThisWeekRevenue() const;
     double getThisMonthRevenue() const;
-    std::vector<double> getMonthlyRevenue(int year) const;
+    std::vector<double> getMonthlyRevenue(int year) const; // Biểu đồ doanh thu năm
 
-    // --- Thống kê theo loại vé ---
+    // Thống kê theo khoảng thời gian (Toàn hệ thống)
+    int getTicketsSoldInRange(const std::string& startDate, const std::string& endDate) const;
+    double getRevenueInRange(const std::string& startDate, const std::string& endDate) const;
+    
+    // Thống kê chi tiết loại vé (Toàn hệ thống)
     int getBusinessTicketsInRange(const std::string& startDate, const std::string& endDate) const;
     int getEconomyTicketsInRange(const std::string& startDate, const std::string& endDate) const;
     int getCancelledTicketsInRange(const std::string& startDate, const std::string& endDate) const;
     int getChangedTicketsInRange(const std::string& startDate, const std::string& endDate) const;
 
-    // --- Các hàm mới cho Agent ---
-    // Doanh thu theo thời gian cho agent cụ thể
+    // Báo cáo chi tiết từng Agent (Admin View)
+    std::vector<AgentReport*>* generateFullAgentReport() const;
+    std::vector<AgentReport*>* generateAgentReportInRange(const std::string& startDate, const std::string& endDate) const;
+
+    // ==========================================
+    //  AGENT STATISTICS (CÁ NHÂN HÓA)
+    // ==========================================
+
+    // Doanh thu & Vé (Cho 1 Agent cụ thể)
+    double getDailyRevenue(const std::string& agentId) const;
+    int getDailyTicketsSold(const std::string& agentId) const;
+    int getDailyCancellations(const std::string& agentId) const;
+    
+    // Doanh thu theo thời gian (Cho 1 Agent cụ thể)
     double getAgentTodayRevenue(const std::string& agentId) const;
     double getAgentThisWeekRevenue(const std::string& agentId) const;
     double getAgentThisMonthRevenue(const std::string& agentId) const;
     std::vector<double> getAgentMonthlyRevenue(const std::string& agentId, int year) const;
 
-    // Thống kê vé theo loại cho agent cụ thể
+    // Thống kê theo khoảng ngày (Cho 1 Agent cụ thể)
+    int getTicketsSoldInRange(const std::string& agentId, const std::string& startDate, const std::string& endDate) const;
+    double getRevenueInRange(const std::string& agentId, const std::string& startDate, const std::string& endDate) const;
+
+    // Thống kê loại vé chi tiết (Cho 1 Agent cụ thể)
     int getAgentBusinessTicketsInRange(const std::string& agentId, const std::string& startDate, const std::string& endDate) const;
     int getAgentEconomyTicketsInRange(const std::string& agentId, const std::string& startDate, const std::string& endDate) const;
     int getAgentCancelledTicketsInRange(const std::string& agentId, const std::string& startDate, const std::string& endDate) const;
     int getAgentChangedTicketsInRange(const std::string& agentId, const std::string& startDate, const std::string& endDate) const;
-
-    // Overload không cần truyền agentId (dùng cho agent hiện tại)
-    int getAgentCancelledTicketsInRange(const std::string& startDate, const std::string& endDate) const;
-    int getAgentChangedTicketsInRange(const std::string& startDate, const std::string& endDate) const;
-
-    // Báo cáo vé theo tháng cho agent
+    
+    // Biểu đồ/Báo cáo tháng (Cho 1 Agent cụ thể)
+    std::vector<int> getMonthlyTicketsByAgent(const std::string& agentId, int year) const;
     std::vector<MonthlyTicketReport*>* generateMonthlyTicketReportForAgent(const std::string& agentId, const std::string& startDate, const std::string& endDate) const;
 
-    // --- Các hàm overload cho agent hiện tại (dùng trong UI) ---
-    int getAgentTicketsSoldInRange(const std::string& startDate, const std::string& endDate) const;
-    int getAgentBusinessTicketsInRange(const std::string& startDate, const std::string& endDate) const;
-    int getAgentEconomyTicketsInRange(const std::string& startDate, const std::string& endDate) const;
+    // ==========================================
+    //  CURRENT SESSION HELPERS (AGENT UI)
+    //  (Tự động dùng ID của user đang login)
+    // ==========================================
     double getAgentTodayRevenue() const;
     double getAgentThisWeekRevenue() const;
     double getAgentThisMonthRevenue() const;
+    
+    int getAgentTicketsSoldInRange(const std::string& startDate, const std::string& endDate) const;
+    int getAgentBusinessTicketsInRange(const std::string& startDate, const std::string& endDate) const;
+    int getAgentEconomyTicketsInRange(const std::string& startDate, const std::string& endDate) const;
+    int getAgentCancelledTicketsInRange(const std::string& startDate, const std::string& endDate) const;
+    int getAgentChangedTicketsInRange(const std::string& startDate, const std::string& endDate) const;
+    
     std::vector<double> getAgentMonthlyRevenue(int year) const;
-
-    // === THÊM MỚI: Hàm overload cho biểu đồ vé ===
     std::vector<int> getAgentMonthlyTickets(int year) const;
-};
 
-#endif // REPORT_MANAGER_H
+private:
+    // --- Dependencies ---
+    AccountManager& accountManager_;
+    BookingManager& bookingManager_;
+
+    // --- Internal Helpers ---
+    int safeStoi(const std::string& str, int defaultValue = 0) const;
+    std::string convertDateFormat(const std::string& date) const; // dd/mm/yyyy -> yyyy-mm-dd
+    std::string extractDatePart(const std::string& datetime) const;
+    bool isDateInRange(const std::string& bookingDate, const std::string& startDate, const std::string& endDate) const;
+};

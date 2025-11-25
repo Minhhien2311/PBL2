@@ -1,68 +1,65 @@
-#ifndef SEATMANAGER_H
-#define SEATMANAGER_H
+#pragma once
 
 #include <string>
 #include <vector>
 #include "entities/Seat.h"
 
-enum class SeatClass {
-    Economy,
-    Business
-};
-
-class Flight; // <-- Đã đổi tên
+enum class SeatClass { Economy, Business };
+class Flight;
 
 class SeatManager {
+public:
+    // --- Constructor & Destructor ---
+    explicit SeatManager(const std::string& seatStatusPath = "C:/PBL2/data/seat_maps.txt",
+                         const std::string& seatConfigPath = "C:/PBL2/data/seat_config.txt");
+    ~SeatManager();
+
+    // --- Initialization (Khởi tạo Map) ---
+    // Load map cho một chuyến bay cụ thể để chuẩn bị thao tác
+    bool loadForFlight(const std::string& flightId);
+    bool loadSeatMapFor(Flight* flight);
+
+    // --- Seat Operations (Thao tác ghế) ---
+    bool selectSeat(const std::string& seatId);  // Chọn tạm thời (UI highlight)
+    void cancelSelection();                      // Hủy chọn
+    bool confirmSelection();                     // Xác nhận chọn
+    
+    bool bookSeat(const std::string& seatId);    // Đặt cứng (lưu vào data)
+    bool releaseSeat(const std::string& seatId); // Trả ghế (hủy vé)
+
+    // --- Persistence (Lưu trữ) ---
+    bool saveChanges();          // Lưu trạng thái hiện tại
+    bool updateAndSaveChanges(); // Cập nhật sync và lưu
+
+    // --- Getters & Status ---
+    std::vector<Seat*>* getActiveSeatMap();
+    const std::vector<Seat*>& getAllSeats() const;
+    Seat* getSelectedSeat() const;
+    
+    const std::string& getCurrentFlightId() const;
+    int getSeatRows() const;
+    int getSeatColumns() const;
+    
+    // Thống kê ghế trống
+    int getAvailableSeats(SeatClass seatClass) const;
+    int getAvailableSeats() const;
+
 private:
-    // Dữ liệu chính
-    std::string currentFlightId_; // <-- Đã đổi tên
+    // --- Data State ---
+    std::string currentFlightId_;
     std::vector<Seat*> activeSeatMap_;
-    Seat* selectedSeat_;
+    Seat* selectedSeat_; // Ghế đang được highlight
     
     int seatRows_;
     int seatCols_;
     
-    // Đường dẫn file
+    // --- File Paths ---
     std::string seatStatusFilePath_;
     std::string seatConfigFilePath_;
     
-    // Hàm trợ giúp nội bộ
+    // --- Internal Helpers ---
     void clearCurrentMap();
-    void loadConfiguration();
+    void loadConfiguration(); // Load số hàng/cột
     std::string seatIdToString(int row, int col) const;
     SeatType determineSeatType(int row) const;
-    
-public:
-    // Constructor và Destructor
-    explicit SeatManager(const std::string& seatStatusPath = "C:/PBL2/data/seat_maps.txt",
-                         const std::string& seatConfigPath = "C:/PBL2/data/seat_config.txt");
-    
-    ~SeatManager();
-    
-    // -- Chức năng chính --
-    bool loadForFlight(const std::string& flightId); // <-- Đã đổi tên
-    bool loadSeatMapFor(Flight* flight); // <-- Đã đổi tên
-
-    // --- Chức năng thao tác ghế ---
-    bool selectSeat(const std::string& seatId);
-    void cancelSelection();
-    bool confirmSelection();
-    bool bookSeat(const std::string& seatId);
-    bool releaseSeat(const std::string& seatId);
-    
-    // --- Chức năng lưu ---
-    bool saveChanges();
-    bool updateAndSaveChanges();
-    
-    // --- Getters ---
-    std::vector<Seat*>* getActiveSeatMap();
-    const std::vector<Seat*>& getAllSeats() const;
-    Seat* getSelectedSeat() const;
-    const std::string& getCurrentFlightId() const; // <-- Đã đổi tên
-    int getSeatRows() const;
-    int getSeatColumns() const;
-    int getAvailableSeats(SeatClass seatClass) const;
-    int getAvailableSeats() const;
 };
-
-#endif // SEATMANAGER_H

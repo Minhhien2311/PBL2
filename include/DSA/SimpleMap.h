@@ -1,122 +1,86 @@
-#ifndef SIMPLEMAP_H
-#define SIMPLEMAP_H
+#pragma once
 
 #include <vector>
 
-//  Map đơn giản sử dụng std::vector với tìm kiếm tuyến tính
-//  Sử dụng std::vector để lưu trữ các cặp key-value
-//  Tìm kiếm: Linear search O(n)
+// Map đơn giản sử dụng std::vector (Tìm kiếm tuyến tính O(n))
 template<typename Key, typename Value>
 class SimpleMap {
 private:
-    // Struct lưu trữ cặp key-value
     struct Entry {
         Key key;
         Value value;
-        
         Entry() : key(), value() {}
         Entry(const Key& k, const Value& v) : key(k), value(v) {}
     };
     
-    // Vector chứa các Entry
-    std::vector<Entry> entries_;
+    // Dữ liệu lưu trữ
+    std::vector<Entry> entries;
 
 public:
-    // Constructor
-    SimpleMap() : entries_() {}
-    
-    // Destructor
+    // --- Khởi tạo & Hủy ---
+    SimpleMap() = default;
     ~SimpleMap() = default;
     
-    // Thêm hoặc cập nhật cặp key-value
+    // --- Thao tác chính ---
+    // Thêm hoặc cập nhật (nếu key đã tồn tại)
     void insert(const Key& key, const Value& value) {
-        // Tìm xem key đã tồn tại chưa
-        for (int i = 0; i < entries_.size(); ++i) {
-            if (entries_[i].key == key) {
-                // Key đã tồn tại, cập nhật value
-                entries_[i].value = value;
+        for (auto& entry : entries) {
+            if (entry.key == key) {
+                entry.value = value;
                 return;
             }
         }
-        
-        // Key chưa tồn tại, thêm Entry mới
-        entries_.push_back(Entry(key, value));
+        entries.emplace_back(key, value);
     }
 
-    // Tìm kiếm value theo key (non-const)
-    Value* find(const Key& key) {
-        for (int i = 0; i < entries_.size(); ++i) {
-            if (entries_[i].key == key) {
-                return &entries_[i].value;
-            }
-        }
-        return nullptr;
-    }
-
-    // Tìm kiếm value theo key (const)
-    const Value* find(const Key& key) const {
-        for (int i = 0; i < entries_.size(); ++i) {
-            if (entries_[i].key == key) {
-                return &entries_[i].value;
-            }
-        }
-        return nullptr;
-    }
-
-    // Xóa một cặp key-value
+    // Xóa phần tử theo key
     bool remove(const Key& key) {
-        for (int i = 0; i < entries_.size(); ++i) {
-            if (entries_[i].key == key) {
-                entries_.erase(entries_.begin() + i);
+        for (auto it = entries.begin(); it != entries.end(); ++it) {
+            if (it->key == key) {
+                entries.erase(it);
                 return true;
             }
         }
         return false;
     }
 
-    // Kiểm tra xem key có tồn tại không
+    // --- Truy cập dữ liệu ---
+    Value* find(const Key& key) {
+        for (auto& entry : entries) {
+            if (entry.key == key) return &entry.value;
+        }
+        return nullptr;
+    }
+
+    const Value* find(const Key& key) const {
+        for (const auto& entry : entries) {
+            if (entry.key == key) return &entry.value;
+        }
+        return nullptr;
+    }
+
     bool contains(const Key& key) const {
         return find(key) != nullptr;
     }
 
-    // Lấy danh sách tất cả các key
+    // Toán tử []: Truy cập hoặc tạo mới mặc định
+    Value& operator[](const Key& key) {
+        for (auto& entry : entries) {
+            if (entry.key == key) return entry.value;
+        }
+        entries.emplace_back(key, Value());
+        return entries.back().value;
+    }
+
+    // --- Tiện ích ---
     std::vector<Key> getKeys() const {
         std::vector<Key> keys;
-        for (int i = 0; i < entries_.size(); ++i) {
-            keys.push_back(entries_[i].key);
-        }
+        keys.reserve(entries.size());
+        for (const auto& entry : entries) keys.push_back(entry.key);
         return keys;
     }
 
-    // Lấy số lượng phần tử trong map
-    int size() const {
-        return entries_.size();
-    }
-    
-    // Kiểm tra map có rỗng không
-    bool empty() const {
-        return entries_.empty();
-    }
-    
-    // Xóa tất cả phần tử
-    void clear() {
-        entries_.clear();
-    }
-    
-    // Toán tử [] để truy cập/thêm mới phần tử
-    // Nhập key cần truy cập, tham chiếu đến value (tạo mới nếu chưa tồn tại)
-    Value& operator[](const Key& key) {
-        // Tìm xem key đã tồn tại chưa
-        for (int i = 0; i < entries_.size(); ++i) {
-            if (entries_[i].key == key) {
-                return entries_[i].value;
-            }
-        }
-        
-        // Key chưa tồn tại, thêm Entry mới với value mặc định
-        entries_.push_back(Entry(key, Value()));
-        return entries_[entries_.size() - 1].value;
-    }
+    int size() const { return entries.size(); }
+    bool empty() const { return entries.empty(); }
+    void clear() { entries.clear(); }
 };
-
-#endif

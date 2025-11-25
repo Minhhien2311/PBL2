@@ -3,14 +3,28 @@
 #include <string>
 
 // --- Constructor & Destructor ---
+AccountManager::AccountManager() 
+    : QObject(nullptr),
+      currentUser(nullptr),
+      adminFilePath_(""),
+      agentFilePath_("")
+{
+    // Constructor rỗng - không load file
+    // Dùng khi tạo object tạm thời hoặc init sau
+}
 
-// Constructor: Khởi tạo currentUser là nullptr và nạp dữ liệu từ file.
-AccountManager::AccountManager(const std::string& adminsFilePath, const std::string& agentsFilePath) 
-    : adminFilePath_(adminsFilePath), agentFilePath_(agentsFilePath) {
-    this->currentUser = nullptr;
+// Constructor có tham số (code cũ giữ nguyên)
+AccountManager::AccountManager(const std::string& adminsFilePath, 
+                               const std::string& agentsFilePath) 
+    : QObject(nullptr), 
+      adminFilePath_(adminsFilePath), 
+      agentFilePath_(agentsFilePath),
+      currentUser(nullptr) 
+{ 
     this->loadAdminsFromFile(adminsFilePath);
     this->loadAgentsFromFile(agentsFilePath);
 }
+
 
 // --- Hàm trợ giúp nội bộ ---
 

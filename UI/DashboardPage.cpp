@@ -209,15 +209,11 @@ void DashboardPage::setupModel()
     QHeaderView *h = flightsTable_->horizontalHeader();
 
     // Mặc định co theo nội dung
-    h->setSectionResizeMode(QHeaderView::ResizeToContents);
+    h->setSectionResizeMode(QHeaderView::Stretch);
     
     // Cột STT cố định nhỏ
     h->setSectionResizeMode(0, QHeaderView::Fixed);
     flightsTable_->setColumnWidth(0, 50);
-
-    // Cột Tuyến bay và Doanh thu giãn ra cho đẹp
-    h->setSectionResizeMode(2, QHeaderView::Stretch); // Tuyến bay
-    h->setSectionResizeMode(5, QHeaderView::Stretch); // Doanh thu
 }
 
 void DashboardPage::refreshData()

@@ -1,21 +1,11 @@
-#ifndef SEAT_H
-#define SEAT_H
+#pragma once
 
 #include <string>
 #include <vector>
 #include <utility>
 
-// Loại ghế
-enum class SeatType {
-    Economy,
-    Business
-};
-
-// Trạng thái của ghế
-enum class SeatStatus {
-    Available,
-    Booked
-};
+enum class SeatType { Economy, Business };
+enum class SeatStatus { Available, Booked };
 
 class Seat {
 private:
@@ -24,8 +14,9 @@ private:
     SeatStatus status;
 
 public:
-    // Constructor
-    Seat(const std::string& seatId, SeatType seatType = SeatType::Economy, SeatStatus seatStatus = SeatStatus::Available);
+    // --- Constructor ---
+    Seat(const std::string& seatId, SeatType seatType = SeatType::Economy, 
+         SeatStatus seatStatus = SeatStatus::Available);
 
     // --- Getters ---
     const std::string& getId() const;
@@ -38,11 +29,7 @@ public:
     void releaseSeat();
     void setStatus(SeatStatus newStatus);
 
-    // Chuyển đổi ID ghế sang tọa độ mảng (hàng, cột). Trả về std::pair<int, int> Tọa độ, {-1, -1} nếu ID không hợp lệ.
-    std::pair<int, int> getCoordinates() const;
-
-    // Hàm static để chuyển đổi tọa độ thành ID.
-    static std::string coordinatesToId(const std::pair<int, int>& coords);
+    // --- Helpers (Tọa độ) ---
+    std::pair<int, int> getCoordinates() const; // ID -> (row, col)
+    static std::string coordinatesToId(const std::pair<int, int>& coords); // (row, col) -> ID
 };
-
-#endif

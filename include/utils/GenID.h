@@ -1,27 +1,23 @@
-#ifndef GEN_ID_H
-#define GEN_ID_H
+#pragma once
 
 #include <string>
 
-// Namespace để gom nhóm các hàm, tránh bị trùng tên
 namespace IdGenerator {
 
-    // Nạp giá trị các biến đếm từ file khi khởi động chương trình
+    // --- Quản lý trạng thái (Counter) ---
     void loadCountersFromFile(const std::string& filePath);
-    // Lưu giá trị các biến đếm hiện tại ra file trước khi thoát
     void saveCountersToFile(const std::string& filePath);
 
-    // Hàm tạo ID cho Admin, bắt đầu bằng "ADM-"
+    // --- Sinh ID cụ thể ---
+    // Admin ID: "ADM-..."
     std::string generateAdminId();
 
-    // Hàm tạo ID cho Agent, bắt đầu bằng "AGT-"
+    // Agent ID: "AGT-..."
     std::string generateAgentId();
 
-    // Hàm tạo ID cho FlightInstance, bắt đầu bằng "FI-"
+    // Flight ID: "FI-..."
     std::string generateFlightId();
 
-    // Hàm tạo ID cho Bookings, bắt đầu bằng "BKG-"
+    // Booking ID: "BKG-..."
     std::string generateBookingId();
 }
-
-#endif // GEN_ID_H

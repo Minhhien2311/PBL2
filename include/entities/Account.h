@@ -1,5 +1,4 @@
-#ifndef ACCOUNT_H
-#define ACCOUNT_H
+#pragma once
 
 #include <string>
 
@@ -7,45 +6,40 @@ enum class Role { Admin, Agent };
 
 class Account {
 protected:
-    // Thông tin đăng nhập 
-    std::string accountId;       // ID tài khoản (unique)
+    // --- Thông tin đăng nhập ---
+    std::string accountId;       // ID duy nhất
     std::string username;
-    std::string passwordHash;    // chỉ lưu hash
+    std::string passwordHash;    // Mật khẩu đã mã hóa
     Role        role;
 
-    // Thông tin cá nhân cơ bản 
-    std::string fullName;        // Họ tên của admin/agent
-    std::string phoneNumber;     // Số điện thoại
-    std::string email;           // Email liên hệ
+    // --- Thông tin cá nhân ---
+    std::string fullName;
+    std::string phoneNumber;
+    std::string email;
 
 private:
-    // Helpers nội bộ, chỉ lớp Account mới truy cập được
+    // --- Helpers nội bộ ---
     static std::string hashPassword(const std::string& plain);
     static bool verifyPassword(const std::string& plain, const std::string& hash);
 
 public:
-    const std::string& getPasswordHash() const;
-    // Không cho phép tạo đối tượng Account rỗng
-    Account() = delete;
-
-    explicit Account(const std::string& id,
-                     const std::string& username,
-                     const std::string& passwordPlain, // sẽ hash ở .cpp
-                     Role role,
-                     const std::string& name,
-                     const std::string& phone,
+    // --- Constructor & Destructor ---
+    Account() = delete; // Không cho phép tạo rỗng
+    explicit Account(const std::string& id, const std::string& username,
+                     const std::string& passwordPlain, Role role,
+                     const std::string& name, const std::string& phone,
                      const std::string& email);
+    
+    virtual ~Account() = default;
 
     // --- Getters ---
-    const std::string& getId()        const;
-    const std::string& getUsername()  const;
-    Role               getRole()      const;
-    const std::string& getFullName()  const;
-    const std::string& getPhone()     const;
-    const std::string& getEmail()     const;
-
-    // Destructor ảo cho lớp cơ sở có hàm ảo
-    virtual ~Account() = default;
+    const std::string& getId() const;
+    const std::string& getUsername() const;
+    const std::string& getPasswordHash() const;
+    Role getRole() const;
+    const std::string& getFullName() const;
+    const std::string& getPhone() const;
+    const std::string& getEmail() const;
 
     // --- Setters ---
     void setFullName(const std::string& name);
@@ -57,9 +51,7 @@ public:
     bool authenticate(const std::string& passwordPlain) const;
     void changePassword(const std::string& newPasswordPlain);
 
-    // Chỉ dùng cho việc nạp dữ liệu từ file.
+    // --- Hỗ trợ nạp dữ liệu ---
     void overrideIdForLoad(const std::string& existingId);
     void overridePasswordHashForLoad(const std::string& existingHash);
 };
-
-#endif

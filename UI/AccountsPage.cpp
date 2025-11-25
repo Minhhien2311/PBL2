@@ -37,7 +37,7 @@ void AccountsPage::setupUi()
         
         // Tiêu đề Section (VD: Thông tin tài khoản)
         "QLabel#SectionTitle { "
-        "    color: #5d6d7e; " 
+        "    color: #133e87; " 
         "    font-weight: 600; "
         "    font-size: 16px; "
         "    padding-bottom: 8px; "
@@ -46,7 +46,7 @@ void AccountsPage::setupUi()
 
         // Label trường nhập liệu (VD: Họ tên)
         "QLabel#FieldLabel { "
-        "    color: #133e87; "
+        "    color: #5d6d7e; "
         "    font-weight: 700; "
         "    font-size: 13px; "
         "}"
@@ -87,7 +87,7 @@ void AccountsPage::setupUi()
 
     // Layout chính với margin trái phải 24px
     QVBoxLayout* mainLayout = new QVBoxLayout(this);
-    mainLayout->setContentsMargins(24, 20, 24, 20); 
+    mainLayout->setContentsMargins(24, 40, 24, 20); 
     mainLayout->setSpacing(20);
 
     // Đặt ID để hứng CSS background

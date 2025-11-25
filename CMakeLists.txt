@@ -14,28 +14,58 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC OFF)
 
+# Chặn MOC scan file Qt internal (fix lỗi qmetatype.h)
+set(CMAKE_AUTOMOC_RELAXED_MODE OFF)
+
 # ===== Tìm Qt với Charts =====
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Charts)
 
-# Kiểm tra nếu tìm thấy Charts
 if(Qt6Charts_FOUND)
     message(STATUS "Qt6 Charts found: ${Qt6Charts_DIR}")
 else()
-    message(FATAL_ERROR "Qt6 Charts NOT found! Please install Qt Charts module.")
+    message(FATAL_ERROR "Qt6 Charts NOT found!")
 endif()
 
-# ===== Thu thập nguồn =====
+# ===== Thu thập nguồn - LIỆT KÊ RÕ RÀNG =====
+
+# 1. UI Sources (đã chuyển ra ngoài src/)
 file(GLOB_RECURSE UI_SOURCES
-    "src/UI/*.cpp"
-    "src/UI/*.h"
+    "${CMAKE_SOURCE_DIR}/UI/*.cpp"
+    "${CMAKE_SOURCE_DIR}/UI/*.h"
 )
 
-file(GLOB_RECURSE CORE_SOURCES 
-    "src/core/*.cpp"
-    "include/core/*.h"    # ← THÊM DÒNG NÀY
+# 2. Core Sources - LIỆT KÊ THỦ CÔNG ĐỂ CHẮC CHẮN
+set(CORE_SOURCES
+    "${CMAKE_SOURCE_DIR}/src/core/AccountManager.cpp"
+    "${CMAKE_SOURCE_DIR}/include/core/AccountManager.h"
+    "${CMAKE_SOURCE_DIR}/src/core/AirportManager.cpp"
+    "${CMAKE_SOURCE_DIR}/src/core/BookingManager.cpp"
+    "${CMAKE_SOURCE_DIR}/src/core/FlightManager.cpp"
+    "${CMAKE_SOURCE_DIR}/src/core/PassengerManager.cpp"
+    "${CMAKE_SOURCE_DIR}/src/core/ReportManager.cpp"
+    "${CMAKE_SOURCE_DIR}/src/core/SeatManager.cpp"
 )
-file(GLOB_RECURSE ENTITY_SOURCES  "src/entities/*.cpp")
-file(GLOB_RECURSE UTILS_SOURCES   "src/utils/*.cpp")
+
+# 3. Entity Sources
+file(GLOB_RECURSE ENTITY_SOURCES  
+    "${CMAKE_SOURCE_DIR}/src/entities/*.cpp"
+)
+
+# 4. Utils Sources
+file(GLOB_RECURSE UTILS_SOURCES   
+    "${CMAKE_SOURCE_DIR}/src/utils/*.cpp"
+)
+
+# ===== Debug: In ra danh sách file =====
+message(STATUS "=== UI_SOURCES (${CMAKE_SOURCE_DIR}/UI/) ===")
+foreach(src ${UI_SOURCES})
+    message(STATUS "  ${src}")
+endforeach()
+
+message(STATUS "=== CORE_SOURCES ===")
+foreach(src ${CORE_SOURCES})
+    message(STATUS "  ${src}")
+endforeach()
 
 # ===== Executable chính =====
 add_executable(pbl2
@@ -43,7 +73,6 @@ add_executable(pbl2
     ${CORE_SOURCES}
     ${ENTITY_SOURCES}
     ${UTILS_SOURCES}
-    ${ADDITIONAL_SOURCES}
 )
 
 # ===== Include paths =====
@@ -53,9 +82,10 @@ target_include_directories(pbl2 PRIVATE
     "${CMAKE_SOURCE_DIR}/include/entities"
     "${CMAKE_SOURCE_DIR}/include/DSA"
     "${CMAKE_SOURCE_DIR}/include/utils"
+    "${CMAKE_SOURCE_DIR}/UI"  # THÊM ĐỂ TÌM HEADER UI
 )
 
-# ===== Link Qt - THÊM CHARTS =====
+# ===== Link Qt =====
 target_link_libraries(pbl2 PRIVATE 
     Qt6::Core
     Qt6::Widgets 
@@ -68,20 +98,11 @@ set_target_properties(pbl2 PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
 )
 
-# Copy data/ only if build/data doesn't exist yet
-# if(EXISTS "${CMAKE_SOURCE_DIR}/data" AND NOT EXISTS "${CMAKE_BINARY_DIR}/data")
-#   add_custom_command(TARGET pbl2 POST_BUILD
-#     COMMAND ${CMAKE_COMMAND} -E copy_directory
-#             "${CMAKE_SOURCE_DIR}/data"
-#             "${CMAKE_BINARY_DIR}/data"
-#     COMMENT "Initial copy: data/ -> build/data/")
-# endif()
-
 # ===== Bundle Qt DLL =====
 if(WIN32)
-  add_custom_command(TARGET pbl2 POST_BUILD
-    COMMAND "${CMAKE_PREFIX_PATH}/bin/windeployqt.exe"
-            --no-translations --compiler-runtime
-            "$<TARGET_FILE:pbl2>"
-    COMMENT "Running windeployqt (copy Qt DLLs cạnh PBL2.exe)")
+    add_custom_command(TARGET pbl2 POST_BUILD
+        COMMAND "${CMAKE_PREFIX_PATH}/bin/windeployqt.exe"
+                --no-translations --compiler-runtime
+                "$<TARGET_FILE:pbl2>"
+        COMMENT "Running windeployqt")
 endif()

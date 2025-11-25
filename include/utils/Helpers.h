@@ -1,16 +1,13 @@
-#ifndef HELPERS_H
-#define HELPERS_H
+#pragma once
 
 #include <string>
 #include <vector>
 
 class Helpers {
 public:
-    static std::vector<std::string> splitString(const std::string& str, char delimiter);
-    
+    // --- Định dạng dữ liệu ---
     static std::string formatCurrency(double amount);
 
+    // --- Đọc dữ liệu bổ trợ ---
     static std::vector<std::string> loadAirlinesFromFile(const std::string& filePath);
 };
-
-#endif // HELPERS_H

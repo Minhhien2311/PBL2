@@ -110,6 +110,7 @@ void SearchBookPage::setupUi()
     // === Hàng 1: Nút Tải lại ===
     QHBoxLayout* headerRow = new QHBoxLayout();
     headerRow->setSpacing(10);
+    headerRow->addStretch();
 
     QPushButton* refreshButton = new QPushButton("Làm mới trang", topBar);
     

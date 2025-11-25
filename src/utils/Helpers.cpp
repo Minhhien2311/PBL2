@@ -3,8 +3,6 @@
 #include <string>
 #include <sstream>
 
-std::vector<std::string> Helpers::splitString(const std::string& str, char delimiter) {}
-
 std::string Helpers::formatCurrency(double amount) {
     std::string s = std::to_string(amount);
     int decimalPoint = s.find('.');

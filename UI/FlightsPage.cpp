@@ -91,6 +91,7 @@ void FlightsPage::setupUi()
     // === Hàng 1: Nút Tải lại ===
     QHBoxLayout* headerRow = new QHBoxLayout();
     headerRow->setSpacing(10);
+    headerRow->addStretch();
 
     refreshButton = new QPushButton("Làm mới trang", topBar);
     refreshButton->setIcon(QIcon("C:/PBL2/assets/icons/reload.png")); 

@@ -1,5 +1,4 @@
-#ifndef AIRPORTMANAGER_H
-#define AIRPORTMANAGER_H
+#pragma once
 
 #include "DSA/SimpleMap.h"
 #include <vector>
@@ -7,42 +6,31 @@
 
 class FlightManager;
 
-//  Quản lý danh sách sân bay
-//  Ánh xạ 2 chiều: Display Name ↔ IATA Code. Ví dụ: "TP. Hồ Chí Minh (SGN)" ↔ "SGN"
+// Quản lý ánh xạ: Display Name (Hà Nội (HAN)) <-> IATA Code (HAN)
 class AirportManager {
-private:
-    SimpleMap<std::string, std::string> displayToIATA_;  // "Hà Nội (HAN)" → "HAN"
-    SimpleMap<std::string, std::string> iataToDisplay_;  // "HAN" → "Hà Nội (HAN)"
-
-    // Load danh sách sân bay mặc định (Việt Nam + quốc tế)
-    void loadAirportsFromFile(const std::string& filePath);
-    
 public:
-    // Constructor
-    AirportManager(const std::string& airportsFilePath);
-
-    // Destructor
+    // --- Constructor & Destructor ---
+    explicit AirportManager(const std::string& airportsFilePath);
     ~AirportManager() = default;
-    // Thêm sân bay mới vào danh sách
+
+    // --- Management (Quản lý) ---
     void addAirport(const std::string& displayName, const std::string& iataCode);
+    void loadAirportsFromRoutes(FlightManager* flightManager); // Auto-add từ chuyến bay
 
-    // Lấy mã IATA từ tên hiển thị
+    // --- Lookup & Conversion (Tra cứu) ---
     std::string getIATACode(const std::string& displayName) const;
-
-    // Lấy tên hiển thị từ mã IATA
     std::string getDisplayName(const std::string& iataCode) const;
+    std::vector<std::string> getAllDisplayNames() const; // Sorted alphabetically
 
-    // Lấy danh sách tất cả tên hiển thị (đã sắp xếp alphabet)
-    std::vector<std::string> getAllDisplayNames() const;
-
-    // Load thêm sân bay từ FlightManager, quét tất cả chuyến bay, tự động thêm sân bay chưa có
-    void loadAirportsFromRoutes(FlightManager* flightManager);
-
-    // Kiểm tra sân bay đã tồn tại chưa
+    // --- Utils ---
     bool hasAirport(const std::string& iataCode) const;
-
-    // Lấy số lượng sân bay
     int getAirportCount() const;
-};
 
-#endif // AIRPORTMANAGER_H
+private:
+    // --- Data Storage ---
+    SimpleMap<std::string, std::string> displayToIATA_;
+    SimpleMap<std::string, std::string> iataToDisplay_;
+
+    // --- Internal Helpers ---
+    void loadAirportsFromFile(const std::string& filePath);
+};
