@@ -38,6 +38,8 @@ private slots:
     void onSearchClicked();
     // đặt vé
     void onBookClicked();
+    // Slot xử lý khi chọn item trong combo
+    void onSortChanged(int index);
 
 private:
     void setupUi();
@@ -48,6 +50,9 @@ private:
     // nạp dữ liệu vào bảng
     void fillTable(const std::vector<Flight*>& flights);
 
+    // --- dữ liệu hiện tại trong bảng ---
+    std::vector<Flight*> currentFlights_;
+
     // --- managers ---
     FlightManager*   flightManager_;
     BookingManager*  bookingManager_;
@@ -56,13 +61,15 @@ private:
     PassengerManager* passengerManager_;
 
     // --- ô tìm kiếm ---
-    AirportComboBox*  fromSearchCombo_;  // điểm đi
-    AirportComboBox*  toSearchCombo_;    // điểm đến
+    AirportComboBox*  fromSearchCombo_;     // điểm đi
+    AirportComboBox*  toSearchCombo_;       // điểm đến
     QLineEdit*  dateSearchEdit_;         // ngày khởi hành
     QComboBox* airlineFilterCombo_;      // hãng hàng không
+    QComboBox* sortingCombo_;               // sắp xếp
     QLineEdit* priceMinEdit_;            // giá tối thiểu
     QLineEdit* priceMaxEdit_;            // giá tối đa
     QLabel* statusLabel_;                // status label for search results
+    QLabel* warningLabel_;               // warning label for input errors
 
     // --- bảng ---
     QTableView*          tableView_;

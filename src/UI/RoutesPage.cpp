@@ -203,15 +203,9 @@ void RoutesPage::setupUi()
     editButton_ = new QPushButton("Sửa tuyến", this);
     deleteButton_ = new QPushButton("Xóa tuyến", this);
 
-    // Style giữ nguyên như bạn yêu cầu
-    QString crudStyle =
-        "QPushButton { background:transparent; color: #133e87; border:1px solid #133e87; "
-        "border-radius:6px; height:20px; padding:4px 10px; font-weight:600; }"
-        "QPushButton:hover { background:#466a9a; color: white; }"; // Thêm color white khi hover cho rõ
-
-    addButton_->setStyleSheet(crudStyle);
-    editButton_->setStyleSheet(crudStyle);
-    deleteButton_->setStyleSheet(crudStyle);
+    addButton_->setStyleSheet("background: #27C93F; color: #FFFFFF; border:none; border-radius:6px; height:20px; padding:4px 10px; font-weight:600; } QPushButton:hover { background: #1b4d1b; color: white;");
+    editButton_->setStyleSheet("background: #FFBD2E; color: #FFFFFF; border:none; border-radius:6px; height:20px; padding:4px 10px; font-weight:600; } QPushButton:hover { background: #b35c00; color: white;");
+    deleteButton_->setStyleSheet("background: #FF5F57; color: #FFFFFF; border:none; border-radius:6px; height:20px; padding:4px 10px; font-weight:600; } QPushButton:hover { background: #8b1c1c; color: white;");
 
     // Add trực tiếp vào layout header, không cần layout phụ
     tableHeaderLayout->addWidget(addButton_);
@@ -354,7 +348,7 @@ void RoutesPage::onEditRoute()
     QModelIndexList selected = tableView_->selectionModel()->selectedRows();
     if (selected.isEmpty()) {
         statusLabel_->setText("Vui lòng chọn một tuyến bay để sửa.");
-        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
+        statusLabel_->setStyleSheet("color: #FF5F57; font-size: 13px; font-weight: 650;");
         return;
     }
 
@@ -433,7 +427,7 @@ void RoutesPage::onDeleteRoute()
     QModelIndexList selected = tableView_->selectionModel()->selectedRows();
     if (selected.isEmpty()) {
         statusLabel_->setText("Vui lòng chọn một tuyến bay để xóa.");
-        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
+        statusLabel_->setStyleSheet("color: #FF5F57; font-size: 13px; font-weight: 650;");
         return;
     }
 
@@ -470,7 +464,7 @@ void RoutesPage::onSearchByRoute()
     
     if (fromIATA.empty() && toIATA.empty()) {
         statusLabel_->setText("Vui lòng chọn điểm đi và điểm đến để tìm kiếm.");
-        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
+        statusLabel_->setStyleSheet("color: #FF5F57; font-size: 13px; font-weight: 650;");
         return;
     }
     
@@ -502,7 +496,7 @@ void RoutesPage::onSearchByRoute()
 
     // ← CẬP NHẬT STATUS
     statusLabel_->setText(QString("Tìm thấy tuyến bay!"));
-    statusLabel_->setStyleSheet("color: #2E7D32; font-size: 13px; font-weight: 650;");
+    statusLabel_->setStyleSheet("color: #27C93F; font-size: 13px; font-weight: 650;");
 
     // QString criteria;
     // if (!fromIATA.empty()) criteria += QString("Từ: <b>%1</b>").arg(QString::fromStdString(fromIATA));
@@ -513,6 +507,6 @@ void RoutesPage::onSearchByRoute()
 
     if (count == 0) {
         statusLabel_->setText(QString("Không tìm thấy tuyến bay phù hợp!"));
-        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
+        statusLabel_->setStyleSheet("color: #FF5F57; font-size: 13px; font-weight: 650;");
     }
 }

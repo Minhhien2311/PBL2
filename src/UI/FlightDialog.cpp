@@ -261,7 +261,7 @@ void FlightDialog::setupUi(bool isEditMode)
 
     if (isEditMode) {
         QLabel* noteLabel = new QLabel(QString("⚠️ Đang sửa chuyến bay: %1").arg(currentFlightId_));
-        noteLabel->setStyleSheet("color: #C62828; font-style: italic; margin-left: 10px;");
+        noteLabel->setStyleSheet("color: #FF5F57; font-style: italic; margin-left: 10px;");
         noteLabel->setAlignment(Qt::AlignCenter);
         contentLayout->addWidget(noteLabel);
     }

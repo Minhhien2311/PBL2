@@ -23,7 +23,7 @@ class RoutesPage;
 class FlightsPage;
 class DashboardPage;
 class AccountsPage;
-class AdminBookingPage;
+class AdminBookingsPage;
 
 class AdminInterface : public QWidget
 {
@@ -69,7 +69,7 @@ private:
     DashboardPage* dashboardPage_;
     RoutesPage* routesPage_;
     FlightsPage* flightsPage_;
-    AdminBookingPage* bookingPage_;             // Mới
+    AdminBookingsPage* bookingPage_;             // Mới
     AccountsPage* accountsPage_;
     AdminTicketsReportPage* ticketsReportPage_;  // Mới
     AdminRevenueReportPage* revenueReportPage_;  // Mới

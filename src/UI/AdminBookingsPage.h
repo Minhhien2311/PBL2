@@ -1,5 +1,5 @@
-#ifndef ADMINBOOKINGPAGE_H
-#define ADMINBOOKINGPAGE_H
+#ifndef AdminBookingsPage_H
+#define AdminBookingsPage_H
 
 #include <QWidget>
 
@@ -17,14 +17,16 @@ class QPushButton;
 class AirportComboBox;
 class Booking;
 class QLabel;
+class QItemSelection;
+class QModelIndex;
 
-class AdminBookingPage : public QWidget
+class AdminBookingsPage : public QWidget
 {
     Q_OBJECT
 
 public:
     // Thêm PassengerManager vào constructor
-    explicit AdminBookingPage(BookingManager* bkManager,
+    explicit AdminBookingsPage(BookingManager* bkManager,
                                FlightManager* flManager,
                                AccountManager* accManager,
                                AirportManager* airportManager,
@@ -50,6 +52,8 @@ private:
     void refreshTable(); // Hàm tải dữ liệu
     void displayBooking(Booking* booking);  // Helper để hiển thị một booking lên bảng
 
+    void onSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+
     // --- Managers ---
     BookingManager* bookingManager_;
     FlightManager* flightManager_;   
@@ -73,4 +77,4 @@ private:
     QPushButton* changeBookingBtn_; // Nút Đổi vé
 };
 
-#endif // ADMINBOOKINGPAGE_H
+#endif // AdminBookingsPage_H

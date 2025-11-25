@@ -34,16 +34,16 @@ namespace {
         "QPushButton { border: none; border-radius: 3px; }"; 
 
     const QString BUSINESS_AVAILABLE_STYLE = SEAT_BASE_STYLE + 
-        "QPushButton { background: #FFD700; } QPushButton:hover { background: #FFC700; border: 2px solid #FF6B35; }";
+        "QPushButton { background: #FFBD2E; } QPushButton:hover { background: #FFC700; border: 2px solid #FF6B35; }";
     
     const QString ECONOMY_AVAILABLE_STYLE = SEAT_BASE_STYLE + 
-        "QPushButton { background: #90EE90; } QPushButton:hover { background: #7FD87F; border: 2px solid #FF6B35; }";
+        "QPushButton { background: #27C93F; } QPushButton:hover { background: #3ad94a; border: 2px solid #FF6B35; }";
     
     const QString BOOKED_STYLE = SEAT_BASE_STYLE + 
         "QPushButton { background: #D3D3D3; }";
     
     const QString LOCKED_STYLE = SEAT_BASE_STYLE + 
-        "QPushButton { background: #FF6B6B; }";
+        "QPushButton { background: #FF5F57; }";
     
     const QString SELECTED_STYLE_SUFFIX = " border: 2px solid #FF6B35;";
 }
@@ -589,9 +589,9 @@ void BookingDialog::setupPage3_SeatSelection() {
         legendLayout->addLayout(itemLayout);
     };
     
-    addLegend("#90EE90", "Hạng phổ thông");
-    addLegend("#FFD700", "Hạng thương gia");
-    addLegend("#FF6B6B", "Không thể chọn");
+    addLegend("#27C93F", "Hạng phổ thông");
+    addLegend("#FFBD2E", "Hạng thương gia");
+    addLegend("#FF5F57", "Không thể chọn");
     addLegend("#D3D3D3", "Đã đặt");
 
     layout->addLayout(legendLayout);
@@ -623,7 +623,7 @@ void BookingDialog::updateFareDisplay() {
     
     fareLabel_->setText(QString("%L1 VNĐ").arg(fare));
     
-    QString color = economyRadio_->isChecked() ? "#90EE90" : "#FFD700";
+    QString color = economyRadio_->isChecked() ? "#00bf63" : "#ff751f";
     fareLabel_->setStyleSheet(
         QString("font-size: 16px; font-weight: bold; color: %1; background: transparent; border: none;").arg(color)
     );

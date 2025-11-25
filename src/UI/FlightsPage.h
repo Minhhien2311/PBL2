@@ -2,18 +2,20 @@
 #define FLIGHTSPAGE_H
 
 #include <QWidget>
+#include <vector>
 
-// Khai báo sớm
+// Forward declarations
 class QLineEdit;
 class QPushButton;
 class QTableView;
 class QStandardItemModel;
-class FlightManager; // Dùng FlightManager
-class QDateEdit;
+class FlightManager;
 class AirportManager;
 class AirportComboBox; 
 class QComboBox;
 class QLabel;
+class Flight; // Forward declaration cho Flight
+class QCheckBox;
 
 class FlightsPage : public QWidget
 {
@@ -23,21 +25,33 @@ public:
     explicit FlightsPage(FlightManager* flightManager, AirportManager* airportManager, QWidget *parent = nullptr);
 
 private slots:
-    private slots:
+    // Search & Filter
     void onSearchById();
-    void onSearchFilter();         // ← THÊM dòng này (tìm kiếm tổng hợp)
+    void onSearchFilter();
+    
+    // CRUD
     void onAddFlight();
     void onEditFlight();
     void onDeleteFlight();
-    void refreshTable();
-    void refreshPage();  // New method to refresh when page shown or user changed
+    
+    // Utilities
+    void refreshPage();       // Làm mới trang (reset search)
+    void onSortChanged(int index); // Xử lý sắp xếp
+    void onFutureFilterChanged(bool checked); // Xử lý lọc chuyến chưa bay
 
 private:
-    private:
     void setupUi();
     void setupModel();
     void setupConnections();
 
+    // --- Helper Functions (Giống SearchBookPage) ---
+    void loadAllFlights(); // Nạp tất cả dữ liệu ban đầu
+    void fillTable(const std::vector<Flight*>& flights); // Hàm nạp bảng dùng chung
+
+    // --- Data ---
+    std::vector<Flight*> currentFlights_; // Lưu danh sách đang hiển thị để sort
+
+    // --- Managers ---
     FlightManager* flightManager_;
     AirportManager* airportManager_;
 
@@ -46,22 +60,23 @@ private:
     AirportComboBox* fromSearchCombo_;
     AirportComboBox* toSearchCombo_;
     QLineEdit* dateSearchEdit_; 
-    QComboBox* airlineFilterCombo_;  // ← THÊM dòng này
-    QLabel* statusLabel_;             // ← THÊM dòng này
+    QComboBox* airlineFilterCombo_;
+    QComboBox* sortingCombo_;
+    QLabel* statusLabel_;
+    QLabel* warningLabel_1; // Nhãn cảnh báo cho lỗi nhập liệu
+    QLabel* warningLabel_2; // Nhãn cảnh báo cho lỗi nhập liệu
 
     QTableView* tableView_;
     QStandardItemModel* model_;
 
-    // <--- Sửa lỗi: Thêm các nút tìm kiếm làm biến thành viên
+    // --- Buttons ---
     QPushButton* searchByIdBtn_;
-    QPushButton* searchByRouteBtn_;
-    QPushButton* searchByDateBtn_;
-    QPushButton* searchFilterBtn_;    // ← THÊM dòng này (nút tìm kiếm tổng hợp)
-    
+    QPushButton* searchFilterBtn_;
     QPushButton* addButton_;
     QPushButton* editButton_;
     QPushButton* deleteButton_;
-    QPushButton* refreshButton;      // ← THÊM dòng này
+    QPushButton* refreshButton;
+    QCheckBox* showFutureOnlyCheckbox_; 
 };
 
 #endif // FLIGHTSPAGE_H

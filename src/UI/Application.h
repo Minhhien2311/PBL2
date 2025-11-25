@@ -6,6 +6,7 @@
 // Khai báo sớm
 class QStackedWidget;
 class LoginPage;
+class ForgotPasswordPage; // <--- THÊM DÒNG NÀY
 class AdminInterface;
 class AgentInterface;
 class AccountManager; 
@@ -42,6 +43,7 @@ private:
 
     // Các trang con cấp cao
     LoginPage *loginPage_;
+    ForgotPasswordPage *forgotPasswordPage_; // <--- THÊM BIẾN NÀY
     AdminInterface *adminInterface_;
     AgentInterface *agentInterface_;
 
@@ -55,4 +57,3 @@ private:
 };
 
 #endif // APPLICATION_H
-

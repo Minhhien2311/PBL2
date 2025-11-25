@@ -1,6 +1,8 @@
 #include "entities/FlightRule.h"
 #include <string>
 #include <stdexcept>
+#include <fstream>
+#include <iostream>
 
 // --- Constructor (Đã đơn giản hóa) ---
 FlightRule::FlightRule(bool allowCancel,
@@ -75,4 +77,24 @@ FlightRule FlightRule::fromRecordLine(const std::string& line) {
     int iChangeCutoff = std::stoi(line.substr(start, end - start));
 
     return FlightRule(bAllowCancel, iCancelCutoff, bAllowChange, iChangeCutoff);
+}
+
+FlightRule* FlightRule::loadFromFile(const std::string& filePath) {
+    std::ifstream file(filePath);
+    if (!file.is_open()) {
+        std::cerr << "ERROR: Cannot open flight rules file: " << filePath << std::endl;
+        // Return default rule nếu không đọc được file
+        return new FlightRule(true, 24, true, 12);
+    }
+    
+    std::string line;
+    if (std::getline(file, line) && !line.empty()) {
+        file.close();
+        FlightRule rule = FlightRule::fromRecordLine(line);
+        return new FlightRule(rule);
+    }
+    
+    file.close();
+    std::cerr << "WARNING: Empty flight rules file, using defaults" << std::endl;
+    return new FlightRule(true, 24, true, 12);
 }

@@ -412,7 +412,7 @@ void PromotionsPage::refreshTable(const std::vector<Promotion>& data) {
         row << new QStandardItem(QString::fromStdString(p.getEndDate()));
 
         QStandardItem* statusItem = new QStandardItem(p.getIsActive() ? "Hoạt động" : "Hết hạn");
-        statusItem->setForeground(p.getIsActive() ? QColor("#2E7D32") : QColor("#C62828"));
+        statusItem->setForeground(p.getIsActive() ? QColor("#27C93F") : QColor("#FF5F57"));
         row << statusItem;
 
         for (auto item : row) item->setTextAlignment(Qt::AlignCenter);

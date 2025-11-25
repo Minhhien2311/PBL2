@@ -5,7 +5,9 @@
 #include "entities/Route.h"
 #include "entities/Flight.h"
 #include "DSA/HashTable.h"
+#include "DSA/AVLTree.h"
 #include <string>
+#include <ctime>
 
 class SeatManager;
 
@@ -16,7 +18,19 @@ private:
 
     HashTable<std::string, Route*> routeIdTable;
     HashTable<std::string, Flight*> flightIdTable;
-    
+
+    // Key: time_t (thời gian bay), Value: vector<string> (danh sách FlightID)
+    AVLTree<time_t, std::vector<std::string>> flightTimeTree;
+    // Hàm phụ trợ để thêm chuyến bay vào cây index
+    void indexFlightTime(const Flight& flight);
+
+    // Helper functions to maintain time index (AVL)
+    time_t getFlightTimeKey(const Flight& flight) const;
+    void addFlightToTimeIndex(Flight* flight);
+    void removeFlightFromTimeIndex(Flight* flight);
+    void removeFlightFromTimeIndexByKey(time_t key, const std::string& flightId);
+    void moveFlightTimeIndex(Flight* flight, time_t oldKey);
+
     std::string routesFilePath_;
     std::string flightsFilePath_;
 
@@ -26,21 +40,21 @@ private:
     struct RouteData {
         std::string routeKey;
         std::vector<Flight*> allFlights;
-        
+
         RouteData(const std::string& key) : routeKey(key) {}
-        
+
         void addFlight(Flight* flight) {
             allFlights.push_back(flight);
         }
     };
-    
+
     HashTable<std::string, RouteData*> routeIndex_;
-    
+
     // RouteIndex management helpers
     bool addFlightToRouteIndex(Flight* flight);
     bool removeFlightFromRouteIndex(Flight* flight);
     bool updateFlightInRouteIndex(Flight* flight, const std::string& oldRouteId);
-    
+
     void buildRouteIndex();
     void sortFlightsByDateTime(std::vector<Flight*>& flights);
     static int compareDates(const std::string& date1, const std::string& date2);
@@ -72,7 +86,7 @@ public:
                          int availableSeats,
                          int fareEconomy,
                          int fareBusiness);
-    
+
     // --- Các hàm Update và Delete ---
     bool updateRoute(const std::string& routeId, const std::string& newDeparture, const std::string& newDestination);
     bool deleteRoute(const std::string& routeId);
@@ -94,7 +108,7 @@ public:
     const std::vector<Route*>& getAllRoutes() const;
     const std::vector<Flight*>& getAllFlights() const;
     SeatManager* getSeatManager() const;
-    
+
     // --- Search and Filter Methods ---
     struct SearchCriteria {
         std::string fromIATA;
@@ -105,37 +119,42 @@ public:
         int maxPrice = 0;
         bool useAVLForPrice = false;
     };
-    
+
     std::vector<Flight*> getFlightsByRoute(
         const std::string& fromIATA,
         const std::string& toIATA
     ) const;
-    
+
     std::vector<Flight*> filterByDate(
         const std::vector<Flight*>& flights,
         const std::string& date
     ) const;
-    
+
     std::vector<Flight*> filterByAirline(
         const std::vector<Flight*>& flights,
         const std::string& airline
     ) const;
-    
+
     std::vector<Flight*> filterByPriceRange(
         const std::vector<Flight*>& flights,
         int minPrice,
         int maxPrice
     ) const;
-    
+
     std::vector<Flight*> filterByPriceRangeAVL(
         const std::vector<Flight*>& flights,
         int minPrice,
         int maxPrice
     ) const;
-    
+
     std::vector<Flight*> searchFlights(
         const SearchCriteria& criteria
     ) const;
+
+    // Hàm lấy danh sách ID chuyến bay (có lọc hoặc không)
+    // onlyFuture = true: Chỉ lấy chuyến chưa bay (Dùng cho Agent/Admin optional)
+    // onlyFuture = false: Lấy tất cả (Dùng cho Admin mặc định)
+    std::vector<Flight*> getFutureFlights(bool onlyFuture = false);
 };
 
 #endif // FLIGHT_MANAGER_H

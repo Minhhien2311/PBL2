@@ -1,4 +1,4 @@
-#include "AdminBookingPage.h"
+#include "AdminBookingsPage.h"
 #include "core/PassengerManager.h"
 #include "core/BookingManager.h"
 #include "core/FlightManager.h"
@@ -34,6 +34,8 @@
 #include <QDialog>
 #include <QGroupBox>
 #include <QTextEdit>
+#include <QItemSelection>
+#include <QItemSelectionModel>
 
 // Helper function format tiền (giống SearchBookPage)
 namespace {
@@ -53,7 +55,7 @@ namespace {
     }
 }
 
-AdminBookingPage::AdminBookingPage(BookingManager* bkManager,
+AdminBookingsPage::AdminBookingsPage(BookingManager* bkManager,
                                      FlightManager* flManager,
                                      AccountManager* accManager,
                                      AirportManager* airportManager,
@@ -78,7 +80,7 @@ AdminBookingPage::AdminBookingPage(BookingManager* bkManager,
     refreshTable(); // Tải dữ liệu lần đầu
 }
 
-void AdminBookingPage::setupUi()
+void AdminBookingsPage::setupUi()
 {
     // style
     this->setStyleSheet(
@@ -241,15 +243,9 @@ void AdminBookingPage::setupUi()
     cancelBookingBtn_ = new QPushButton("Hủy vé", this);
     changeBookingBtn_ = new QPushButton("Đổi vé", this);
 
-    // Style gọn nhẹ (Ghost style)
-    QString btnStyle =
-        "QPushButton { background:transparent; color: #133e87; border:1px solid #133e87; "
-        "border-radius:6px; height:20px; padding:4px 10px; font-weight:600; }"
-        "QPushButton:hover { background:#466a9a; color: white; }";
-
-    viewDetailsBtn_->setStyleSheet(btnStyle);
-    cancelBookingBtn_->setStyleSheet(btnStyle);
-    changeBookingBtn_->setStyleSheet(btnStyle);
+    viewDetailsBtn_->setStyleSheet("background: #27C93F; color: #FFFFFF; border:none; border-radius:6px; height:20px; padding:4px 10px; font-weight:600; } QPushButton:hover { background: #1b4d1b; color: white;");
+    changeBookingBtn_->setStyleSheet("background: #FFBD2E; color: #FFFFFF; border:none; border-radius:6px; height:20px; padding:4px 10px; font-weight:600; } QPushButton:hover { background: #8b1c1c; color: white;");
+    cancelBookingBtn_->setStyleSheet("background: #FF5F57; color: #FFFFFF; border:none; border-radius:6px; height:20px; padding:4px 10px; font-weight:600; } QPushButton:hover { background: #b35c00; color: white;");
     
     // Set cursor
     viewDetailsBtn_->setCursor(Qt::PointingHandCursor);
@@ -293,7 +289,7 @@ void AdminBookingPage::setupUi()
 }
 
 
-void AdminBookingPage::setupModel()
+void AdminBookingsPage::setupModel()
 {
     // Tăng lên 8 cột (Thêm STT vào đầu)
     model_ = new QStandardItemModel(0, 8, this);
@@ -328,21 +324,82 @@ void AdminBookingPage::setupModel()
     tableView_->setColumnWidth(0, 50);
 }
 
-void AdminBookingPage::setupConnections()
+void AdminBookingsPage::onSelectionChanged(const QItemSelection &selected, const QItemSelection & /*deselected*/)
+{
+    QModelIndexList sel = tableView_->selectionModel()->selectedRows();
+    if (sel.isEmpty()) {
+        viewDetailsBtn_->setEnabled(false);
+        changeBookingBtn_->setEnabled(false);
+        cancelBookingBtn_->setEnabled(false);
+        statusLabel_->setText("");
+        return;
+    }
+
+    // BookingId ở cột 1 theo layout hiện tại
+    QString bookingId = model_->data(sel.first().siblingAtColumn(1)).toString();
+    Booking* booking = bookingManager_->findBookingById(bookingId.toStdString());
+    if (!booking) {
+        viewDetailsBtn_->setEnabled(false);
+        changeBookingBtn_->setEnabled(false);
+        cancelBookingBtn_->setEnabled(false);
+        statusLabel_->setText("Không tìm thấy đặt chỗ.");
+        return;
+    }
+
+    viewDetailsBtn_->setEnabled(true);
+
+    // Kiểm tra luật hủy/đổi qua BookingManager
+    bool canCancel = bookingManager_->canCancelBooking(bookingId.toStdString(), *flightManager_);
+    bool canChange = bookingManager_->canChangeBooking(bookingId.toStdString(), *flightManager_);
+
+    // Chỉ cho thao tác nếu booking đang giữ chỗ (Issued) và luật cho phép
+    bool isIssued = (booking->getStatus() == BookingStatus::Issued);
+    cancelBookingBtn_->setEnabled(isIssued && canCancel);
+    changeBookingBtn_->setEnabled(isIssued && canChange);
+
+    // Hiển thị thông tin ngắn gọn trên statusLabel (hoặc tooltip)
+    QString info;
+    if (!canCancel) {
+        std::string deadline = bookingManager_->getCancellationDeadline(bookingId.toStdString(), *flightManager_);
+        info += QString("Không thể hủy. Hạn hủy: %1. ").arg(QString::fromStdString(deadline));
+    }
+    if (!canChange) {
+        std::string deadline = bookingManager_->getChangeDeadline(bookingId.toStdString(), *flightManager_);
+        info += QString("Không thể đổi. Hạn đổi: %1.").arg(QString::fromStdString(deadline));
+    }
+    if (info.isEmpty()) {
+        statusLabel_->setText("Sẵn sàng thao tác (Có thể đổi/hủy nếu cần).");
+        statusLabel_->setStyleSheet("color: #27C93F; font-weight:650; ");
+    } else {
+        statusLabel_->setText(info);
+        statusLabel_->setStyleSheet("color: #FF5F57; font-weight:650; ");
+    }
+
+    // Thêm tooltip cho hàng (tùy chọn)
+    // Đặt tooltip lên ô Mã Đặt chỗ để agent thấy nhanh
+    QStandardItem* idItem = model_->item(sel.first().row(), 1);
+    if (idItem) {
+        idItem->setToolTip(info);
+    }
+}
+
+void AdminBookingsPage::setupConnections()
 {
     // 2 nút tìm kiếm
-    connect(searchButton_, &QPushButton::clicked, this, &AdminBookingPage::onSearchByBookingId);
-    connect(searchByPassengerBtn_, &QPushButton::clicked, this, &AdminBookingPage::onSearchByPassengerId);
+    connect(searchButton_, &QPushButton::clicked, this, &AdminBookingsPage::onSearchByBookingId);
+    connect(searchByPassengerBtn_, &QPushButton::clicked, this, &AdminBookingsPage::onSearchByPassengerId);
     
     // Các nút khác
-    connect(refreshButton, &QPushButton::clicked, this, &AdminBookingPage::refreshPage);
-    connect(cancelBookingBtn_, &QPushButton::clicked, this, &AdminBookingPage::onCancelBookingClicked);
-    connect(viewDetailsBtn_, &QPushButton::clicked, this, &AdminBookingPage::onViewDetailsClicked);
-    connect(changeBookingBtn_, &QPushButton::clicked, this, &AdminBookingPage::onChangeBookingClicked);
+    connect(refreshButton, &QPushButton::clicked, this, &AdminBookingsPage::refreshPage);
+    connect(cancelBookingBtn_, &QPushButton::clicked, this, &AdminBookingsPage::onCancelBookingClicked);
+    connect(viewDetailsBtn_, &QPushButton::clicked, this, &AdminBookingsPage::onViewDetailsClicked);
+    connect(changeBookingBtn_, &QPushButton::clicked, this, &AdminBookingsPage::onChangeBookingClicked);
+
+    connect(tableView_->selectionModel(), &QItemSelectionModel::selectionChanged, this, &AdminBookingsPage::onSelectionChanged);
 }
 
 // Hàm này tải (hoặc làm mới) TOÀN BỘ vé của Agent
-void AdminBookingPage::refreshTable()
+void AdminBookingsPage::refreshTable()
 {
     model_->removeRows(0, model_->rowCount());
 
@@ -359,7 +416,7 @@ void AdminBookingPage::refreshTable()
     );
 }
 
-void AdminBookingPage::onCancelBookingClicked()
+void AdminBookingsPage::onCancelBookingClicked()
 {
     // 1. Lấy hàng đang chọn
     QModelIndexList selected = tableView_->selectionModel()->selectedRows();
@@ -384,18 +441,12 @@ void AdminBookingPage::onCancelBookingClicked()
     }
 
     // 3. Check if can cancel (time constraint)
-    if (!bookingManager_->canCancelBooking(bookingId.toStdString(), 
-                                          *flightManager_)) {
+    if (!bookingManager_->canCancelBooking(bookingId.toStdString(), *flightManager_)) {
         QString deadline = QString::fromStdString(
-            bookingManager_->getCancellationDeadline(bookingId.toStdString(), 
-                                                    *flightManager_)
+            bookingManager_->getCancellationDeadline(bookingId.toStdString(), *flightManager_)
         );
-        
         QMessageBox::warning(this, "Không thể hủy", 
-            QString("Không thể hủy vé này.\n\n"
-                   "Lý do: Đã quá hạn hủy vé.\n"
-                   "Hạn hủy: %1\n\n"
-                   "Vui lòng liên hệ bộ phận hỗ trợ.").arg(deadline));
+            QString("Không thể hủy vé này vì đã quá hạn.\nHạn hủy: %1").arg(deadline));
         return;
     }
 
@@ -436,7 +487,7 @@ void AdminBookingPage::onCancelBookingClicked()
     }
 }
 
-void AdminBookingPage::onViewDetailsClicked()
+void AdminBookingsPage::onViewDetailsClicked()
 {
     // 1. Lấy hàng đang chọn
     QModelIndexList selected = tableView_->selectionModel()->selectedRows();
@@ -462,13 +513,13 @@ void AdminBookingPage::onViewDetailsClicked()
     dialog.exec();
 }
 
-void AdminBookingPage::onChangeBookingClicked()
+void AdminBookingsPage::onChangeBookingClicked()
 {
     // 1. Get selected row
     QModelIndexList selected = tableView_->selectionModel()->selectedRows();
     if (selected.isEmpty()) {
         statusLabel_->setText("Vui lòng chọn một vé để đổi!");
-        statusLabel_->setStyleSheet("color: #C62828;"); // Màu đỏ
+        statusLabel_->setStyleSheet("color: #FF5F57;"); // Màu đỏ
         return;
     }
     
@@ -479,7 +530,17 @@ void AdminBookingPage::onChangeBookingClicked()
     // 2. Validate status is Issued
     if (status != "Đang giữ chỗ") {
         statusLabel_->setText("Chỉ có thể đổi vé có trạng thái 'Đang giữ chỗ'.");
-        statusLabel_->setStyleSheet("color: #C62828;"); // Màu đỏ
+        statusLabel_->setStyleSheet("color: #FF5F57;"); // Màu đỏ
+        return;
+    }
+
+    // Kiểm tra luật đổi
+    if (!bookingManager_->canChangeBooking(bookingId.toStdString(), *flightManager_)) {
+        QString deadline = QString::fromStdString(
+            bookingManager_->getChangeDeadline(bookingId.toStdString(), *flightManager_)
+        );
+        QMessageBox::warning(this, "Không thể đổi", 
+            QString("Không thể đổi vé này vì đã quá hạn.\nHạn đổi: %1").arg(deadline));
         return;
     }
     
@@ -498,7 +559,7 @@ void AdminBookingPage::onChangeBookingClicked()
 }
 
 // ========== HÀM HELPER: HIỂN THỊ 1 BOOKING ==========
-void AdminBookingPage::displayBooking(Booking* booking)
+void AdminBookingsPage::displayBooking(Booking* booking)
 {
     if (!booking) return;
     
@@ -536,13 +597,13 @@ void AdminBookingPage::displayBooking(Booking* booking)
 
     if (booking->getStatus() == BookingStatus::Issued) {
         statusStr = "Đang giữ chỗ";
-        statusColor = QColor("#2E7D32"); // Xanh lá đậm
+        statusColor = QColor("#27C93F"); // Xanh lá đậm
     } else if (booking->getStatus() == BookingStatus::Cancelled) {
         statusStr = "Đã hủy";
-        statusColor = QColor("#C62828"); // Đỏ đậm
+        statusColor = QColor("#FF5F57"); // Đỏ đậm
     } else {
         statusStr = "Đã đổi";
-        statusColor = QColor("#F57C00"); // Cam đậm (cho trạng thái khác)
+        statusColor = QColor("#FFBD2E"); // Cam đậm (cho trạng thái khác)
     }
     rowItems << new QStandardItem(statusStr);
     rowItems.last()->setForeground(statusColor);
@@ -554,18 +615,26 @@ void AdminBookingPage::displayBooking(Booking* booking)
     for (QStandardItem *item : rowItems) {
         item->setTextAlignment(Qt::AlignCenter);
     }
-    
+
+    // sau khi tạo rowItems và trước model_->appendRow(rowItems);
+    QString cancelDeadline = QString::fromStdString(
+        bookingManager_->getCancellationDeadline(booking->getBookingId(), *flightManager_));
+    QString changeDeadline = QString::fromStdString(
+        bookingManager_->getChangeDeadline(booking->getBookingId(), *flightManager_));
+    QString tip = QString("Hạn hủy: %1\nHạn đổi: %2").arg(cancelDeadline, changeDeadline);
+    for (QStandardItem *item : rowItems) item->setToolTip(tip);
+
     model_->appendRow(rowItems);
 }
 
 // ========== 1. TÌM THEO MÃ ĐẶT CHỖ ==========
-void AdminBookingPage::onSearchByBookingId()
+void AdminBookingsPage::onSearchByBookingId()
 {
     QString input = bookingIdSearchEdit_->text().trimmed();
     
     if (input.isEmpty()) {
         statusLabel_->setText("Vui lòng nhập mã đặt chỗ cần tìm!");
-        statusLabel_->setStyleSheet("color: #C62828;"); // Màu đỏ
+        statusLabel_->setStyleSheet("color: #FF5F57;"); // Màu đỏ
         return;
     }
     
@@ -579,7 +648,7 @@ void AdminBookingPage::onSearchByBookingId()
     
     if (!booking) {
         statusLabel_->setText("Không tìm thấy vé với mã " + input + "!");
-        statusLabel_->setStyleSheet("color: #C62828;"); // Màu đỏ
+        statusLabel_->setStyleSheet("color: #FF5F57;"); // Màu đỏ
         return;
     }
     
@@ -588,17 +657,17 @@ void AdminBookingPage::onSearchByBookingId()
 
     // ← THÊM: Cập nhật status
     statusLabel_->setText("Tìm thấy 1 vé với mã " + input + "!");
-    statusLabel_->setStyleSheet("color: #2E7D32;"); // Màu xanh lá
+    statusLabel_->setStyleSheet("color: #27C93F;"); // Màu xanh lá
 }
 
 // ========== 2. TÌM THEO CCCD KHÁCH HÀNG ==========
-void AdminBookingPage::onSearchByPassengerId()
+void AdminBookingsPage::onSearchByPassengerId()
 {
     QString input = passengerIdSearchEdit_->text().trimmed();
     
     if (input.isEmpty()) {
         statusLabel_->setText("Vui lòng nhập CCCD khách hàng cần tìm!");
-        statusLabel_->setStyleSheet("color: #C62828;"); // Màu đỏ
+        statusLabel_->setStyleSheet("color: #FF5F57;"); // Màu đỏ
         return;
     }
     
@@ -620,7 +689,7 @@ void AdminBookingPage::onSearchByPassengerId()
     
     if (results.empty()) {
         statusLabel_->setText("Không tìm thấy vé với CCCD " + input + "!");
-        statusLabel_->setStyleSheet("color: #C62828;"); // Màu đỏ
+        statusLabel_->setStyleSheet("color: #FF5F57;"); // Màu đỏ
         return;
     }
     
@@ -636,10 +705,10 @@ void AdminBookingPage::onSearchByPassengerId()
     statusLabel_->setText(
         QString("Tìm thấy %1 vé với CCCD %2").arg(results.size()).arg(input)
     );
-    statusLabel_->setStyleSheet("color: #2E7D32;"); // Màu xanh lá
+    statusLabel_->setStyleSheet("color: #27C93F;"); // Màu xanh lá
 }
 
-void AdminBookingPage::refreshPage() {
+void AdminBookingsPage::refreshPage() {
     PageRefresher::clearSearchFields(this);
     PageRefresher::executeRefresh([this]() {
         refreshTable();

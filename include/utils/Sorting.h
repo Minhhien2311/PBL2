@@ -10,8 +10,11 @@ public:
     // So sánh theo arrivalDate và arrivalTime
     static std::vector<Flight*> sortByArrivalTime(const std::vector<Flight*>& flights);
     
-    // Sắp xếp FlightInstance theo giá vé Economy (từ thấp tới cao)
+    // Sắp xếp FlightInstance theo giá vé Economy (từ thấp tới cao, cao tới thấp ta dùng reverse của thư viện STL algorithm)
     static std::vector<Flight*> sortByPrice(const std::vector<Flight*>& flights);
+
+    // Sắp xếp FlightInstance theo tên Hãng bay (A-Z)
+    static std::vector<Flight*> sortByAirline(const std::vector<Flight*>& flights);
 
 private:
     // Helper function để so sánh thời gian
@@ -32,6 +35,10 @@ private:
     // Quick Sort helpers cho sắp xếp theo giá
     static void quickSortByPrice(std::vector<Flight*>& arr, int low, int high);
     static int partitionByPrice(std::vector<Flight*>& arr, int low, int high);
+
+    // Quick Sort helpers cho sắp xếp theo hãng bay
+    static void quickSortByAirline(std::vector<Flight*>& arr, int low, int high);
+    static int partitionByAirline(std::vector<Flight*>& arr, int low, int high);
 };
 
 #endif

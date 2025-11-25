@@ -185,7 +185,7 @@ QGridLayout* BookingDetailsDialog::createBookingInfoLayout()
                         ? "Đang giữ chỗ" : 
                       (booking_->getStatus() == BookingStatus::Cancelled) ? "Đã hủy" : "Đã đổi";
     QString statusColor = (booking_->getStatus() == BookingStatus::Issued) 
-                          ? "#2E7D32" : (booking_->getStatus() == BookingStatus::Cancelled) ? "#C62828" : "#F57C00";
+                          ? "#27C93F" : (booking_->getStatus() == BookingStatus::Cancelled) ? "#FF5F57" : "#FFBD2E";
     addInfoRow(layout, row++, "Trạng thái", statusStr, true, statusColor);
     
     return layout;
@@ -215,7 +215,7 @@ QGridLayout* BookingDetailsDialog::createFlightInfoLayout()
                 .arg(QString::fromStdString(route->getArrivalAirport()));
             addInfoRow(layout, row++, "Lộ trình", routeStr, false, "#2A5A8A");
         } else {
-            addInfoRow(layout, row++, "Lộ trình", "Không xác định", false, "#C62828");
+            addInfoRow(layout, row++, "Lộ trình", "Không xác định", false, "#FF5F57");
         }
         
         QString departureStr = QString("%1 %2")
@@ -229,7 +229,7 @@ QGridLayout* BookingDetailsDialog::createFlightInfoLayout()
         addInfoRow(layout, row++, "Thời gian hạ cánh (dự kiến)", arrivalStr, false, "#2A5A8A");
         
     } else {
-        addInfoRow(layout, row++, "Lỗi", "Không tìm thấy thông tin chuyến bay", false, "#C62828");
+        addInfoRow(layout, row++, "Lỗi", "Không tìm thấy thông tin chuyến bay", false, "#FF5F57");
     }
     
     return layout;

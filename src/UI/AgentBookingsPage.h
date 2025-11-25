@@ -17,6 +17,8 @@ class QPushButton;
 class AirportComboBox;
 class Booking;
 class QLabel;
+class QItemSelection;
+class QModelIndex;
 
 class AgentBookingsPage : public QWidget
 {
@@ -42,6 +44,8 @@ private slots:
     void onCancelBookingClicked(); // Hủy vé
     void onViewDetailsClicked(); // Xem chi tiết vé
     void onChangeBookingClicked(); // Đổi vé
+
+    void onSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 
 private:
     void setupUi();

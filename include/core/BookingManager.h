@@ -70,6 +70,9 @@ public:
                        const std::string& newSeatNumber,
                        BookingClass newClass);
 
+    bool canChangeBooking(const std::string& bookingId, FlightManager& flightManager) const;
+    std::string getChangeDeadline(const std::string& bookingId, FlightManager& flightManager) const;
+
     // --- Tìm kiếm  ---
     Booking* findBookingById(const std::string& bookingId);
     std::vector<Booking*> findBookingsByPassengerId(const std::string& passengerId);

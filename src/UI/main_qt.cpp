@@ -8,6 +8,7 @@
 #include "core/ReportManager.h"
 #include "core/AirportManager.h"
 #include "core/PassengerManager.h"  // ✅ THÊM: PassengerManager
+#include "entities/FlightRule.h"   // ✅ THÊM: FlightRule
 
 #include <iostream>
 #include <exception>
@@ -16,10 +17,12 @@ int main(int argc, char *argv[]) {
     try {
         QApplication app(argc, argv);
 
+        FlightRule* flightRule = FlightRule::loadFromFile("C:/PBL2/data/flight_rules.txt");
+
         // --- TẠO CÁC MANAGER ---
         AccountManager accountManager("C:/PBL2/data/admins.txt", "C:/PBL2/data/agents.txt");
         FlightManager flightManager("C:/PBL2/data/routes.txt", "C:/PBL2/data/flights.txt");
-        BookingManager bookingManager("C:/PBL2/data/bookings.txt", nullptr); 
+        BookingManager bookingManager("C:/PBL2/data/bookings.txt", flightRule); 
         ReportManager reportManager(accountManager, bookingManager);
         AirportManager airportManager("C:/PBL2/data/airports.txt");
         // ✅ THÊM: Khởi tạo PassengerManager
@@ -44,6 +47,5 @@ int main(int argc, char *argv[]) {
     catch (...) {
         std::cerr << "[EXCEPTION] Unknown exception!" << std::endl;
     }
-
     return -1;
 }

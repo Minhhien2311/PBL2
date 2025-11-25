@@ -429,9 +429,7 @@ bool BookingManager::canCancelBooking(const std::string& bookingId,
 }
 
 // Get cancellation deadline for a booking
-std::string BookingManager::getCancellationDeadline(
-    const std::string& bookingId,
-    FlightManager& flightManager) const 
+std::string BookingManager::getCancellationDeadline( const std::string& bookingId, FlightManager& flightManager) const 
 { 
     Booking* booking = const_cast<BookingManager*>(this)->findBookingById(bookingId);
     if (!booking) return "N/A";
@@ -452,6 +450,60 @@ std::string BookingManager::getCancellationDeadline(
     
     // Subtract minimum cancellation hours
     auto deadline = departureTime - std::chrono::hours(currentRule->getCancelCutoffHours());
+    
+    return utils::DateTime::formatLocal(deadline, "%d/%m/%Y %H:%M");
+}
+
+bool BookingManager::canChangeBooking(const std::string& bookingId, FlightManager& flightManager) const {
+    Booking* booking = const_cast<BookingManager*>(this)->findBookingById(bookingId);
+    if (!booking || booking->getStatus() != BookingStatus::Issued) {
+        return false;
+    }
+    
+    if (!currentRule || !currentRule->isChangeAllowed()) {
+        return false;
+    }
+    
+    // <-- ĐÃ ĐỔI TÊN HÀNG LOẠT Ở ĐÂY
+    Flight* flight = flightManager.findFlightById(
+        booking->getFlightId()
+    );
+    if (!flight) return false;
+    
+    auto departureTime = utils::DateTime::fromDmYHm(
+        flight->getDepartureDate(), 
+        flight->getDepartureTime()
+    );
+    auto now = utils::DateTime::nowUtc();
+    auto duration = std::chrono::duration_cast<std::chrono::hours>(
+        departureTime - now
+    );
+    
+    return currentRule->isChangeable(duration.count());
+}
+
+std::string BookingManager::getChangeDeadline(
+    const std::string& bookingId,
+    FlightManager& flightManager) const 
+{ 
+    Booking* booking = const_cast<BookingManager*>(this)->findBookingById(bookingId);
+    if (!booking) return "N/A";
+    
+    Flight* flight = flightManager.findFlightById(
+        booking->getFlightId()
+    );
+    if (!flight) return "N/A";
+    
+    if (!currentRule) return "N/A";
+    
+    // Get departure time
+    auto departureTime = utils::DateTime::fromDmYHm(
+        flight->getDepartureDate(), 
+        flight->getDepartureTime()
+    );
+    
+    // Subtract minimum change hours
+    auto deadline = departureTime - std::chrono::hours(currentRule->getChangeCutoffHours());
     
     return utils::DateTime::formatLocal(deadline, "%d/%m/%Y %H:%M");
 }

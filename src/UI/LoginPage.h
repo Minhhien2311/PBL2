@@ -7,18 +7,21 @@ class QLineEdit;
 class QCheckBox;
 class QPushButton;
 class QLabel;
-class AccountManager; // <--- Sửa lỗi: Khai báo sớm (Forward declare)
+class AccountManager;
 
 class LoginPage : public QWidget
 {
     Q_OBJECT 
 
 public:
-    // <--- Sửa lỗi: Constructor nhận AccountManager
     explicit LoginPage(AccountManager* accManager, QWidget *parent = nullptr);
 
 signals:
+    // Tín hiệu báo đăng nhập thành công
     void loginSuccess(const QString& role, const QString& token);
+    
+    // Tín hiệu yêu cầu chuyển sang trang Quên mật khẩu
+    void forgotPasswordClicked();
 
 private slots:
     void onLoginClicked();
@@ -37,9 +40,7 @@ private:
     QLabel* forgotPasswordLabel_;
     QLabel* NotiLabel;
 
-    // <--- Sửa lỗi: Thêm con trỏ tới Manager
     AccountManager* accountManager_; 
 };
 
 #endif // LOGINPAGE_H
-

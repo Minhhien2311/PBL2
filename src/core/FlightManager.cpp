@@ -2,7 +2,12 @@
 #include "core/SeatManager.h"
 #include <fstream>
 #include <string>
+#include <climits>
 #include <sstream>
+#include "utils/DateTime.h"
+#include <algorithm>
+#include <iterator>
+#include <ctime>
 
 // --- Constructor & Destructor ---
 
@@ -76,7 +81,13 @@ void FlightManager::loadFlightsFromFile(const std::string& filePath) {
         while (std::getline(file, line)) {
             if (!line.empty()) {
                 Flight flightOnStack = Flight::fromRecordLine(line);
-                this->allFlights.push_back(new Flight(flightOnStack));
+                // Create heap object and store pointer
+                Flight* p = new Flight(flightOnStack);
+                this->allFlights.push_back(p);
+                // Maintain id table
+                this->flightIdTable.insert(p->getFlightId(), p);
+                // Index this flight by time (AVL)
+                addFlightToTimeIndex(p);
             }
         }
         file.close();
@@ -240,6 +251,9 @@ bool FlightManager::createNewFlight(const std::string& routeId,
         delete newFlight;
         return false;
     }
+
+    // Add to time index (AVL)
+    addFlightToTimeIndex(newFlight);
     
     return true;
 }
@@ -396,9 +410,15 @@ bool FlightManager::updateFlight(const std::string& flightId,
     Flight* oldFlight = findFlightById(flightId);
     if (!oldFlight) return false;
     
+    // Save old time key BEFORE changing object
+    time_t oldKey = getFlightTimeKey(*oldFlight);
+    
     std::string oldRouteId = oldFlight->getRouteId();
     *oldFlight = updatedFlight;
     updateFlightInRouteIndex(oldFlight, oldRouteId);
+
+    // Move id in time index if departure time changed
+    moveFlightTimeIndex(oldFlight, oldKey);
     
     return true;
 }
@@ -408,6 +428,9 @@ bool FlightManager::deleteFlight(const std::string& flightId) {
         if (allFlights[i]->getFlightId() == flightId) {
             Flight* flightToDelete = allFlights[i];
             
+            // Remove from time index first
+            removeFlightFromTimeIndex(flightToDelete);
+
             removeFlightFromRouteIndex(flightToDelete);
             flightIdTable.remove(flightId);
             delete flightToDelete;
@@ -582,13 +605,23 @@ std::vector<Flight*> FlightManager::filterByPriceRangeAVL(
     return filterByPriceRange(flights, minPrice, maxPrice);
 }
 
-std::vector<Flight*> FlightManager::searchFlights(
-    const SearchCriteria& criteria) const 
+std::vector<Flight*> FlightManager::searchFlights( const SearchCriteria& criteria) const 
 {
-    std::vector<Flight*> results = 
-        getFlightsByRoute(criteria.fromIATA, criteria.toIATA);
+    std::vector<Flight*> results = getAllFlights();
     
     if (results.empty()) return results;
+
+    if (!criteria.fromIATA.empty() && !criteria.toIATA.empty()) {
+        std::vector<Flight*> routeFiltered;
+        for (Flight* flight : results) {
+            Route* route = findRouteById(flight->getRouteId());
+            if (route && route->getDepartureAirport() == criteria.fromIATA &&
+                route->getArrivalAirport() == criteria.toIATA) {
+                routeFiltered.push_back(flight);
+            }
+        }
+        results = routeFiltered;
+    }
     
     if (!criteria.date.empty()) {
         results = filterByDate(results, criteria.date);
@@ -607,4 +640,117 @@ std::vector<Flight*> FlightManager::searchFlights(
     }
     
     return results;
+}
+
+// --- Time index helpers (AVL) ---
+
+time_t FlightManager::getFlightTimeKey(const Flight& flight) const {
+    // Use DateTime helper to parse dd/MM/yyyy and HH:MM
+    auto tp = utils::DateTime::fromDmYHm(flight.getDepartureDate(), flight.getDepartureTime());
+    return utils::DateTime::toUnix(tp);
+}
+
+void FlightManager::addFlightToTimeIndex(Flight* flight) {
+    if (!flight) return;
+    time_t key = getFlightTimeKey(*flight);
+    std::vector<std::string>* existing = flightTimeTree.find(key);
+    if (existing) {
+        // ensure not duplicate
+        if (std::find(existing->begin(), existing->end(), flight->getFlightId()) == existing->end()) {
+            existing->push_back(flight->getFlightId());
+        }
+    } else {
+        std::vector<std::string> list;
+        list.push_back(flight->getFlightId());
+        flightTimeTree.insert(key, list); // AVL will copy the vector
+    }
+}
+
+void FlightManager::removeFlightFromTimeIndexByKey(time_t key, const std::string& flightId) {
+    std::vector<std::string>* existing = flightTimeTree.find(key);
+    if (!existing) return;
+    auto it = std::find(existing->begin(), existing->end(), flightId);
+    if (it != existing->end()) {
+        existing->erase(it);
+        if (existing->empty()) {
+            flightTimeTree.remove(key);
+        }
+    }
+}
+
+void FlightManager::removeFlightFromTimeIndex(Flight* flight) {
+    if (!flight) return;
+    time_t key = getFlightTimeKey(*flight);
+    removeFlightFromTimeIndexByKey(key, flight->getFlightId());
+}
+
+void FlightManager::moveFlightTimeIndex(Flight* flight, time_t oldKey) {
+    if (!flight) return;
+    time_t newKey = getFlightTimeKey(*flight);
+    if (oldKey == newKey) return; // nothing changed
+    // Remove from old key
+    removeFlightFromTimeIndexByKey(oldKey, flight->getFlightId());
+    // Add to new key
+    addFlightToTimeIndex(flight);
+}
+
+// Existing function (kept for compatibility) — now delegates to addFlightToTimeIndex
+void FlightManager::indexFlightTime(const Flight& flight) {
+    // Find the Flight* in flightIdTable if it exists
+    Flight** pptr = flightIdTable.find(flight.getFlightId());
+    if (pptr && *pptr) {
+        addFlightToTimeIndex(*pptr);
+    } else {
+        // fallback: create a temporary vector under the key (rare)
+        time_t key = getFlightTimeKey(flight);
+        std::vector<std::string>* existing = flightTimeTree.find(key);
+        if (existing) {
+            if (std::find(existing->begin(), existing->end(), flight.getFlightId()) == existing->end()) {
+                existing->push_back(flight.getFlightId());
+            }
+        } else {
+            std::vector<std::string> list;
+            list.push_back(flight.getFlightId());
+            flightTimeTree.insert(key, list);
+        }
+    }
+}
+
+std::vector<Flight*> FlightManager::getFutureFlights(bool onlyFuture) {
+    std::vector<std::string> flightIds;
+    
+    if (onlyFuture) {
+        // === LOGIC CHO AGENT (FILTER MODE) ===
+        time_t now = utils::DateTime::toUnix(utils::DateTime::nowUtc());
+        time_t farFuture = std::numeric_limits<time_t>::max();
+        
+        // Dùng AVL Range Query: O(log N + K) - Cực nhanh!
+        std::vector<std::vector<std::string>> nestedResult = 
+            flightTimeTree.rangeQuery(now, farFuture);
+        
+        // Flatten kết quả
+        for (const auto& listIds : nestedResult) {
+            flightIds.insert(flightIds.end(), listIds.begin(), listIds.end());
+        }
+    } else {
+        // === LOGIC CHO ADMIN (SHOW ALL MODE) ===
+        std::vector<std::vector<std::string>> nestedResult = 
+            flightTimeTree.getAllValues();
+        
+        // Flatten kết quả
+        for (const auto& listIds : nestedResult) {
+            flightIds.insert(flightIds.end(), listIds.begin(), listIds.end());
+        }
+    }
+    
+    // Chuyển từ ID sang Flight*
+    std::vector<Flight*> result;
+    for (const std::string& id : flightIds) {
+        Flight* flight = findFlightById(id);
+        if (flight) {
+            result.push_back(flight);
+        }
+    }
+    
+    return result;
 }

@@ -50,6 +50,8 @@ public:
     
     // Tạo đối tượng FlightRule từ 1 dòng string đọc từ file.
     static FlightRule fromRecordLine(const std::string& line);
+
+    static FlightRule* loadFromFile(const std::string& filePath);
 };
 
 #endif

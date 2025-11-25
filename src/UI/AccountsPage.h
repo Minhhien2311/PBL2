@@ -2,34 +2,50 @@
 #define ACCOUNTSPAGE_H
 
 #include <QWidget>
-#include <qpushbutton.h>
+#include <QPushButton>
+#include <QLineEdit>
+#include <QLabel>
 #include <QShowEvent>
 
-class AccountManager; // <--- Sửa lỗi: Khai báo sớm
-class QLineEdit;      // <--- Sửa lỗi: Khai báo sớm
+class AccountManager;
 
 class AccountsPage : public QWidget {
     Q_OBJECT 
 public:
-    // <--- Sửa lỗi: Constructor nhận AccountManager
-    explicit AccountsPage(AccountManager* accManager, QWidget* parent=nullptr);
+    explicit AccountsPage(AccountManager* accManager, QWidget* parent = nullptr);
+
 protected:
     void showEvent(QShowEvent *event) override;
     
 private:
-    AccountManager* accountManager_; // <--- Sửa lỗi: Thêm con trỏ
+    AccountManager* accountManager_;
 
-    // <--- Sửa lỗi: Thêm con trỏ UI làm biến thành viên
+    // --- Section 1: Thông tin tài khoản ---
     QLineEdit* idEdit_;
-    QLineEdit* userEdit_;
-    QLineEdit* roleEdit_;
     QLineEdit* fullnameEdit_;
+    QLineEdit* userEdit_;     // Tên đăng nhập
     QLineEdit* phoneEdit_;
+    QLineEdit* roleEdit_;
     QLineEdit* emailEdit_;
-    QPushButton* btnUpdate_;
+    QPushButton* btnUpdateInfo_; // Nút "Sửa thông tin" / "Lưu thông tin"
 
-    void loadAccountData(); // Hàm helper để tải/làm mới
+    // --- Section 2: Đổi mật khẩu (Inline) ---
+    QLineEdit* currentPassEdit_;
+    QLineEdit* newPassEdit_;
+    QLineEdit* confirmPassEdit_;
+    QPushButton* btnChangePass_; // Nút "Đổi mật khẩu"
+
+    // Helper functions
+    void setupUi();
+    void setupConnections();
+    void loadAccountData(); 
+    
+    // Hàm helper tạo widget con (Label ở trên, Input ở dưới)
+    QWidget* createFieldWidget(const QString& labelText, QWidget* inputWidget, bool isMandatory = false);
+    
+    // Hàm xử lý logic
+    void onUpdateInfoClicked();
+    void onChangePasswordClicked();
 };
 
 #endif // ACCOUNTSPAGE_H
-

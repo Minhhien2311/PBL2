@@ -138,19 +138,19 @@ void RouteDialog::onAccept()
 
     if (fromIATA.empty()) {
         statusLabel_->setText("Vui lòng chọn điểm đi!");
-        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
+        statusLabel_->setStyleSheet("color: #FF5F57; font-size: 13px; font-weight: 650;");
         valid = false;
     }
 
     if (toIATA.empty()) {
         statusLabel_->setText("Vui lòng chọn điểm đến!");
-        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
+        statusLabel_->setStyleSheet("color: #FF5F57; font-size: 13px; font-weight: 650;");
         valid = false;
     }
 
     if (fromIATA == toIATA) {
         statusLabel_->setText("Điểm đi và điểm đến phải khác nhau!");
-        statusLabel_->setStyleSheet("color: #C62828; font-size: 13px; font-weight: 650;");
+        statusLabel_->setStyleSheet("color: #FF5F57; font-size: 13px; font-weight: 650;");
         valid = false;
     }
 

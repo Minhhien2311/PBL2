@@ -9,7 +9,7 @@
 #include "PromotionsPage.h"          // Tạo mới - placeholder
 #include "AgentListPage.h"           // Tạo mới - placeholder
 #include "PageRefresher.h"
-#include "AdminBookingPage.h"       // Mới
+#include "AdminBookingsPage.h"       // Mới
 
 #include "core/AccountManager.h"
 #include "core/FlightManager.h"
@@ -197,7 +197,7 @@ AdminInterface::AdminInterface(AccountManager* accManager,
     stack_->addWidget(new DashboardPage(accountManager_, reportManager_, this)); // 0
     stack_->addWidget(new RoutesPage(flightManager_, airportManager_, this));   // 1
     stack_->addWidget(new FlightsPage(flightManager_, airportManager_, this));  // 2
-    stack_->addWidget(new AdminBookingPage(bookingManager_, flightManager_, accountManager_, airportManager_, passengerManager_, this)); // 3
+    stack_->addWidget(new AdminBookingsPage(bookingManager_, flightManager_, accountManager_, airportManager_, passengerManager_, this)); // 3
     stack_->addWidget(new FlightRulesPage(flightManager_, this));               // 4 - placeholder
     stack_->addWidget(new PromotionsPage(this));                                // 5 - placeholder
     stack_->addWidget(new AdminTicketsReportPage(accountManager_, bookingManager_, reportManager_, this)); // 6

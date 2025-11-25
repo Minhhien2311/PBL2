@@ -1,9 +1,8 @@
 #include "LoginPage.h"
-
 #include "core/AccountManager.h"
 #include "entities/AccountAdmin.h"
-#include "ForgotPasswordDialog.h"
-#include <QLabel>
+
+#include <QLabel> 
 #include <QLineEdit>
 #include <QPushButton>
 #include <QCheckBox>
@@ -187,6 +186,7 @@ void LoginPage::onLoginClicked()
 
     if (username.isEmpty() || password.isEmpty()) {
         NotiLabel->setText("Vui lòng nhập đầy đủ thông tin.");
+        NotiLabel->setVisible(true);
         return;
     }
 
@@ -217,21 +217,6 @@ void LoginPage::onShowPasswordToggled(bool checked)
 
 void LoginPage::onForgotPasswordClicked()
 {
-    ForgotPasswordDialog dialog(this);
-    
-    if (dialog.exec() == QDialog::Accepted) {
-        QString email = dialog.getEmail();
-        QString newPassword = dialog.getNewPassword();
-        
-        // Gọi AccountManager để reset password
-        bool success = accountManager_->resetPassword(email.toStdString(), newPassword.toStdString());
-        
-        if (success) {
-            QMessageBox::information(this, tr("Thành công"), 
-                                   tr("Đặt lại mật khẩu thành công!\nBạn có thể đăng nhập với mật khẩu mới."));
-        } else {
-            QMessageBox::warning(this, tr("Lỗi"), 
-                               tr("Không tìm thấy tài khoản với email này hoặc có lỗi xảy ra."));
-        }
-    }
+    // Bắn tín hiệu ra ngoài để MainWindow (hoặc AppController) chuyển trang
+    emit forgotPasswordClicked();
 }

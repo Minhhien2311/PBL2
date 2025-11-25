@@ -1,4 +1,6 @@
 #include "SearchBookPage.h"
+#include "utils/Sorting.h"
+#include "utils/DateTime.h"
 
 // Core & entities
 #include "core/FlightManager.h"
@@ -26,6 +28,7 @@
 #include <QHeaderView>
 #include <QMessageBox>
 #include <QInputDialog>
+#include <QTimer> // Required for QTimer
 #include <QCalendarWidget>
 #include <QComboBox>
 #include <QIntValidator>
@@ -195,7 +198,7 @@ void SearchBookPage::setupUi()
 
     // Date picker (Dùng QLineEdit)
     dateSearchEdit_ = new QLineEdit(this);
-    dateSearchEdit_->setPlaceholderText("dd/MM/yyyy"); // Gợi ý định dạng
+    dateSearchEdit_->setPlaceholderText("DD/MM/YYYY"); // Gợi ý định dạng
     dateSearchEdit_->setMinimumHeight(36);
     filterLayout->addWidget(dateSearchEdit_, 1, 2);
 
@@ -252,7 +255,14 @@ void SearchBookPage::setupUi()
 
     // Thêm layout vào searchBox
     searchBoxLayout->addLayout(filterLayout);
-    
+
+    // Warning label for input errors
+    warningLabel_ = new QLabel(this);
+    warningLabel_->setStyleSheet("color: #FF0000; font-size: 11px; font-weight: 500; border: none; background: transparent;");
+    searchBoxLayout->addWidget(warningLabel_);
+    // Mặc định ẩn
+    warningLabel_->setVisible(false);
+
     // Thêm searchBox vào topLayout
     topLayout->addWidget(searchBox);
 
@@ -276,7 +286,38 @@ void SearchBookPage::setupUi()
     // 2. Lò xo đẩy nút sang phải
     thLayout->addStretch();
 
-    // 3. Nút Đặt vé
+    // 3. Nút chọn tiêu chí sắp xếp
+    sortingCombo_ = new QComboBox(this);
+    sortingCombo_->setStyleSheet(
+        "QComboBox { "
+        "   background: white; "
+        "   border: 1px solid #1e3e87; "
+        "   border-radius: 2px; "
+        "   height: 20px; "
+        "   padding-left: 6px; "
+        "}"
+        // Style cho phần danh sách xổ xuống
+        "QComboBox QAbstractItemView { "
+        "   background-color: white; "
+        "   border: 1px solid #1e3e87; "
+        "   selection-background-color: #4472C4; " // Màu nền khi di chuột vào item
+        "   selection-color: white; "              // Màu chữ khi di chuột vào item
+        "   outline: 0px; "                        // Bỏ đường viền nét đứt
+        "}"
+    );
+
+    sortingCombo_->setCursor(Qt::PointingHandCursor);
+    
+    // Thêm các lựa chọn sắp xếp
+    sortingCombo_->addItem("Sắp xếp mặc định");
+    sortingCombo_->addItem("Giá: Thấp đến Cao");
+    sortingCombo_->addItem("Giá: Cao đến Thấp");
+    sortingCombo_->addItem("Giờ bay: Sớm nhất");
+    sortingCombo_->addItem("Hãng bay: A-Z");
+
+    thLayout->addWidget(sortingCombo_);
+
+    // 4. Nút Đặt vé
     bookButton_ = new QPushButton("Đặt vé cho chuyến đã chọn", this);
     bookButton_->setCursor(Qt::PointingHandCursor);
 
@@ -350,6 +391,9 @@ void SearchBookPage::setupConnections()
 {
     // đặt vé
     connect(bookButton_, &QPushButton::clicked, this, &SearchBookPage::onBookClicked);
+    // Kết nối tín hiệu thay đổi lựa chọn
+    connect(sortingCombo_, QOverload<int>::of(&QComboBox::currentIndexChanged), 
+            this, &SearchBookPage::onSortChanged);
 }
 
 // ================ CHỖ NẠP DỮ LIỆU VÀO BẢNG ================
@@ -391,23 +435,36 @@ void SearchBookPage::onSearchClicked()
     FlightManager::SearchCriteria criteria;
     criteria.fromIATA = fromSearchCombo_->getSelectedIATA();
     criteria.toIATA = toSearchCombo_->getSelectedIATA();
-    
-    if (criteria.fromIATA.empty() || criteria.toIATA.empty()) {
-        QMessageBox::warning(this, "Lỗi", "Vui lòng chọn điểm đi và điểm đến");
-        return;
+
+    // --- LOGIC MỚI: BẮT BUỘC CẢ 2 HOẶC KHÔNG CẦN CẢ 2 ---
+    bool hasFrom = !criteria.fromIATA.empty();
+    bool hasTo = !criteria.toIATA.empty();
+
+    // Nếu chỉ có From mà thiếu To, hoặc chỉ có To mà thiếu From
+    if (hasFrom != hasTo) {
+        warningLabel_->setText("Vui lòng chọn cả điểm đi và điểm đến để tìm kiếm.");
+        warningLabel_->setVisible(true);
+        QTimer::singleShot(4000, [this]() {
+            warningLabel_->setVisible(false);
+        });
+        return; // Dừng lại, không tìm kiếm
     }
     
     // Date (optional) - chỉ filter nếu user chọn ngày cụ thể - Xử lý nhập text
     QString dateText = dateSearchEdit_->text().trimmed();
     if (!dateText.isEmpty()) {
         // Ép kiểu chuỗi nhập vào thành QDate
-        QDate selectedDate = QDate::fromString(dateText, "DD/MM/YYYY");
+        QDate selectedDate = QDate::fromString(dateText, "dd/MM/yyyy");
 
         if (selectedDate.isValid()) {
             criteria.date = selectedDate.toString("dd/MM/yyyy").toStdString();
         } else {
             // Nếu nhập sai định dạng (ví dụ nhập chữ linh tinh)
-            QMessageBox::warning(this, "Lỗi ngày", "Vui lòng nhập ngày đúng định dạng: ngày/tháng/năm (ví dụ: 25/12/2025)");
+            warningLabel_->setText("Vui lòng nhập ngày đúng định dạng: ngày/tháng/năm (ví dụ: 25/12/2025)");
+            warningLabel_->setVisible(true);
+            QTimer::singleShot(4000, [this]() {
+                warningLabel_->setVisible(false);
+            });
             return; // Dừng tìm kiếm
         }
     }
@@ -439,13 +496,30 @@ void SearchBookPage::onSearchClicked()
     
     // Search with criteria
     auto results = flightManager_->searchFlights(criteria);
+
+    // LỌC THÊM CHỈ LẤY CHUYẾN TƯƠNG LAI
+    time_t now = utils::DateTime::toUnix(utils::DateTime::nowUtc());
+    std::vector<Flight*> futureResults;
     
+    for (Flight* flight : results) {
+        time_t flightTime = utils::DateTime::toUnix(
+            utils::DateTime::fromDmYHm(
+                flight->getDepartureDate(), 
+                flight->getDepartureTime()
+            )
+        );
+        if (flightTime >= now) {
+            futureResults.push_back(flight);
+        }
+    }
+    
+    currentFlights_ = futureResults;
     // Display results
-    fillTable(results);
+    fillTable(futureResults);
     
     // Update status
     statusLabel_->setText(
-        QString("🔍 Tìm thấy %1 chuyến bay").arg(results.size())
+        QString("Tìm thấy %1 chuyến bay").arg(futureResults.size())
     );
 }
 
@@ -484,8 +558,10 @@ void SearchBookPage::onBookClicked()
 
 void SearchBookPage::loadAllFlights()
 {
-    // Get all flight flights (giống FlightsPage)
-    const std::vector<Flight*>& flights = flightManager_->getAllFlights();
+    // CHỈ LẤY CHUYẾN TƯƠNG LAI (onlyFuture = true)
+    const std::vector<Flight*> flights = flightManager_->getFutureFlights(true);
+    // LƯU KẾT QUẢ VÀO BIẾN THÀNH VIÊN
+    currentFlights_ = flights;
     
     // Display them in the table
     fillTable(flights); // Use the correct type for fillTable
@@ -494,6 +570,43 @@ void SearchBookPage::loadAllFlights()
     statusLabel_->setText(
         QString("Hiển thị tất cả %1 chuyến bay").arg(flights.size())
     );
+}
+
+// LOGIC CHO HÀM SORT
+void SearchBookPage::onSortChanged(int index)
+{
+    if (currentFlights_.empty()) return;
+
+    std::vector<Flight*> sortedList;
+
+    switch(index) {
+        case 0: // Mặc định (Theo ID hoặc thứ tự gốc)
+            // Load lại theo thứ tự search ban đầu
+            sortedList = currentFlights_; 
+            break;
+
+        case 1: // Giá: Thấp đến Cao
+            sortedList = Sorting::sortByPrice(currentFlights_);
+            break;
+
+        case 2: // Giá: Cao đến Thấp
+            // Sorting::sortByPrice trả về Thấp->Cao, ta đảo ngược vector lại
+            sortedList = Sorting::sortByPrice(currentFlights_);
+            std::reverse(sortedList.begin(), sortedList.end());
+            break;
+
+        case 3: // Giờ đi: Sớm nhất
+            sortedList = Sorting::sortByArrivalTime(currentFlights_); 
+            // Lưu ý: Hàm của bạn tên là sortByArrivalTime nhưng logic check cả Date+Time nên dùng cho Departure cũng ổn nếu chỉ so sánh thời gian.
+            // Nếu bạn muốn chính xác là DepartureTime, hãy đảm bảo logic compareDateTime dùng getDepartureDate/Time.
+            break;
+        case 4: // Hãng bay: A-Z
+            sortedList = Sorting::sortByAirline(currentFlights_);
+            break;
+    }
+
+    // Hiển thị lại bảng với danh sách đã sắp xếp
+    fillTable(sortedList);
 }
 
 void SearchBookPage::refreshPage() {
