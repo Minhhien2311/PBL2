@@ -552,7 +552,7 @@ void AdminBookingsPage::onChangeBookingClicked()
     }
     
     // 4. Open ChangeBookingDialog
-    ChangeBookingDialog dialog(booking, bookingManager_, flightManager_, this);
+    ChangeBookingDialog dialog(booking, bookingManager_, flightManager_, airportManager_, this);
     if (dialog.exec() == QDialog::Accepted) {
         refreshTable();
     }

@@ -17,6 +17,7 @@ class Flight;
 class FlightManager;
 class BookingManager;
 class SeatManager;
+class AirportManager;
 
 class ChangeBookingDialog : public QDialog
 {
@@ -26,6 +27,7 @@ public:
     explicit ChangeBookingDialog(Booking* currentBooking,
                                  BookingManager* bookingManager,
                                  FlightManager* flightManager,
+                                 AirportManager* airportManager,
                                  QWidget *parent = nullptr);
     ~ChangeBookingDialog() override = default;
 
@@ -65,6 +67,7 @@ private:
     Booking* currentBooking_;
     BookingManager* bookingManager_;
     FlightManager* flightManager_;
+    AirportManager* airportManager_;
     
     Flight* currentFlight_;
     Flight* selectedNewFlight_;

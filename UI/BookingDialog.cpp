@@ -6,6 +6,7 @@
 #include "core/AccountManager.h"
 #include "core/SeatManager.h"
 #include "core/PassengerManager.h"
+#include "core/AirportManager.h"
 #include "entities/Seat.h"
 #include "entities/Account.h"
 #include "utils/DateTime.h"
@@ -53,6 +54,7 @@ BookingDialog::BookingDialog(Flight* flight,
                              BookingManager* bookingManager,
                              AccountManager* accountManager,
                              PassengerManager* passengerManager,
+                             AirportManager* airportManager,
                              QWidget *parent)
     : QDialog(parent),
       flight_(flight),
@@ -60,6 +62,7 @@ BookingDialog::BookingDialog(Flight* flight,
       bookingManager_(bookingManager),
       accountManager_(accountManager),
       passengerManager_(passengerManager),
+      airportManager_(airportManager),
       seatMapContainer_(nullptr),
       seatMapLayout_(nullptr),
       selectedSeatId_("")
@@ -342,7 +345,9 @@ void BookingDialog::setupPage1_FlightInfo() {
         gridLayout->addWidget(val, row, 1, Qt::AlignRight);
     };
 
-    addRow(0, "Lộ trình bay", "TP. Hồ Chí Minh → TP. Hà Nội");
+    Route* route = flightManager_->findRouteById(flight_->getRouteId());
+
+    addRow(0, "Lộ trình bay", QString::fromStdString(airportManager_->getDisplayName(route->getDepartureAirport()) + " → " + airportManager_->getDisplayName(route->getArrivalAirport())));
     addRow(1, "Hãng hàng không", QString::fromStdString(flight_->getAirline()));
     addRow(2, "Số hiệu chuyến bay", QString::fromStdString(flight_->getFlightNumber()));
     addRow(3, "Ngày khởi hành", QString::fromStdString(flight_->getDepartureDate()));

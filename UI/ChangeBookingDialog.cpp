@@ -3,6 +3,7 @@
 #include "entities/Flight.h"
 #include "core/FlightManager.h"
 #include "core/BookingManager.h"
+#include "core/AirportManager.h"
 #include "core/SeatManager.h"
 #include "entities/Seat.h"
 
@@ -65,11 +66,13 @@ ChangeBookingDialog::ChangeBookingDialog(
         Booking* currentBooking,
         BookingManager* bookingManager,
         FlightManager* flightManager,
+        AirportManager* airportManager,
         QWidget *parent)
     : QDialog(parent),
       currentBooking_(currentBooking),
       bookingManager_(bookingManager),
       flightManager_(flightManager),
+      airportManager_(airportManager),
       currentFlight_(nullptr),
       selectedNewFlight_(nullptr),
       currentStep_(1),
@@ -726,9 +729,10 @@ void ChangeBookingDialog::onSearchByIdClicked()
     }
 
     selectedNewFlight_ = f;
+    Route* route = flightManager_->findRouteById(f->getRouteId());
 
     QStringList values = {
-        QString::fromStdString(f->getRouteId()),
+        QString::fromStdString(airportManager_->getDisplayName(route->getDepartureAirport()) + " → " + airportManager_->getDisplayName(route->getArrivalAirport())),
         QString::fromStdString(f->getAirline()),
         QString::fromStdString(f->getFlightNumber()),
         QString::fromStdString(f->getDepartureDate()),

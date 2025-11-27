@@ -19,6 +19,7 @@ class FlightManager;
 class BookingManager;
 class AccountManager;
 class PassengerManager;
+class AirportManager;
 
 class BookingDialog : public QDialog
 {
@@ -30,6 +31,7 @@ public:
                           BookingManager* bookingManager,
                           AccountManager* accountManager,
                           PassengerManager* passengerManager,
+                          AirportManager* airportManager,
                           QWidget *parent = nullptr);
     
     QString getPassengerId() const;
@@ -67,6 +69,7 @@ private:
     BookingManager* bookingManager_;
     AccountManager* accountManager_;
     PassengerManager* passengerManager_;
+    AirportManager* airportManager_;
     
     QStackedWidget* stackedWidget_;
     

@@ -545,7 +545,7 @@ void SearchBookPage::onBookClicked()
     }
     
     // Hiển thị dialog đặt vé (dialog handles everything internally)
-    BookingDialog dialog(flight, flightManager_, bookingManager_, accountManager_, passengerManager_, this);
+    BookingDialog dialog(flight, flightManager_, bookingManager_, accountManager_, passengerManager_, airportManager_, this);
     
     if (dialog.exec() == QDialog::Accepted) {
         // Booking already created and saved inside dialog!
