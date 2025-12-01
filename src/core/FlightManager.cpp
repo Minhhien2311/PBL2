@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <iterator>
 #include <ctime>
+#include <set>
 
 // --- Constructor & Destructor ---
 
@@ -88,6 +89,7 @@ void FlightManager::loadFlightsFromFile(const std::string& filePath) {
                 this->flightIdTable.insert(p->getFlightId(), p);
                 // Index this flight by time (AVL)
                 addFlightToTimeIndex(p);
+                addFlightToPriceIndex(p);
             }
         }
         file.close();
@@ -254,6 +256,7 @@ bool FlightManager::createNewFlight(const std::string& routeId,
 
     // Add to time index (AVL)
     addFlightToTimeIndex(newFlight);
+    addFlightToPriceIndex(newFlight);
     
     return true;
 }
@@ -412,6 +415,7 @@ bool FlightManager::updateFlight(const std::string& flightId,
     
     // Save old time key BEFORE changing object
     time_t oldKey = getFlightTimeKey(*oldFlight);
+    int oldPriceKey = oldFlight->getFareEconomy();
     
     std::string oldRouteId = oldFlight->getRouteId();
     *oldFlight = updatedFlight;
@@ -419,6 +423,7 @@ bool FlightManager::updateFlight(const std::string& flightId,
 
     // Move id in time index if departure time changed
     moveFlightTimeIndex(oldFlight, oldKey);
+    moveFlightPriceIndex(oldFlight, oldPriceKey);
     
     return true;
 }
@@ -430,13 +435,12 @@ bool FlightManager::deleteFlight(const std::string& flightId) {
             
             // Remove from time index first
             removeFlightFromTimeIndex(flightToDelete);
+            removeFlightFromPriceIndex(flightToDelete);
 
             removeFlightFromRouteIndex(flightToDelete);
             flightIdTable.remove(flightId);
             delete flightToDelete;
             allFlights.erase(allFlights.begin() + i);
-            
-            // ✅ BỎ: saveFlightsToFiles(flightsFilePath_);
             
             return true;
         }
@@ -574,35 +578,40 @@ std::vector<Flight*> FlightManager::filterByAirline(
     return results;
 }
 
-std::vector<Flight*> FlightManager::filterByPriceRange(
-    const std::vector<Flight*>& flights,
-    int minPrice,
-    int maxPrice) const 
-{
-    std::vector<Flight*> results;
-    
-    for (Flight* flight : flights) {
-        if (!flight) continue;
-        
-        int price = flight->getFareEconomy();
-        
-        bool passesMin = (minPrice == 0 || price >= minPrice);
-        bool passesMax = (maxPrice == 0 || price <= maxPrice);
-        
-        if (passesMin && passesMax) {
-            results.push_back(flight);
-        }
-    }
-    
-    return results;
-}
-
 std::vector<Flight*> FlightManager::filterByPriceRangeAVL(
     const std::vector<Flight*>& flights,
     int minPrice,
     int maxPrice) const 
 {
-    return filterByPriceRange(flights, minPrice, maxPrice);
+    // 1. Xử lý trường hợp biên
+    if (flights.empty()) return {};
+    if (minPrice <= 0 && maxPrice <= 0) return flights; // Không lọc nếu không có khoảng giá
+
+    int effectiveMin = (minPrice > 0) ? minPrice : 0;
+    int effectiveMax = (maxPrice > 0) ? maxPrice : INT_MAX;
+
+    // 2. Truy vấn khoảng trên cây AVL (O(log N + K))
+    // Kết quả là danh sách các danh sách ID: [[id1, id2], [id3], ...]
+    std::vector<std::vector<std::string>> avlResults = 
+        flightPriceTree.rangeQuery(effectiveMin, effectiveMax);
+
+    // 3. Đưa tất cả ID tìm được vào một std::set để tra cứu cực nhanh (O(1) trung bình)
+    std::set<std::string> validPriceFlightIds;
+    for (const auto& idList : avlResults) {
+        for (const std::string& id : idList) {
+            validPriceFlightIds.insert(id);
+        }
+    }
+
+    // 4. Thực hiện phép GIAO: Duyệt danh sách đầu vào và chỉ giữ lại những cái có trong set
+    std::vector<Flight*> finalResults;
+    for (Flight* flight : flights) {
+        if (flight && validPriceFlightIds.count(flight->getFlightId())) {
+            finalResults.push_back(flight);
+        }
+    }
+    
+    return finalResults;
 }
 
 std::vector<Flight*> FlightManager::searchFlights( const SearchCriteria& criteria) const 
@@ -634,8 +643,6 @@ std::vector<Flight*> FlightManager::searchFlights( const SearchCriteria& criteri
     if (criteria.minPrice > 0 || criteria.maxPrice > 0) {
         if (criteria.useAVLForPrice) {
             results = filterByPriceRangeAVL(results, criteria.minPrice, criteria.maxPrice);
-        } else {
-            results = filterByPriceRange(results, criteria.minPrice, criteria.maxPrice);
         }
     }
     
@@ -753,4 +760,66 @@ std::vector<Flight*> FlightManager::getFutureFlights(bool onlyFuture) {
     }
     
     return result;
+}
+
+// --- Price index helpers (AVL) ---
+
+// Hàm thêm chuyến bay vào index giá
+void FlightManager::addFlightToPriceIndex(Flight* flight) {
+    if (!flight) return;
+    // Chúng ta dùng Giá Economy làm key để index
+    int key = flight->getFareEconomy();
+    
+    std::vector<std::string>* existing = flightPriceTree.find(key);
+    if (existing) {
+        // Nếu giá này đã có, thêm ID vào danh sách (tránh trùng lặp)
+        if (std::find(existing->begin(), existing->end(), flight->getFlightId()) == existing->end()) {
+            existing->push_back(flight->getFlightId());
+        }
+    } else {
+        // Nếu giá này chưa có, tạo danh sách mới
+        std::vector<std::string> list;
+        list.push_back(flight->getFlightId());
+        flightPriceTree.insert(key, list);
+    }
+}
+
+// Hàm xóa chuyến bay khỏi index giá
+void FlightManager::removeFlightFromPriceIndex(Flight* flight) {
+    if (!flight) return;
+    int key = flight->getFareEconomy();
+    std::string flightId = flight->getFlightId();
+
+    std::vector<std::string>* existing = flightPriceTree.find(key);
+    if (!existing) return;
+
+    auto it = std::find(existing->begin(), existing->end(), flightId);
+    if (it != existing->end()) {
+        existing->erase(it);
+        // Nếu danh sách rỗng sau khi xóa, xóa luôn node khỏi cây AVL
+        if (existing->empty()) {
+            flightPriceTree.remove(key);
+        }
+    }
+}
+
+// Hàm cập nhật index khi giá thay đổi
+void FlightManager::moveFlightPriceIndex(Flight* flight, int oldPrice) {
+    if (!flight) return;
+    int newPrice = flight->getFareEconomy();
+    if (oldPrice == newPrice) return; // Giá không đổi, không làm gì
+
+    // Xóa khỏi key giá cũ
+    // Lưu ý: ta phải tự tìm ID và xóa thủ công vì object flight lúc này đã mang giá mới
+    std::vector<std::string>* oldList = flightPriceTree.find(oldPrice);
+    if (oldList) {
+        auto it = std::find(oldList->begin(), oldList->end(), flight->getFlightId());
+        if (it != oldList->end()) {
+            oldList->erase(it);
+            if (oldList->empty()) flightPriceTree.remove(oldPrice);
+        }
+    }
+
+    // Thêm vào key giá mới
+    addFlightToPriceIndex(flight);
 }

@@ -59,7 +59,6 @@ public:
     // Các bộ lọc chi tiết
     std::vector<Flight*> filterByDate(const std::vector<Flight*>& flights, const std::string& date) const;
     std::vector<Flight*> filterByAirline(const std::vector<Flight*>& flights, const std::string& airline) const;
-    std::vector<Flight*> filterByPriceRange(const std::vector<Flight*>& flights, int minPrice, int maxPrice) const;
     std::vector<Flight*> filterByPriceRangeAVL(const std::vector<Flight*>& flights, int minPrice, int maxPrice) const;
 
     // --- Data Access (Truy xuất dữ liệu) ---
@@ -93,7 +92,9 @@ private:
     HashTable<std::string, RouteData*> routeIndex_;
     
     // Key: time_t, Value: List of FlightIDs
-    AVLTree<time_t, std::vector<std::string>> flightTimeTree; 
+    AVLTree<time_t, std::vector<std::string>> flightTimeTree;
+    // Key: EconomyPrice, Value: List of FlightIDs
+    AVLTree<int, std::vector<std::string>> flightPriceTree; 
 
     // --- Internal Helpers: Indexing Maintenance ---
     void buildRouteIndex();
@@ -107,6 +108,10 @@ private:
     void removeFlightFromTimeIndex(Flight* flight);
     void removeFlightFromTimeIndexByKey(time_t key, const std::string& flightId);
     void moveFlightTimeIndex(Flight* flight, time_t oldKey);
+
+    void addFlightToPriceIndex(Flight* flight);
+    void removeFlightFromPriceIndex(Flight* flight);
+    void moveFlightPriceIndex(Flight* flight, int oldPrice);
 
     // Route Index Helpers
     bool addFlightToRouteIndex(Flight* flight);

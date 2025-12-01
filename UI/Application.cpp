@@ -87,6 +87,35 @@ Application::Application(AccountManager* accManager,
             QScrollBar::handle:vertical { background: #608bc1; border-radius: 3px; min-height: 20px; }
             QScrollBar:horizontal { border: none; background: #cbdceb; height: 6px; margin: 0; }
             QScrollBar::handle:horizontal { background: #608bc1; border-radius: 3px; min-width: 20px; }
+
+            /* ============================================== */
+            /* === STYLE MESSAGE BOX (HỘP THÔNG BÁO) === */
+            /* ============================================== */
+            QMessageBox {
+                background-color: white;
+            }
+            /* Chỉnh màu chữ nội dung thông báo */
+            QMessageBox QLabel {
+                color: #133e87;
+                font-size: 13px;
+                font-weight: 500;
+            }
+            /* Chỉnh nút bấm (Yes/No/OK) trong thông báo */
+            QMessageBox QPushButton {
+                background-color: #608bc1; /* Màu xanh dịu (giống style bạn đang dùng) */
+                color: #133e87;              /* Chữ màu trắng */
+                border: 1px solid #133e87;
+                border-radius: 5px;
+                padding: 5px 20px;         /* Padding rộng để nút dài ra */
+                min-width: 60px;           /* Đảm bảo nút không bị bé quá */
+                font-weight: bold;
+            }
+            QMessageBox QPushButton:hover {
+                background-color: #365a9e; /* Xanh đậm hơn khi di chuột */
+            }
+            QMessageBox QPushButton:pressed {
+                background-color: #133e87; /* Xanh rất đậm khi nhấn */
+            }
             )";
         this->setStyleSheet(qss);
     
