@@ -4,9 +4,7 @@
 #include <sstream>
 #include <iostream>
 #include <vector>
-
 #include <algorithm>
-
 
 SeatManager::SeatManager(const std::string& seatStatusPath,
                          const std::string& seatConfigPath)
@@ -16,8 +14,7 @@ SeatManager::SeatManager(const std::string& seatStatusPath,
       selectedSeat_(nullptr),
       seatRows_(0),
       seatCols_(8)
-{
-}
+{}
 
 SeatManager::~SeatManager() {
     clearCurrentMap();
@@ -27,7 +24,7 @@ bool SeatManager::loadForFlight(const std::string& flightId) {
     clearCurrentMap();
     currentFlightId_ = flightId;
     
-    // Will be called by loadSeatMapFor(Flightflight*)
+    // Sẽ được gọi bởi loadSeatMapFor(Flight* flight)
     return true;
 }
 
@@ -37,11 +34,11 @@ bool SeatManager::loadSeatMapFor(Flight* flight) {
     clearCurrentMap();
     currentFlightId_ = flight->getFlightId();
     
-    // Calculate rows from capacity
+    // Tính toán số hàng ghế dựa trên sức chứa
     int capacity = flight->getTotalCapacity();
     seatRows_ = (capacity + seatCols_ - 1) / seatCols_;
     
-    // Create all seats
+    // Tạo bản đồ ghế trống
     for (int row = 0; row < seatRows_; row++) {
         for (int col = 0; col < seatCols_; col++) {
             std::string seatId = seatIdToString(row, col);
@@ -52,10 +49,10 @@ bool SeatManager::loadSeatMapFor(Flight* flight) {
         }
     }
     
-    // Load booked seats from file
+    // Tải trạng thái ghế đã đặt từ file
     std::ifstream file(seatStatusFilePath_);
     if (!file.is_open()) {
-        return true;  // No bookings yet
+        return true;  // Nếu không mở được file, coi như chưa có ghế nào được đặt
     }
     
     std::string line;
@@ -110,18 +107,16 @@ bool SeatManager::confirmSelection() {
     if (!selectedSeat_) return false;
     
     std::string seatId = selectedSeat_->getId();
-    selectedSeat_ = nullptr;  // IMPORTANT: Reset before returning
+    selectedSeat_ = nullptr;  // Reset trước khi return
     
     return bookSeat(seatId);
 }
-
-// SeatManager.cpp - Line 136
 
 bool SeatManager::bookSeat(const std::string& seatId) {
     
     for (int i = 0; i < activeSeatMap_.size(); i++) {
         if (activeSeatMap_[i]->getId() == seatId) {
-            // ✅ THÊM: Log status hiện tại
+            // Log status hiện tại
             std::string statusStr = (activeSeatMap_[i]->getStatus() == SeatStatus::Available) 
                                     ? "Available" : "Booked";
             
@@ -152,8 +147,6 @@ bool SeatManager::saveChanges() {
     return updateAndSaveChanges();
 }
 
-// SeatManager.cpp - Line 166
-
 bool SeatManager::updateAndSaveChanges() {
     
     if (currentFlightId_.empty()) {
@@ -161,7 +154,7 @@ bool SeatManager::updateAndSaveChanges() {
         return false;
     }
     
-    // ✅ THÊM: Log đọc file
+    // Log đọc file
     std::vector<std::string> allLines;
     std::ifstream inFile(seatStatusFilePath_);
     if (inFile.is_open()) {
@@ -174,7 +167,7 @@ bool SeatManager::updateAndSaveChanges() {
         std::cout << "[DEBUG] File not found, will create new" << std::endl;
     }
     
-    // Build booked seats string
+    // Tạo dãy ghế đã đặt
     std::ostringstream bookedSeats;
     bool first = true;
     int bookedCount = 0;
@@ -190,7 +183,7 @@ bool SeatManager::updateAndSaveChanges() {
     
     std::string newLine = currentFlightId_ + "|" + bookedSeats.str();
     
-    // Update or add line
+    // Cập nhật hoặc thêm dòng mới
     bool found = false;
     for (size_t i = 0; i < allLines.size(); i++) {
         if (allLines[i].find(currentFlightId_ + "|") == 0) {
@@ -204,7 +197,7 @@ bool SeatManager::updateAndSaveChanges() {
         allLines.push_back(newLine);
     }
     
-    // Write back
+    // Ghi lại toàn bộ file
     std::ofstream outFile(seatStatusFilePath_);
     if (!outFile.is_open()) {
         std::cerr << "[ERROR] Cannot open file for writing: " << seatStatusFilePath_ << std::endl;
@@ -288,17 +281,17 @@ void SeatManager::clearCurrentMap() {
 }
 
 std::string SeatManager::seatIdToString(int row, int col) const {
-    // Seat ID format: {Column Letter}{Row Number with padding} e.g., A01, B12, H25
+    // Định dạng ID ghế: {Chữ cái cột}{Số hàng có padding} ví dụ: A01, B12, H25
     char colChar = 'A' + col;
     int rowNum = row + 1;
     
-    // Add leading zero for row numbers < 10
+    // Thêm số 0 ở đầu cho các số hàng < 10
     std::string rowStr = (rowNum < 10) ? ("0" + std::to_string(rowNum)) : std::to_string(rowNum);
     
     return std::string(1, colChar) + rowStr;
 }
 
 SeatType SeatManager::determineSeatType(int row) const {
-    int businessRows = seatRows_ / 5;  // First 20% are Business
+    int businessRows = seatRows_ / 5;  // 20% đầu là Business
     return (row < businessRows) ? SeatType::Business : SeatType::Economy;
 }

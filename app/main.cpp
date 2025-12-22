@@ -1,7 +1,7 @@
 #include <iostream>
 #include <exception>
 #include <QApplication>
-#include "UI/Application.h" 
+#include "Application.h" 
 
 // Include các manager từ core logic
 #include "core/AccountManager.h" 
@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
     PassengerManager passengerManager("C:/PBL2/data/passengers.txt");
 
     Application w(&accountManager, &flightManager, &bookingManager,
-                    &reportManager, &airportManager, &passengerManager);
+                  &reportManager, &airportManager, &passengerManager);
     w.show();
 
     return app.exec();

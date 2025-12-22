@@ -1,8 +1,8 @@
 #include "core/AirportManager.h"
 #include "core/FlightManager.h"
 #include "entities/Route.h"
-#include <fstream> // Required for std::ifstream
-#include <stdexcept> // Required for std::runtime_error
+#include <fstream>
+#include <stdexcept>
 
 AirportManager::AirportManager(const std::string& airportsFilePath)
     : displayToIATA_(), iataToDisplay_()
@@ -18,7 +18,7 @@ void AirportManager::loadAirportsFromFile(const std::string& filePath)
 
     std::string line;
     while (std::getline(file, line)) {
-        if (line.empty() || line[0] == '#') continue; // Bỏ qua comment
+        if (line.empty() || line[0] == '#') continue;
         
         size_t pos = line.find('|');
         if (pos == std::string::npos) continue;
@@ -26,7 +26,6 @@ void AirportManager::loadAirportsFromFile(const std::string& filePath)
         std::string iataCode = line.substr(0, pos);
         std::string cityName = line.substr(pos + 1);
         
-        // Loại bỏ khoảng trắng thừa
         iataCode.erase(0, iataCode.find_first_not_of(" \t\r\n"));
         iataCode.erase(iataCode.find_last_not_of(" \t\r\n") + 1);
         cityName.erase(0, cityName.find_first_not_of(" \t\r\n"));
@@ -40,7 +39,6 @@ void AirportManager::loadAirportsFromFile(const std::string& filePath)
 
 void AirportManager::addAirport(const std::string& displayName, const std::string& iataCode)
 {
-    // Thêm vào cả 2 map để tra cứu 2 chiều
     displayToIATA_.insert(displayName, iataCode);
     iataToDisplay_.insert(iataCode, displayName);
 }
@@ -59,10 +57,9 @@ std::string AirportManager::getDisplayName(const std::string& iataCode) const
 
 std::vector<std::string> AirportManager::getAllDisplayNames() const
 {
-    // Lấy tất cả keys (display names)
     std::vector<std::string> names = displayToIATA_.getKeys();
     
-    // Sắp xếp alphabet bằng Bubble Sort
+    // Sắp xếp theo thứ tự ABC bằng Bubble Sort
     for (int i = 0; i < names.size() - 1; ++i) {
         for (int j = 0; j < names.size() - i - 1; ++j) {
             if (names[j] > names[j + 1]) {
@@ -80,18 +77,15 @@ void AirportManager::loadAirportsFromRoutes(FlightManager* flightManager)
 {
     if (!flightManager) return;
     
-    // Đổi getAllFlights (trả về Flight mới) sang getAllRoutes (trả về Route)
     const std::vector<Route*>& routes = flightManager->getAllRoutes();
     
     for (int i = 0; i < routes.size(); ++i) {
         Route* route = routes[i];
         if (!route) continue;
         
-        // Các hàm getter này vẫn tồn tại trên Route (Flight cũ)
         std::string depIATA = route->getDepartureAirport();
         std::string arrIATA = route->getArrivalAirport();
         
-        // Nếu chưa có trong danh sách, tạo display name mặc định: "HAN"
         if (!hasAirport(depIATA)) {
             addAirport(depIATA, depIATA);
         }
