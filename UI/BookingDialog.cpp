@@ -71,7 +71,7 @@ BookingDialog::BookingDialog(Flight* flight,
     Q_ASSERT(flightManager_ != nullptr);
     
     setWindowTitle("Đặt vé máy bay");
-    setFixedSize(700, 600);
+    setFixedSize(700, 630);
     setStyleSheet("QDialog { background-color: #FFFFFF; }");
     
     setupUi();

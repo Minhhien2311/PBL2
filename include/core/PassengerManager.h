@@ -18,21 +18,21 @@ public:
     
     bool updatePassenger(const std::string& id, const std::string& fullName, const std::string& phoneNumber);
 
-    // --- Search & Lookup (Tìm kiếm) ---
+    // --- Tìm kiếm & Tra cứu ---
     Passenger* findPassengerById(const std::string& id); // id = CCCD
     const std::vector<Passenger*>& getAllPassengers() const;
 
-    // --- Persistence (Lưu trữ) ---
+    // --- Lưu trữ ---
     bool savePassengersToFile(const std::string& filePath) const;
     bool saveAllData();
 
 private:
-    // --- Data Storage ---
+    // --- Dữ liệu lưu trữ ---
     std::vector<Passenger*> allPassengers_;
     HashTable<std::string, Passenger*> passengerIdTable_; // Key: CCCD
     std::string passengersFilePath_;
     
-    // --- Internal Helpers ---
+    // --- Các hàm trợ giúp nội bộ ---
     void loadPassengersFromFile(const std::string& filePath);
     void buildPassengerIdTable();
 };

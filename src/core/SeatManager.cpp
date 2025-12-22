@@ -17,28 +17,10 @@ SeatManager::SeatManager(const std::string& seatStatusPath,
       seatRows_(0),
       seatCols_(8)
 {
-    loadConfiguration();
 }
 
 SeatManager::~SeatManager() {
     clearCurrentMap();
-}
-
-void SeatManager::loadConfiguration() {
-    std::ifstream file(seatConfigFilePath_);
-    if (!file.is_open()) {
-        std::cerr << "Warning: Cannot open " << seatConfigFilePath_ << ". Using defaults.\n";
-        seatCols_ = 8;
-        return;
-    }
-    
-    std::string line;
-    while (std::getline(file, line)) {
-        if (line.find("SEAT_LAYOUT_COLS=") == 0) {
-            seatCols_ = std::stoi(line.substr(17));
-        }
-    }
-    file.close();
 }
 
 bool SeatManager::loadForFlight(const std::string& flightId) {

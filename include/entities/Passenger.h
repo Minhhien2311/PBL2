@@ -6,7 +6,7 @@ class Passenger {
 private:
     std::string id;             // CCCD/Passport
     std::string fullName;
-    std::string dateOfBirth;    // yyyy-mm-dd
+    std::string dateOfBirth;    // DD/MM/YYYY
     std::string phoneNumber;
 
 public:
@@ -23,8 +23,8 @@ public:
     const std::string& getPhoneNumber() const;
     
     // Các hàm getter mở rộng (nếu cần cho tương lai)
-    const std::string& getPassportNumber() const;
-    const std::string& getNationality() const;
+    // const std::string& getPassportNumber() const;
+    // const std::string& getNationality() const;
 
     // --- Setters ---
     void setFullName(const std::string& name);

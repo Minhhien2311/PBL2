@@ -14,12 +14,12 @@ public:
                          const std::string& seatConfigPath = "C:/PBL2/data/seat_config.txt");
     ~SeatManager();
 
-    // --- Initialization (Khởi tạo Map) ---
+    // --- Khởi tạo Map ---
     // Load map cho một chuyến bay cụ thể để chuẩn bị thao tác
     bool loadForFlight(const std::string& flightId);
     bool loadSeatMapFor(Flight* flight);
 
-    // --- Seat Operations (Thao tác ghế) ---
+    // --- Thao tác ghế ---
     bool selectSeat(const std::string& seatId);  // Chọn tạm thời (UI highlight)
     void cancelSelection();                      // Hủy chọn
     bool confirmSelection();                     // Xác nhận chọn
@@ -27,11 +27,11 @@ public:
     bool bookSeat(const std::string& seatId);    // Đặt cứng (lưu vào data)
     bool releaseSeat(const std::string& seatId); // Trả ghế (hủy vé)
 
-    // --- Persistence (Lưu trữ) ---
+    // --- Lưu trữ ---
     bool saveChanges();          // Lưu trạng thái hiện tại
     bool updateAndSaveChanges(); // Cập nhật sync và lưu
 
-    // --- Getters & Status ---
+    // --- Lấy dữ liệu & Trạng thái ---
     std::vector<Seat*>* getActiveSeatMap();
     const std::vector<Seat*>& getAllSeats() const;
     Seat* getSelectedSeat() const;
@@ -45,7 +45,7 @@ public:
     int getAvailableSeats() const;
 
 private:
-    // --- Data State ---
+    // --- Trạng thái dữ liệu ---
     std::string currentFlightId_;
     std::vector<Seat*> activeSeatMap_;
     Seat* selectedSeat_; // Ghế đang được highlight
@@ -53,13 +53,12 @@ private:
     int seatRows_;
     int seatCols_;
     
-    // --- File Paths ---
+    // --- Đường dẫn file ---
     std::string seatStatusFilePath_;
     std::string seatConfigFilePath_;
     
-    // --- Internal Helpers ---
+    // --- Các hàm trợ giúp nội bộ ---
     void clearCurrentMap();
-    void loadConfiguration(); // Load số hàng/cột
     std::string seatIdToString(int row, int col) const;
     SeatType determineSeatType(int row) const;
 };

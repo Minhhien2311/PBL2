@@ -1,4 +1,4 @@
-#include "entities/Route.h" // <-- Đã đổi
+#include "entities/Route.h" 
 #include <algorithm>
 #include <cctype>
 #include <string>
@@ -20,14 +20,14 @@ const std::string& Route::getArrivalAirport() const { return arrivalAirport; }
 // --- Đọc/Ghi file cấu hình ---
 
 // Chuyển đổi đối tượng thành một dòng string, ngăn cách bởi dấu '|'.
-std::string Route::toRecordLine() const { // <-- Đã đổi tên class
+std::string Route::toRecordLine() const {
     return this->routeId + "|" +
            this->departureAirport + "|" +
            this->arrivalAirport;
 }
 
 // Tạo đối tượng Route từ một dòng string.
-Route Route::fromRecordLine(const std::string& line) { // <-- Đã đổi tên class
+Route Route::fromRecordLine(const std::string& line) {
     size_t start = 0;
     size_t end = line.find('|');
     
@@ -45,16 +45,16 @@ Route Route::fromRecordLine(const std::string& line) { // <-- Đã đổi tên c
     // Kỹ thuật "Tạo tạm rồi sửa lỗi":
     // 1. Dùng constructor public để tạo một đối tượng Route.
     //    Lúc này, nó sẽ có một ID được tạo từ airline-departure-arrival.
-    Route route(departure, arrival); // <-- Đã đổi
+    Route route(departure, arrival); 
 
     // 2. Dùng hàm helper để ghi đè ID tạm thời bằng ID chính xác đã đọc từ file.
-    route.overrideIdForLoad(id); // <-- Đã đổi
+    route.overrideIdForLoad(id); 
 
-    return route; // <-- Đã đổi
+    return route; 
 }
 
 // --- Helper cho việc nạp dữ liệu ---
 
-void Route::overrideIdForLoad(const std::string& existingId) { // <-- Đã đổi
-    this->routeId = existingId; // <-- Đã đổi
+void Route::overrideIdForLoad(const std::string& existingId) { 
+    this->routeId = existingId; 
 }

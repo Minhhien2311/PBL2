@@ -17,7 +17,7 @@ public:
     BookingManager(const std::string& bookingsFilePath, FlightRule* rule);
     ~BookingManager();
 
-    // --- Booking Operations (Nghiệp vụ Vé) ---
+    // --- Nghiệp vụ Vé ---
     // Tạo vé mới
     Booking* createNewBooking(FlightManager& flightManager, const std::string& flightId,
                               const std::string& agentId, const std::string& passengerId,
@@ -44,27 +44,27 @@ public:
     // Áp dụng khuyến mãi
     int applyPromotion(const std::string& promoCode, int baseFare);
 
-    // --- Search & Lookup (Tìm kiếm) ---
+    // --- Tìm kiếm & Tra cứu ---
     Booking* findBookingById(const std::string& bookingId);
     std::vector<Booking*> findBookingsByPassengerId(const std::string& passengerId);
     std::vector<Booking*> getBookingsByAgentId(const std::string& agentId) const;
     const std::vector<Booking*>& getAllBookings() const;
 
-    // --- Persistence (Lưu trữ) ---
+    // --- Lưu trữ ---
     bool saveDataToFiles(const std::string& bookingsFilePath) const;
     bool saveBookingToFile(Booking* booking);
 
 private:
-    // --- Data Members ---
+    // --- Các thành viên dữ liệu ---
     std::vector<Booking*> allBookings;
     FlightRule* currentRule;
     std::string bookingsFilePath_;
 
-    // --- Indexing Tables ---
+    // --- Bảng băm (Indexing Tables) ---
     HashTable<std::string, Booking*> bookingIdTable;
     HashTable<std::string, std::vector<Booking*>> passengerIdTable;
 
-    // --- Internal Helpers ---
+    // --- Các hàm trợ giúp nội bộ ---
     void loadBookingsFromFile(const std::string& filePath);
     void buildBookingIdTable();
     void buildPassengerIdTable();

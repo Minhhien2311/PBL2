@@ -263,16 +263,19 @@ bool FlightManager::createNewFlight(const std::string& routeId,
 
 // --- Chức năng Đọc/Tìm kiếm (Read) ---
 
+// Tra cứu tuyến bay theo Mã tuyến (routeId)
 Route* FlightManager::findRouteById(const std::string& routeId) const {
     Route** routePtrPtr = routeIdTable.find(routeId);
     return (routePtrPtr != nullptr) ? *routePtrPtr : nullptr;
 }
 
+// Tra cứu chuyến bay theo Mã chuyến (flightId)
 Flight* FlightManager::findFlightById(const std::string& flightId) const {
     Flight** flightPtrPtr = flightIdTable.find(flightId);
     return (flightPtrPtr != nullptr) ? *flightPtrPtr : nullptr;
 }
 
+// Tìm tất cả chuyến bay có cùng Mã tuyến (routeId)
 std::vector<Flight*> FlightManager::findFlightsByRouteId(const std::string& routeId) const {
     std::vector<Flight*> results;
     for (size_t i = 0; i < allFlights.size(); ++i) {
@@ -590,12 +593,11 @@ std::vector<Flight*> FlightManager::filterByPriceRangeAVL(
     int effectiveMin = (minPrice > 0) ? minPrice : 0;
     int effectiveMax = (maxPrice > 0) ? maxPrice : INT_MAX;
 
-    // 2. Truy vấn khoảng trên cây AVL (O(log N + K))
-    // Kết quả là danh sách các danh sách ID: [[id1, id2], [id3], ...]
+    // 2. Truy vấn khoảng trên cây AVL (O(log N + K)). Kết quả là danh sách các danh sách ID
     std::vector<std::vector<std::string>> avlResults = 
         flightPriceTree.rangeQuery(effectiveMin, effectiveMax);
 
-    // 3. Đưa tất cả ID tìm được vào một std::set để tra cứu cực nhanh (O(1) trung bình)
+    // 3. Đưa tất cả ID tìm được vào một std::set để tra cứu nhanh O(1)
     std::set<std::string> validPriceFlightIds;
     for (const auto& idList : avlResults) {
         for (const std::string& id : idList) {
@@ -614,7 +616,7 @@ std::vector<Flight*> FlightManager::filterByPriceRangeAVL(
     return finalResults;
 }
 
-std::vector<Flight*> FlightManager::searchFlights( const SearchCriteria& criteria) const 
+std::vector<Flight*> FlightManager::searchFlights(const SearchCriteria& criteria) const 
 {
     std::vector<Flight*> results = getAllFlights();
     
@@ -643,6 +645,18 @@ std::vector<Flight*> FlightManager::searchFlights( const SearchCriteria& criteri
     if (criteria.minPrice > 0 || criteria.maxPrice > 0) {
         if (criteria.useAVLForPrice) {
             results = filterByPriceRangeAVL(results, criteria.minPrice, criteria.maxPrice);
+        }
+        else {  // Fallback: Linear scan
+            std::vector<Flight*> priceFiltered;
+            for (Flight* flight : results) {
+                if (!flight) continue;
+                int price = flight->getFareEconomy();
+                if ((criteria.minPrice <= 0 || price >= criteria.minPrice) &&
+                    (criteria.maxPrice <= 0 || price <= criteria.maxPrice)) {
+                    priceFiltered.push_back(flight);
+                }
+            }
+            results = priceFiltered;
         }
     }
     
@@ -731,7 +745,7 @@ std::vector<Flight*> FlightManager::getFutureFlights(bool onlyFuture) {
         time_t now = utils::DateTime::toUnix(utils::DateTime::nowUtc());
         time_t farFuture = std::numeric_limits<time_t>::max();
         
-        // Dùng AVL Range Query: O(log N + K) - Cực nhanh!
+        // Dùng AVL Range Query: O(log N + K)
         std::vector<std::vector<std::string>> nestedResult = 
             flightTimeTree.rangeQuery(now, farFuture);
         

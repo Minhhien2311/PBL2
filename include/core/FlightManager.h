@@ -61,12 +61,12 @@ public:
     std::vector<Flight*> filterByAirline(const std::vector<Flight*>& flights, const std::string& airline) const;
     std::vector<Flight*> filterByPriceRangeAVL(const std::vector<Flight*>& flights, int minPrice, int maxPrice) const;
 
-    // --- Data Access (Truy xuất dữ liệu) ---
+    // --- Truy xuất dữ liệu ---
     const std::vector<Route*>& getAllRoutes() const;
     const std::vector<Flight*>& getAllFlights() const;
     SeatManager* getSeatManager() const;
 
-    // --- Persistence (Lưu trữ file) ---
+    // --- Lưu trữ file ---
     bool saveRoutesToFiles(const std::string& routesFilePath) const;
     bool saveFlightsToFiles(const std::string& flightsFilePath) const;
     bool saveAllData();
@@ -82,7 +82,7 @@ private:
     std::string routesFilePath_;
     std::string flightsFilePath_;
 
-    // --- Indexing Structures ---
+    // --- Các cấu trúc chỉ mục ---
     struct RouteData {
         std::string routeKey;
         std::vector<Flight*> allFlights;
@@ -96,7 +96,7 @@ private:
     // Key: EconomyPrice, Value: List of FlightIDs
     AVLTree<int, std::vector<std::string>> flightPriceTree; 
 
-    // --- Internal Helpers: Indexing Maintenance ---
+    // --- Các hàm trợ giúp nội bộ: Bảo trì chỉ mục ---
     void buildRouteIndex();
     void buildRouteIdTable();
     void buildFlightIdTable();
@@ -118,7 +118,7 @@ private:
     bool removeFlightFromRouteIndex(Flight* flight);
     bool updateFlightInRouteIndex(Flight* flight, const std::string& oldRouteId);
 
-    // --- Internal Helpers: Utils ---
+    // --- Các hàm trợ giúp nội bộ: Utils ---
     void loadRoutesFromFile(const std::string& filePath);
     void loadFlightsFromFile(const std::string& filePath);
     void sortFlightsByDateTime(std::vector<Flight*>& flights);

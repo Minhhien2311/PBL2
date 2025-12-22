@@ -1,4 +1,4 @@
-#include "entities/Flight.h" // <-- Đã đổi
+#include "entities/Flight.h" 
 #include "utils/GenID.h"
 #include "utils/DateTime.h"         // Cần để chuyển đổi ngày
 #include <iostream>                 // Cần cho hàm displayInfo
@@ -6,7 +6,7 @@
 /* --- Constructor ---
     Chỉ cần nhận vào thông tin gốc và totalCapacity.
 */
-Flight::Flight(const std::string& routeId, // <-- Đã đổi
+Flight::Flight(const std::string& routeId, 
                const std::string& airline,
                const std::string& flightNumber,
                const std::string& departureDate,
@@ -17,8 +17,8 @@ Flight::Flight(const std::string& routeId, // <-- Đã đổi
                int availableSeats,
                int fareEconomy,
                int fareBusiness)
-    : flightId(IdGenerator::generateFlightId()), // <-- Đã đổi
-      routeId(routeId), // <-- Đã đổi
+    : flightId(IdGenerator::generateFlightId()), 
+      routeId(routeId), 
       airline(airline),
       flightNumber(flightNumber),
       departureDate(departureDate), 
@@ -31,8 +31,8 @@ Flight::Flight(const std::string& routeId, // <-- Đã đổi
       fareBusiness(fareBusiness) {}
 
 // --- Getters ---
-const std::string& Flight::getFlightId() const { return flightId; } // <-- Đã đổi
-const std::string& Flight::getRouteId() const { return routeId; } // <-- Đã đổi
+const std::string& Flight::getFlightId() const { return flightId; } 
+const std::string& Flight::getRouteId() const { return routeId; } 
 const std::string& Flight::getAirline() const { return airline; }
 const std::string& Flight::getFlightNumber() const { return flightNumber; }
 const std::string& Flight::getDepartureDate() const { return departureDate; }
@@ -70,8 +70,8 @@ void Flight::setAvailableSeats(int seats) {
 
 // Chuyển đổi đối tượng thành một dòng string, ngăn cách bởi dấu '|'.
 std::string Flight::toRecordLine() const {
-    return this->flightId + "|" + // <-- Đã đổi
-           this->routeId + "|" + // <-- Đã đổi
+    return this->flightId + "|" + 
+           this->routeId + "|" + 
            this->airline + "|" +
            this->flightNumber + "|" +
            this->departureDate + "|" + 
@@ -145,5 +145,5 @@ Flight Flight::fromRecordLine(const std::string& line) {
 // --- Helper cho việc nạp dữ liệu ---
 
 void Flight::overrideIdForLoad(const std::string& existingId) {
-    this->flightId = existingId; // <-- Đã đổi
+    this->flightId = existingId; 
 }

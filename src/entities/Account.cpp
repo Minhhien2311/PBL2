@@ -93,17 +93,12 @@ void Account::setPassword(const std::string& newPassword) {
     passwordHash = hashPassword(newPassword);
 }
 
-// --- Chức năng chính ---
-// bool Account::authenticate(const std::string& passwordPlain) const {
-//     return verifyPassword(passwordPlain, this->passwordHash);
-// }
-
 // ==== DEBUG ======
 bool Account::authenticate(const std::string& passwordPlain) const {
     // 1. Hash mật khẩu người dùng nhập vào
     std::string hashed_input = hashPassword(passwordPlain);
     
-    // 2. <<< THÊM CÔNG CỤ THÁM TỬ CUỐI CÙNG VÀO ĐÂY
+    // 2. In debug
     std::cout << "[DEBUG]   -> Hash tu input: |" << hashed_input << "|\n";
 
     // 3. Thực hiện so sánh

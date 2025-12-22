@@ -13,24 +13,24 @@ public:
     explicit AirportManager(const std::string& airportsFilePath);
     ~AirportManager() = default;
 
-    // --- Management (Quản lý) ---
+    // --- Quản lý ---
     void addAirport(const std::string& displayName, const std::string& iataCode);
-    void loadAirportsFromRoutes(FlightManager* flightManager); // Auto-add từ chuyến bay
+    void loadAirportsFromRoutes(FlightManager* flightManager);
 
-    // --- Lookup & Conversion (Tra cứu) ---
+    // --- Tra cứu ---
     std::string getIATACode(const std::string& displayName) const;
     std::string getDisplayName(const std::string& iataCode) const;
-    std::vector<std::string> getAllDisplayNames() const; // Sorted alphabetically
+    std::vector<std::string> getAllDisplayNames() const;    // Sắp xếp alphabetically
 
     // --- Utils ---
     bool hasAirport(const std::string& iataCode) const;
     int getAirportCount() const;
 
 private:
-    // --- Data Storage ---
+    // --- Dữ liệu lưu trữ ---
     SimpleMap<std::string, std::string> displayToIATA_;
     SimpleMap<std::string, std::string> iataToDisplay_;
 
-    // --- Internal Helpers ---
+    // --- Các hàm trợ giúp nội bộ ---
     void loadAirportsFromFile(const std::string& filePath);
 };
