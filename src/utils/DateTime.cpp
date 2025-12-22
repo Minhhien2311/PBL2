@@ -89,13 +89,11 @@ DateTime::fromDmYHm(const std::string& date, const std::string& time) {
     return std::chrono::system_clock::from_time_t(tt);
 }
 
-// ----- HÀM MỚI: formatDmY -----
 std::string DateTime::formatDmY(std::chrono::system_clock::time_point tp) {
     // Dùng lại hàm formatLocal đã có với định dạng mới
     return formatLocal(tp, "%d/%m/%Y");
 }
 
-// ----- HÀM MỚI: formatHm -----
 std::string DateTime::formatHm(std::chrono::system_clock::time_point tp) {
     // Dùng lại hàm formatLocal đã có với định dạng mới
     return formatLocal(tp, "%H:%M");

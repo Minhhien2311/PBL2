@@ -113,8 +113,6 @@ void AdminBookingsPage::setupUi()
     // ← NÚT TẢI LẠI (góc phải trên)
     refreshButton = new QPushButton("Làm mới trang", top);
     
-    // [QUAN TRỌNG] Set Icon (Bạn thay đường dẫn file ảnh vào đây)
-    // Lưu ý: Nên dùng icon có màu #133e87 để đồng bộ với chữ
     refreshButton->setIcon(QIcon("C:/PBL2/assets/icons/reload.png")); // Đường dẫn icon")); 
     refreshButton->setIconSize(QSize(14, 14)); // Kích thước icon
 
@@ -508,7 +506,7 @@ void AdminBookingsPage::onViewDetailsClicked()
         return;
     }
     
-    // 4. Hiển thị dialog chi tiết - SỬA DÒNG NÀY
+    // 4. Hiển thị dialog chi tiết 
     BookingDetailsDialog dialog(booking, flightManager_, accountManager_, passengerManager_, this);
     dialog.exec();
 }
@@ -655,7 +653,6 @@ void AdminBookingsPage::onSearchByBookingId()
     // Hiển thị kết quả
     displayBooking(booking);
 
-    // ← THÊM: Cập nhật status
     statusLabel_->setText("Tìm thấy 1 vé với mã " + input + "!");
     statusLabel_->setStyleSheet("color: #27C93F;"); // Màu xanh lá
 }

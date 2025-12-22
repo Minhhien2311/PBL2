@@ -267,7 +267,7 @@ void AccountsPage::showEvent(QShowEvent *event)
     QWidget::showEvent(event);
 }
 
-// --- LOGIC XỬ LÝ SỬA THÔNG TIN (ĐÃ SỬA LỖI) ---
+// --- LOGIC XỬ LÝ SỬA THÔNG TIN  ---
 void AccountsPage::onUpdateInfoClicked()
 {
     bool isReadOnly = fullnameEdit_->isReadOnly();
@@ -292,9 +292,6 @@ void AccountsPage::onUpdateInfoClicked()
             fullnameEdit_->setFocus();
             return;
         }
-
-        // --- SỬA LỖI TẠI ĐÂY: Gọi trực tiếp không qua IF ---
-        // Vì updateProfile trả về void, ta chỉ gọi nó để thực thi.
         accountManager_->updateProfile(id, newFull, newPhone, newEmail);
         
         // Khóa lại các ô

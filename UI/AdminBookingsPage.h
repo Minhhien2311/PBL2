@@ -8,7 +8,7 @@ class BookingManager;
 class FlightManager;  
 class AccountManager; 
 class AirportManager;
-class PassengerManager;  // Thêm dòng này
+class PassengerManager;
 class QTableView;
 class QStandardItemModel;
 class QLineEdit;      
@@ -34,7 +34,7 @@ public:
                                QWidget *parent = nullptr);
 
 public slots:
-    void refreshPage();  // New method to refresh when page shown or user changed
+    void refreshPage();
 
 private slots:
     // Hàng tìm kiếm
