@@ -159,7 +159,6 @@ double ReportManager::getDailyRevenue(const std::string& agentId) const {
     double total = 0.0;
     const auto& bookings = bookingManager_.getAllBookings();
 
-    // SỬA: Dùng class DateTime của bạn
     std::string today = utils::DateTime::formatDmY(utils::DateTime::nowUtc());
 
     for (int i = 0; i < bookings.size(); ++i) {
@@ -180,7 +179,6 @@ int ReportManager::getDailyTicketsSold(const std::string& agentId) const {
     int count = 0;
     const auto& bookings = bookingManager_.getAllBookings();
 
-    // SỬA: Dùng class DateTime của bạn
     std::string today = utils::DateTime::formatDmY(utils::DateTime::nowUtc());
 
     for (int i = 0; i < bookings.size(); ++i) {
@@ -201,7 +199,6 @@ int ReportManager::getDailyCancellations(const std::string& agentId) const {
     int count = 0;
     const auto& bookings = bookingManager_.getAllBookings();
 
-    // SỬA: Dùng class DateTime của bạn
     std::string today = utils::DateTime::formatDmY(utils::DateTime::nowUtc());
 
     for (int i = 0; i < bookings.size(); ++i) {
@@ -259,7 +256,6 @@ int ReportManager::getTicketsSoldInRange(const std::string& agentId,
     for (int i = 0; i < bookings.size(); ++i) {
     Booking* b = bookings[i];
     if (!b) continue;
-    // Không cần kiểm tra agentId nữa
     if (b->getStatus() == BookingStatus::Issued &&
         isDateInRange(b->getBookingDate(), startDate, endDate)) {
         count++;
@@ -277,7 +273,6 @@ double ReportManager::getRevenueInRange(const std::string& agentId,
     for (int i = 0; i < bookings.size(); ++i) {
     Booking* b = bookings[i];
     if (!b) continue;
-    // Không cần kiểm tra agentId nữa
     if (b->getStatus() == BookingStatus::Issued &&
         isDateInRange(b->getBookingDate(), startDate, endDate)) {
         total += b->getBaseFare();
@@ -289,7 +284,6 @@ double ReportManager::getRevenueInRange(const std::string& agentId,
 // --- Báo cáo theo agent và khoảng ngày (Admin view) ---
 std::vector<AgentReport*>* ReportManager::generateAgentReportInRange(const std::string& startDate,
                                     const std::string& endDate) const {
-// ... (Giữ nguyên logic cũ)
     auto* reports = new std::vector<AgentReport*>();
     const auto& agents = accountManager_.getAllAgents();
     const auto& bookings = bookingManager_.getAllBookings();
@@ -351,13 +345,11 @@ std::vector<int> ReportManager::getMonthlyTicketsByAgent(const std::string& agen
 
 // --- Các hàm mới cho thống kê doanh thu ---
 double ReportManager::getTodayRevenue() const {
-    // SỬA: Dùng class DateTime của bạn
     std::string today = utils::DateTime::formatDmY(utils::DateTime::nowUtc());
     return getRevenueInRange(today, today);
 }
 
 double ReportManager::getThisWeekRevenue() const {
-    // SỬA: Dùng class DateTime của bạn để tính toán
     auto now_tp = utils::DateTime::nowUtc();
     std::tm now_tm = utils::DateTime::toLocalTm(now_tp);
 
@@ -374,7 +366,6 @@ double ReportManager::getThisWeekRevenue() const {
 }
 
 double ReportManager::getThisMonthRevenue() const {
-    // SỬA: Dùng class DateTime của bạn
     auto now_tp = utils::DateTime::nowUtc();
     std::tm now_tm = utils::DateTime::toLocalTm(now_tp);
 
@@ -474,13 +465,11 @@ int ReportManager::getChangedTicketsInRange(const std::string& startDate, const 
 // --- Các hàm mới cho Agent ---
 
 double ReportManager::getAgentTodayRevenue(const std::string& agentId) const {
-    // SỬA: Dùng class DateTime của bạn
     std::string today = utils::DateTime::formatDmY(utils::DateTime::nowUtc());
     return getRevenueInRange(agentId, today, today);
 }
 
 double ReportManager::getAgentThisWeekRevenue(const std::string& agentId) const {
-    // SỬA: Dùng class DateTime của bạn
     auto now_tp = utils::DateTime::nowUtc();
     std::tm now_tm = utils::DateTime::toLocalTm(now_tp);
 
@@ -496,7 +485,6 @@ double ReportManager::getAgentThisWeekRevenue(const std::string& agentId) const 
 }
 
 double ReportManager::getAgentThisMonthRevenue(const std::string& agentId) const {
-    // SỬA: Dùng class DateTime của bạn
     auto now_tp = utils::DateTime::nowUtc();
     std::tm now_tm = utils::DateTime::toLocalTm(now_tp);
 

@@ -81,15 +81,15 @@ void AirportManager::loadAirportsFromRoutes(FlightManager* flightManager)
     if (!flightManager) return;
     
     // Đổi getAllFlights (trả về Flight mới) sang getAllRoutes (trả về Route)
-    const std::vector<Route*>& routes = flightManager->getAllRoutes(); // <-- ĐÃ THAY ĐỔI
+    const std::vector<Route*>& routes = flightManager->getAllRoutes();
     
-    for (int i = 0; i < routes.size(); ++i) { // <-- ĐÃ THAY ĐỔI
-        Route* route = routes[i]; // <-- ĐÃ THAY ĐỔI
-        if (!route) continue; // <-- ĐÃ THAY ĐỔI
+    for (int i = 0; i < routes.size(); ++i) {
+        Route* route = routes[i];
+        if (!route) continue;
         
         // Các hàm getter này vẫn tồn tại trên Route (Flight cũ)
-        std::string depIATA = route->getDepartureAirport(); // <-- ĐÃ THAY ĐỔI
-        std::string arrIATA = route->getArrivalAirport(); // <-- ĐÃ THAY ĐỔI
+        std::string depIATA = route->getDepartureAirport();
+        std::string arrIATA = route->getArrivalAirport();
         
         // Nếu chưa có trong danh sách, tạo display name mặc định: "HAN"
         if (!hasAirport(depIATA)) {

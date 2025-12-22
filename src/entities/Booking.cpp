@@ -109,7 +109,7 @@ Booking Booking::fromRecordLine(const std::string& line) {
 
     int baseFare = std::stod(line.substr(start, end - start));
     start = end + 1;
-    end = line.length(); // Thay đổi ở đây
+    end = line.length();
 
     // Đọc status từ cuối dòng
     int statusInt = std::stoi(line.substr(start, end - start));

@@ -17,7 +17,6 @@ AccountAdmin::AccountAdmin(const std::string& username,
 std::string AccountAdmin::toRecordLine() const {
     std::string roleStr = std::to_string(static_cast<int>(this->role)); // Truy cập trực tiếp 'role'
 
-    // SỬA LỖI: Truy cập trực tiếp vào thuộc tính 'passwordHash' của lớp cha
     return this->accountId + "|" +
            this->username + "|" +
            this->passwordHash + "|" + 
@@ -59,10 +58,6 @@ AccountAdmin AccountAdmin::fromRecordLine(const std::string& line) {
     end = line.length();
 
     std::string email = line.substr(start, end - start);
-
-    // ---- QUAN TRỌNG ----
-    // Vì constructor của AccountAdmin tự động sinh ID mới và hash lại mật khẩu, chúng ta cần một cách để tạo đối tượng với dữ liệu đã có sẵn từ file.
-    // Giải pháp đơn giản nhất là tạo đối tượng rồi ghi đè lại các giá trị.
 
     // 1. Tạo một đối tượng Admin tạm thời. Mật khẩu "temp" sẽ bị ghi đè.
     AccountAdmin admin(username, "temp_password", fullName, phone, email);

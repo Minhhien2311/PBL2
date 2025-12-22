@@ -29,19 +29,13 @@ bool Promotion::isExpired() const {
 
 std::vector<Promotion> Promotion::loadAllPromotions() {
     // Implement logic to load all promotions from a data source
-    // Tạm thời chưa biết cách triển khai, có phải tự viết class vector không nè trời...
     return {}; // Placeholder
 }
 
 Promotion Promotion::findPromotionByCode(const std::string& code) {
-    // Implement logic to find a promotion by its code
-    // Này là kiểu tìm data rồi tạo đối tượng đúng không? Ta nghĩ mình nên sắp xếp theo thứ tự quy trình rồi comment cho dễ xài
-    // Thuật toán: ....(đang làm)
     return Promotion("", "", "", 0.0, "", "", false); // Placeholder
 }
 
 bool Promotion::validatePromotionCode(const std::string& code) {
-    // Implement logic to validate a promotion code format or existence
-    // Đây là gì...?
     return true; // Placeholder
 }

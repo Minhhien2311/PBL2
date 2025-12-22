@@ -14,7 +14,7 @@ PassengerManager::PassengerManager(const std::string& passengersFilePath)
 }
 
 PassengerManager::~PassengerManager() {
-    // Save before destruction
+    // Lưu trước khi Destruction
     saveAllData();
     
     // Cleanup
@@ -60,11 +60,11 @@ Passenger* PassengerManager::createOrUpdatePassenger(
     const std::string& dateOfBirth,
     const std::string& phoneNumber)
 {
-    // Check if passenger already exists
+    // Kiểm tra xem hành khách đã có mặt chưa.
     Passenger* existing = findPassengerById(id);
     
     if (existing) {
-        // Update existing passenger
+        // Cập nhật hành khách hiện tại
         existing->setFullName(fullName);
         existing->setPhoneNumber(phoneNumber);
         
@@ -72,7 +72,7 @@ Passenger* PassengerManager::createOrUpdatePassenger(
         return existing;
     }
     
-    // Create new passenger
+    // Tạo hành khách mới
     Passenger* newPassenger = new Passenger( id, fullName, dateOfBirth, phoneNumber );
     
     allPassengers_.push_back(newPassenger);

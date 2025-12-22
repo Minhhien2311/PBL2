@@ -42,8 +42,8 @@ std::pair<int, int> Seat::getCoordinates() const {
         return {-1, -1}; // Invalid ID
     }
 
-    // Seat ID format: {COL Letter}{ROW Number} e.g., A1, B10, H25
-    // Parse: First character = Column (A=0, B=1...), Number = Row (1-based)
+    // Định dạng Seat ID: {COL Letter}{ROW Number} e.g., A1, B10, H25
+    // Parse: kí tự đầu tiên = Column (A=0, B=1...), Number = Row (1-based)
     int col = std::toupper(id[0]) - 'A';  // Column from letter (0-based)
     
     try {

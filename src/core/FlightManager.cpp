@@ -343,7 +343,7 @@ bool FlightManager::saveAllData() {
 bool FlightManager::updateRoute(const std::string& routeId,
                                 const std::string& newDeparture, 
                                 const std::string& newDestination) {
-    // === STEP 1: Validate input ===
+    // === STEP 1: Xác thực đầu vào ===
     if (newDeparture.empty() || newDestination.empty()) {
         return false;
     }
@@ -384,8 +384,6 @@ bool FlightManager::updateRoute(const std::string& routeId,
             // Thêm ID mới vào hash table
             routeIdTable.insert(newRoute->getRouteId(), newRoute);
             
-            // ✅ KHÔNG lưu file ngay (theo chiến lược lazy write)
-            
             return true;
         }
     }
@@ -403,8 +401,6 @@ bool FlightManager::deleteRoute(const std::string& routeId) {
             delete allRoutes[i];
             allRoutes.erase(allRoutes.begin() + i);
             
-            // ✅ BỎ: saveRoutesToFiles(routesFilePath_);
-            
             return true;
         }
     }
@@ -416,7 +412,7 @@ bool FlightManager::updateFlight(const std::string& flightId,
     Flight* oldFlight = findFlightById(flightId);
     if (!oldFlight) return false;
     
-    // Save old time key BEFORE changing object
+    // Lưu khóa thời gian cũ TRƯỚC KHI thay đổi đối tượng
     time_t oldKey = getFlightTimeKey(*oldFlight);
     int oldPriceKey = oldFlight->getFareEconomy();
     
@@ -424,7 +420,7 @@ bool FlightManager::updateFlight(const std::string& flightId,
     *oldFlight = updatedFlight;
     updateFlightInRouteIndex(oldFlight, oldRouteId);
 
-    // Move id in time index if departure time changed
+    // Di chuyển ID trong chỉ mục thời gian nếu thời gian khởi hành thay đổi
     moveFlightTimeIndex(oldFlight, oldKey);
     moveFlightPriceIndex(oldFlight, oldPriceKey);
     
@@ -436,7 +432,7 @@ bool FlightManager::deleteFlight(const std::string& flightId) {
         if (allFlights[i]->getFlightId() == flightId) {
             Flight* flightToDelete = allFlights[i];
             
-            // Remove from time index first
+            // Trước tiên hãy xóa khỏi chỉ mục thời gian.
             removeFlightFromTimeIndex(flightToDelete);
             removeFlightFromPriceIndex(flightToDelete);
 
@@ -455,7 +451,7 @@ SeatManager* FlightManager::getSeatManager() const {
     return seatManager_;
 }
 
-// --- Route Index and Search Implementation ---
+// --- Chỉ mục Route và triển khai tìm kiếm ---
 
 void FlightManager::sortFlightsByDateTime(std::vector<Flight*>& flights) {
     for (size_t i = 0; i < flights.size(); i++) {
@@ -646,7 +642,7 @@ std::vector<Flight*> FlightManager::searchFlights(const SearchCriteria& criteria
         if (criteria.useAVLForPrice) {
             results = filterByPriceRangeAVL(results, criteria.minPrice, criteria.maxPrice);
         }
-        else {  // Fallback: Linear scan
+        else {  // Phương án dự phòng: Quét tuyến tính
             std::vector<Flight*> priceFiltered;
             for (Flight* flight : results) {
                 if (!flight) continue;
@@ -663,10 +659,10 @@ std::vector<Flight*> FlightManager::searchFlights(const SearchCriteria& criteria
     return results;
 }
 
-// --- Time index helpers (AVL) ---
+// --- Trợ giúp chỉ số thời gian (AVL) ---
 
 time_t FlightManager::getFlightTimeKey(const Flight& flight) const {
-    // Use DateTime helper to parse dd/MM/yyyy and HH:MM
+    // Sử dụng trình trợ giúp DateTime để phân tích định dạng dd/MM/yyyy và HH:MM.
     auto tp = utils::DateTime::fromDmYHm(flight.getDepartureDate(), flight.getDepartureTime());
     return utils::DateTime::toUnix(tp);
 }
@@ -676,14 +672,14 @@ void FlightManager::addFlightToTimeIndex(Flight* flight) {
     time_t key = getFlightTimeKey(*flight);
     std::vector<std::string>* existing = flightTimeTree.find(key);
     if (existing) {
-        // ensure not duplicate
+        // đảm bảo không trùng lặp
         if (std::find(existing->begin(), existing->end(), flight->getFlightId()) == existing->end()) {
             existing->push_back(flight->getFlightId());
         }
     } else {
         std::vector<std::string> list;
         list.push_back(flight->getFlightId());
-        flightTimeTree.insert(key, list); // AVL will copy the vector
+        flightTimeTree.insert(key, list); // AVL sẽ copy danh sách vào cây
     }
 }
 
@@ -708,21 +704,20 @@ void FlightManager::removeFlightFromTimeIndex(Flight* flight) {
 void FlightManager::moveFlightTimeIndex(Flight* flight, time_t oldKey) {
     if (!flight) return;
     time_t newKey = getFlightTimeKey(*flight);
-    if (oldKey == newKey) return; // nothing changed
-    // Remove from old key
+    if (oldKey == newKey) return; // Không có gì được thay đổi
+    // Xóa khỏi khóa cũ
     removeFlightFromTimeIndexByKey(oldKey, flight->getFlightId());
-    // Add to new key
+    // Thêm vào khóa mới
     addFlightToTimeIndex(flight);
 }
 
-// Existing function (kept for compatibility) — now delegates to addFlightToTimeIndex
+// Hàm hiện có (được giữ lại để đảm bảo tính tương thích) — hiện ủy quyền cho hàm addFlightToTimeIndex
 void FlightManager::indexFlightTime(const Flight& flight) {
-    // Find the Flight* in flightIdTable if it exists
+    // Tìm Flight* trong flightIdTable nếu nó tồn tại.
     Flight** pptr = flightIdTable.find(flight.getFlightId());
     if (pptr && *pptr) {
         addFlightToTimeIndex(*pptr);
     } else {
-        // fallback: create a temporary vector under the key (rare)
         time_t key = getFlightTimeKey(flight);
         std::vector<std::string>* existing = flightTimeTree.find(key);
         if (existing) {

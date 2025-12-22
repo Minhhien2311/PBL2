@@ -177,14 +177,14 @@ bool SeatManager::updateAndSaveChanges() {
     // Build booked seats string
     std::ostringstream bookedSeats;
     bool first = true;
-    int bookedCount = 0;  // ✅ THÊM: Đếm số ghế booked
+    int bookedCount = 0;
     
     for (int i = 0; i < activeSeatMap_.size(); i++) {
         if (activeSeatMap_[i]->getStatus() == SeatStatus::Booked) {
             if (!first) bookedSeats << ",";
             bookedSeats << activeSeatMap_[i]->getId();
             first = false;
-            bookedCount++;  // ✅ THÊM
+            bookedCount++;
         }
     }
     
@@ -207,7 +207,6 @@ bool SeatManager::updateAndSaveChanges() {
     // Write back
     std::ofstream outFile(seatStatusFilePath_);
     if (!outFile.is_open()) {
-        // ✅ THÊM: Log lỗi chi tiết
         std::cerr << "[ERROR] Cannot open file for writing: " << seatStatusFilePath_ << std::endl;
         std::cerr << "[ERROR] Possible reasons:" << std::endl;
         std::cerr << "  - File is locked by another process" << std::endl;
