@@ -228,9 +228,21 @@ typename AVLTree<Key, Value>::Node* AVLTree<Key, Value>::searchNode(Node* node, 
 template <typename Key, typename Value>
 void AVLTree<Key, Value>::rangeQueryHelper(Node* node, const Key& minKey, const Key& maxKey, std::vector<Value>& result) const {
     if (!node) return;
-    if (node->key > minKey) rangeQueryHelper(node->left, minKey, maxKey, result);
-    if (node->key >= minKey && node->key <= maxKey) result.push_back(node->value);
-    if (node->key < maxKey) rangeQueryHelper(node->right, minKey, maxKey, result);
+    
+    // Nếu key hiện tại lớn hơn minKey, có thể có giá trị nhỏ hơn hoặc bằng ở bên trái
+    if (node->key >= minKey) {
+        rangeQueryHelper(node->left, minKey, maxKey, result);
+    }
+    
+    // Nếu key nằm trong khoảng, thêm vào kết quả
+    if (node->key >= minKey && node->key <= maxKey) {
+        result.push_back(node->value);
+    }
+    
+    // Nếu key hiện tại nhỏ hơn hoặc bằng maxKey, có thể có giá trị lớn hơn ở bên phải
+    if (node->key <= maxKey) {
+        rangeQueryHelper(node->right, minKey, maxKey, result);
+    }
 }
 
 template <typename Key, typename Value>

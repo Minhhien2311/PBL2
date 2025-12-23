@@ -184,7 +184,7 @@ AdminInterface::AdminInterface(AccountManager* accManager,
     root->addWidget(sidebar_);
 
     stack_ = new QStackedWidget(this);
-    stack_->addWidget(new DashboardPage(accountManager_, reportManager_, this));
+    stack_->addWidget(new DashboardPage(accountManager_, reportManager_, flightManager_, bookingManager_, airportManager_, this));
     stack_->addWidget(new RoutesPage(flightManager_, airportManager_, this));
     stack_->addWidget(new FlightsPage(flightManager_, airportManager_, this));
     stack_->addWidget(new AdminBookingsPage(bookingManager_, flightManager_, accountManager_, airportManager_, passengerManager_, this));

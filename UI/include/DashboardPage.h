@@ -9,13 +9,18 @@ class QStandardItemModel;
 class QLabel;
 class AccountManager;
 class ReportManager;
+class FlightManager;
+class BookingManager;
+class AirportManager;
 
 class DashboardPage : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit DashboardPage(AccountManager* accManager, ReportManager* reportManager, QWidget *parent = nullptr);
+    explicit DashboardPage(AccountManager* accManager, ReportManager* reportManager, 
+                          FlightManager* flightManager, BookingManager* bookingManager,
+                          AirportManager* airportManager, QWidget *parent = nullptr);
 
 public slots:
     void refreshData();
@@ -26,6 +31,9 @@ private:
 
     AccountManager* accountManager_;
     ReportManager* reportManager_;
+    FlightManager* flightManager_;
+    BookingManager* bookingManager_;
+    AirportManager* airportManager_;
     
     QWidget* createStatCard(const QString& title, const QString& defaultValue, QLabel*& outValueLabel);
 

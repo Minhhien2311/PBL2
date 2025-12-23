@@ -166,7 +166,7 @@ AgentInterface::AgentInterface(AccountManager* accManager,
 
     stack_ = new QStackedWidget(this);
     
-    dashboardPage_ = new DashboardPage(accountManager_, reportManager_, this);
+    dashboardPage_ = new DashboardPage(accountManager_, reportManager_, flightManager_, bookingManager_, airportManager_, this);
     searchBookPage_ = new SearchBookPage(flightManager_, bookingManager_, accountManager_, airportManager_, passengerManager_, this);
     agentBookingsPage_ = new AgentBookingsPage(bookingManager_, flightManager_, accountManager_, airportManager_, passengerManager_, this);
     ticketsReportPage_ = new AgentTicketsReportPage(accountManager_, bookingManager_, reportManager_, this);

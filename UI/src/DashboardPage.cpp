@@ -4,7 +4,13 @@
 #include "PageRefresher.h"
 #include "core/AccountManager.h"
 #include "core/ReportManager.h"
+#include "core/FlightManager.h"
+#include "core/BookingManager.h"
+#include "core/AirportManager.h"
 #include "entities/Account.h"
+#include "entities/Flight.h"
+#include "entities/Booking.h"
+#include "utils/DateTime.h"
 
 #include <QFrame>
 #include <QHBoxLayout>
@@ -35,11 +41,18 @@ namespace {
     }
 }
 
-DashboardPage::DashboardPage(AccountManager* accManager, ReportManager* reportManager, QWidget *parent)
-    : QWidget(parent), accountManager_(accManager), reportManager_(reportManager)
+DashboardPage::DashboardPage(AccountManager* accManager, ReportManager* reportManager, 
+                             FlightManager* flightManager, BookingManager* bookingManager,
+                             AirportManager* airportManager, QWidget *parent)
+    : QWidget(parent), accountManager_(accManager), reportManager_(reportManager),
+      flightManager_(flightManager), bookingManager_(bookingManager),
+      airportManager_(airportManager)
 {
     Q_ASSERT(accountManager_ != nullptr);
     Q_ASSERT(reportManager_ != nullptr);
+    Q_ASSERT(flightManager_ != nullptr);
+    Q_ASSERT(bookingManager_ != nullptr);
+    Q_ASSERT(airportManager_ != nullptr);
     
     setupUi();
     setupModel();
@@ -192,7 +205,7 @@ void DashboardPage::setupModel()
     flightsModel_ = new QStandardItemModel(0, 6, this);
     flightsModel_->setHorizontalHeaderLabels({
         "STT", "Mã chuyến", "Tuyến bay", "Giờ khởi hành", 
-        "Khách đặt", "Doanh thu (Est)"
+        "Khách đặt", "Doanh thu"
     });
     
     flightsTable_->setModel(flightsModel_);
@@ -215,10 +228,27 @@ void DashboardPage::refreshData()
         return;
     }
     
-    std::string agentId = currentUser->getId();
-    int dailySales = reportManager_->getDailyTicketsSold(agentId);
-    double dailyRevenue = reportManager_->getDailyRevenue(agentId);
-    int dailyCancellations = reportManager_->getDailyCancellations(agentId);
+    // Lấy ngày hôm nay (format DD/MM/YYYY)
+    auto now = utils::DateTime::nowUtc();
+    std::string today = utils::DateTime::formatDmY(now);
+    
+    int dailySales = 0;
+    double dailyRevenue = 0.0;
+    int dailyCancellations = 0;
+    
+    // Phân biệt Admin và Agent
+    if (currentUser->getRole() == Role::Admin) {
+        // Admin: Hiển thị thống kê TRONG NGÀY toàn hệ thống
+        dailySales = reportManager_->getTicketsSoldInRange(today, today);
+        dailyRevenue = reportManager_->getRevenueInRange(today, today);
+        dailyCancellations = reportManager_->getCancelledTicketsInRange(today, today);
+    } else {
+        // Agent: Hiển thị thống kê TRONG NGÀY cá nhân
+        std::string agentId = currentUser->getId();
+        dailySales = reportManager_->getDailyTicketsSold(agentId);
+        dailyRevenue = reportManager_->getDailyRevenue(agentId);
+        dailyCancellations = reportManager_->getDailyCancellations(agentId);
+    }
     
     salesCountLabel_->setText(QString::number(dailySales));
     salesTotalLabel_->setText(formatVietnamCurrency(static_cast<long long>(dailyRevenue)));
@@ -226,32 +256,62 @@ void DashboardPage::refreshData()
 
     flightsModel_->removeRows(0, flightsModel_->rowCount());
     
-    struct MockFlight {
-        QString id;
-        QString route;
-        QString time;
-        QString seats;
-        long long revenue;
-    };
-
-    QList<MockFlight> mockData = {
-        {"VN123", "SGN - HAN", "08:00", "100/150", 150000000},
-        {"VJ456", "DAD - SGN", "10:30", "120/180", 180000000},
-        {"QH789", "HAN - DAD", "13:15", "80/120", 95000000},
-        {"VN234", "SGN - DAD", "15:45", "140/160", 210000000},
-        {"VJ567", "HAN - SGN", "18:00", "170/200", 255000000},
-        {"QH890", "DAD - HAN", "20:30", "90/120", 110000000}
-    };
-
+    // Lấy tất cả chuyến bay
+    std::vector<Flight*> allFlights = flightManager_->getAllFlights();
+    
+    // Lọc chuyến bay trong ngày hôm nay
+    std::vector<Flight*> todayFlights;
+    for (Flight* flight : allFlights) {
+        if (flight) {
+            if (flight->getDepartureDate() == today) {
+                todayFlights.push_back(flight);
+            }
+        }
+    }
+    
+    // Lấy tất cả bookings để tính số khách và doanh thu
+    const std::vector<Booking*>& allBookings = bookingManager_->getAllBookings();
+    
     int stt = 1;
-    for (const auto& f : mockData) {
+    for (Flight* flight : todayFlights) {
+        // Đếm số booking cho chuyến bay này
+        int bookedCount = 0;
+        long long flightRevenue = 0;
+        
+        for (Booking* booking : allBookings) {
+            if (booking && booking->getFlightId() == flight->getFlightId()) {
+                if (booking->getStatus() == BookingStatus::Issued) {
+                    bookedCount++;
+                    flightRevenue += booking->getBaseFare();
+                }
+            }
+        }
+        
+        // Tạo chuỗi tuyến bay từ routeId (VD: SGN-HAN -> Hồ Chí Minh - Hà Nội)
+        std::string routeId = flight->getRouteId();
+        std::string routeInfo = routeId;
+        
+        size_t pos = routeId.find('-');
+        if (pos != std::string::npos) {
+            std::string fromIATA = routeId.substr(0, pos);
+            std::string toIATA = routeId.substr(pos + 1);
+            std::string fromName = airportManager_->getDisplayName(fromIATA);
+            std::string toName = airportManager_->getDisplayName(toIATA);
+            
+            if (!fromName.empty() && !toName.empty()) {
+                routeInfo = fromName + " → " + toName;
+            } else {
+                routeInfo = fromIATA + " → " + toIATA;
+            }
+        }
+        
         QList<QStandardItem *> row;
         row << new QStandardItem(QString::number(stt++))
-            << new QStandardItem(f.id)
-            << new QStandardItem(f.route)
-            << new QStandardItem(f.time)
-            << new QStandardItem(f.seats)
-            << new QStandardItem(formatVietnamCurrency(f.revenue));
+            << new QStandardItem(QString::fromStdString(flight->getFlightNumber()))
+            << new QStandardItem(QString::fromStdString(routeInfo))
+            << new QStandardItem(QString::fromStdString(flight->getDepartureTime()))
+            << new QStandardItem(QString("%1/%2").arg(bookedCount).arg(flight->getTotalCapacity()))
+            << new QStandardItem(formatVietnamCurrency(flightRevenue));
 
         for (QStandardItem *item : row) {
             item->setTextAlignment(Qt::AlignCenter);

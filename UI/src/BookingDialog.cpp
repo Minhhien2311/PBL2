@@ -836,8 +836,9 @@ void BookingDialog::onConfirmClicked() {
         return;
     }
 
-    if (!seatManager->bookSeat(selectedSeatId_.toStdString())) {
-        QMessageBox::critical(this, "Lỗi", "Không thể đặt ghế này. Vui lòng chọn ghế khác.");
+    // Chọn ghế trước khi tạo booking (createNewBooking sẽ gọi confirmSelection)
+    if (!seatManager->selectSeat(selectedSeatId_.toStdString())) {
+        QMessageBox::critical(this, "Lỗi", "Không thể chọn ghế này. Vui lòng chọn ghế khác.");
         renderSeatMap();
         confirmBtn_->setEnabled(true);
         return;
@@ -850,29 +851,29 @@ void BookingDialog::onConfirmClicked() {
     int baseFare = (bookingClass == BookingClass::Economy) ? flight_->getFareEconomy() : flight_->getFareBusiness();
     int finalFare = bookingManager_->applyPromotion( promoCodeEdit_->text().trimmed().toStdString(), baseFare);
 
-    QString currentDateTime = QDateTime::currentDateTime().toString("dd/MM/yyyy HH:mm:ss");
-
-    Booking* newBooking = new Booking(
+    // Sử dụng createNewBooking để tự động cập nhật availableSeats
+    // Hàm này sẽ gọi confirmSelection() để book ghế
+    Booking* newBooking = bookingManager_->createNewBooking(
+        *flightManager_,
         flight_->getFlightId(),
         agentId,
         passengerId.toStdString(),
-        selectedSeatId_.toStdString(),
-        currentDateTime.toStdString(),
         bookingClass,
         finalFare,
-        BookingStatus::Issued
+        *seatManager
     );
 
-    if (!bookingManager_->saveBookingToFile(newBooking)) {
-        QMessageBox::critical(this, "Lỗi", "Không thể lưu booking. Vui lòng thử lại.");
-        delete newBooking;
-        seatManager->releaseSeat(selectedSeatId_.toStdString());
+    if (!newBooking) {
+        QMessageBox::critical(this, "Lỗi", "Không thể tạo và lưu booking. Vui lòng thử lại.");
+        seatManager->cancelSelection();
         confirmBtn_->setEnabled(true);
         return;
     }
 
-    if (!seatManager->saveChanges()) {
-        std::cerr << "[WARN] Failed to save seat map changes to file." << std::endl;
+    // createNewBooking đã tự động lưu booking vào file rồi
+    // Bây giờ chỉ cần lưu thay đổi số ghế trống vào file flights.txt
+    if (!flightManager_->saveAllData()) {
+        std::cerr << "[WARN] Failed to save flight data changes." << std::endl;
     }
 
     QMessageBox::information(this, "Thành công", 
