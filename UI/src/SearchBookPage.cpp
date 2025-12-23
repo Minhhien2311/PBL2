@@ -481,10 +481,6 @@ void SearchBookPage::onBookClicked()
     if (dialog.exec() == QDialog::Accepted) {
         QMessageBox::information(this, "Thành công", "Đặt vé thành công!");
         
-<<<<<<< HEAD:UI/SearchBookPage.cpp
-        // Reload table to show updated seat availability
-=======
->>>>>>> 1653edf2f873c47ec38b1c735fbef5b35522f03c:UI/src/SearchBookPage.cpp
         onSearchClicked();
     }
 }
@@ -494,10 +490,6 @@ void SearchBookPage::loadAllFlights()
     const std::vector<Flight*> flights = flightManager_->getFutureFlights(true);
     currentFlights_ = flights;
     
-<<<<<<< HEAD:UI/SearchBookPage.cpp
-    // Display them in the table
-=======
->>>>>>> 1653edf2f873c47ec38b1c735fbef5b35522f03c:UI/src/SearchBookPage.cpp
     fillTable(flights);
     
     statusLabel_->setText(
@@ -525,11 +517,7 @@ void SearchBookPage::onSortChanged(int index)
             std::reverse(sortedList.begin(), sortedList.end());
             break;
 
-<<<<<<< HEAD:UI/SearchBookPage.cpp
-        case 3: // Giờ đi: Sớm nhất
-=======
         case 3:
->>>>>>> 1653edf2f873c47ec38b1c735fbef5b35522f03c:UI/src/SearchBookPage.cpp
             sortedList = Sorting::sortByArrivalTime(currentFlights_);
             break;
         case 4:

@@ -321,11 +321,6 @@ void RoutesPage::onEditRoute()
     int row = selected.first().row();
     QString routeId = model_->item(row, 1)->text();
     
-<<<<<<< HEAD:UI/RoutesPage.cpp
-    // Giả sử cột 1, 2 là display name, cần parse IATA
-    // Hoặc lưu IATA trong data role
-=======
->>>>>>> 1653edf2f873c47ec38b1c735fbef5b35522f03c:UI/src/RoutesPage.cpp
     Route* currentRoute = flightManager_->findRouteById(routeId.toStdString());
     if (!currentRoute) {
         QMessageBox::critical(this, "Lỗi", "Không tìm thấy tuyến bay.");
