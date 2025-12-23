@@ -119,7 +119,8 @@ Booking* BookingManager::createNewBooking( FlightManager& flightManager,
     flight->setAvailableSeats(flight->getAvailableSeats() - 1); // Cập nhật số ghế trống
 
     // BƯỚC 4: Tạo đối tượng Booking mới
-    std::string currentDate = utils::DateTime::formatLocal(utils::DateTime::nowUtc(), "%Y-%m-%d %H:%M:%S");
+    // Định dạng ngày theo dd/mm/yyyy HH:MM:SS để khớp với format trong file bookings.txt
+    std::string currentDate = utils::DateTime::formatLocal(utils::DateTime::nowUtc(), "%d/%m/%Y %H:%M:%S");
     
     // Sử dụng seatId đã lấu được ở dòng 86 (KHÔNG gọi getSelectedSeat() vì đã bị reset)
     Booking* newBooking = new Booking(flightId, agentId, passengerId, seatId, currentDate, bookingClass, baseFare, BookingStatus::Issued); // <-- Đã đổi
@@ -127,6 +128,21 @@ Booking* BookingManager::createNewBooking( FlightManager& flightManager,
     // Thêm vào std::vector và HashTable
     this->allBookings.push_back(newBooking);
     this->bookingIdTable.insert(newBooking->getBookingId(), newBooking);
+    
+    // BƯỚC 5: Lưu booking vào file ngay lập tức
+    std::ofstream file(bookingsFilePath_, std::ios::app);
+    if (!file.is_open()) {
+        std::cerr << "Lỗi Booking: Không thể mở file bookings để ghi." << std::endl;
+        // Rollback: Xóa khỏi allBookings và bookingIdTable
+        allBookings.pop_back();
+        bookingIdTable.remove(newBooking->getBookingId());
+        delete newBooking;
+        return nullptr;
+    }
+    
+    file << newBooking->toRecordLine() << std::endl;
+    file.flush();
+    file.close();
     
     return newBooking;
 }

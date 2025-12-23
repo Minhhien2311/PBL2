@@ -26,12 +26,12 @@ else()
     message(FATAL_ERROR "Qt6 Charts NOT found!")
 endif()
 
-# ===== Thu thập nguồn - LIỆT KÊ RÕ RÀNG =====
+# ===== Thu thập nguồn =====
 
-# 1. UI Sources (đã chuyển ra ngoài src/)
+# 1. UI Sources (UI/src và UI/include)
 file(GLOB_RECURSE UI_SOURCES
-    "${CMAKE_SOURCE_DIR}/UI/*.cpp"
-    "${CMAKE_SOURCE_DIR}/UI/*.h"
+    "${CMAKE_SOURCE_DIR}/UI/src/*.cpp"
+    "${CMAKE_SOURCE_DIR}/UI/include/*.h"
 )
 
 # 2. Core Sources - LIỆT KÊ THỦ CÔNG ĐỂ CHẮC CHẮN
@@ -56,6 +56,11 @@ file(GLOB_RECURSE UTILS_SOURCES
     "${CMAKE_SOURCE_DIR}/src/utils/*.cpp"
 )
 
+# 5. App Sources
+file(GLOB_RECURSE APP_SOURCES   
+    "${CMAKE_SOURCE_DIR}/app/*.cpp"
+)
+
 # ===== Debug: In ra danh sách file =====
 message(STATUS "=== UI_SOURCES (${CMAKE_SOURCE_DIR}/UI/) ===")
 foreach(src ${UI_SOURCES})
@@ -69,6 +74,7 @@ endforeach()
 
 # ===== Executable chính =====
 add_executable(pbl2
+    ${APP_SOURCES}
     ${UI_SOURCES}
     ${CORE_SOURCES}
     ${ENTITY_SOURCES}
@@ -82,7 +88,8 @@ target_include_directories(pbl2 PRIVATE
     "${CMAKE_SOURCE_DIR}/include/entities"
     "${CMAKE_SOURCE_DIR}/include/DSA"
     "${CMAKE_SOURCE_DIR}/include/utils"
-    "${CMAKE_SOURCE_DIR}/UI"  # THÊM ĐỂ TÌM HEADER UI
+    "${CMAKE_SOURCE_DIR}/UI/include"
+    "${CMAKE_SOURCE_DIR}/app"
 )
 
 # ===== Link Qt =====

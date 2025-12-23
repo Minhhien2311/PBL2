@@ -177,9 +177,9 @@ int main() {
 
     long long totalBookedSeatsGlobal = 0; 
 
-    // Mốc thời gian hiện tại giả lập: 20/11/2025
+    // Mốc thời gian hiện tại giả lập: 24/12/2025 (70% chuyến chưa bay từ 24/12 trở đi)
     tm currentTm = {};
-    currentTm.tm_year = 125; currentTm.tm_mon = 10; currentTm.tm_mday = 20;
+    currentTm.tm_year = 125; currentTm.tm_mon = 11; currentTm.tm_mday = 24; // 24/12/2025
     mktime(&currentTm);
     time_t nowTime = mktime(&currentTm);
 
@@ -194,10 +194,24 @@ int main() {
         RouteData route = routes[rIdx];
         Airline airline = airlines[randomInt(0, airlines.size() - 1)];
 
+        // Sinh ngày bay: 30% đã bay (trước 24/12), 70% chưa bay (từ 24/12 trở đi)
         tm depTm = {};
-        depTm.tm_year = 125; depTm.tm_mon = 0; depTm.tm_mday = 1;
-        mktime(&depTm);
-        depTm.tm_mday += randomInt(0, 364); 
+        depTm.tm_year = 125;
+        
+        if (rand() % 100 < 30) {
+            // 30% chuyến đã bay: từ 01/01 đến 23/12 (357 ngày)
+            depTm.tm_mon = 0; 
+            depTm.tm_mday = 1;
+            mktime(&depTm);
+            depTm.tm_mday += randomInt(0, 356); // 0-356 ngày kể từ 01/01
+        } else {
+            // 70% chuyến chưa bay: từ 24/12 trở đi (24/12 -> 31/01/2026 = 39 ngày)
+            depTm.tm_mon = 11; 
+            depTm.tm_mday = 24;
+            mktime(&depTm);
+            depTm.tm_mday += randomInt(0, 38); // 0-38 ngày kể từ 24/12
+        }
+        
         depTm.tm_hour = randomInt(5, 23); 
         depTm.tm_min = randomInt(0, 11) * 5;
         time_t flightTime = mktime(&depTm);
@@ -209,15 +223,30 @@ int main() {
         int numRows = randomInt(20, 40); 
         int totalCapacity = numRows * 8;
 
+        // Điều chỉnh tỉ lệ lấp đầy để trung bình khoảng 50%
         double diffSeconds = difftime(flightTime, nowTime);
         double occupancyRate = 0.0;
-        if (diffSeconds < 0) occupancyRate = 0.80 + (rand() % 19) / 100.0; 
-        else if (diffSeconds < 7 * 24 * 3600) occupancyRate = 0.50 + (rand() % 36) / 100.0;
-        else occupancyRate = (rand() % 41) / 100.0;
+        if (diffSeconds < 0) {
+            // Chuyến đã bay: 60-85% (trung bình 72.5%)
+            occupancyRate = 0.60 + (rand() % 26) / 100.0;
+        } else if (diffSeconds < 7 * 24 * 3600) {
+            // Sắp bay trong 7 ngày: 40-70% (trung bình 55%)
+            occupancyRate = 0.40 + (rand() % 31) / 100.0;
+        } else {
+            // Chuyến xa: 10-40% (trung bình 25%)
+            occupancyRate = 0.10 + (rand() % 31) / 100.0;
+        }
 
+        // Tính số ghế đã đặt và số ghế trống
         int bookedSeats = (int)(totalCapacity * occupancyRate);
         int availableSeats = totalCapacity - bookedSeats;
         if (availableSeats < 0) availableSeats = 0;
+        
+        // Đảm bảo tính đồng nhất: số ghế đã đặt phải <= tổng số ghế
+        if (bookedSeats > totalCapacity) {
+            bookedSeats = totalCapacity;
+            availableSeats = 0;
+        }
 
         totalBookedSeatsGlobal += bookedSeats;
 
@@ -275,16 +304,23 @@ int main() {
     long long bkgCount = 1;
 
     for (const auto& f : generatedFlights) {
+        // Tạo danh sách tất cả ghế
+        vector<string> allSeats = generateFullSeatList(f.totalSeats);
+        
         if (f.bookedCount <= 0) {
+            // Không có ghế nào được đặt
             sOut << f.id << "|" << endl;
             continue; 
         }
 
-        vector<string> allSeats = generateFullSeatList(f.totalSeats);
+        // Đảm bảo không đặt quá số ghế có sẵn
+        int actualBooked = min(f.bookedCount, (int)allSeats.size());
+        
+        // Shuffle và lấy số ghế đúng bằng bookedCount
         shuffle(allSeats.begin(), allSeats.end(), g);
 
         vector<string> bookedSeatCodes;
-        for(int k=0; k < f.bookedCount; ++k) {
+        for(int k=0; k < actualBooked; ++k) {
             bookedSeatCodes.push_back(allSeats[k]);
         }
 
@@ -311,9 +347,21 @@ int main() {
             string agentId = ssAgent.str();
             // ----------------------------------------------
 
-            int status = 1; 
-            int luggage = (rand() % 3 == 0) ? 1 : 0;
-            long long finalPrice = f.priceEco + (luggage * 500000);
+            // BookingClass: 0=Economy, 1=Business (80% Economy, 20% Business)
+            int bookingClass = (rand() % 10 < 8) ? 0 : 1;
+            long long finalPrice = (bookingClass == 0) ? f.priceEco : (f.priceEco * 2);
+            
+            // BookingStatus: Đa dạng hóa trạng thái
+            // 0=Issued/Bán (80%), 1=Cancelled/Hủy (5%), 2=Changed/Đổi (15%)
+            int status = 0; // Mặc định Issued
+            int statusRand = rand() % 100;
+            if (statusRand < 80) {
+                status = 0; // Issued - Đã bán
+            } else if (statusRand < 85) {
+                status = 1; // Cancelled - Đã hủy
+            } else {
+                status = 2; // Changed - Đã đổi
+            }
 
             bOut << bkgId.str() << "|"
                  << f.id << "|"
@@ -321,9 +369,9 @@ int main() {
                  << p.id << "|"
                  << seatCode << "|"
                  << getBookingTime(f.departureDate) << "|"
-                 << status << "|"
+                 << bookingClass << "|"
                  << finalPrice << "|"
-                 << luggage << endl;
+                 << status << endl;
         }
     }
 

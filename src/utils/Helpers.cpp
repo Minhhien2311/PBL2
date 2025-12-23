@@ -32,17 +32,15 @@ std::vector<std::string> Helpers::loadAirlinesFromFile(const std::string& filePa
     std::ifstream file(filePath);
     
     if (!file.is_open()) {
-        return airlines; // Trả về vector rỗng nếu không đọc được file
+        return airlines;
     }
     
     std::string line;
     while (std::getline(file, line)) {
-        // Bỏ qua dòng trống và comment
         if (line.empty() || line[0] == '#') {
             continue;
         }
         
-        // Loại bỏ khoảng trắng đầu/cuối
         size_t start = line.find_first_not_of(" \t\r\n");
         size_t end = line.find_last_not_of(" \t\r\n");
         

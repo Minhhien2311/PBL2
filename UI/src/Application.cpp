@@ -1,0 +1,185 @@
+#include "Application.h"
+
+#include "AdminInterface.h"
+#include "AgentInterface.h"
+#include "core/AccountManager.h"
+#include "core/AirportManager.h"
+#include "core/BookingManager.h"
+#include "core/FlightManager.h"
+#include "core/PassengerManager.h"
+#include "core/ReportManager.h"
+#include "ForgotPasswordPage.h"
+#include "LoginPage.h"
+
+#include <QStackedWidget>
+#include <QTimer>
+
+// Constructor
+Application::Application(AccountManager* accManager, 
+                         FlightManager* flManager, 
+                         BookingManager* bkManager,
+                         ReportManager* reportManager,
+                         AirportManager* airportManager,
+                         PassengerManager* passengerManager,
+                         QWidget *parent)
+    : QMainWindow(parent), 
+      accountManager_(accManager), 
+      flightManager_(flManager),
+      bookingManager_(bkManager),
+      reportManager_(reportManager),
+      airportManager_(airportManager),
+      passengerManager_(passengerManager)
+{
+    setWindowTitle("Hệ thống Quản lý Bán vé máy bay");
+    
+    setupUi();
+    setupConnections();
+
+    QString qss = R"(
+            QWidget { background: white; color: #333; font-family: 'Segoe UI'; }
+            QMainWindow { background: white; }
+            QFrame#Sidebar { background: #133e87; }
+            QLabel#AppTitle { color:#123B7A; font-weight:700; font-size:24px; }
+            QFrame#LoginBox { border: 1px solid #C9D6EB; border-radius: 8px; background: white; color: #333; }
+            
+            QListWidget { 
+                border: none; color: white; background: transparent; outline: 0; padding: 0px; 
+            }
+            QListWidget::item { 
+                padding: 8px 15px; margin: 0px; border: none;
+            }
+            QListWidget::item:selected, QListWidget::item:hover { 
+                background: #1C4E99; border: none; 
+            }
+            
+            QPushButton { 
+                border:1px solid #7AA0D4; border-radius:8px; padding:6px 10px; 
+                background:#5B86C6; color:white; font-weight:600;
+            }
+            QPushButton:hover { background:#6B97D8; }
+            
+            QLineEdit, QComboBox, QDateEdit, QTimeEdit, QSpinBox { 
+                border: 1px solid #608bc1; border-radius: 6px; padding: 4px 10px; 
+                background: white; color: #333; height: 30px; font-size: 13px;
+            }
+            QLineEdit:focus, QComboBox:focus { border: 1.5px solid #4472C4; }
+
+            QTableView {
+                border: 1px solid #133e87; gridline-color: transparent; background: white; outline: 0;
+            }
+            QTableView::item { border-bottom: 1px solid #C9D6EB; border-right: none; }
+            QHeaderView::section {
+                background-color: #133e87; color: white; padding: 8px; border: none; font-weight: 600; 
+            }
+            QTableView::item:hover { background-color: #EAF2F8; color: #123B7A; }
+            QTableView::item:selected { background-color: #EAF2F8; color: black; }
+
+            QScrollBar:vertical { border: none; background: #cbdceb; width: 6px; margin: 0; }
+            QScrollBar::handle:vertical { background: #608bc1; border-radius: 3px; min-height: 20px; }
+            QScrollBar:horizontal { border: none; background: #cbdceb; height: 6px; margin: 0; }
+            QScrollBar::handle:horizontal { background: #608bc1; border-radius: 3px; min-width: 20px; }
+
+            QMessageBox {
+                background-color: white;
+            }
+            QMessageBox QLabel {
+                color: #133e87;
+                font-size: 13px;
+                font-weight: 500;
+            }
+            QMessageBox QPushButton {
+                background-color: #608bc1;
+                color: #133e87;
+                border: 1px solid #133e87;
+                border-radius: 5px;
+                padding: 5px 20px;
+                min-width: 60px;
+                font-weight: bold;
+            }
+            QMessageBox QPushButton:hover {
+                background-color: #365a9e;
+            }
+            QMessageBox QPushButton:pressed {
+                background-color: #133e87;
+            }
+            )";
+        this->setStyleSheet(qss);
+    
+    QTimer::singleShot(0, this, [this]() {
+        showMaximized();
+    });
+}
+
+// ========== DESTRUCTOR ==========
+
+Application::~Application() {}
+
+// ========== SETUP UI ==========
+
+void Application::setupUi()
+{
+    loginPage_ = new LoginPage(accountManager_, this);
+    forgotPasswordPage_ = new ForgotPasswordPage(accountManager_, this);
+    
+    adminInterface_ = new AdminInterface(accountManager_, 
+                                         flightManager_, 
+                                         bookingManager_,
+                                         reportManager_,
+                                         airportManager_,
+                                         passengerManager_,
+                                         this);
+    
+    // 4. Khởi tạo AgentInterface
+    agentInterface_ = new AgentInterface(accountManager_, flightManager_, 
+                                         bookingManager_, reportManager_,
+                                         airportManager_, passengerManager_, this);
+
+    // 5. Thêm tất cả vào StackedWidget
+    stack_ = new QStackedWidget(this);
+    stack_->addWidget(loginPage_);          // Index 0
+    stack_->addWidget(adminInterface_);     // Index 1
+    stack_->addWidget(agentInterface_);     // Index 2
+    stack_->addWidget(forgotPasswordPage_); // Index 3 (THÊM MỚI)
+
+    setCentralWidget(stack_);
+    stack_->setCurrentWidget(loginPage_);
+}
+
+// ========== SETUP CONNECTIONS ==========
+
+void Application::setupConnections()
+{
+    connect(loginPage_, &LoginPage::loginSuccess, this, &Application::onLoginSuccess);
+
+    connect(loginPage_, &LoginPage::forgotPasswordClicked, this, [this]() {
+        forgotPasswordPage_->clearFields();
+        stack_->setCurrentWidget(forgotPasswordPage_);
+    });
+
+    connect(forgotPasswordPage_, &ForgotPasswordPage::backToLogin, this, [this]() {
+        stack_->setCurrentWidget(loginPage_);
+    });
+
+    connect(adminInterface_, &AdminInterface::logoutClicked, this, &Application::onLogout);
+    connect(agentInterface_, &AgentInterface::logoutClicked, this, &Application::onLogout);
+}
+
+// ========== SLOTS ==========
+
+void Application::onLoginSuccess(const QString& role, const QString& token)
+{
+    if (role == "admin") {
+        stack_->setCurrentWidget(adminInterface_);
+    } 
+    else if (role == "agent") {
+        stack_->setCurrentWidget(agentInterface_);
+    }
+}
+
+void Application::onLogout()
+{
+    if(accountManager_) {
+        accountManager_->logout();
+    }
+    stack_->setCurrentWidget(loginPage_);
+}
