@@ -83,8 +83,6 @@ void RoutesPage::setupUi()
     // NÚT TẢI LẠI (góc phải trên)
     QPushButton* refreshButton = new QPushButton("Làm mới trang", topBar);
     
-    // [QUAN TRỌNG] Set Icon (Bạn thay đường dẫn file ảnh vào đây)
-    // Lưu ý: Nên dùng icon có màu #133e87 để đồng bộ với chữ
     refreshButton->setIcon(QIcon("C:/PBL2/assets/icons/reload.png")); // Đường dẫn icon")); 
     refreshButton->setIconSize(QSize(14, 14)); // Kích thước icon
 
@@ -105,7 +103,6 @@ void RoutesPage::setupUi()
     );
     
     refreshButton->setCursor(Qt::PointingHandCursor);
-    // refreshButton->setMinimumWidth(140); // Có thể bỏ dòng này để nút tự co theo chữ
     
     headerRow->addWidget(refreshButton);
     topLayout->addLayout(headerRow);
@@ -356,7 +353,6 @@ void RoutesPage::onEditRoute()
     int row = selected.first().row();
     QString routeId = model_->item(row, 1)->text();
     
-    // ✅ LẤY IATA CODE từ model (không phải display name)
     // Giả sử cột 1, 2 là display name, cần parse IATA
     // Hoặc lưu IATA trong data role
     Route* currentRoute = flightManager_->findRouteById(routeId.toStdString());
@@ -498,13 +494,6 @@ void RoutesPage::onSearchByRoute()
     // ← CẬP NHẬT STATUS
     statusLabel_->setText(QString("Tìm thấy tuyến bay!"));
     statusLabel_->setStyleSheet("color: #27C93F; font-size: 13px; font-weight: 650;");
-
-    // QString criteria;
-    // if (!fromIATA.empty()) criteria += QString("Từ: <b>%1</b>").arg(QString::fromStdString(fromIATA));
-    // if (!toIATA.empty()) {
-    //     if (!criteria.isEmpty()) criteria += " | ";
-    //     criteria += QString("Đến: <b>%1</b>").arg(QString::fromStdString(toIATA));
-    // }
 
     if (count == 0) {
         statusLabel_->setText(QString("Không tìm thấy tuyến bay phù hợp!"));

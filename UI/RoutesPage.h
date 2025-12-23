@@ -8,7 +8,7 @@ class QLineEdit;
 class QPushButton;
 class QTableView;
 class QStandardItemModel;
-class FlightManager; // <--- Sửa lỗi: Tên đúng (số ít)
+class FlightManager;
 class AirportManager;
 class AirportComboBox;
 class QComboBox;
@@ -19,7 +19,6 @@ class RoutesPage : public QWidget
     Q_OBJECT
 
 public:
-    // <--- Sửa lỗi: Sửa tên tham số cho rõ ràng
     explicit RoutesPage(FlightManager* flightManager, AirportManager* airportManager, QWidget *parent = nullptr);
 
 private slots:
@@ -28,7 +27,7 @@ private slots:
     void onEditRoute();
     void onDeleteRoute();
     void refreshTable();
-    void refreshPage();  // New method to refresh when page shown or user changed
+    void refreshPage();
 
 private:
     void setupUi();
@@ -48,7 +47,6 @@ private:
     QStandardItemModel* model_;
     QLabel* statusLabel_;
 
-    // <--- Sửa lỗi: Thêm các nút tìm kiếm làm biến thành viên
     QPushButton* searchByIdBtn_;
     QPushButton* searchByRouteBtn_;
     

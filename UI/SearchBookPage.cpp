@@ -74,7 +74,6 @@ SearchBookPage::SearchBookPage(FlightManager* flManager,
 {
     Q_ASSERT(flightManager_ != nullptr);
     Q_ASSERT(bookingManager_ != nullptr);
-    // accountManager_ có thể null nếu bạn chưa truyền – tùy bạn nối API sau
 
     setupUi();          // vẽ UI giống FlightsPage
     setupModel();       // tạo model bảng
@@ -84,7 +83,6 @@ SearchBookPage::SearchBookPage(FlightManager* flManager,
 
 void SearchBookPage::setupUi()
 {
-    // --- style chung giống FlightsPage / AgentBookingsPage ---
     this->setStyleSheet(
         "QWidget { background: #F2F6FD; }"
         "QLabel.PageTitle { color:#123B7A; font-weight:700; font-size:17px; }"
@@ -114,8 +112,6 @@ void SearchBookPage::setupUi()
 
     QPushButton* refreshButton = new QPushButton("Làm mới trang", topBar);
     
-    // [QUAN TRỌNG] Set Icon (Bạn thay đường dẫn file ảnh vào đây)
-    // Lưu ý: Nên dùng icon có màu #133e87 để đồng bộ với chữ
     refreshButton->setIcon(QIcon("C:/PBL2/assets/icons/reload.png")); // Đường dẫn icon")); 
     refreshButton->setIconSize(QSize(14, 14)); // Kích thước icon
 
@@ -136,7 +132,6 @@ void SearchBookPage::setupUi()
     );
     
     refreshButton->setCursor(Qt::PointingHandCursor);
-    // refreshButton->setMinimumWidth(140); // Có thể bỏ dòng này để nút tự co theo chữ
     
     headerRow->addWidget(refreshButton);
     topLayout->addLayout(headerRow);
@@ -437,7 +432,6 @@ void SearchBookPage::onSearchClicked()
     criteria.fromIATA = fromSearchCombo_->getSelectedIATA();
     criteria.toIATA = toSearchCombo_->getSelectedIATA();
 
-    // --- LOGIC MỚI: BẮT BUỘC CẢ 2 HOẶC KHÔNG CẦN CẢ 2 ---
     bool hasFrom = !criteria.fromIATA.empty();
     bool hasTo = !criteria.toIATA.empty();
 
@@ -552,9 +546,8 @@ void SearchBookPage::onBookClicked()
         QMessageBox::information(this, "Thành công", "Đặt vé thành công!");
         
         // Reload table to show updated seat availability
-        onSearchClicked(); // Re-run current search to refresh results
+        onSearchClicked();
     }
-    // else: User cancelled - no action needed
 }
 
 void SearchBookPage::loadAllFlights()
@@ -565,7 +558,7 @@ void SearchBookPage::loadAllFlights()
     currentFlights_ = flights;
     
     // Display them in the table
-    fillTable(flights); // Use the correct type for fillTable
+    fillTable(flights);
     
     // Update status label
     statusLabel_->setText(
@@ -597,9 +590,7 @@ void SearchBookPage::onSortChanged(int index)
             break;
 
         case 3: // Giờ đi: Sớm nhất
-            sortedList = Sorting::sortByArrivalTime(currentFlights_); 
-            // Lưu ý: Hàm của bạn tên là sortByArrivalTime nhưng logic check cả Date+Time nên dùng cho Departure cũng ổn nếu chỉ so sánh thời gian.
-            // Nếu bạn muốn chính xác là DepartureTime, hãy đảm bảo logic compareDateTime dùng getDepartureDate/Time.
+            sortedList = Sorting::sortByArrivalTime(currentFlights_);
             break;
         case 4: // Hãng bay: A-Z
             sortedList = Sorting::sortByAirline(currentFlights_);
